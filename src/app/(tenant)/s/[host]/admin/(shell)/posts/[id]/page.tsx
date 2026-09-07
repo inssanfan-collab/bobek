@@ -20,7 +20,16 @@ export default async function EditPostPage({
   });
   if (!post) notFound();
 
-  const csrf = await csrfToken();
+  const [csrf, library] = await Promise.all([
+    csrfToken(),
+    // Только изображения: обложкой не может быть PDF устава.
+    ctx.db.media.findMany({
+      where: { mime: { startsWith: 'image/' } },
+      orderBy: { createdAt: 'desc' },
+      take: 60,
+      select: { id: true, origName: true },
+    }),
+  ]);
 
   return (
     <>
@@ -31,6 +40,7 @@ export default async function EditPostPage({
         section={post.section}
         post={post}
         cover={post.coverMedia}
+        library={library}
         canEdit={ctx.canEdit}
       />
     </>

@@ -6,6 +6,7 @@ import { BilingualField } from '@/components/admin/BilingualField';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { ActionForm } from '@/components/ActionForm';
+import { CoverPicker, type PickableMedia } from '@/components/admin/CoverPicker';
 import { savePost } from '../actions';
 import type { Media, Post, Section } from '@prisma/client';
 
@@ -15,6 +16,7 @@ export function PostForm({
   section,
   post,
   cover,
+  library,
   canEdit,
 }: {
   csrf: string;
@@ -22,6 +24,7 @@ export function PostForm({
   section: Section;
   post?: Post | null;
   cover?: Media | null;
+  library: PickableMedia[];
   canEdit: boolean;
 }) {
   const publishedAt = post?.publishedAt ?? new Date();
@@ -80,18 +83,11 @@ export function PostForm({
           Закрепить наверху списка
         </label>
 
-        <div>
-          <span className="field-label">Обложка</span>
-          {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={`/api/media/${cover.id}`} alt="" className="mb-2 h-32 rounded-2xl object-cover" />
-          ) : null}
-          <input type="hidden" name="coverMediaId" defaultValue={post?.coverMediaId ?? ''} />
-          <p className="field-hint">
-            Обложку можно выбрать из загруженных файлов в разделе «Фотогалерея» — скопируйте
-            фото в альбом, и оно станет доступно для новостей.
-          </p>
-        </div>
+        <CoverPicker
+          defaultMediaId={cover?.id ?? post?.coverMediaId ?? ''}
+          library={library}
+          disabled={!canEdit}
+        />
       </section>
 
       <div className="flex flex-wrap gap-3">

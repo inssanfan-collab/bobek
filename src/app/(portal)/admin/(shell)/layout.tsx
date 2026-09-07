@@ -22,6 +22,7 @@ export default async function PortalAdminLayout({ children }: { children: React.
     { href: '/admin/users', label: 'Пользователи', icon: '🔑' },
     { href: '/admin/subscriptions', label: 'Подписки', icon: '💳' },
     { href: '/admin/leads', label: 'Заявки', icon: '📥', badge: newLeads || undefined },
+    { href: '/admin/news', label: 'Новости портала', icon: '✍️' },
     { href: '/admin/feed', label: 'Публикации садов', icon: '📰', badge: newFeedback || undefined },
     { href: '/admin/audit', label: 'Журнал действий', icon: '🧾' },
   ];

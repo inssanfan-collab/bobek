@@ -21,12 +21,21 @@ export default async function NewPostPage({
   const section = await ctx.db.sections.findFirst({ where: { type } });
   if (!section) notFound();
 
-  const csrf = await csrfToken();
+  const [csrf, library] = await Promise.all([
+    csrfToken(),
+    // Только изображения: обложкой не может быть PDF устава.
+    ctx.db.media.findMany({
+      where: { mime: { startsWith: 'image/' } },
+      orderBy: { createdAt: 'desc' },
+      take: 60,
+      select: { id: true, origName: true },
+    }),
+  ]);
 
   return (
     <>
       <PageHeader title={type === 'NEWS' ? 'Новая новость' : 'Новое объявление'} />
-      <PostForm csrf={csrf} host={host} section={section} canEdit={ctx.canEdit} />
+      <PostForm csrf={csrf} host={host} section={section} library={library} canEdit={ctx.canEdit} />
     </>
   );
 }

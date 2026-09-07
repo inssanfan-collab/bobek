@@ -80,6 +80,13 @@ export async function savePost(_prev: ActionState, formData: FormData): Promise<
   const bodyKk = sanitizeContent(str(formData, 'bodyKk'));
   const publish = formData.get('status') === 'PUBLISHED';
 
+  // Обложку можно либо загрузить прямо здесь, либо выбрать из уже загруженных файлов.
+  let coverMediaId = optionalStr(formData, 'coverMediaId');
+  const coverFile = formData.get('coverFile');
+  if (coverFile instanceof File && coverFile.size > 0) {
+    coverMediaId = (await saveUpload(coverFile, ctx.tenantId)).id;
+  }
+
   const data = {
     titleRu: parsed.data.titleRu,
     titleKk: parsed.data.titleKk || parsed.data.titleRu,
@@ -87,7 +94,7 @@ export async function savePost(_prev: ActionState, formData: FormData): Promise<
     excerptKk: optionalStr(formData, 'excerptKk') ?? (toPlainText(bodyKk, 180) || null),
     bodyRu,
     bodyKk,
-    coverMediaId: optionalStr(formData, 'coverMediaId'),
+    coverMediaId,
     isPinned: formData.get('isPinned') === 'on',
     status: publish ? ('PUBLISHED' as const) : ('DRAFT' as const),
   };

@@ -15,7 +15,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "subscriptions:check": "tsx scripts/subscription-reminders.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.0.2",

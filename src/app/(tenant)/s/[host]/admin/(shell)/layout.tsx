@@ -31,6 +31,7 @@ export default async function TenantAdminLayout({
     { href: `${base}/posts?type=ANNOUNCEMENT`, label: 'Объявления', icon: '📢' },
     { href: `${base}/gallery`, label: 'Фотогалерея', icon: '📷' },
     { href: `${base}/documents`, label: 'Документы', icon: '📄' },
+    { href: `${base}/media`, label: 'Файлы', icon: '🗂' },
     { href: `${base}/staff`, label: 'Педагоги', icon: '👩‍🏫' },
     { href: `${base}/groups`, label: 'Группы', icon: '🧸' },
     { href: `${base}/menu`, label: 'Меню питания', icon: '🍎' },
