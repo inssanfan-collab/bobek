@@ -1,0 +1,528 @@
+// Портал детских садов Актюбинской области.
+// Мультитенантность: одна БД, общая схема, tenantId в каждой контентной таблице.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── Платформа ───────────────────────────
+
+enum TenantStatus {
+  DRAFT // создан, но ещё не открыт публично
+  ACTIVE
+  SUSPENDED // подписка просрочена сверх grace-периода
+  ARCHIVED
+}
+
+enum TenantKind {
+  NURSERY_GARDEN // ясли-сад
+  KINDERGARTEN // детский сад
+  MINI_CENTER // дошкольный мини-центр
+  PRIVATE // частный сад
+  FAMILY // семейный ясли-сад
+}
+
+model Tenant {
+  id           String       @id @default(cuid())
+  slug         String       @unique // он же метка поддомена: sad12 -> sad12.bobegim.kz
+  status       TenantStatus @default(DRAFT)
+  templateCode String       @default("klassik")
+  palette      String       @default("mandarin")
+  /// Тонкая настройка темы поверх шаблона: шрифт, обложка, скругления.
+  theme        Json         @default("{}")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  profile       TenantProfile?
+  domains       Domain[]
+  users         User[]
+  sections      Section[]
+  posts         Post[]
+  pages         Page[]
+  media         Media[]
+  albums        Album[]
+  documents     Document[]
+  staff         StaffMember[]
+  groups        Group[]
+  menuDays      MenuDay[]
+  feedback      FeedbackMessage[]
+  subscriptions Subscription[]
+  payments      Payment[]
+  auditLogs     AuditLog[]
+
+  @@index([status])
+}
+
+/// Паспорт организации — то, что проверяющие ищут на сайте в первую очередь.
+model TenantProfile {
+  tenantId String @id
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  nameKk      String
+  nameRu      String
+  shortNameKk String?
+  shortNameRu String?
+  kind        TenantKind @default(NURSERY_GARDEN)
+  isPrivate   Boolean    @default(false)
+
+  bin          String? // БИН организации
+  licenseNo    String?
+  addressKk    String?
+  addressRu    String?
+  district     String? // район города — фильтр в каталоге портала
+  lat          Float?
+  lng          Float?
+  phone        String?
+  phoneExtra   String?
+  email        String?
+  workHours    String?
+  headNameKk   String? // ФИО заведующей
+  headNameRu   String?
+  groupsCount  Int?
+  placesTotal  Int?
+  placesFree   Int?    @default(0)
+  langKk       Boolean @default(true)
+  langRu       Boolean @default(true)
+  aboutKk      String?
+  aboutRu      String?
+  socialLinks  Json    @default("{}")
+  logoMediaId  String?
+  coverMediaId String?
+
+  updatedAt DateTime @updatedAt
+
+  @@index([district])
+}
+
+enum DomainType {
+  SUBDOMAIN // выдаётся автоматически на домене портала
+  CUSTOM // куплен садом самостоятельно
+}
+
+enum CertStatus {
+  PENDING
+  DNS_OK // A-запись указывает на наш IP, Caddy может выпускать сертификат
+  ACTIVE
+  FAILED
+}
+
+model Domain {
+  id         String     @id @default(cuid())
+  host       String     @unique
+  tenantId   String
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type       DomainType @default(SUBDOMAIN)
+  isPrimary  Boolean    @default(false) // канонический адрес, остальные редиректят на него
+  verifiedAt DateTime?
+  certStatus CertStatus @default(PENDING)
+  lastError  String?
+  createdAt  DateTime   @default(now())
+
+  @@index([tenantId])
+}
+
+model Template {
+  code        String  @id // klassik | zhuldyz | ertegi
+  nameRu      String
+  nameKk      String
+  description String?
+  preview     String?
+  palette     String  @default("mandarin")
+  isActive    Boolean @default(true)
+}
+
+// ─────────────────────────── Доступ ───────────────────────────
+
+enum Role {
+  SUPERADMIN // главный админ портала
+  TENANT_ADMIN // администратор одного сада
+  TENANT_EDITOR // может только контент, без настроек и дизайна
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  login              String    @unique
+  passwordHash       String
+  fullName           String
+  phone              String?
+  email              String?
+  role               Role      @default(TENANT_ADMIN)
+  tenantId           String? // null только у SUPERADMIN
+  tenant             Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(true)
+  failedAttempts     Int       @default(0)
+  lockedUntil        DateTime?
+  lastLoginAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  sessions Session[]
+
+  @@index([tenantId])
+}
+
+/// Серверные сессии, а не чистый JWT: главный админ должен уметь разлогинить сад мгновенно.
+model Session {
+  id             String   @id @default(cuid())
+  tokenHash      String   @unique
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Заполняется, когда суперадмин работает «под садом» — видно в интерфейсе и в аудите.
+  impersonatedBy String?
+  ip             String?
+  userAgent      String?
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ─────────────────────────── Контент сада ───────────────────────────
+
+enum SectionType {
+  PAGE
+  NEWS
+  ANNOUNCEMENT
+  GALLERY
+  DOCUMENTS
+  STAFF
+  GROUPS
+  MENU_FOOD
+  VACANCIES
+  TRUSTEE_BOARD
+  ANTICORRUPTION
+  FEEDBACK
+  CONTACTS
+}
+
+model Section {
+  id        String      @id @default(cuid())
+  tenantId  String
+  tenant    Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type      SectionType
+  slug      String
+  titleKk   String
+  titleRu   String
+  position  Int         @default(0)
+  isVisible Boolean     @default(true)
+  parentId  String?
+  parent    Section?    @relation("SectionTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Section[]   @relation("SectionTree")
+  settings  Json        @default("{}")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  posts Post[]
+  page  Page?
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, position])
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Post {
+  id           String        @id @default(cuid())
+  tenantId     String
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sectionId    String
+  section      Section       @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  slug         String
+  titleKk      String
+  titleRu      String
+  excerptKk    String?
+  excerptRu    String?
+  bodyKk       String? // санитизированный HTML
+  bodyRu       String?
+  coverMediaId String?
+  coverMedia   Media?        @relation("PostCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  status       PublishStatus @default(DRAFT)
+  publishedAt  DateTime?
+  isPinned     Boolean       @default(false)
+  viewCount    Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, status, publishedAt])
+  @@index([sectionId, publishedAt])
+}
+
+model Page {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sectionId  String   @unique
+  section    Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  bodyKk     String?
+  bodyRu     String?
+  seoTitleKk String?
+  seoTitleRu String?
+  seoDescKk  String?
+  seoDescRu  String?
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  path      String // относительный путь внутри STORAGE_DIR
+  origName  String
+  mime      String
+  size      Int
+  width     Int?
+  height    Int?
+  sha256    String // дедупликация в пределах сада
+  altKk     String?
+  altRu     String?
+  createdAt DateTime @default(now())
+
+  albumItems AlbumItem[]
+  documents  Document[]
+  staff      StaffMember[]
+  postCovers Post[]        @relation("PostCover")
+
+  @@unique([tenantId, sha256])
+  @@index([tenantId, createdAt])
+}
+
+model Album {
+  id        String    @id @default(cuid())
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  slug      String
+  titleKk   String
+  titleRu   String
+  descKk    String?
+  descRu    String?
+  takenOn   DateTime?
+  isVisible Boolean   @default(true)
+  position  Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  items AlbumItem[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, position])
+}
+
+model AlbumItem {
+  id       String @id @default(cuid())
+  albumId  String
+  album    Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  mediaId  String
+  media    Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  position Int    @default(0)
+
+  @@unique([albumId, mediaId])
+  @@index([albumId, position])
+}
+
+enum DocumentCategory {
+  CHARTER // устав
+  LICENSE // лицензия
+  ORDERS // приказы
+  RULES // правила приёма
+  PROCUREMENT // госзакупки
+  REPORTS // отчёты
+  TRUSTEE // попечительский совет
+  ANTICORRUPTION
+  OTHER
+}
+
+model Document {
+  id          String           @id @default(cuid())
+  tenantId    String
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  titleKk     String
+  titleRu     String
+  category    DocumentCategory @default(OTHER)
+  mediaId     String
+  media       Media            @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  publishedAt DateTime         @default(now())
+  position    Int              @default(0)
+
+  @@index([tenantId, category, position])
+}
+
+model StaffMember {
+  id           String  @id @default(cuid())
+  tenantId     String
+  tenant       Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fullName     String
+  positionKk   String
+  positionRu   String
+  educationKk  String?
+  educationRu  String?
+  experience   String?
+  categoryName String? // квалификационная категория
+  photoMediaId String?
+  photo        Media?  @relation(fields: [photoMediaId], references: [id], onDelete: SetNull)
+  position     Int     @default(0)
+  isVisible    Boolean @default(true)
+
+  @@index([tenantId, position])
+}
+
+model Group {
+  id          String  @id @default(cuid())
+  tenantId    String
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  nameKk      String
+  nameRu      String
+  ageFrom     Int? // в месяцах
+  ageTo       Int?
+  language    String  @default("kk") // язык обучения группы
+  teachers    String?
+  placesTotal Int?
+  placesFree  Int     @default(0)
+  position    Int     @default(0)
+  isVisible   Boolean @default(true)
+
+  @@index([tenantId, position])
+}
+
+model MenuDay {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  date        DateTime @db.Date
+  breakfastKk String?
+  breakfastRu String?
+  lunchKk     String?
+  lunchRu     String?
+  snackKk     String?
+  snackRu     String?
+  dinnerKk    String?
+  dinnerRu    String?
+  scanMediaId String? // скан утверждённого меню
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, date])
+  @@index([tenantId, date])
+}
+
+enum FeedbackStatus {
+  NEW
+  IN_PROGRESS
+  ANSWERED
+}
+
+/// Виртуальная приёмная. Персональные данные родителей — хранятся на сервере в РК.
+model FeedbackMessage {
+  id         String         @id @default(cuid())
+  tenantId   String
+  tenant     Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name       String
+  contact    String // телефон или e-mail
+  message    String
+  status     FeedbackStatus @default(NEW)
+  answer     String?
+  answeredAt DateTime?
+  ip         String?
+  createdAt  DateTime       @default(now())
+
+  @@index([tenantId, status, createdAt])
+}
+
+// ─────────────────────────── Подписки ───────────────────────────
+
+model Subscription {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  periodStart DateTime
+  periodEnd   DateTime
+  amount      Int      @default(20000) // тенге
+  isCurrent   Boolean  @default(true)
+  note        String?
+  createdAt   DateTime @default(now())
+
+  payments Payment[]
+
+  @@index([tenantId, periodEnd])
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  tenantId       String
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  amount         Int
+  paidAt         DateTime
+  method         String        @default("kaspi") // kaspi | invoice | cash
+  invoiceNo      String?
+  note           String?
+  createdAt      DateTime      @default(now())
+
+  @@index([tenantId, paidAt])
+}
+
+// ─────────────────────────── Аудит ───────────────────────────
+
+/// Сброс чужих паролей и вход «под садом» обязаны оставлять след.
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  userLogin String?
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  action    String // tenant.create, user.reset_password, tenant.impersonate, ...
+  entity    String?
+  entityId  String?
+  meta      Json     @default("{}")
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([tenantId, createdAt])
+}
+
+/// Заявки на подключение с публичного портала.
+model Lead {
+  id         String   @id @default(cuid())
+  gardenName String
+  personName String
+  phone      String
+  email      String?
+  comment    String?
+  isHandled  Boolean  @default(false)
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([isHandled, createdAt])
+}
+
+/// Новости самого портала (не сада).
+model PortalPost {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  titleKk     String
+  titleRu     String
+  excerptKk   String?
+  excerptRu   String?
+  bodyKk      String?
+  bodyRu      String?
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, publishedAt])
+}

@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Дизайн-токены. Нейтральная база одна на всю платформу, а бренд-цвета переключаются
+ * атрибутом data-palette на <html> — его проставляет тема сада из админки.
+ * Всё через CSS-переменные, поэтому смена палитры не требует пересборки.
+ */
+:root {
+  --surface: 253 250 246;   /* тёплый off-white, а не стерильно белый */
+  --card: 255 255 255;
+  --ink: 28 31 38;
+  --muted: 104 112 126;
+  --line: 231 226 219;
+
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  --font-sans: 'Nunito Sans', system-ui;
+  --font-display: 'Baloo 2', 'Nunito Sans', system-ui;
+
+  --base-size: 17px;
+}
+
+/* Палитры. brand — основной, brand-soft — фон плашек, brand-ink — текст на светлой плашке. */
+:root,
+[data-palette='mandarin'] {
+  --brand: 234 122 42;
+  --brand-soft: 254 240 226;
+  --brand-ink: 146 66 12;
+  --accent: 46 164 158;
+}
+[data-palette='mint'] {
+  --brand: 24 158 150;
+  --brand-soft: 226 246 244;
+  --brand-ink: 13 92 88;
+  --accent: 238 138 60;
+}
+[data-palette='berry'] {
+  --brand: 199 74 118;
+  --brand-soft: 252 232 240;
+  --brand-ink: 124 34 68;
+  --accent: 92 138 214;
+}
+[data-palette='sky'] {
+  --brand: 48 122 208;
+  --brand-soft: 228 240 253;
+  --brand-ink: 24 71 126;
+  --accent: 240 160 52;
+}
+[data-palette='meadow'] {
+  --brand: 76 152 62;
+  --brand-soft: 233 246 228;
+  --brand-ink: 42 90 34;
+  --accent: 226 124 58;
+}
+[data-palette='sun'] {
+  --brand: 214 152 20;
+  --brand-soft: 253 245 219;
+  --brand-ink: 128 88 6;
+  --accent: 70 146 190;
+}
+
+/*
+ * Версия для слабовидящих. На сайтах организаций образования в РК её ожидают,
+ * поэтому это режим всего сайта, а не отдельная «облегчённая» копия страниц.
+ */
+[data-a11y='on'] {
+  --surface: 255 255 255;
+  --card: 255 255 255;
+  --ink: 0 0 0;
+  --muted: 33 33 33;
+  --line: 0 0 0;
+  --brand: 0 0 0;
+  --brand-soft: 255 255 255;
+  --brand-ink: 0 0 0;
+  --accent: 0 0 0;
+  --base-size: 22px;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+}
+[data-a11y='on'] img:not([data-a11y-keep]) {
+  filter: grayscale(1);
+}
+[data-a11y='on'] .decor {
+  display: none !important;
+}
+
+html {
+  font-size: var(--base-size);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: rgb(var(--surface));
+  color: rgb(var(--ink));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Видимый фокус обязателен: по админке ходят с клавиатуры чаще, чем кажется. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid rgb(var(--brand));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-content px-4 sm:px-6 lg:px-8;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-card shadow-soft;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold
+           transition disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-brand text-white hover:brightness-110 active:brightness-95;
+  }
+  .btn-secondary {
+    @apply btn border border-line bg-card text-ink hover:bg-brand-soft;
+  }
+  .btn-ghost {
+    @apply btn text-brand-ink hover:bg-brand-soft;
+  }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-ink;
+  }
+  .field {
+    @apply w-full rounded-xl border border-line bg-card px-3.5 py-2.5 text-ink
+           placeholder:text-muted/70 focus:border-brand focus:outline-none
+           focus:ring-2 focus:ring-brand/25;
+  }
+  .field-hint {
+    @apply mt-1 text-sm text-muted;
+  }
+  .field-error {
+    @apply mt-1 text-sm font-medium text-red-600;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+
+  .prose-content {
+    @apply leading-relaxed;
+  }
+  .prose-content :where(h2) {
+    @apply mb-3 mt-8 font-display text-2xl font-bold text-ink;
+  }
+  .prose-content :where(h3) {
+    @apply mb-2 mt-6 font-display text-xl font-bold text-ink;
+  }
+  .prose-content :where(p) {
+    @apply mb-4;
+  }
+  .prose-content :where(ul) {
+    @apply mb-4 list-disc space-y-1 pl-6;
+  }
+  .prose-content :where(ol) {
+    @apply mb-4 list-decimal space-y-1 pl-6;
+  }
+  .prose-content :where(a) {
+    @apply font-semibold text-brand underline underline-offset-2;
+  }
+  .prose-content :where(img) {
+    @apply my-4 rounded-2xl;
+  }
+  .prose-content :where(table) {
+    @apply my-4 w-full border-collapse text-left;
+  }
+  .prose-content :where(th, td) {
+    @apply border border-line px-3 py-2;
+  }
+}
