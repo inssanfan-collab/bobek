@@ -3,6 +3,7 @@ import { PrismaClient, type TenantKind } from '@prisma/client';
 import { hash } from '@node-rs/argon2';
 import { DEFAULT_SECTIONS, SECTION_CATALOG } from '../src/lib/sections';
 import { TEMPLATES } from '../src/lib/templates';
+import { seedImage, seedPdf } from './seed-media';
 
 const prisma = new PrismaClient();
 
@@ -348,7 +349,31 @@ async function main() {
       });
     }
 
-    await prisma.album.create({
+    // Демо-медиа: без него галерея, обложки и документы выглядят пустыми,
+    // и понять, как сайт смотрится с контентом, невозможно.
+    const cover = await seedImage(prisma, tenant.id, 'Наш детский сад', '#ea7a2a', '#2ea49e', 'obложka.webp');
+    const photos = await Promise.all([
+      seedImage(prisma, tenant.id, 'Наурыз мейрамы', '#ea7a2a', '#d69814', 'nauryz-1.webp'),
+      seedImage(prisma, tenant.id, 'Концерт', '#189e96', '#307ad0', 'nauryz-2.webp'),
+      seedImage(prisma, tenant.id, 'Дастархан', '#c74a76', '#ea7a2a', 'nauryz-3.webp'),
+      seedImage(prisma, tenant.id, 'Ұлттық ойындар', '#4c983e', '#189e96', 'nauryz-4.webp'),
+    ]);
+
+    await prisma.tenantProfile.update({
+      where: { tenantId: tenant.id },
+      data: { coverMediaId: cover.id },
+    });
+
+    await prisma.post.updateMany({
+      where: { tenantId: tenant.id, slug: 'nauryz-meyramy' },
+      data: { coverMediaId: photos[0].id },
+    });
+    await prisma.post.updateMany({
+      where: { tenantId: tenant.id, slug: 'den-sauliq-kuni' },
+      data: { coverMediaId: photos[1].id },
+    });
+
+    const album = await prisma.album.create({
       data: {
         tenantId: tenant.id,
         slug: 'nauryz-2026',
@@ -359,8 +384,68 @@ async function main() {
       },
     });
 
+    await prisma.albumItem.createMany({
+      data: photos.map((media, index) => ({ albumId: album.id, mediaId: media.id, position: index })),
+    });
+
+    const charter = await seedPdf(prisma, tenant.id, 'Ustav organizacii', 'ustav.pdf');
+    const rules = await seedPdf(prisma, tenant.id, 'Pravila priema detey', 'pravila-priema.pdf');
+
+    await prisma.document.createMany({
+      data: [
+        {
+          tenantId: tenant.id, titleRu: 'Устав организации', titleKk: 'Ұйым жарғысы',
+          category: 'CHARTER', mediaId: charter.id, position: 0,
+        },
+        {
+          tenantId: tenant.id, titleRu: 'Правила приёма детей', titleKk: 'Балаларды қабылдау ережелері',
+          category: 'RULES', mediaId: rules.id, position: 1,
+        },
+      ],
+    });
+
+    // Фотографии педагогов
+    const staff = await prisma.staffMember.findMany({ where: { tenantId: tenant.id }, orderBy: { position: 'asc' } });
+    for (const [index, member] of staff.entries()) {
+      const photo = await seedImage(
+        prisma, tenant.id, member.fullName, ['#ea7a2a', '#189e96', '#c74a76'][index % 3], '#307ad0',
+        `staff-${index}.webp`,
+      );
+      await prisma.staffMember.update({ where: { id: member.id }, data: { photoMediaId: photo.id } });
+    }
+
+    await prisma.feedbackMessage.createMany({
+      data: [
+        {
+          tenantId: tenant.id, name: 'Асель Нурлановна', contact: '+7 (777) 123-45-67',
+          message: 'Здравствуйте! Подскажите, есть ли места в среднюю группу с казахским языком обучения?',
+          status: 'NEW',
+        },
+        {
+          tenantId: tenant.id, name: 'Марат', contact: 'marat@mail.kz',
+          message: 'Можно ли забирать ребёнка в 16:00, а не в 18:00?',
+          status: 'ANSWERED', answer: 'Позвонила 3 сентября, вопрос решён — можно.',
+          answeredAt: new Date(),
+        },
+      ],
+    });
+
     console.log(`Создан сад ${garden.slug} → http://${garden.slug}.${PORTAL_DOMAIN}:3000 (логин ${garden.slug}-admin / ${garden.slug}-2026)`);
   }
+
+  await prisma.lead.createMany({
+    data: [
+      {
+        gardenName: 'Ясли-сад №23 «Ақбота»', personName: 'Гүлмира Сериковна',
+        phone: '+7 (701) 555-30-30', email: 'akbota23@mail.kz',
+        comment: 'Хотим сайт до начала учебного года. Удобно звонить после 15:00.',
+      },
+      {
+        gardenName: 'Мини-центр «Балапан»', personName: 'Айдос',
+        phone: '+7 (747) 800-11-22', isHandled: true,
+      },
+    ],
+  });
 
   await prisma.portalPost.upsert({
     where: { slug: 'portal-zapushchen' },
