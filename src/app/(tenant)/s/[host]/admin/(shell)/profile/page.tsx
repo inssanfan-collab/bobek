@@ -135,6 +135,36 @@ export default async function ProfilePage({ params }: { params: Promise<{ host: 
           </fieldset>
         </section>
 
+        <section className="card grid gap-4 p-6 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <h2 className="font-display text-lg font-bold">Соцсети и мессенджеры</h2>
+            <p className="mt-1 text-sm text-muted">
+              Родители пишут в WhatsApp и смотрят Instagram чаще, чем звонят. Ссылки появятся
+              в подвале сайта и в разделе «Контакты».
+            </p>
+          </div>
+          <div>
+            <label className="field-label" htmlFor="whatsapp">WhatsApp (номер)</label>
+            <input id="whatsapp" name="whatsapp" defaultValue={profile?.whatsapp ?? ''} className="field" placeholder="+7 777 000 00 00" />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="instagram">Instagram (ссылка)</label>
+            <input id="instagram" name="instagram" defaultValue={profile?.instagram ?? ''} className="field" placeholder="https://instagram.com/sad12" />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="youtube">YouTube</label>
+            <input id="youtube" name="youtube" defaultValue={profile?.youtube ?? ''} className="field" />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="telegram">Telegram</label>
+            <input id="telegram" name="telegram" defaultValue={profile?.telegram ?? ''} className="field" />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="facebook">Facebook</label>
+            <input id="facebook" name="facebook" defaultValue={profile?.facebook ?? ''} className="field" />
+          </div>
+        </section>
+
         <section className="card p-6">
           <h2 className="mb-4 font-display text-lg font-bold">О саде</h2>
           <BilingualField

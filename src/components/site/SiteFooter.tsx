@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
+import { SocialLinks } from './SocialLinks';
 import type { Section, TenantProfile } from '@prisma/client';
 
 const T = {
@@ -48,6 +49,10 @@ export function SiteFooter({
               </a>
             </li>
           </ul>
+
+          <div className="mt-4">
+            <SocialLinks profile={profile} locale={locale} withTitle={false} />
+          </div>
         </div>
 
         <div>

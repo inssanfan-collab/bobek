@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { A11yToggle } from '@/components/A11yToggle';
 import { LocaleSwitch } from './LocaleSwitch';
+import { SiteNav } from './SiteNav';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import type { Section, TenantProfile } from '@prisma/client';
@@ -8,6 +9,7 @@ import type { Section, TenantProfile } from '@prisma/client';
 const T = {
   menu: { kk: 'Мәзір', ru: 'Меню' },
   home: { kk: 'Басты бет', ru: 'Главная' },
+  search: { kk: 'Іздеу', ru: 'Поиск' },
 } as const;
 
 export function SiteHeader({
@@ -48,28 +50,17 @@ export function SiteHeader({
         </div>
       </div>
 
-      <nav className="container-page pb-2" aria-label={T.menu[locale]}>
-        <ul className="flex gap-1 overflow-x-auto">
-          <li>
-            <Link
-              href={withLocale('/', locale)}
-              className="whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold text-muted hover:bg-brand-soft hover:text-brand-ink"
-            >
-              {T.home[locale]}
-            </Link>
-          </li>
-          {sections.map((section) => (
-            <li key={section.id}>
-              <Link
-                href={withLocale(`/${section.slug}`, locale)}
-                className="whitespace-nowrap rounded-xl px-3 py-2 text-sm font-semibold text-muted hover:bg-brand-soft hover:text-brand-ink"
-              >
-                {pick(locale, section.titleKk, section.titleRu)}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      <SiteNav
+        locale={locale}
+        links={[
+          { href: withLocale('/', locale), label: T.home[locale] },
+          ...sections.map((section) => ({
+            href: withLocale(`/${section.slug}`, locale),
+            label: pick(locale, section.titleKk, section.titleRu),
+          })),
+          { href: withLocale('/search', locale), label: T.search[locale] },
+        ]}
+      />
     </header>
   );
 }

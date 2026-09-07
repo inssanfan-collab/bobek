@@ -4,7 +4,7 @@ import { withLocale } from '@/server/tenant/context';
 import { formatAgeRange, formatDate, DOC_CATEGORY_LABEL } from '@/lib/labels';
 import { mediaUrl, type AlbumWithCover, type PostWithCover } from '@/components/site/blocks';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { Document, Group, Media, MenuDay, StaffMember, TenantProfile } from '@prisma/client';
+import type { Club, Document, FaqItem, Group, Media, MenuDay, StaffMember, TenantProfile } from '@prisma/client';
 
 const T = {
   empty: { kk: 'Мазмұн әзірге қосылмаған', ru: 'Материалы пока не добавлены' },
@@ -22,6 +22,11 @@ const T = {
   snack: { kk: 'Бесін ас', ru: 'Полдник' },
   dinner: { kk: 'Кешкі ас', ru: 'Ужин' },
   photos: { kk: 'сурет', ru: 'фото' },
+  noPrice: { kk: 'Тегін', ru: 'Бесплатно' },
+  perMonth: { kk: 'айына', ru: 'в месяц' },
+  teacher: { kk: 'Жетекші', ru: 'Ведёт' },
+  schedule: { kk: 'Кесте', ru: 'Расписание' },
+  age: { kk: 'Жасы', ru: 'Возраст' },
 } as const;
 
 export function Empty({ locale }: { locale: Locale }) {
@@ -294,6 +299,78 @@ export function VacanciesBlock({
       </div>
 
       {withFree.length > 0 ? <GroupList groups={withFree} locale={locale} /> : null}
+    </div>
+  );
+}
+
+
+export function ClubList({ clubs, locale }: { clubs: Club[]; locale: Locale }) {
+  if (clubs.length === 0) return <Empty locale={locale} />;
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {clubs.map((club) => (
+        <article key={club.id} className="card p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <h2 className="font-display text-lg font-bold">{pick(locale, club.nameKk, club.nameRu)}</h2>
+            {club.isFree || club.priceKzt == null ? (
+              <span className="badge bg-emerald-100 text-emerald-800">{T.noPrice[locale]}</span>
+            ) : (
+              <span className="badge bg-brand-soft text-brand-ink">
+                {club.priceKzt.toLocaleString('ru-RU')} ₸ / {T.perMonth[locale]}
+              </span>
+            )}
+          </div>
+
+          {pick(locale, club.descKk, club.descRu) ? (
+            <p className="mt-2 text-muted">{pick(locale, club.descKk, club.descRu)}</p>
+          ) : null}
+
+          <dl className="mt-3 space-y-1 text-sm">
+            {club.teacher ? (
+              <div className="flex gap-2">
+                <dt className="text-muted">{T.teacher[locale]}:</dt>
+                <dd>{club.teacher}</dd>
+              </div>
+            ) : null}
+            {club.schedule ? (
+              <div className="flex gap-2">
+                <dt className="text-muted">{T.schedule[locale]}:</dt>
+                <dd>{club.schedule}</dd>
+              </div>
+            ) : null}
+            {club.ageRange ? (
+              <div className="flex gap-2">
+                <dt className="text-muted">{T.age[locale]}:</dt>
+                <dd>{club.ageRange}</dd>
+              </div>
+            ) : null}
+          </dl>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+export function FaqList({ items, locale }: { items: FaqItem[]; locale: Locale }) {
+  if (items.length === 0) return <Empty locale={locale} />;
+
+  return (
+    <div className="max-w-3xl space-y-3">
+      {items.map((item) => (
+        // <details> вместо скрипта: работает без JavaScript и доступно с клавиатуры.
+        <details key={item.id} className="card group p-5">
+          <summary className="cursor-pointer list-none font-display text-lg font-bold marker:hidden">
+            <span className="mr-2 text-brand" aria-hidden>+</span>
+            {pick(locale, item.questionKk, item.questionRu)}
+          </summary>
+          {pick(locale, item.answerKk, item.answerRu) ? (
+            <p className="mt-3 whitespace-pre-line text-muted">
+              {pick(locale, item.answerKk, item.answerRu)}
+            </p>
+          ) : null}
+        </details>
+      ))}
     </div>
   );
 }

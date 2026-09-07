@@ -3,14 +3,20 @@ import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom } from '@/server/tenant/context';
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
+import { UrgentNotice } from '@/components/site/UrgentNotice';
+import { recordVisit } from '@/server/stats';
 import { ContactCard } from '@/components/site/blocks';
 import {
-  AlbumGrid, DocumentList, Empty, GroupList, MenuTable, PostFeed, StaffList, VacanciesBlock,
+  AlbumGrid, ClubList, DocumentList, Empty, FaqList, GroupList, MenuTable, PostFeed, StaffList,
+  VacanciesBlock,
 } from '@/components/site/sections';
+import { RouteMap } from '@/components/site/RouteMap';
+import { SocialLinks } from '@/components/site/SocialLinks';
 import { FeedbackForm } from '@/components/site/FeedbackForm';
 import { csrfToken } from '@/server/auth/csrf';
 import { pick } from '@/lib/i18n';
 import { env } from '@/lib/env';
+import { prisma } from '@/server/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,8 +59,11 @@ export default async function SectionPage({
 
   const title = pick(locale, section.titleKk, section.titleRu);
 
+  await recordVisit(context.tenant.id);
+
   return (
     <>
+      <UrgentNotice profile={profile} locale={locale} />
       <SiteHeader profile={profile} sections={menu} locale={locale} pathname={basePath} />
       <main id="main" className="container-page py-8">
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{title}</h1>
@@ -144,8 +153,35 @@ async function SectionBody({
       return <VacanciesBlock profile={profile} groups={groups} locale={locale} />;
     }
 
+    case 'CLUBS': {
+      const clubs = await prisma.club.findMany({
+        where: { tenantId: tenant.id, isVisible: true },
+        orderBy: { position: 'asc' },
+      });
+      return <ClubList clubs={clubs} locale={locale} />;
+    }
+
+    case 'FAQ': {
+      const items = await prisma.faqItem.findMany({
+        where: { tenantId: tenant.id, isVisible: true },
+        orderBy: { position: 'asc' },
+      });
+      return <FaqList items={items} locale={locale} />;
+    }
+
     case 'CONTACTS':
-      return <ContactCard profile={profile} locale={locale} />;
+      return (
+        <div className="space-y-6">
+          <ContactCard profile={profile} locale={locale} />
+          <SocialLinks profile={profile} locale={locale} />
+          <RouteMap
+            lat={profile?.lat ?? null}
+            lng={profile?.lng ?? null}
+            address={pick(locale, profile?.addressKk, profile?.addressRu)}
+            locale={locale}
+          />
+        </div>
+      );
 
     case 'FEEDBACK': {
       const csrf = await csrfToken();

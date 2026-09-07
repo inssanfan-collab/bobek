@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
+import { UrgentNotice } from '@/components/site/UrgentNotice';
+import { recordPostView, recordVisit } from '@/server/stats';
 import { mediaUrl } from '@/components/site/blocks';
 import { pick } from '@/lib/i18n';
 import { toPlainText } from '@/lib/sanitize';
@@ -74,8 +76,12 @@ export default async function EntryPage({
     orderBy: { position: 'asc' },
   });
 
+  await recordVisit(context.tenant.id);
+  if (post) await recordPostView(post.id);
+
   return (
     <>
+      <UrgentNotice profile={context.profile} locale={locale} />
       <SiteHeader profile={context.profile} sections={menu} locale={locale} pathname={basePath} />
 
       <main id="main" className="container-page max-w-3xl py-8">

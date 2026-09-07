@@ -42,6 +42,8 @@ export function scoped(tenantId: string) {
     },
 
     pages: {
+      findMany: <T extends Prisma.PageFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.PageFindManyArgs>) =>
+        prisma.page.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.PageGetPayload<T>[]>,
       findFirst: <T extends Prisma.PageFindFirstArgs>(args?: Prisma.SelectSubset<T, Prisma.PageFindFirstArgs>) =>
         prisma.page.findFirst(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.PageGetPayload<T> | null>,
     },
@@ -105,7 +107,8 @@ export class NotFoundError extends Error {}
 
 type OwnedModel =
   | 'post' | 'section' | 'media' | 'album' | 'document'
-  | 'staffMember' | 'group' | 'menuDay' | 'feedbackMessage' | 'page';
+  | 'staffMember' | 'group' | 'menuDay' | 'feedbackMessage' | 'page'
+  | 'club' | 'faqItem';
 
 /**
  * Проверка владения перед update/delete: Prisma не умеет составной where по id+tenantId
@@ -116,6 +119,7 @@ export async function assertOwned(model: OwnedModel, id: string, tenantId: strin
     post: prisma.post, section: prisma.section, media: prisma.media, album: prisma.album,
     document: prisma.document, staffMember: prisma.staffMember, group: prisma.group,
     menuDay: prisma.menuDay, feedbackMessage: prisma.feedbackMessage, page: prisma.page,
+    club: prisma.club, faqItem: prisma.faqItem,
   } as const;
 
   type OwnerLookup = {

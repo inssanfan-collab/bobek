@@ -67,6 +67,21 @@ export const SECTION_CATALOG: SectionMeta[] = [
     defaultOn: true, singleton: true, icon: '🍎',
   },
   {
+    type: 'PAGE', slug: 'daily-routine', titleKk: 'Күн тәртібі', titleRu: 'Режим дня',
+    hintRu: 'Распорядок по времени: приём детей, занятия, прогулка, сон, ужин.',
+    defaultOn: true, singleton: false, icon: '🕗',
+  },
+  {
+    type: 'CLUBS', slug: 'clubs', titleKk: 'Үйірмелер', titleRu: 'Кружки и услуги',
+    hintRu: 'Дополнительные занятия: английский, хореография, логопед. С ценой или бесплатные.',
+    defaultOn: false, singleton: true, icon: '🎨',
+  },
+  {
+    type: 'FAQ', slug: 'faq', titleKk: 'Жиі қойылатын сұрақтар', titleRu: 'Частые вопросы',
+    hintRu: 'Ответы на повторяющиеся вопросы родителей — снимает часть звонков.',
+    defaultOn: false, singleton: true, icon: '❓',
+  },
+  {
     type: 'VACANCIES', slug: 'vacancies', titleKk: 'Бос орындар', titleRu: 'Свободные места',
     hintRu: 'Свободные места по группам и вакансии для сотрудников.',
     defaultOn: true, singleton: true, icon: '🪑',

@@ -1,6 +1,8 @@
 import { publicSiteContext, localeFrom } from '@/server/tenant/context';
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
+import { UrgentNotice } from '@/components/site/UrgentNotice';
+import { recordVisit } from '@/server/stats';
 import { TemplateHome } from '@/templates';
 import { mediaUrl } from '@/components/site/blocks';
 import { prisma } from '@/server/db';
@@ -44,8 +46,11 @@ export default async function TenantHome({
       : null,
   ]);
 
+  await recordVisit(tenant.id);
+
   return (
     <>
+      <UrgentNotice profile={profile} locale={locale} />
       <SiteHeader profile={profile} sections={sections} locale={locale} pathname="/" />
       <main id="main">
         <TemplateHome

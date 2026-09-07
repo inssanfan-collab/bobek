@@ -50,6 +50,9 @@ model Tenant {
   staff         StaffMember[]
   groups        Group[]
   menuDays      MenuDay[]
+  clubs         Club[]
+  faq           FaqItem[]
+  stats         DailyStat[]
   feedback      FeedbackMessage[]
   subscriptions Subscription[]
   payments      Payment[]
@@ -90,9 +93,23 @@ model TenantProfile {
   langRu       Boolean @default(true)
   aboutKk      String?
   aboutRu      String?
-  socialLinks  Json    @default("{}")
   logoMediaId  String?
   coverMediaId String?
+
+  /// Родители в Казахстане пишут в WhatsApp и смотрят Instagram —
+  /// без этих ссылок сайт оторван от того, как сад общается на самом деле.
+  whatsapp  String?
+  instagram String?
+  youtube   String?
+  facebook  String?
+  telegram  String?
+
+  /// Срочное объявление: карантин, изменение режима, отмена занятий.
+  /// Показывается полосой на всех страницах сайта, пока не истечёт срок.
+  noticeKk    String?
+  noticeRu    String?
+  noticeTone  NoticeTone @default(WARN)
+  noticeUntil DateTime?
 
   updatedAt DateTime @updatedAt
 
@@ -200,6 +217,14 @@ enum SectionType {
   ANTICORRUPTION
   FEEDBACK
   CONTACTS
+  CLUBS
+  FAQ
+}
+
+enum NoticeTone {
+  INFO
+  WARN
+  URGENT
 }
 
 model Section {
@@ -437,6 +462,55 @@ model FeedbackMessage {
   createdAt  DateTime       @default(now())
 
   @@index([tenantId, status, createdAt])
+}
+
+/// Кружки и дополнительные услуги. Для частных садов это отдельная статья дохода,
+/// а родители сравнивают сады в том числе по ним.
+model Club {
+  id        String  @id @default(cuid())
+  tenantId  String
+  tenant    Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  nameKk    String
+  nameRu    String
+  descKk    String?
+  descRu    String?
+  teacher   String?
+  schedule  String?
+  ageRange  String?
+  priceKzt  Int? // null и isFree = true — занятие бесплатное
+  isFree    Boolean @default(false)
+  position  Int     @default(0)
+  isVisible Boolean @default(true)
+
+  @@index([tenantId, position])
+}
+
+/// Часто задаваемые вопросы. Снимает с заведующей повторяющиеся звонки.
+model FaqItem {
+  id         String  @id @default(cuid())
+  tenantId   String
+  tenant     Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  questionKk String
+  questionRu String
+  answerKk   String?
+  answerRu   String?
+  position   Int     @default(0)
+  isVisible  Boolean @default(true)
+
+  @@index([tenantId, position])
+}
+
+/// Посещаемость по дням. Сад должен видеть, что сайт кому-то нужен, —
+/// это главный аргумент, когда приходит время продлевать подписку.
+model DailyStat {
+  id       String   @id @default(cuid())
+  tenantId String
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  date     DateTime @db.Date
+  views    Int      @default(0)
+
+  @@unique([tenantId, date])
+  @@index([tenantId, date])
 }
 
 // ─────────────────────────── Подписки ───────────────────────────

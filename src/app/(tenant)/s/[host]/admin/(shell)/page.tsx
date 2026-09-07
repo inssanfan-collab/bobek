@@ -4,6 +4,7 @@ import { tenantAdmin } from '@/server/tenant/admin-context';
 import { PageHeader, StatCard } from '@/components/admin/AdminShell';
 import { Alert } from '@/components/ui/Alert';
 import { formatDate } from '@/lib/labels';
+import { statsSummary } from '@/server/stats';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,8 @@ export default async function TenantAdminHome({ params }: { params: Promise<{ ho
       ctx.db.feedback.count({ where: { status: 'NEW' } }),
       ctx.db.posts.findMany({ orderBy: { updatedAt: 'desc' }, take: 5 }),
     ]);
+
+  const stats = await statsSummary(ctx.tenantId, 30);
 
   const checklist = [
     { done: Boolean(profile?.aboutRu || profile?.aboutKk), label: 'Заполнить «О саде»', href: '/admin/profile' },
@@ -86,10 +89,10 @@ export default async function TenantAdminHome({ params }: { params: Promise<{ ho
       </section>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Просмотров за месяц" value={stats.total30} hint="подробнее — в разделе «Посещаемость»" />
         <StatCard label="Публикаций" value={posts} />
-        <StatCard label="Файлов" value={media} />
         <StatCard label="Новых обращений" value={feedback} />
-        <StatCard label="Педагогов" value={staff} />
+        <StatCard label="Файлов" value={media} />
       </div>
 
       {lastPosts.length > 0 ? (

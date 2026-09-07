@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { PrismaClient, type TenantKind } from '@prisma/client';
 import { hash } from '@node-rs/argon2';
-import { DEFAULT_SECTIONS } from '../src/lib/sections';
+import { DEFAULT_SECTIONS, SECTION_CATALOG } from '../src/lib/sections';
 import { TEMPLATES } from '../src/lib/templates';
 
 const prisma = new PrismaClient();
@@ -135,6 +135,10 @@ async function main() {
             aboutRu: garden.aboutRu,
             aboutKk: garden.aboutKk,
             groupsCount: 6,
+            lat: 50.2839,
+            lng: 57.1670,
+            whatsapp: garden.phone,
+            instagram: `https://instagram.com/${garden.slug}`,
           },
         },
         domains: {
@@ -161,8 +165,15 @@ async function main() {
       },
     });
 
+    // Кружки и частые вопросы по умолчанию выключены, но демо-данные для них мы
+    // создаём ниже — без разделов эти данные на сайте было бы не увидеть.
+    const demoSections = [
+      ...DEFAULT_SECTIONS,
+      ...SECTION_CATALOG.filter((section) => section.slug === 'clubs' || section.slug === 'faq'),
+    ];
+
     await prisma.section.createMany({
-      data: DEFAULT_SECTIONS.map((section, index) => ({
+      data: demoSections.map((section, index) => ({
         tenantId: tenant.id,
         type: section.type,
         slug: section.slug,
@@ -272,6 +283,70 @@ async function main() {
         snackKk: 'Кефир, тоқаш',
       },
     });
+
+    await prisma.club.createMany({
+      data: [
+        {
+          tenantId: tenant.id, nameRu: 'Английский язык', nameKk: 'Ағылшын тілі',
+          descRu: 'Игровые занятия в малых группах по 8 детей.',
+          teacher: 'Ахметова Гүлнар', schedule: 'Вт, Чт — 16:00', ageRange: 'от 4 лет',
+          priceKzt: 8000, position: 0,
+        },
+        {
+          tenantId: tenant.id, nameRu: 'Хореография', nameKk: 'Хореография',
+          descRu: 'Подготовка номеров к утренникам, растяжка, ритмика.',
+          teacher: 'Есенова Дана', schedule: 'Пн, Ср — 15:30', ageRange: 'от 3 лет',
+          priceKzt: 6000, position: 1,
+        },
+        {
+          tenantId: tenant.id, nameRu: 'Логопед', nameKk: 'Логопед',
+          descRu: 'Индивидуальные занятия по постановке звуков.',
+          schedule: 'по записи', isFree: true, position: 2,
+        },
+      ],
+    });
+
+    await prisma.faqItem.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          questionRu: 'Во сколько нужно привести ребёнка?',
+          questionKk: 'Баланы сағат нешеде әкелу керек?',
+          answerRu: 'Приём детей с 07:30 до 08:30. Завтрак в 08:40 — после этого времени ребёнок остаётся без завтрака.',
+          answerKk: 'Балаларды қабылдау 07:30-дан 08:30-ға дейін.',
+          position: 0,
+        },
+        {
+          tenantId: tenant.id,
+          questionRu: 'Что взять с собой в первый день?',
+          questionKk: 'Бірінші күні не алып келу керек?',
+          answerRu: 'Сменную обувь, форму для физкультуры, расчёску, салфетки и запасной комплект одежды.',
+          position: 1,
+        },
+        {
+          tenantId: tenant.id,
+          questionRu: 'Что делать, если ребёнок заболел?',
+          questionKk: 'Бала ауырып қалса не істеу керек?',
+          answerRu: 'Сообщите воспитателю до 08:00. После болезни нужна справка от участкового врача.',
+          position: 2,
+        },
+      ],
+    });
+
+    // Демонстрируем срочное объявление только у первого сада.
+    if (garden.slug === 'sad12') {
+      const until = new Date();
+      until.setDate(until.getDate() + 10);
+      await prisma.tenantProfile.update({
+        where: { tenantId: tenant.id },
+        data: {
+          noticeRu: 'С 10 по 20 марта группа «Гүлдер» закрыта на карантин по ОРВИ.',
+          noticeKk: '10-20 наурыз аралығында «Гүлдер» тобы карантинге жабылды.',
+          noticeTone: 'WARN',
+          noticeUntil: until,
+        },
+      });
+    }
 
     await prisma.album.create({
       data: {

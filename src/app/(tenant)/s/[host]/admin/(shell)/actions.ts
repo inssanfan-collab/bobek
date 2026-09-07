@@ -624,6 +624,11 @@ export async function saveProfile(formData: FormData) {
       langRu: formData.get('langRu') === 'on',
       aboutRu: optionalStr(formData, 'aboutRu'),
       aboutKk: optionalStr(formData, 'aboutKk'),
+      whatsapp: optionalStr(formData, 'whatsapp'),
+      instagram: optionalStr(formData, 'instagram'),
+      youtube: optionalStr(formData, 'youtube'),
+      facebook: optionalStr(formData, 'facebook'),
+      telegram: optionalStr(formData, 'telegram'),
       lat: Number.parseFloat(str(formData, 'lat')) || null,
       lng: Number.parseFloat(str(formData, 'lng')) || null,
     },
@@ -670,4 +675,116 @@ export async function changeOwnPassword(_prev: ActionState, formData: FormData):
   } catch (error) {
     return toActionError(error);
   }
+}
+
+// ─────────────────────────── Кружки и услуги ───────────────────────────
+
+export async function saveClub(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  const nameRu = str(formData, 'nameRu');
+  if (nameRu.length < 2) throw new Error('Укажите название кружка');
+
+  const isFree = formData.get('isFree') === 'on';
+  const data = {
+    nameRu,
+    nameKk: str(formData, 'nameKk') || nameRu,
+    descRu: optionalStr(formData, 'descRu'),
+    descKk: optionalStr(formData, 'descKk'),
+    teacher: optionalStr(formData, 'teacher'),
+    schedule: optionalStr(formData, 'schedule'),
+    ageRange: optionalStr(formData, 'ageRange'),
+    // Бесплатное занятие не должно хранить цену: иначе она всплывёт при снятии галочки.
+    priceKzt: isFree ? null : num(formData, 'priceKzt'),
+    isFree,
+  };
+
+  if (id) {
+    await assertOwned('club', id, ctx.tenantId);
+    await prisma.club.update({ where: { id }, data });
+  } else {
+    const last = await prisma.club.findFirst({ where: { tenantId: ctx.tenantId }, orderBy: { position: 'desc' } });
+    await prisma.club.create({ data: { ...data, tenantId: ctx.tenantId, position: (last?.position ?? -1) + 1 } });
+  }
+
+  revalidatePath('/admin/clubs');
+}
+
+export async function deleteClub(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  await assertOwned('club', id, ctx.tenantId);
+  await prisma.club.delete({ where: { id } });
+  revalidatePath('/admin/clubs');
+}
+
+// ─────────────────────────── Частые вопросы ───────────────────────────
+
+export async function saveFaq(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  const questionRu = str(formData, 'questionRu');
+  if (questionRu.length < 3) throw new Error('Сформулируйте вопрос');
+
+  const data = {
+    questionRu,
+    questionKk: str(formData, 'questionKk') || questionRu,
+    answerRu: optionalStr(formData, 'answerRu'),
+    answerKk: optionalStr(formData, 'answerKk'),
+  };
+
+  if (id) {
+    await assertOwned('faqItem', id, ctx.tenantId);
+    await prisma.faqItem.update({ where: { id }, data });
+  } else {
+    const last = await prisma.faqItem.findFirst({ where: { tenantId: ctx.tenantId }, orderBy: { position: 'desc' } });
+    await prisma.faqItem.create({ data: { ...data, tenantId: ctx.tenantId, position: (last?.position ?? -1) + 1 } });
+  }
+
+  revalidatePath('/admin/faq');
+}
+
+export async function deleteFaq(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  await assertOwned('faqItem', id, ctx.tenantId);
+  await prisma.faqItem.delete({ where: { id } });
+  revalidatePath('/admin/faq');
+}
+
+// ─────────────────────────── Срочное объявление ───────────────────────────
+
+export async function saveNotice(formData: FormData) {
+  const ctx = await gate(formData);
+  if (!ctx.canManageSettings) throw new Error('Срочное объявление публикует администратор сада');
+
+  const untilRaw = str(formData, 'noticeUntil');
+  const tone = str(formData, 'noticeTone') || 'WARN';
+  if (!['INFO', 'WARN', 'URGENT'].includes(tone)) throw new Error('Неизвестный тип объявления');
+
+  await prisma.tenantProfile.update({
+    where: { tenantId: ctx.tenantId },
+    data: {
+      noticeRu: optionalStr(formData, 'noticeRu'),
+      noticeKk: optionalStr(formData, 'noticeKk'),
+      noticeTone: tone as 'INFO' | 'WARN' | 'URGENT',
+      noticeUntil: untilRaw ? new Date(untilRaw) : null,
+    },
+  });
+
+  await invalidateTenantCacheById(ctx.tenantId);
+  revalidatePath('/admin/notice');
+}
+
+export async function clearNotice(formData: FormData) {
+  const ctx = await gate(formData);
+  if (!ctx.canManageSettings) throw new Error('Срочное объявление снимает администратор сада');
+
+  await prisma.tenantProfile.update({
+    where: { tenantId: ctx.tenantId },
+    data: { noticeRu: null, noticeKk: null, noticeUntil: null },
+  });
+
+  await invalidateTenantCacheById(ctx.tenantId);
+  revalidatePath('/admin/notice');
 }
