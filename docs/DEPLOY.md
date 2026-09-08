@@ -191,7 +191,7 @@ cd bobegim
 pnpm install
 cp .env.local.example .env   # на Windows: copy .env.local.example .env
 pnpm db:up                   # поднимает PostgreSQL в Docker
-pnpm setup                   # применяет миграции и создаёт демо-сады
+pnpm db:setup                # применяет миграции и создаёт демо-сады
 pnpm dev
 ```
 
@@ -201,7 +201,7 @@ pnpm dev
 
 Откройте **http://bobegim.local:3000** — именно это имя, не `localhost`.
 
-Демо-доступы после `pnpm setup`:
+Демо-доступы после `pnpm db:setup`:
 
 | Кто | Адрес | Логин | Пароль |
 |---|---|---|---|

@@ -36,7 +36,7 @@ cd bobegim
 pnpm install
 cp .env.local.example .env  # готовые локальные настройки, править не нужно
 pnpm db:up                  # PostgreSQL в Docker
-pnpm setup                  # миграции и демо-сады
+pnpm db:setup               # миграции и демо-сады
 pnpm dev
 ```
 

@@ -5,7 +5,7 @@
   "description": "Портал детских садов Актюбинской области — мультисайтовый движок",
   "scripts": {
     "dev": "next dev",
-    "setup": "prisma migrate dev && tsx prisma/seed.ts",
+    "db:setup": "prisma migrate dev && tsx prisma/seed.ts",
     "db:up": "docker compose -f docker-compose.dev.yml up -d",
     "db:down": "docker compose -f docker-compose.dev.yml down",
     "build": "prisma generate && next build",
