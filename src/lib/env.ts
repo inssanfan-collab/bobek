@@ -28,6 +28,12 @@ export const env = {
    * придётся вводить руками: платформа работает, карта в каталоге пустеет.
    */
   yandexGeocoderKey: process.env.YANDEX_GEOCODER_KEY ?? '',
+  /**
+   * Ключ JavaScript API Яндекса. В отличие от геокодерного, этот уезжает
+   * в браузер — иначе карту не нарисовать. Без него каталог показывает
+   * виджет в iframe: тот работает без ключа и без лимита запросов.
+   */
+  yandexMapsKey: process.env.YANDEX_MAPS_KEY ?? '',
   subscriptionPrice: int('SUBSCRIPTION_PRICE_KZT', 20000),
   subscriptionGraceDays: int('SUBSCRIPTION_GRACE_DAYS', 30),
   isProduction: process.env.NODE_ENV === 'production',

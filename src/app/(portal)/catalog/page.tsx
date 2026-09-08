@@ -17,6 +17,11 @@ export const metadata: Metadata = {
 
 type Search = { q?: string; district?: string; kind?: string; free?: string };
 
+/** Собственный домен сада, если куплен, иначе выданный поддомен портала. */
+function siteHost(tenant: { slug: string; domains: { host: string }[] }): string {
+  return tenant.domains[0]?.host ?? `${tenant.slug}.${env.portalDomain}`;
+}
+
 export default async function CatalogPage({
   searchParams,
 }: {
@@ -60,9 +65,24 @@ export default async function CatalogPage({
     ? [...found].sort((a, b) => ranked.indexOf(a.id) - ranked.indexOf(b.id))
     : found;
 
-  const points = gardens.flatMap((tenant) => {
-    const { lat, lng } = tenant.profile ?? {};
-    return lat != null && lng != null ? [{ lat, lng }] : [];
+  // Нумерация общая с картой: метка «3» и карточка «3» — один и тот же сад.
+  // Сады без координат номера не получают, их на карте нет.
+  const numbers = new Map<string, number>();
+  const mapGardens = gardens.flatMap((tenant) => {
+    const p = tenant.profile;
+    if (p?.lat == null || p?.lng == null) return [];
+
+    const number = numbers.size + 1;
+    numbers.set(tenant.id, number);
+
+    return [{
+      lat: p.lat,
+      lng: p.lng,
+      number,
+      name: p.nameRu ?? tenant.slug,
+      address: p.addressRu ?? '',
+      href: `https://${siteHost(tenant)}`,
+    }];
   });
 
   return (
@@ -108,7 +128,7 @@ export default async function CatalogPage({
         </div>
       </form>
 
-      <CatalogMap points={points} />
+      <CatalogMap gardens={mapGardens} />
 
       {gardens.length === 0 ? (
         <div className="mt-8">
@@ -124,11 +144,22 @@ export default async function CatalogPage({
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {gardens.map((tenant) => {
               const p = tenant.profile;
-              const host = tenant.domains[0]?.host ?? `${tenant.slug}.${env.portalDomain}`;
+              const host = siteHost(tenant);
+              const number = numbers.get(tenant.id);
               return (
                 <article key={tenant.id} className="card flex flex-col p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="font-display text-lg font-bold">{p?.nameRu ?? tenant.slug}</h2>
+                    <h2 className="font-display text-lg font-bold">
+                      {number ? (
+                        <span
+                          className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand text-sm text-white"
+                          title="Номер метки на карте"
+                        >
+                          {number}
+                        </span>
+                      ) : null}
+                      {p?.nameRu ?? tenant.slug}
+                    </h2>
                     {p?.isPrivate ? (
                       <span className="badge bg-accent/15 text-accent">Частный</span>
                     ) : (

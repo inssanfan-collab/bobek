@@ -18,13 +18,21 @@ const MIN_ZOOM = 4;
 const SINGLE_POINT_ZOOM = 14;
 
 /**
- * Ширина карты в пикселях, под которую подбирается масштаб. Точного значения
- * знать неоткуда — вёрстка резиновая, — поэтому берём типичную ширину колонки
- * каталога на ноутбуке и оставляем запас по краям.
+ * Ширина карты, когда измерить её неоткуда: на сервере вёрстка ещё не разложена.
+ * Типичная ширина колонки каталога на ноутбуке.
  */
-const VIEWPORT_WIDTH = 900;
+const DEFAULT_WIDTH = 900;
 
-export function mapView(points: MapPoint[]): MapView | null {
+/** Уже этого карта не бывает даже на телефоне — защита от нулевой ширины. */
+const MIN_WIDTH = 320;
+
+/**
+ * Центр и масштаб, при которых в кадр попадают все точки.
+ *
+ * `width` — ширина карты в пикселях. В браузере её стоит померить у контейнера:
+ * на узкой колонке масштаб, посчитанный под ноутбук, оставит метки за краем.
+ */
+export function mapView(points: MapPoint[], width = DEFAULT_WIDTH): MapView | null {
   if (points.length === 0) return null;
 
   const lats = points.map((p) => p.lat);
@@ -46,7 +54,7 @@ export function mapView(points: MapPoint[]): MapView | null {
   if (span <= 0) return { ...center, zoom: SINGLE_POINT_ZOOM };
 
   // Один тайл — 256 пикселей и 360 градусов на нулевом масштабе.
-  const zoom = Math.log2((360 * VIEWPORT_WIDTH) / (256 * span));
+  const zoom = Math.log2((360 * Math.max(width, MIN_WIDTH)) / (256 * span));
 
   return { ...center, zoom: clamp(Math.floor(zoom), MIN_ZOOM, MAX_ZOOM) };
 }

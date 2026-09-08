@@ -28,13 +28,13 @@ test.describe('Публичная часть', () => {
   test('каталог показывает сады на карте', async ({ page }) => {
     await page.goto(`${PORTAL}/catalog`);
 
-    const map = page.locator('iframe[title="Детские сады Актобе на карте"]');
-    const src = await map.getAttribute('src');
-    expect(src).toContain('map-widget');
+    // Карта работает в двух видах — интерактивная с ключом JS API и виджет
+    // без него, — поэтому проверяем не разметку карты, а нумерацию: метка «2»
+    // и карточка «2» должны быть одним и тем же садом.
+    await expect(page.getByTestId('catalog-map')).toBeVisible();
 
-    // Метка на каждый сад с координатами, а не одна общая на весь город.
-    const marks = new URL(src ?? '').searchParams.get('pt')?.split('~') ?? [];
-    expect(marks.length).toBeGreaterThan(1);
+    const numbers = await page.locator('article h2 span[title="Номер метки на карте"]').allInnerTexts();
+    expect(numbers).toEqual(['1', '2', '3']);
   });
 
   test('сайт сада открывается на своём поддомене', async ({ page }) => {
