@@ -113,7 +113,11 @@ model TenantProfile {
 
   updatedAt DateTime @updatedAt
 
+  /// Полнотекстовый индекс: считает сама база, см. миграцию fulltext_search.
+  searchVector Unsupported("tsvector")? @default(dbgenerated())
+
   @@index([district])
+  @@index([searchVector], type: Gin)
 }
 
 enum DomainType {
@@ -247,8 +251,12 @@ model Section {
   posts Post[]
   page  Page?
 
+  /// Полнотекстовый индекс: считает сама база, см. миграцию fulltext_search.
+  searchVector Unsupported("tsvector")? @default(dbgenerated())
+
   @@unique([tenantId, slug])
   @@index([tenantId, position])
+  @@index([searchVector], type: Gin)
 }
 
 enum PublishStatus {
@@ -278,9 +286,13 @@ model Post {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
+  /// Полнотекстовый индекс: считает сама база, см. миграцию fulltext_search.
+  searchVector Unsupported("tsvector")? @default(dbgenerated())
+
   @@unique([tenantId, slug])
   @@index([tenantId, status, publishedAt])
   @@index([sectionId, publishedAt])
+  @@index([searchVector], type: Gin)
 }
 
 model Page {
@@ -297,7 +309,11 @@ model Page {
   seoDescRu  String?
   updatedAt  DateTime @updatedAt
 
+  /// Полнотекстовый индекс: считает сама база, см. миграцию fulltext_search.
+  searchVector Unsupported("tsvector")? @default(dbgenerated())
+
   @@index([tenantId])
+  @@index([searchVector], type: Gin)
 }
 
 model Media {
@@ -381,7 +397,11 @@ model Document {
   publishedAt DateTime         @default(now())
   position    Int              @default(0)
 
+  /// Полнотекстовый индекс: считает сама база, см. миграцию fulltext_search.
+  searchVector Unsupported("tsvector")? @default(dbgenerated())
+
   @@index([tenantId, category, position])
+  @@index([searchVector], type: Gin)
 }
 
 model StaffMember {
@@ -400,7 +420,11 @@ model StaffMember {
   position     Int     @default(0)
   isVisible    Boolean @default(true)
 
+  /// Полнотекстовый индекс: считает сама база, см. миграцию fulltext_search.
+  searchVector Unsupported("tsvector")? @default(dbgenerated())
+
   @@index([tenantId, position])
+  @@index([searchVector], type: Gin)
 }
 
 model Group {

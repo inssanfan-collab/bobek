@@ -18,9 +18,27 @@ test.describe('Разделы и сервисы сада', () => {
     await expect(page.getByRole('link', { name: /Наурыз мейрамы/ })).toBeVisible();
   });
 
+  test('поиск находит новость по другой форме слова', async ({ page }) => {
+    // Родитель ищет так, как говорит, а не так, как написано в заголовке:
+    // «собраниями» должно приводить к «Родительскому собранию».
+    await page.goto(`${site('sad12')}/search?q=собраниями`);
+    await expect(page.getByRole('link', { name: /Родительское собрание/ })).toBeVisible();
+  });
+
+  test('поиск по казахскому тексту находит запись', async ({ page }) => {
+    // Заголовок на русском, совпадение — в казахской версии той же записи.
+    await page.goto(`${site('sad12')}/search?q=жиналыс`);
+    await expect(page.getByRole('link', { name: /Родительское собрание/ })).toBeVisible();
+  });
+
   test('поиск честно сообщает, что ничего не нашёл', async ({ page }) => {
     await page.goto(`${site('sad12')}/search?q=цукербринов`);
     await expect(page.getByText('Ничего не найдено')).toBeVisible();
+  });
+
+  test('поиск не ломается на служебных символах tsquery', async ({ page }) => {
+    await page.goto(`${site('sad12')}/search?q=${encodeURIComponent('&|!():*')}`);
+    await expect(page.getByRole('heading', { name: 'Поиск по сайту' })).toBeVisible();
   });
 
   test('кружки показывают цену и бесплатные занятия', async ({ page }) => {

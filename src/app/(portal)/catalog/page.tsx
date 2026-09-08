@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { prisma } from '@/server/db';
+import { searchTenantIds } from '@/server/db/search';
 import { env } from '@/lib/env';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { KIND_LABEL } from '@/lib/labels';
@@ -23,25 +24,22 @@ export default async function CatalogPage({
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
 
+  // Поиск отдаёт id по релевантности, фильтры остаются на стороне Prisma:
+  // ранжировать по совпадению и одновременно фильтровать по району в одном
+  // запросе можно, но тогда условия каталога расползаются по сырому SQL.
+  const ranked = query ? await searchTenantIds(query) : null;
+
   const where: Prisma.TenantWhereInput = {
     status: 'ACTIVE',
+    ...(ranked ? { id: { in: ranked } } : {}),
     profile: {
       ...(params.district ? { district: params.district } : {}),
       ...(params.kind ? { kind: params.kind as never } : {}),
       ...(params.free === '1' ? { placesFree: { gt: 0 } } : {}),
-      ...(query
-        ? {
-            OR: [
-              { nameRu: { contains: query, mode: 'insensitive' } },
-              { nameKk: { contains: query, mode: 'insensitive' } },
-              { addressRu: { contains: query, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
     },
   };
 
-  const [gardens, districts] = await Promise.all([
+  const [found, districts] = await Promise.all([
     prisma.tenant.findMany({
       where,
       include: { profile: true, domains: { where: { isPrimary: true }, take: 1 } },
@@ -56,6 +54,11 @@ export default async function CatalogPage({
     }),
   ]);
 
+  // Порядок задаёт релевантность, а без запроса — алфавит.
+  const gardens = ranked
+    ? [...found].sort((a, b) => ranked.indexOf(a.id) - ranked.indexOf(b.id))
+    : found;
+
   return (
     <div className="container-page py-12">
       <h1 className="font-display text-4xl font-extrabold">Детские сады Актобе</h1>
@@ -69,7 +72,7 @@ export default async function CatalogPage({
 
       <form className="card mt-8 grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4" role="search">
         <div>
-          <label className="field-label" htmlFor="q">Название или адрес</label>
+          <label className="field-label" htmlFor="q">Название, адрес или район</label>
           <input id="q" name="q" defaultValue={query} className="field" placeholder="Например: Балдырған" />
         </div>
         <div>

@@ -1,4 +1,5 @@
 import { prisma } from '@/server/db';
+import { searchSite } from '@/server/db/search';
 import type { Prisma } from '@prisma/client';
 
 /**
@@ -22,6 +23,9 @@ export function scoped(tenantId: string) {
 
   return {
     tenantId,
+
+    /** Полнотекстовый поиск по публичной части сайта — тоже только внутри сада. */
+    search: (query: string) => searchSite(tenantId, query),
 
     sections: {
       findMany: <T extends Prisma.SectionFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.SectionFindManyArgs>) =>

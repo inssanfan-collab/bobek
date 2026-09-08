@@ -50,7 +50,7 @@ export default async function SearchPage({
     orderBy: { position: 'asc' },
   });
 
-  const results = query ? await runSearch(db, query) : null;
+  const results = query ? await db.search(query) : null;
 
   const posts = results?.posts ?? [];
   const pages = results?.pages ?? [];
@@ -98,7 +98,7 @@ export default async function SearchPage({
             {posts.map((post) => (
               <Item
                 key={post.id}
-                href={withLocale(`/${post.section.slug}/${post.slug}`, locale)}
+                href={withLocale(`/${post.sectionSlug}/${post.slug}`, locale)}
                 title={pick(locale, post.titleKk, post.titleRu)}
                 note={formatDate(post.publishedAt)}
               />
@@ -111,8 +111,8 @@ export default async function SearchPage({
             {pages.map((page) => (
               <Item
                 key={page.id}
-                href={withLocale(`/${page.section.slug}`, locale)}
-                title={pick(locale, page.section.titleKk, page.section.titleRu)}
+                href={withLocale(`/${page.sectionSlug}`, locale)}
+                title={pick(locale, page.titleKk, page.titleRu)}
               />
             ))}
           </Group>
@@ -165,45 +165,4 @@ function Item({ href, title, note }: { href: string; title: string; note?: strin
       {note ? <span className="text-sm text-muted">{note}</span> : null}
     </Link>
   );
-}
-
-/**
- * Поиск подстрокой без учёта регистра. Полнотекстовый индекс потребовал бы
- * отдельных словарей под казахский и русский — для сайта на сотню страниц
- * это лишняя сложность.
- */
-async function runSearch(db: Awaited<ReturnType<typeof publicSiteContext>>['db'], query: string) {
-  const like = { contains: query, mode: 'insensitive' as const };
-
-  const [posts, pages, documents, staff] = await Promise.all([
-    db.posts.findMany({
-      where: {
-        status: 'PUBLISHED',
-        publishedAt: { lte: new Date() },
-        OR: [
-          { titleRu: like }, { titleKk: like },
-          { excerptRu: like }, { excerptKk: like },
-          { bodyRu: like }, { bodyKk: like },
-        ],
-      },
-      include: { section: true },
-      orderBy: { publishedAt: 'desc' },
-      take: 20,
-    }),
-    db.pages.findMany({
-      where: { OR: [{ bodyRu: like }, { bodyKk: like }] },
-      include: { section: true },
-      take: 10,
-    }),
-    db.documents.findMany({
-      where: { OR: [{ titleRu: like }, { titleKk: like }] },
-      take: 10,
-    }),
-    db.staff.findMany({
-      where: { isVisible: true, OR: [{ fullName: like }, { positionRu: like }, { positionKk: like }] },
-      take: 10,
-    }),
-  ]);
-
-  return { posts, pages, documents, staff };
 }

@@ -11,9 +11,16 @@ test.describe('Публичная часть', () => {
     await page.goto(`${PORTAL}/catalog`);
     await expect(page.getByRole('heading', { name: 'Детские сады Актобе' })).toBeVisible();
 
-    await page.getByLabel('Название или адрес').fill('Күншуақ');
+    await page.getByLabel('Название, адрес или район').fill('Күншуақ');
     await page.getByRole('button', { name: 'Найти' }).click();
 
+    await expect(page.getByRole('heading', { name: /Күншуақ/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Балдырған/ })).toHaveCount(0);
+  });
+
+  test('каталог ищет сад по району, а не только по названию', async ({ page }) => {
+    // Район в карточке не показан, но родитель ищет именно им.
+    await page.goto(`${PORTAL}/catalog?q=${encodeURIComponent('Алматинский')}`);
     await expect(page.getByRole('heading', { name: /Күншуақ/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Балдырған/ })).toHaveCount(0);
   });
