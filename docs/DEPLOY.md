@@ -153,31 +153,77 @@ docker compose run --rm app pnpm subscriptions:check
 
 ## 7. Локальная разработка
 
+### Шаг 1. Забрать код
+
 ```bash
-pnpm install
-cp .env.example .env      # DATABASE_URL на локальный postgres, PORTAL_DOMAIN=bobegim.local
-pnpm exec prisma migrate dev
-pnpm exec tsx prisma/seed.ts
-pnpm dev
+cd ~/Desktop
+git clone -b claude/kindergarten-portal-aktobe-njxi42 https://github.com/inssanfan-collab/bobek.git bobegim
+cd bobegim
 ```
 
-Поддомены на локальной машине не резолвятся сами — добавьте в `/etc/hosts`
-(в Windows: `C:\Windows\System32\drivers\etc\hosts`):
+На Windows то же самое в PowerShell:
+
+```powershell
+cd $HOME\Desktop
+git clone -b claude/kindergarten-portal-aktobe-njxi42 https://github.com/inssanfan-collab/bobek.git bobegim
+cd bobegim
+```
+
+Понадобятся [Node.js 22+](https://nodejs.org), [pnpm](https://pnpm.io/installation)
+(`npm i -g pnpm`) и [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+### Шаг 2. Домены садов
+
+Сад определяется по домену, поэтому на `localhost` приложение покажет 404 —
+нужны локальные имена. Добавьте строку в файл hosts:
+
+- macOS и Linux: `sudo nano /etc/hosts`
+- Windows: откройте Блокнот **от имени администратора** и в нём
+  `C:\Windows\System32\drivers\etc\hosts`
 
 ```
 127.0.0.1 bobegim.local sad12.bobegim.local kunshuaq.bobegim.local ertegi.bobegim.local demo-sad.bobegim.local
 ```
 
-Открывать нужно `http://bobegim.local:3000`, а не `localhost` — приложение
-определяет сад по домену, и на `localhost` покажет 404.
+### Шаг 3. Запуск
 
-Демо-доступы после сидов:
+```bash
+pnpm install
+cp .env.example .env        # на Windows: copy .env.example .env
+pnpm db:up                  # поднимает PostgreSQL в Docker
+pnpm setup                  # применяет миграции и создаёт демо-сады
+pnpm dev
+```
+
+Значения в `.env.example` уже рассчитаны на локальный запуск через `pnpm db:up`.
+Поменяйте только `SESSION_SECRET` — сгодится любая длинная строка.
+Для локальной работы по http добавьте `COOKIE_SECURE=false`, иначе браузер
+отбросит cookie сессии и вход будет выглядеть как «неверный пароль».
+
+Откройте **http://bobegim.local:3000** — именно это имя, не `localhost`.
+
+Демо-доступы после `pnpm setup`:
 
 | Кто | Адрес | Логин | Пароль |
 |---|---|---|---|
 | Админ портала | bobegim.local:3000/admin | `admin` | `admin-bobegim-2026` |
-| Сад №12 | sad12.bobegim.local:3000/admin | `sad12-admin` | `sad12-2026` |
-| Күншуақ | kunshuaq.bobegim.local:3000/admin | `kunshuaq-admin` | `kunshuaq-2026` |
+| Сад №12 «Балдырған» | sad12.bobegim.local:3000/admin | `sad12-admin` | `sad12-2026` |
+| «Күншуақ» | kunshuaq.bobegim.local:3000/admin | `kunshuaq-admin` | `kunshuaq-2026` |
+| «Ертегі» | ertegi.bobegim.local:3000/admin | `ertegi-admin` | `ertegi-2026` |
+
+Демо-сады сделаны на трёх разных шаблонах — так сразу видно разницу.
+
+### Если что-то не работает
+
+| Симптом | Что проверить |
+|---|---|
+| `Can't reach database server` | запущен ли Docker Desktop и прошёл ли `pnpm db:up` |
+| Открывается 404 вместо сайта | открыт `localhost` вместо `bobegim.local`, или не прописан hosts |
+| Вход не проходит с верным паролем | нет `COOKIE_SECURE=false` в `.env` при работе по http |
+| Порт 5432 занят | на машине уже есть PostgreSQL — остановите его или поменяйте порт в `docker-compose.dev.yml` |
+
+Остановить базу: `pnpm db:down`. Данные сохраняются в томе Docker
+и переживают перезапуск.
 
 ## 8. Тесты
 

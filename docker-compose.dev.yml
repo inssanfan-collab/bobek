@@ -1,0 +1,27 @@
+# Только база для локальной разработки.
+# Приложение при этом запускается напрямую через pnpm dev — так быстрее
+# пересборка и работает горячая перезагрузка.
+#
+#   docker compose -f docker-compose.dev.yml up -d
+#
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bobegim-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bobegim
+      POSTGRES_PASSWORD: bobegim
+      POSTGRES_DB: bobegim
+    ports:
+      - '5432:5432'
+    volumes:
+      - bobegim-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U bobegim']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  bobegim-dev-data:

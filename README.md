@@ -27,22 +27,30 @@ Docker Compose · Caddy.
 
 ## Быстрый старт
 
+Нужны Node.js 22+, pnpm и Docker Desktop.
+
 ```bash
+git clone -b claude/kindergarten-portal-aktobe-njxi42 https://github.com/inssanfan-collab/bobek.git bobegim
+cd bobegim
+
 pnpm install
-cp .env.example .env          # PORTAL_DOMAIN=bobegim.local для локальной работы
-pnpm exec prisma migrate dev
-pnpm exec tsx prisma/seed.ts
+cp .env.example .env        # поставьте PORTAL_DOMAIN=bobegim.local и COOKIE_SECURE=false
+pnpm db:up                  # PostgreSQL в Docker
+pnpm setup                  # миграции и демо-сады
 pnpm dev
 ```
 
-Добавьте в `/etc/hosts`:
+Добавьте в hosts (`/etc/hosts`, в Windows `C:\Windows\System32\drivers\etc\hosts`):
 
 ```
 127.0.0.1 bobegim.local sad12.bobegim.local kunshuaq.bobegim.local ertegi.bobegim.local demo-sad.bobegim.local
 ```
 
-Открывайте `http://bobegim.local:3000` — на `localhost` приложение не найдёт сад
-и покажет 404, потому что определяет его по домену.
+Откройте **http://bobegim.local:3000**, а не `localhost` — приложение определяет
+сад по домену и на `localhost` покажет 404.
+
+Вход в админку портала: `admin` / `admin-bobegim-2026`.
+Подробности, разбор ошибок и остальные доступы — в [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Тесты
 
