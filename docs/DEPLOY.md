@@ -189,16 +189,15 @@ cd bobegim
 
 ```bash
 pnpm install
-cp .env.example .env        # на Windows: copy .env.example .env
-pnpm db:up                  # поднимает PostgreSQL в Docker
-pnpm setup                  # применяет миграции и создаёт демо-сады
+cp .env.local.example .env   # на Windows: copy .env.local.example .env
+pnpm db:up                   # поднимает PostgreSQL в Docker
+pnpm setup                   # применяет миграции и создаёт демо-сады
 pnpm dev
 ```
 
-Значения в `.env.example` уже рассчитаны на локальный запуск через `pnpm db:up`.
-Поменяйте только `SESSION_SECRET` — сгодится любая длинная строка.
-Для локальной работы по http добавьте `COOKIE_SECURE=false`, иначе браузер
-отбросит cookie сессии и вход будет выглядеть как «неверный пароль».
+`.env.local.example` — готовый набор настроек для своей машины, править в нём
+ничего не нужно. Для сервера он не годится: там берите `.env.example`
+и задавайте собственные секреты.
 
 Откройте **http://bobegim.local:3000** — именно это имя, не `localhost`.
 

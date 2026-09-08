@@ -34,7 +34,7 @@ git clone -b claude/kindergarten-portal-aktobe-njxi42 https://github.com/inssanf
 cd bobegim
 
 pnpm install
-cp .env.example .env        # поставьте PORTAL_DOMAIN=bobegim.local и COOKIE_SECURE=false
+cp .env.local.example .env  # готовые локальные настройки, править не нужно
 pnpm db:up                  # PostgreSQL в Docker
 pnpm setup                  # миграции и демо-сады
 pnpm dev
