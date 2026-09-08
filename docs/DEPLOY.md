@@ -219,7 +219,8 @@ pnpm dev
 | `Can't reach database server` | запущен ли Docker Desktop и прошёл ли `pnpm db:up` |
 | Открывается 404 вместо сайта | открыт `localhost` вместо `bobegim.local`, или не прописан hosts |
 | Вход не проходит с верным паролем | нет `COOKIE_SECURE=false` в `.env` при работе по http |
-| Порт 5432 занят | на машине уже есть PostgreSQL — остановите его или поменяйте порт в `docker-compose.dev.yml` |
+| `Authentication failed against database server` | Prisma попала в чужой PostgreSQL. Проверьте, что в `.env` порт **5433**, и что контейнер поднят: `docker ps` |
+| `Port is already allocated` | занят и 5433 — поменяйте его в `docker-compose.dev.yml` и в `.env` на любой свободный |
 
 Остановить базу: `pnpm db:down`. Данные сохраняются в томе Docker
 и переживают перезапуск.

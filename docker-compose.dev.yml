@@ -14,7 +14,10 @@ services:
       POSTGRES_PASSWORD: bobegim
       POSTGRES_DB: bobegim
     ports:
-      - '5432:5432'
+      # 5433 снаружи намеренно: на машине разработчика часто уже стоит свой
+      # PostgreSQL на 5432, и тогда Prisma молча стучится в него, а не сюда —
+      # ошибка выглядит как «неверный пароль», а не как конфликт портов.
+      - '5433:5432'
     volumes:
       - bobegim-dev-data:/var/lib/postgresql/data
     healthcheck:
