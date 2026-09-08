@@ -23,6 +23,11 @@ export const env = {
   sessionSecret: required('SESSION_SECRET'),
   sessionTtlDays: int('SESSION_TTL_DAYS', 14),
   tlsAskToken: process.env.TLS_ASK_TOKEN ?? '',
+  /**
+   * Ключ геокодера Яндекса — только для сервера. Без него координаты сада
+   * придётся вводить руками: платформа работает, карта в каталоге пустеет.
+   */
+  yandexGeocoderKey: process.env.YANDEX_GEOCODER_KEY ?? '',
   subscriptionPrice: int('SUBSCRIPTION_PRICE_KZT', 20000),
   subscriptionGraceDays: int('SUBSCRIPTION_GRACE_DAYS', 30),
   isProduction: process.env.NODE_ENV === 'production',

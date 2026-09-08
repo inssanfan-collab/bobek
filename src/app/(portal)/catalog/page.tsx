@@ -3,6 +3,7 @@ import { prisma } from '@/server/db';
 import { searchTenantIds } from '@/server/db/search';
 import { env } from '@/lib/env';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { CatalogMap } from '@/components/portal/CatalogMap';
 import { KIND_LABEL } from '@/lib/labels';
 import type { Prisma } from '@prisma/client';
 
@@ -59,6 +60,11 @@ export default async function CatalogPage({
     ? [...found].sort((a, b) => ranked.indexOf(a.id) - ranked.indexOf(b.id))
     : found;
 
+  const points = gardens.flatMap((tenant) => {
+    const { lat, lng } = tenant.profile ?? {};
+    return lat != null && lng != null ? [{ lat, lng }] : [];
+  });
+
   return (
     <div className="container-page py-12">
       <h1 className="font-display text-4xl font-extrabold">Детские сады Актобе</h1>
@@ -101,6 +107,8 @@ export default async function CatalogPage({
           <button type="submit" className="btn-primary">Найти</button>
         </div>
       </form>
+
+      <CatalogMap points={points} />
 
       {gardens.length === 0 ? (
         <div className="mt-8">

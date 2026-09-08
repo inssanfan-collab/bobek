@@ -95,6 +95,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ host: 
               <label className="field-label" htmlFor="lng">Долгота</label>
               <input id="lng" name="lng" defaultValue={profile?.lng ?? ''} className="field" placeholder="57.166" />
             </div>
+            <p className="col-span-2 text-sm text-muted">
+              Оставьте пустыми — определим по адресу. Если метка на карте встала не туда,
+              впишите координаты вручную: они важнее найденных автоматически.
+            </p>
           </div>
         </section>
 

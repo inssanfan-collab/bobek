@@ -14,6 +14,7 @@ import { sanitizeContent, toPlainText } from '@/lib/sanitize';
 import { uniqueSlug } from '@/lib/slug';
 import { saveUpload, deleteMedia, UploadError } from '@/server/media';
 import { invalidateTenantCacheById } from '@/server/tenant/resolve';
+import { geocodeAddress } from '@/server/maps/yandex';
 import { hashPassword, passwordProblem, verifyPassword } from '@/server/auth/password';
 import { destroyAllSessions } from '@/server/auth/session';
 import { isPaletteCode, isTemplateCode } from '@/lib/templates';
@@ -601,6 +602,21 @@ export async function saveProfile(formData: FormData) {
   const nameRu = str(formData, 'nameRu');
   if (nameRu.length < 2) throw new Error('Укажите название сада');
 
+  const addressRu = optionalStr(formData, 'addressRu');
+  let lat = Number.parseFloat(str(formData, 'lat')) || null;
+  let lng = Number.parseFloat(str(formData, 'lng')) || null;
+
+  // Заведующая своих координат не знает — спрашиваем их у геокодера по адресу.
+  // Только когда поля пустые: введённую руками точку затирать нельзя, она почти
+  // всегда точнее (одинаковых названий улиц в Актобе хватает).
+  if ((lat === null || lng === null) && addressRu) {
+    const point = await geocodeAddress(addressRu);
+    if (point) {
+      lat = point.lat;
+      lng = point.lng;
+    }
+  }
+
   await prisma.tenantProfile.update({
     where: { tenantId: ctx.tenantId },
     data: {
@@ -610,7 +626,7 @@ export async function saveProfile(formData: FormData) {
       shortNameKk: optionalStr(formData, 'shortNameKk'),
       bin: optionalStr(formData, 'bin'),
       licenseNo: optionalStr(formData, 'licenseNo'),
-      addressRu: optionalStr(formData, 'addressRu'),
+      addressRu,
       addressKk: optionalStr(formData, 'addressKk'),
       district: optionalStr(formData, 'district'),
       phone: optionalStr(formData, 'phone'),
@@ -629,8 +645,8 @@ export async function saveProfile(formData: FormData) {
       youtube: optionalStr(formData, 'youtube'),
       facebook: optionalStr(formData, 'facebook'),
       telegram: optionalStr(formData, 'telegram'),
-      lat: Number.parseFloat(str(formData, 'lat')) || null,
-      lng: Number.parseFloat(str(formData, 'lng')) || null,
+      lat,
+      lng,
     },
   });
 

@@ -19,7 +19,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "subscriptions:check": "tsx scripts/subscription-reminders.ts"
+    "subscriptions:check": "tsx scripts/subscription-reminders.ts",
+    "maps:geocode": "tsx scripts/geocode-tenants.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.0.2",

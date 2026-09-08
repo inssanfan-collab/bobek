@@ -25,6 +25,18 @@ test.describe('Публичная часть', () => {
     await expect(page.getByRole('heading', { name: /Балдырған/ })).toHaveCount(0);
   });
 
+  test('каталог показывает сады на карте', async ({ page }) => {
+    await page.goto(`${PORTAL}/catalog`);
+
+    const map = page.locator('iframe[title="Детские сады Актобе на карте"]');
+    const src = await map.getAttribute('src');
+    expect(src).toContain('map-widget');
+
+    // Метка на каждый сад с координатами, а не одна общая на весь город.
+    const marks = new URL(src ?? '').searchParams.get('pt')?.split('~') ?? [];
+    expect(marks.length).toBeGreaterThan(1);
+  });
+
   test('сайт сада открывается на своём поддомене', async ({ page }) => {
     await page.goto(site('sad12'));
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Балдырған');
