@@ -6,6 +6,7 @@ import { SiteFooter } from '@/components/site/SiteFooter';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { pick } from '@/lib/i18n';
+import { splitHighlight } from '@/lib/search-query';
 import { formatDate } from '@/lib/labels';
 import { env } from '@/lib/env';
 
@@ -101,6 +102,7 @@ export default async function SearchPage({
                 href={withLocale(`/${post.sectionSlug}/${post.slug}`, locale)}
                 title={pick(locale, post.titleKk, post.titleRu)}
                 note={formatDate(post.publishedAt)}
+                snippet={pick(locale, post.snippetKk, post.snippetRu)}
               />
             ))}
           </Group>
@@ -113,6 +115,7 @@ export default async function SearchPage({
                 key={page.id}
                 href={withLocale(`/${page.sectionSlug}`, locale)}
                 title={pick(locale, page.titleKk, page.titleRu)}
+                snippet={pick(locale, page.snippetKk, page.snippetRu)}
               />
             ))}
           </Group>
@@ -158,11 +161,46 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
-function Item({ href, title, note }: { href: string; title: string; note?: string }) {
+function Item({
+  href,
+  title,
+  note,
+  snippet,
+}: {
+  href: string;
+  title: string;
+  note?: string;
+  snippet?: string;
+}) {
   return (
-    <Link href={href} className="flex flex-wrap items-baseline gap-x-3 px-5 py-3 hover:bg-brand-soft/40">
-      <span className="font-semibold">{title}</span>
-      {note ? <span className="text-sm text-muted">{note}</span> : null}
+    <Link href={href} className="block px-5 py-3 hover:bg-brand-soft/40">
+      <span className="flex flex-wrap items-baseline gap-x-3">
+        <span className="font-semibold">{title}</span>
+        {note ? <span className="text-sm text-muted">{note}</span> : null}
+      </span>
+      {snippet ? <Snippet text={snippet} /> : null}
     </Link>
+  );
+}
+
+/**
+ * Фрагмент с подсветкой. Совпадения приходят из ts_headline размеченными
+ * управляющими символами, а не готовым HTML: подставлять в страницу разметку,
+ * собранную из текста сада, нельзя даже после санитайзера.
+ */
+function Snippet({ text }: { text: string }) {
+  const parts = splitHighlight(text);
+  if (parts.length === 0) return null;
+
+  return (
+    <span className="mt-1 block text-sm text-muted">
+      {parts.map((part, index) =>
+        part.match ? (
+          <mark key={index} className="rounded bg-brand-soft px-0.5 text-brand-ink">{part.text}</mark>
+        ) : (
+          <span key={index}>{part.text}</span>
+        ),
+      )}
+    </span>
   );
 }

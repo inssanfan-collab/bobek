@@ -1,7 +1,7 @@
 import 'server-only';
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/server/db';
-import { parseSearchQuery } from '@/lib/search-query';
+import { HEADLINE_OPTIONS, parseSearchQuery } from '@/lib/search-query';
 
 /**
  * Полнотекстовый поиск на tsvector-колонках (миграция fulltext_search).
@@ -16,6 +16,18 @@ function tsQuery(prefix: string, plain: string): Prisma.Sql {
   return Prisma.sql`(to_tsquery('simple', ${prefix}) || plainto_tsquery('russian', ${plain}))`;
 }
 
+/**
+ * Фрагмент текста вокруг совпадения, границы отмечены управляющими символами.
+ *
+ * Конфигурация russian здесь и для казахского: она одна умеет и русскую
+ * словоформу («родителей» по запросу «родителями»), и казахский префикс
+ * («балабақшамызда» по запросу «балабақша»). Если совпадение было только
+ * в заголовке, ts_headline вернёт начало текста — как анонс, это тоже годится.
+ */
+function snippet(column: Prisma.Sql, q: Prisma.Sql): Prisma.Sql {
+  return Prisma.sql`ts_headline('russian', bobegim_plain_text(${column}), ${q}, ${HEADLINE_OPTIONS})`;
+}
+
 export type SiteSearchResults = {
   posts: {
     id: string;
@@ -24,8 +36,17 @@ export type SiteSearchResults = {
     titleRu: string;
     publishedAt: Date | null;
     sectionSlug: string;
+    snippetKk: string;
+    snippetRu: string;
   }[];
-  pages: { id: string; sectionSlug: string; titleKk: string; titleRu: string }[];
+  pages: {
+    id: string;
+    sectionSlug: string;
+    titleKk: string;
+    titleRu: string;
+    snippetKk: string;
+    snippetRu: string;
+  }[];
   documents: { id: string; titleKk: string; titleRu: string }[];
   staff: { id: string; fullName: string; positionKk: string; positionRu: string }[];
 };
@@ -49,7 +70,9 @@ export async function searchSite(tenantId: string, query: string): Promise<SiteS
   const [posts, pages, documents, staff] = await Promise.all([
     prisma.$queryRaw<SiteSearchResults['posts']>`
       SELECT p."id", p."slug", p."titleKk", p."titleRu", p."publishedAt",
-             s."slug" AS "sectionSlug"
+             s."slug" AS "sectionSlug",
+             ${snippet(Prisma.sql`p."bodyKk"`, q)} AS "snippetKk",
+             ${snippet(Prisma.sql`p."bodyRu"`, q)} AS "snippetRu"
         FROM "Post" p
         JOIN "Section" s ON s."id" = p."sectionId"
        WHERE p."tenantId" = ${tenantId}
@@ -63,7 +86,9 @@ export async function searchSite(tenantId: string, query: string): Promise<SiteS
     // Заголовок страницы хранится в разделе, поэтому совпадение засчитывается
     // и по тексту страницы, и по названию раздела.
     prisma.$queryRaw<SiteSearchResults['pages']>`
-      SELECT g."id", s."slug" AS "sectionSlug", s."titleKk", s."titleRu"
+      SELECT g."id", s."slug" AS "sectionSlug", s."titleKk", s."titleRu",
+             ${snippet(Prisma.sql`g."bodyKk"`, q)} AS "snippetKk",
+             ${snippet(Prisma.sql`g."bodyRu"`, q)} AS "snippetRu"
         FROM "Page" g
         JOIN "Section" s ON s."id" = g."sectionId"
        WHERE g."tenantId" = ${tenantId}

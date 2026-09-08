@@ -31,6 +31,12 @@ test.describe('Разделы и сервисы сада', () => {
     await expect(page.getByRole('link', { name: /Родительское собрание/ })).toBeVisible();
   });
 
+  test('поиск показывает фрагмент с подсвеченным словом', async ({ page }) => {
+    // По заголовку не видно, почему новость нашлась, — совпадение внутри текста.
+    await page.goto(`${site('sad12')}/search?q=родителями`);
+    await expect(page.locator('mark').first()).toHaveText('родителей');
+  });
+
   test('поиск честно сообщает, что ничего не нашёл', async ({ page }) => {
     await page.goto(`${site('sad12')}/search?q=цукербринов`);
     await expect(page.getByText('Ничего не найдено')).toBeVisible();

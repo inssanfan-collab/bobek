@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { parseSearchQuery } from '@/lib/search-query';
+import {
+  HIGHLIGHT_END,
+  HIGHLIGHT_START,
+  parseSearchQuery,
+  splitHighlight,
+} from '@/lib/search-query';
+
+/** Так же, как это делает ts_headline. */
+const hl = (text: string) => `${HIGHLIGHT_START}${text}${HIGHLIGHT_END}`;
 
 describe('parseSearchQuery', () => {
   it('строит поиск по началу слова', () => {
@@ -36,5 +44,42 @@ describe('parseSearchQuery', () => {
 
     const long = parseSearchQuery('а'.repeat(200));
     expect(long?.prefix).toBe(`${'а'.repeat(64)}:*`);
+  });
+});
+
+describe('splitHighlight', () => {
+  it('разделяет текст и совпадения', () => {
+    expect(splitHighlight(`Приглашаем ${hl('родителей')} всех групп`)).toEqual([
+      { text: 'Приглашаем ', match: false },
+      { text: 'родителей', match: true },
+      { text: ' всех групп', match: false },
+    ]);
+  });
+
+  it('находит несколько совпадений и совпадение в начале', () => {
+    expect(splitHighlight(`${hl('Наурыз')} мейрамы ${hl('өтті')}`)).toEqual([
+      { text: 'Наурыз', match: true },
+      { text: ' мейрамы ', match: false },
+      { text: 'өтті', match: true },
+    ]);
+  });
+
+  it('отдаёт текст без разметки одним куском', () => {
+    // Совпадение было только в заголовке — ts_headline вернул начало текста.
+    expect(splitHighlight('Утро началось с зарядки во дворе')).toEqual([
+      { text: 'Утро началось с зарядки во дворе', match: false },
+    ]);
+  });
+
+  it('переживает обрезанный маркер', () => {
+    expect(splitHighlight(`Обсудим ${HIGHLIGHT_START}подготовку`)).toEqual([
+      { text: 'Обсудим ', match: false },
+      { text: 'подготовку', match: true },
+    ]);
+  });
+
+  it('на пустом фрагменте не отдаёт ничего', () => {
+    expect(splitHighlight('')).toEqual([]);
+    expect(splitHighlight(hl(''))).toEqual([]);
   });
 });
