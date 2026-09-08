@@ -189,7 +189,7 @@ cd bobegim
 
 ```bash
 pnpm install
-cp .env.local.example .env   # на Windows: copy .env.local.example .env
+cp .env.local.example .env   # PowerShell: Copy-Item .env.local.example .env -Force
 pnpm db:up                   # поднимает PostgreSQL в Docker
 pnpm db:setup                # применяет миграции и создаёт демо-сады
 pnpm dev
@@ -221,6 +221,7 @@ pnpm dev
 | Вход не проходит с верным паролем | нет `COOKIE_SECURE=false` в `.env` при работе по http |
 | `Authentication failed against database server` | Prisma попала в чужой PostgreSQL. Проверьте, что в `.env` порт **5433**, и что контейнер поднят: `docker ps` |
 | `Port is already allocated` | занят и 5433 — поменяйте его в `docker-compose.dev.yml` и в `.env` на любой свободный |
+| В `.env` остался старый порт после `git pull` | `.env` намеренно вне репозитория, `git pull` его не меняет — перезапишите: `Copy-Item .env.local.example .env -Force` |
 
 Остановить базу: `pnpm db:down`. Данные сохраняются в томе Docker
 и переживают перезапуск.

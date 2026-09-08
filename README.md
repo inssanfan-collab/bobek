@@ -34,7 +34,7 @@ git clone -b claude/kindergarten-portal-aktobe-njxi42 https://github.com/inssanf
 cd bobegim
 
 pnpm install
-cp .env.local.example .env  # готовые локальные настройки, править не нужно
+cp .env.local.example .env  # готовые настройки; в PowerShell: Copy-Item .env.local.example .env -Force
 pnpm db:up                  # PostgreSQL в Docker
 pnpm db:setup               # миграции и демо-сады
 pnpm dev
