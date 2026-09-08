@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { login, site, SAD12_ADMIN } from './helpers';
 
 test.describe('Разделы и сервисы сада', () => {
@@ -61,14 +61,46 @@ test.describe('Разделы и сервисы сада', () => {
     await expect(page.getByRole('heading', { name: 'Как добраться' })).toBeVisible();
   });
 
+});
+
+/**
+ * Счётчик намеренно не учитывает headless-браузеры: иначе статистику сада
+ * накручивали бы поисковые роботы, и цифра «сайт посмотрели 340 раз» перестала
+ * бы что-то значить. Playwright ходит именно headless-браузером, поэтому здесь
+ * он представляется обычным Chrome — тест проверяет счётчик, а не фильтр.
+ */
+test.describe('Посещаемость', () => {
+  test.use({
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  });
+
   test('посещаемость растёт после захода на сайт', async ({ page }) => {
+    await login(page, site('sad12'), SAD12_ADMIN);
+
+    // Сравниваем до и после: проверка «больше нуля» проходила бы за счёт
+    // чужих заходов в тот же день и врала бы на чистой базе.
+    const before = await todayViews(page);
     await page.goto(site('sad12'));
 
-    await login(page, site('sad12'), SAD12_ADMIN);
-    await page.goto(`${site('sad12')}/admin/stats`);
+    expect(await todayViews(page)).toBe(before + 1);
+  });
 
-    const today = page.locator('.card', { hasText: 'Сегодня' }).first();
-    const value = Number((await today.locator('p').nth(1).innerText()).trim());
-    expect(value).toBeGreaterThan(0);
+  test('заходы роботов в статистику не попадают', async ({ page }) => {
+    await login(page, site('sad12'), SAD12_ADMIN);
+
+    const before = await todayViews(page);
+    await page.request.get(site('sad12'), {
+      headers: { 'user-agent': 'Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)' },
+    });
+
+    expect(await todayViews(page)).toBe(before);
   });
 });
+
+/** Число из карточки «Сегодня» на странице статистики сада. */
+async function todayViews(page: Page): Promise<number> {
+  await page.goto(`${site('sad12')}/admin/stats`);
+  const card = page.locator('.card', { hasText: 'Сегодня' }).first();
+  return Number((await card.locator('p').nth(1).innerText()).trim());
+}
