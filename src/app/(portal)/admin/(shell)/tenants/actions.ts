@@ -18,6 +18,7 @@ import { redirect } from 'next/navigation';
 import { promises as dns } from 'node:dns';
 import { headers } from 'next/headers';
 import type { TenantKind, TenantStatus } from '@prisma/client';
+import { ActionError } from '@/lib/action-state';
 
 const createSchema = z.object({
   nameRu: z.string().trim().min(2, 'Укажите название по-русски').max(200),
@@ -137,7 +138,7 @@ export async function setTenantStatus(formData: FormData) {
   const status = String(formData.get('status')) as TenantStatus;
 
   if (!['DRAFT', 'ACTIVE', 'SUSPENDED', 'ARCHIVED'].includes(status)) {
-    throw new Error('Неизвестный статус');
+    throw new ActionError({ kk: 'Мәртебе белгісіз', ru: 'Неизвестный статус' });
   }
 
   await prisma.tenant.update({ where: { id: tenantId }, data: { status } });
@@ -154,7 +155,7 @@ export async function resetUserPassword(formData: FormData): Promise<void> {
 
   const userId = String(formData.get('userId'));
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new Error('Пользователь не найден');
+  if (!user) throw new ActionError({ kk: 'Пайдаланушы табылмады', ru: 'Пользователь не найден' });
 
   const password = generatePassword();
   await prisma.user.update({
@@ -186,7 +187,7 @@ export async function toggleUserActive(formData: FormData) {
 
   const userId = String(formData.get('userId'));
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new Error('Пользователь не найден');
+  if (!user) throw new ActionError({ kk: 'Пайдаланушы табылмады', ru: 'Пользователь не найден' });
 
   const isActive = !user.isActive;
   await prisma.user.update({ where: { id: userId }, data: { isActive } });
@@ -283,7 +284,7 @@ export async function recordPayment(formData: FormData) {
   const invoiceNo = String(formData.get('invoiceNo') ?? '').trim() || null;
   const months = Number.parseInt(String(formData.get('months') ?? '12'), 10);
 
-  if (!Number.isFinite(amount) || amount <= 0) throw new Error('Некорректная сумма');
+  if (!Number.isFinite(amount) || amount <= 0) throw new ActionError({ kk: 'Сома дұрыс емес', ru: 'Некорректная сумма' });
 
   const periodEnd = await extendSubscription(tenantId, Number.isFinite(months) ? months : 12);
 
@@ -327,12 +328,12 @@ export async function addDomain(formData: FormData) {
   const tenantId = String(formData.get('tenantId'));
   const host = normalizeHost(String(formData.get('host') ?? ''));
 
-  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(host)) throw new Error('Некорректное доменное имя');
+  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(host)) throw new ActionError({ kk: 'Домен атауы дұрыс емес', ru: 'Некорректное доменное имя' });
   if (host.endsWith(`.${env.portalDomain}`) || host === env.portalDomain) {
-    throw new Error('Поддомены портала выдаются автоматически — здесь добавляются только собственные домены сада.');
+    throw new ActionError({ kk: 'Портал субдомендері автоматты түрде беріледі — мұнда тек балабақшаның жеке домендері қосылады.', ru: 'Поддомены портала выдаются автоматически — здесь добавляются только собственные домены сада.' });
   }
   if (await prisma.domain.findUnique({ where: { host }, select: { id: true } })) {
-    throw new Error('Этот домен уже подключён');
+    throw new ActionError({ kk: 'Бұл домен бұрыннан жалғанған', ru: 'Этот домен уже подключён' });
   }
 
   await prisma.domain.create({ data: { tenantId, host, type: 'CUSTOM', certStatus: 'PENDING' } });
@@ -351,7 +352,7 @@ export async function verifyDomain(formData: FormData) {
 
   const domainId = String(formData.get('domainId'));
   const domain = await prisma.domain.findUnique({ where: { id: domainId } });
-  if (!domain) throw new Error('Домен не найден');
+  if (!domain) throw new ActionError({ kk: 'Домен табылмады', ru: 'Домен не найден' });
 
   const expected = (process.env.SERVER_IPV4 ?? '').trim();
   let certStatus: 'DNS_OK' | 'FAILED' = 'FAILED';
@@ -392,7 +393,7 @@ export async function setPrimaryDomain(formData: FormData) {
 
   const domainId = String(formData.get('domainId'));
   const domain = await prisma.domain.findUnique({ where: { id: domainId } });
-  if (!domain) throw new Error('Домен не найден');
+  if (!domain) throw new ActionError({ kk: 'Домен табылмады', ru: 'Домен не найден' });
 
   await prisma.$transaction([
     prisma.domain.updateMany({ where: { tenantId: domain.tenantId }, data: { isPrimary: false } }),
@@ -415,8 +416,8 @@ export async function deleteDomain(formData: FormData) {
 
   const domainId = String(formData.get('domainId'));
   const domain = await prisma.domain.findUnique({ where: { id: domainId } });
-  if (!domain) throw new Error('Домен не найден');
-  if (domain.type === 'SUBDOMAIN') throw new Error('Основной поддомен сада удалить нельзя');
+  if (!domain) throw new ActionError({ kk: 'Домен табылмады', ru: 'Домен не найден' });
+  if (domain.type === 'SUBDOMAIN') throw new ActionError({ kk: 'Балабақшаның негізгі субдоменін жоюға болмайды', ru: 'Основной поддомен сада удалить нельзя' });
 
   await prisma.domain.delete({ where: { id: domainId } });
   await invalidateTenantCacheById(domain.tenantId);
@@ -435,13 +436,13 @@ export async function impersonate(formData: FormData) {
     where: { tenantId, role: 'TENANT_ADMIN', isActive: true },
     orderBy: { createdAt: 'asc' },
   });
-  if (!target) throw new Error('У этого сада нет активного администратора');
+  if (!target) throw new ActionError({ kk: 'Бұл балабақшаның белсенді әкімшісі жоқ', ru: 'У этого сада нет активного администратора' });
 
   const domain = await prisma.domain.findFirst({
     where: { tenantId },
     orderBy: [{ isPrimary: 'desc' }, { createdAt: 'asc' }],
   });
-  if (!domain) throw new Error('У этого сада нет ни одного домена');
+  if (!domain) throw new ActionError({ kk: 'Бұл балабақшада бірде-бір домен жоқ', ru: 'У этого сада нет ни одного домена' });
 
   const { ip, userAgent } = await requestMeta();
   // Cookie не ставим: она осталась бы на домене портала, а работать будут на домене сада.

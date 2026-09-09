@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
-import { type ActionState, toActionError } from '@/lib/action-state';
+import { ActionError, type ActionState, toActionError } from '@/lib/action-state';
 import { z } from 'zod';
 import { prisma } from '@/server/db';
 import { tenantAdmin } from '@/server/tenant/admin-context';
@@ -16,7 +16,7 @@ import { saveUpload, deleteMedia, UploadError } from '@/server/media';
 import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { geocodeAddress } from '@/server/maps/yandex';
 import { hashPassword, passwordProblem, verifyPassword } from '@/server/auth/password';
-import { destroyAllSessions } from '@/server/auth/session';
+import { destroyAllSessions, getCurrentUser } from '@/server/auth/session';
 import { isPaletteCode, isTemplateCode } from '@/lib/templates';
 import { env } from '@/lib/env';
 import type { DocumentCategory } from '@prisma/client';
@@ -131,7 +131,7 @@ export async function savePost(_prev: ActionState, formData: FormData): Promise<
   revalidatePath('/admin/posts');
   return { redirectTo: await hostUrl('/admin/posts') };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, (await getCurrentUser())?.locale);
   }
 }
 
@@ -169,7 +169,7 @@ export async function savePage(_prev: ActionState, formData: FormData): Promise<
   revalidatePath('/admin/pages');
   return { redirectTo: await hostUrl('/admin/pages') };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, (await getCurrentUser())?.locale);
   }
 }
 
@@ -181,7 +181,7 @@ export async function toggleSection(formData: FormData) {
   await assertOwned('section', id, ctx.tenantId);
 
   const section = await prisma.section.findUnique({ where: { id } });
-  if (!section) throw new Error('Раздел не найден');
+  if (!section) throw new ActionError({ kk: 'Бөлім табылмады', ru: 'Раздел не найден' });
 
   await prisma.section.update({ where: { id }, data: { isVisible: !section.isVisible } });
   revalidatePath('/admin/sections');
@@ -232,10 +232,10 @@ export async function addSection(formData: FormData) {
   const slug = str(formData, 'slug');
   const { SECTION_CATALOG } = await import('@/lib/sections');
   const meta = SECTION_CATALOG.find((s) => s.slug === slug);
-  if (!meta) throw new Error('Неизвестный тип раздела');
+  if (!meta) throw new ActionError({ kk: 'Бөлімнің түрі белгісіз', ru: 'Неизвестный тип раздела' });
 
   const exists = await prisma.section.findFirst({ where: { tenantId: ctx.tenantId, slug } });
-  if (exists) throw new Error('Такой раздел уже есть');
+  if (exists) throw new ActionError({ kk: 'Мұндай бөлім бұрыннан бар', ru: 'Такой раздел уже есть' });
 
   const last = await prisma.section.findFirst({
     where: { tenantId: ctx.tenantId },
@@ -295,7 +295,7 @@ export async function saveAlbum(_prev: ActionState, formData: FormData): Promise
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   const titleRu = str(formData, 'titleRu');
-  if (titleRu.length < 2) throw new Error('Укажите название альбома');
+  if (titleRu.length < 2) throw new ActionError({ kk: 'Альбом атауын көрсетіңіз', ru: 'Укажите название альбома' });
 
   const takenOnRaw = str(formData, 'takenOn');
   const data = {
@@ -319,7 +319,7 @@ export async function saveAlbum(_prev: ActionState, formData: FormData): Promise
   const album = await prisma.album.create({ data: { ...data, slug, tenantId: ctx.tenantId } });
   return { redirectTo: await hostUrl(`/admin/gallery/${album.id}`) };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, (await getCurrentUser())?.locale);
   }
 }
 
@@ -332,7 +332,7 @@ export async function deleteAlbum(_prev: ActionState, formData: FormData): Promi
   revalidatePath('/admin/gallery');
   return { redirectTo: await hostUrl('/admin/gallery') };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, (await getCurrentUser())?.locale);
   }
 }
 
@@ -356,7 +356,7 @@ export async function deleteMediaAction(formData: FormData) {
 export async function saveDocument(formData: FormData) {
   const ctx = await gate(formData);
   const titleRu = str(formData, 'titleRu');
-  if (titleRu.length < 2) throw new Error('Укажите название документа');
+  if (titleRu.length < 2) throw new ActionError({ kk: 'Құжат атауын көрсетіңіз', ru: 'Укажите название документа' });
 
   const file = formData.get('file');
   const existingId = str(formData, 'id');
@@ -366,7 +366,7 @@ export async function saveDocument(formData: FormData) {
     const media = await saveUpload(file, ctx.tenantId);
     mediaId = media.id;
   }
-  if (!mediaId) throw new Error('Прикрепите файл документа');
+  if (!mediaId) throw new ActionError({ kk: 'Құжат файлын тіркеңіз', ru: 'Прикрепите файл документа' });
   await assertOwned('media', mediaId, ctx.tenantId);
 
   const data = {
@@ -400,7 +400,7 @@ export async function saveStaff(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   const fullName = str(formData, 'fullName');
-  if (fullName.length < 2) throw new Error('Укажите ФИО');
+  if (fullName.length < 2) throw new ActionError({ kk: 'Аты-жөнін көрсетіңіз', ru: 'Укажите ФИО' });
 
   let photoMediaId = optionalStr(formData, 'photoMediaId');
   const photo = formData.get('photo');
@@ -451,7 +451,7 @@ export async function saveGroup(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   const nameRu = str(formData, 'nameRu');
-  if (nameRu.length < 1) throw new Error('Укажите название группы');
+  if (nameRu.length < 1) throw new ActionError({ kk: 'Топ атауын көрсетіңіз', ru: 'Укажите название группы' });
 
   const data = {
     nameRu,
@@ -505,7 +505,7 @@ async function syncFreePlaces(tenantId: string) {
 export async function saveMenuDay(formData: FormData) {
   const ctx = await gate(formData);
   const dateRaw = str(formData, 'date');
-  if (!dateRaw) throw new Error('Укажите дату');
+  if (!dateRaw) throw new ActionError({ kk: 'Күнін көрсетіңіз', ru: 'Укажите дату' });
   const date = new Date(dateRaw);
 
   let scanMediaId = optionalStr(formData, 'scanMediaId');
@@ -567,11 +567,11 @@ export async function answerFeedback(formData: FormData) {
 
 export async function saveAppearance(formData: FormData) {
   const ctx = await gate(formData);
-  if (!ctx.canManageSettings) throw new Error('Менять внешний вид может только администратор сада');
+  if (!ctx.canManageSettings) throw new ActionError({ kk: 'Сыртқы көріністі тек балабақша әкімшісі өзгерте алады', ru: 'Менять внешний вид может только администратор сада' });
 
   const templateCode = str(formData, 'templateCode');
   const palette = str(formData, 'palette');
-  if (!isTemplateCode(templateCode) || !isPaletteCode(palette)) throw new Error('Неизвестный шаблон или палитра');
+  if (!isTemplateCode(templateCode) || !isPaletteCode(palette)) throw new ActionError({ kk: 'Үлгі немесе палитра белгісіз', ru: 'Неизвестный шаблон или палитра' });
 
   let coverMediaId = optionalStr(formData, 'coverMediaId');
   const cover = formData.get('cover');
@@ -597,10 +597,10 @@ export async function saveAppearance(formData: FormData) {
 
 export async function saveProfile(formData: FormData) {
   const ctx = await gate(formData);
-  if (!ctx.canManageSettings) throw new Error('Менять паспорт сада может только администратор сада');
+  if (!ctx.canManageSettings) throw new ActionError({ kk: 'Балабақша төлқұжатын тек балабақша әкімшісі өзгерте алады', ru: 'Менять паспорт сада может только администратор сада' });
 
   const nameRu = str(formData, 'nameRu');
-  if (nameRu.length < 2) throw new Error('Укажите название сада');
+  if (nameRu.length < 2) throw new ActionError({ kk: 'Балабақша атауын көрсетіңіз', ru: 'Укажите название сада' });
 
   const addressRu = optionalStr(formData, 'addressRu');
   let lat = Number.parseFloat(str(formData, 'lat')) || null;
@@ -669,13 +669,13 @@ export async function changeOwnPassword(_prev: ActionState, formData: FormData):
   const next = String(formData.get('next') ?? '');
   const repeat = String(formData.get('repeat') ?? '');
 
-  if (next !== repeat) throw new Error('Новый пароль и повтор не совпадают');
+  if (next !== repeat) throw new ActionError({ kk: 'Жаңа құпия сөз бен қайталауы сәйкес келмейді', ru: 'Новый пароль и повтор не совпадают' });
   const problem = passwordProblem(next);
   if (problem) throw new Error(problem);
 
   const user = await prisma.user.findUnique({ where: { id: ctx.user.id } });
   if (!user || !(await verifyPassword(user.passwordHash, current))) {
-    throw new Error('Текущий пароль указан неверно');
+    throw new ActionError({ kk: 'Ағымдағы құпия сөз дұрыс көрсетілмеген', ru: 'Текущий пароль указан неверно' });
   }
 
   await prisma.user.update({
@@ -689,7 +689,7 @@ export async function changeOwnPassword(_prev: ActionState, formData: FormData):
 
   return { redirectTo: await hostUrl('/admin/login') };
   } catch (error) {
-    return toActionError(error);
+    return toActionError(error, (await getCurrentUser())?.locale);
   }
 }
 
@@ -699,7 +699,7 @@ export async function saveClub(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   const nameRu = str(formData, 'nameRu');
-  if (nameRu.length < 2) throw new Error('Укажите название кружка');
+  if (nameRu.length < 2) throw new ActionError({ kk: 'Үйірме атауын көрсетіңіз', ru: 'Укажите название кружка' });
 
   const isFree = formData.get('isFree') === 'on';
   const data = {
@@ -740,7 +740,7 @@ export async function saveFaq(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   const questionRu = str(formData, 'questionRu');
-  if (questionRu.length < 3) throw new Error('Сформулируйте вопрос');
+  if (questionRu.length < 3) throw new ActionError({ kk: 'Сұрақты тұжырымдаңыз', ru: 'Сформулируйте вопрос' });
 
   const data = {
     questionRu,
@@ -772,11 +772,11 @@ export async function deleteFaq(formData: FormData) {
 
 export async function saveNotice(formData: FormData) {
   const ctx = await gate(formData);
-  if (!ctx.canManageSettings) throw new Error('Срочное объявление публикует администратор сада');
+  if (!ctx.canManageSettings) throw new ActionError({ kk: 'Шұғыл хабарландыруды балабақша әкімшісі жариялайды', ru: 'Срочное объявление публикует администратор сада' });
 
   const untilRaw = str(formData, 'noticeUntil');
   const tone = str(formData, 'noticeTone') || 'WARN';
-  if (!['INFO', 'WARN', 'URGENT'].includes(tone)) throw new Error('Неизвестный тип объявления');
+  if (!['INFO', 'WARN', 'URGENT'].includes(tone)) throw new ActionError({ kk: 'Хабарландырудың түрі белгісіз', ru: 'Неизвестный тип объявления' });
 
   await prisma.tenantProfile.update({
     where: { tenantId: ctx.tenantId },
@@ -794,7 +794,7 @@ export async function saveNotice(formData: FormData) {
 
 export async function clearNotice(formData: FormData) {
   const ctx = await gate(formData);
-  if (!ctx.canManageSettings) throw new Error('Срочное объявление снимает администратор сада');
+  if (!ctx.canManageSettings) throw new ActionError({ kk: 'Шұғыл хабарландыруды балабақша әкімшісі алып тастайды', ru: 'Срочное объявление снимает администратор сада' });
 
   await prisma.tenantProfile.update({
     where: { tenantId: ctx.tenantId },

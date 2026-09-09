@@ -3,11 +3,17 @@ import Link from 'next/link';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, withLocale } from '@/lib/i18n';
 
-export const metadata: Metadata = {
-  title: 'Родителям',
-  description:
-    'Как встать в очередь в детский сад в Актобе через egov.kz, какие документы нужны и как выбрать сад.',
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const locale = localeFromParam((await searchParams).lang);
+  return {
+    title: locale === 'kk' ? 'Ата-аналарға' : 'Родителям',
+    description: locale === 'kk' ? 'Ақтөбеде egov.kz арқылы балабақшаға кезекке қалай тұру керек, қандай құжаттар қажет және балабақшаны қалай таңдау керек.' : 'Как встать в очередь в детский сад в Актобе через egov.kz, какие документы нужны и как выбрать сад.',
+  };
+}
 
 const T = {
   title: { kk: 'Ата-аналарға', ru: 'Родителям' },

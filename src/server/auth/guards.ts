@@ -5,6 +5,7 @@ import { subscriptionState, type SubscriptionState } from '@/server/subscription
 import { scoped, type TenantScope } from '@/server/db/scope';
 import { roleAtLeast } from './session';
 import type { Role } from '@prisma/client';
+import { ActionError } from '@/lib/action-state';
 
 /** Админка портала. Сад сюда не попадает, даже зная адрес. */
 export async function requireSuperadmin(): Promise<AuthUser> {
@@ -64,5 +65,5 @@ export function assertCanEdit(session: TenantSession): void {
       'Подписка истекла — сейчас доступен только просмотр. Обратитесь к администратору портала для продления.',
     );
   }
-  throw new Error('У вашей учётной записи нет прав на это действие.');
+  throw new ActionError({ kk: 'Тіркелгіңізде бұл әрекетке құқық жоқ.', ru: 'У вашей учётной записи нет прав на это действие.' });
 }

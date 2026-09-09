@@ -4,7 +4,16 @@ import { formatMoney } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Публичная оферта' };
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const locale = localeFromParam((await searchParams).lang);
+  return {
+    title: locale === 'kk' ? 'Жария оферта' : 'Публичная оферта',
+  };
+}
 
 const T = {
   title: { kk: 'Жария оферта', ru: 'Публичная оферта' },

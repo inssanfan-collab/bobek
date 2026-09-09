@@ -4,7 +4,16 @@ import { env } from '@/lib/env';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, withLocale } from '@/lib/i18n';
 
-export const metadata: Metadata = { title: 'Контакты' };
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const locale = localeFromParam((await searchParams).lang);
+  return {
+    title: locale === 'kk' ? 'Байланыс' : 'Контакты',
+  };
+}
 
 const T = {
   title: { kk: 'Байланыс', ru: 'Контакты' },

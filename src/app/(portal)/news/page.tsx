@@ -7,7 +7,16 @@ import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Новости портала' };
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const locale = localeFromParam((await searchParams).lang);
+  return {
+    title: locale === 'kk' ? 'Портал жаңалықтары' : 'Новости портала',
+  };
+}
 
 const T = {
   title: { kk: 'Жаңалықтар', ru: 'Новости' },

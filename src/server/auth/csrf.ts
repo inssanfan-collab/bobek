@@ -4,6 +4,7 @@ import { createHmac } from 'node:crypto';
 import { env } from '@/lib/env';
 import { safeEqual, SESSION_COOKIE } from './session';
 import { CSRF_FIELD } from './csrf.client';
+import { ActionError } from '@/lib/action-state';
 
 export { CSRF_FIELD };
 
@@ -30,7 +31,7 @@ export async function csrfToken(): Promise<string> {
 
 export async function assertCsrf(formData: FormData): Promise<void> {
   const supplied = String(formData.get(CSRF_FIELD) ?? '');
-  if (!supplied) throw new Error('Форма устарела. Обновите страницу и попробуйте ещё раз.');
+  if (!supplied) throw new ActionError({ kk: 'Нысан ескірген. Бетті жаңартып, қайталап көріңіз.', ru: 'Форма устарела. Обновите страницу и попробуйте ещё раз.' });
 
   const session = (await cookies()).get(SESSION_COOKIE)?.value;
 
@@ -40,7 +41,7 @@ export async function assertCsrf(formData: FormData): Promise<void> {
     : [signWindow(currentWindow()), signWindow(currentWindow() - 1)];
 
   if (!accepted.some((candidate) => safeEqual(candidate, supplied))) {
-    throw new Error('Форма устарела. Обновите страницу и попробуйте ещё раз.');
+    throw new ActionError({ kk: 'Нысан ескірген. Бетті жаңартып, қайталап көріңіз.', ru: 'Форма устарела. Обновите страницу и попробуйте ещё раз.' });
   }
 }
 

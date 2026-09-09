@@ -25,10 +25,17 @@ const T = {
   },
 } as const;
 
-export const metadata: Metadata = {
-  title: 'Заявка на подключение',
-  description: 'Оставьте заявку — подготовим сайт детского сада с админкой и выдадим доступы.',
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const locale = localeFromParam((await searchParams).lang);
+  return {
+    title: locale === 'kk' ? 'Қосылуға өтінім' : 'Заявка на подключение',
+    description: locale === 'kk' ? 'Өтінім қалдырыңыз — әкімші бөлімі бар балабақша сайтын дайындап, кіру деректерін береміз.' : 'Оставьте заявку — подготовим сайт детского сада с админкой и выдадим доступы.',
+  };
+}
 
 export default async function ApplyPage({
   searchParams,

@@ -5,10 +5,17 @@ import { formatMoney } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, withLocale } from '@/lib/i18n';
 
-export const metadata: Metadata = {
-  title: 'Тарифы',
-  description: 'Сайт детского сада за 20 000 ₸ в год: движок, админка, хостинг, поддержка, адрес на домене портала.',
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const locale = localeFromParam((await searchParams).lang);
+  return {
+    title: locale === 'kk' ? 'Тарифтер' : 'Тарифы',
+    description: locale === 'kk' ? 'Жылына 20 000 ₸ тұратын балабақша сайты: жүйе, әкімші бөлімі, хостинг, қолдау, портал доменіндегі мекенжай.' : 'Сайт детского сада за 20 000 ₸ в год: движок, админка, хостинг, поддержка, адрес на домене портала.',
+  };
+}
 
 const T = {
   title: { kk: 'Тариф', ru: 'Тариф' },

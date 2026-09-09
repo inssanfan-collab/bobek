@@ -7,6 +7,7 @@ import { requireSuperadmin } from '@/server/auth/guards';
 import { assertCsrf } from '@/server/auth/csrf';
 import { sanitizeContent, toPlainText } from '@/lib/sanitize';
 import { uniqueSlug } from '@/lib/slug';
+import { ActionError } from '@/lib/action-state';
 
 /** Новости самого портала: анонсы, изменения в тарифе, новости системы образования. */
 export async function savePortalPost(formData: FormData) {
@@ -15,7 +16,7 @@ export async function savePortalPost(formData: FormData) {
 
   const id = String(formData.get('id') ?? '').trim();
   const titleRu = String(formData.get('titleRu') ?? '').trim();
-  if (titleRu.length < 2) throw new Error('Укажите заголовок');
+  if (titleRu.length < 2) throw new ActionError({ kk: 'Тақырыпты көрсетіңіз', ru: 'Укажите заголовок' });
 
   const bodyRu = sanitizeContent(String(formData.get('bodyRu') ?? ''));
   const bodyKk = sanitizeContent(String(formData.get('bodyKk') ?? ''));

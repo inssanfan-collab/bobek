@@ -11,11 +11,17 @@ import type { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Каталог детских садов Актобе',
-  description:
-    'Детские сады и мини-центры Актобе: адреса, телефоны, язык обучения, свободные места и ссылки на официальные сайты.',
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const locale = localeFromParam((await searchParams).lang);
+  return {
+    title: locale === 'kk' ? 'Ақтөбе балабақшаларының каталогы' : 'Каталог детских садов Актобе',
+    description: locale === 'kk' ? 'Ақтөбенің балабақшалары мен шағын орталықтары: мекенжайлары, телефондары, оқыту тілі, бос орындар және ресми сайттарға сілтемелер.' : 'Детские сады и мини-центры Актобе: адреса, телефоны, язык обучения, свободные места и ссылки на официальные сайты.',
+  };
+}
 
 const T = {
   title: { kk: 'Ақтөбе балабақшалары', ru: 'Детские сады Актобе' },
