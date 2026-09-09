@@ -5,8 +5,25 @@ import { login, type LoginState } from './actions';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Alert } from '@/components/ui/Alert';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 
-export function LoginForm({ csrf, next }: { csrf: string; next?: string }) {
+const T = {
+  login: { kk: 'Логин', ru: 'Логин' },
+  password: { kk: 'Құпия сөз', ru: 'Пароль' },
+  entering: { kk: 'Кіріп жатырмыз…', ru: 'Входим…' },
+  submit: { kk: 'Кіру', ru: 'Войти' },
+} as const;
+
+export function LoginForm({
+  csrf,
+  next,
+  locale = DEFAULT_LOCALE,
+}: {
+  csrf: string;
+  next?: string;
+  /** До входа язык пользователя ещё неизвестен, поэтому приходит из адреса. */
+  locale?: Locale;
+}) {
   const [state, action] = useActionState<LoginState, FormData>(login, {});
 
   // Настоящий переход браузера: только он проходит через middleware,
@@ -23,7 +40,7 @@ export function LoginForm({ csrf, next }: { csrf: string; next?: string }) {
       {state.error ? <Alert tone="danger">{state.error}</Alert> : null}
 
       <div>
-        <label className="field-label" htmlFor="login">Логин</label>
+        <label className="field-label" htmlFor="login">{T.login[locale]}</label>
         <input
           id="login"
           name="login"
@@ -36,11 +53,11 @@ export function LoginForm({ csrf, next }: { csrf: string; next?: string }) {
       </div>
 
       <div>
-        <label className="field-label" htmlFor="password">Пароль</label>
+        <label className="field-label" htmlFor="password">{T.password[locale]}</label>
         <input id="password" name="password" type="password" required autoComplete="current-password" className="field" />
       </div>
 
-      <SubmitButton className="btn-primary w-full" pendingLabel="Входим…">Войти</SubmitButton>
+      <SubmitButton className="btn-primary w-full" pendingLabel={T.entering[locale]}>{T.submit[locale]}</SubmitButton>
     </form>
   );
 }

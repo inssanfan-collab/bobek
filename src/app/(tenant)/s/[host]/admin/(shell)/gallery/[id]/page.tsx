@@ -7,8 +7,25 @@ import { SubmitButton } from '@/components/ui/SubmitButton';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { ActionForm } from '@/components/ActionForm';
 import { deleteAlbum, removeAlbumItem, saveAlbum, uploadMedia } from '../../actions';
+import { pick } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
+
+const T = {
+  photos: { kk: 'фото', ru: 'фото' },
+  toAlbums: { kk: 'Альбомдарға', ru: 'К альбомам' },
+  addPhotos: { kk: 'Фото қосу', ru: 'Добавить фотографии' },
+  uploading: { kk: 'Жүктелуде…', ru: 'Загружаем…' },
+  upload: { kk: 'Жүктеу', ru: 'Загрузить' },
+  aboutAlbum: { kk: 'Альбом туралы', ru: 'Об альбоме' },
+  name: { kk: 'Атауы', ru: 'Название' },
+  description: { kk: 'Сипаттамасы', ru: 'Описание' },
+  takenOn: { kk: 'Түсірілген күні', ru: 'Дата съёмки' },
+  save: { kk: 'Сақтау', ru: 'Сохранить' },
+  removePhoto: { kk: 'Алып тастау', ru: 'Убрать' },
+  removeAlbum: { kk: 'Альбомды толығымен жою', ru: 'Удалить альбом целиком' },
+  inRu: { kk: '(орыс.)', ru: '(рус.)' },
+} as const;
 
 export default async function AlbumPage({
   params,
@@ -25,13 +42,14 @@ export default async function AlbumPage({
   if (!album) notFound();
 
   const csrf = await csrfToken();
+  const locale = ctx.user.locale;
 
   return (
     <>
       <PageHeader
-        title={album.titleRu}
-        description={`${album.items.length} фото`}
-        action={<Link href="/admin/gallery" className="btn-secondary">К альбомам</Link>}
+        title={pick(locale, album.titleKk, album.titleRu)}
+        description={`${album.items.length} ${T.photos[locale]}`}
+        action={<Link href="/admin/gallery" className="btn-secondary">{T.toAlbums[locale]}</Link>}
       />
 
       {ctx.canEdit ? (
@@ -40,7 +58,7 @@ export default async function AlbumPage({
             <input type="hidden" name={CSRF_FIELD} value={csrf} />
             <input type="hidden" name="host" value={host} />
             <input type="hidden" name="albumId" value={album.id} />
-            <label className="field-label" htmlFor="files">Добавить фотографии</label>
+            <label className="field-label" htmlFor="files">{T.addPhotos[locale]}</label>
             <input
               id="files"
               name="files"
@@ -55,7 +73,7 @@ export default async function AlbumPage({
               данные о месте съёмки будут удалены.
             </p>
             <div className="mt-4">
-              <SubmitButton pendingLabel="Загружаем…">Загрузить</SubmitButton>
+              <SubmitButton pendingLabel={T.uploading[locale]}>{T.upload[locale]}</SubmitButton>
             </div>
           </form>
 
@@ -64,10 +82,10 @@ export default async function AlbumPage({
             <input type="hidden" name="host" value={host} />
             <input type="hidden" name="id" value={album.id} />
             <div className="sm:col-span-2">
-              <h2 className="font-display text-lg font-bold">Об альбоме</h2>
+              <h2 className="font-display text-lg font-bold">{T.aboutAlbum[locale]}</h2>
             </div>
             <div>
-              <label className="field-label" htmlFor="titleRu">Название по-русски</label>
+              <label className="field-label" htmlFor="titleRu">{T.name[locale]} {T.inRu[locale]}</label>
               <input id="titleRu" name="titleRu" required defaultValue={album.titleRu} className="field" />
             </div>
             <div>
@@ -75,11 +93,11 @@ export default async function AlbumPage({
               <input id="titleKk" name="titleKk" defaultValue={album.titleKk} className="field" />
             </div>
             <div>
-              <label className="field-label" htmlFor="descRu">Описание</label>
+              <label className="field-label" htmlFor="descRu">{T.description[locale]} {T.inRu[locale]}</label>
               <textarea id="descRu" name="descRu" rows={2} defaultValue={album.descRu ?? ''} className="field" />
             </div>
             <div>
-              <label className="field-label" htmlFor="takenOn">Дата съёмки</label>
+              <label className="field-label" htmlFor="takenOn">{T.takenOn[locale]}</label>
               <input
                 id="takenOn"
                 name="takenOn"
@@ -89,7 +107,7 @@ export default async function AlbumPage({
               />
             </div>
             <div className="flex gap-3 sm:col-span-2">
-              <SubmitButton>Сохранить</SubmitButton>
+              <SubmitButton>{T.save[locale]}</SubmitButton>
             </div>
           </ActionForm>
         </>
@@ -106,7 +124,7 @@ export default async function AlbumPage({
                 <input type="hidden" name="host" value={host} />
                 <input type="hidden" name="albumId" value={album.id} />
                 <input type="hidden" name="mediaId" value={item.media.id} />
-                <button type="submit" className="btn-ghost w-full px-2 py-1 text-xs text-red-600">Убрать</button>
+                <button type="submit" className="btn-ghost w-full px-2 py-1 text-xs text-red-600">{T.removePhoto[locale]}</button>
               </form>
             ) : null}
           </figure>
@@ -118,7 +136,7 @@ export default async function AlbumPage({
           <input type="hidden" name={CSRF_FIELD} value={csrf} />
           <input type="hidden" name="host" value={host} />
           <input type="hidden" name="id" value={album.id} />
-          <button type="submit" className="btn-ghost text-sm text-red-600">Удалить альбом целиком</button>
+          <button type="submit" className="btn-ghost text-sm text-red-600">{T.removeAlbum[locale]}</button>
         </ActionForm>
       ) : null}
     </>

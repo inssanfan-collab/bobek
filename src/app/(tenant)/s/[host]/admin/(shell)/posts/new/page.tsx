@@ -7,6 +7,11 @@ import type { SectionType } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
+const T = {
+  newPost: { kk: 'Жаңа жаңалық', ru: 'Новая новость' },
+  newAnnouncement: { kk: 'Жаңа хабарландыру', ru: 'Новое объявление' },
+} as const;
+
 export default async function NewPostPage({
   params,
   searchParams,
@@ -16,6 +21,7 @@ export default async function NewPostPage({
 }) {
   const [{ host }, search] = await Promise.all([params, searchParams]);
   const ctx = await tenantAdmin(host);
+  const locale = ctx.user.locale;
 
   const type = (search.type === 'ANNOUNCEMENT' ? 'ANNOUNCEMENT' : 'NEWS') as SectionType;
   const section = await ctx.db.sections.findFirst({ where: { type } });
@@ -34,7 +40,7 @@ export default async function NewPostPage({
 
   return (
     <>
-      <PageHeader title={type === 'NEWS' ? 'Новая новость' : 'Новое объявление'} />
+      <PageHeader title={type === 'NEWS' ? T.newPost[locale] : T.newAnnouncement[locale]} />
       <PostForm csrf={csrf} host={host} section={section} library={library} canEdit={ctx.canEdit} locale={ctx.user.locale} />
     </>
   );

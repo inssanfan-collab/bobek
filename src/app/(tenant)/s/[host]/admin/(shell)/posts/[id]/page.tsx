@@ -3,8 +3,13 @@ import { tenantAdmin } from '@/server/tenant/admin-context';
 import { csrfToken } from '@/server/auth/csrf';
 import { PageHeader } from '@/components/admin/AdminShell';
 import { PostForm } from '../PostForm';
+import { pick } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
+
+const T = {
+  editing: { kk: 'Өңдеу', ru: 'Редактирование' },
+} as const;
 
 export default async function EditPostPage({
   params,
@@ -13,6 +18,7 @@ export default async function EditPostPage({
 }) {
   const { host, id } = await params;
   const ctx = await tenantAdmin(host);
+  const locale = ctx.user.locale;
 
   const post = await ctx.db.posts.findFirst({
     where: { id },
@@ -33,7 +39,7 @@ export default async function EditPostPage({
 
   return (
     <>
-      <PageHeader title="Редактирование" description={post.titleRu || post.titleKk} />
+      <PageHeader title={T.editing[locale]} description={pick(locale, post.titleKk, post.titleRu)} />
       <PostForm
         csrf={csrf}
         host={host}
