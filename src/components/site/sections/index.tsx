@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
-import { formatAgeRange, formatDate, DOC_CATEGORY_LABEL } from '@/lib/labels';
+import { formatAgeRange, formatDate, DOC_CATEGORY } from '@/lib/labels';
 import { mediaUrl, type AlbumWithCover, type PostWithCover } from '@/components/site/blocks';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { Club, Document, FaqItem, Group, Media, MenuDay, StaffMember, TenantProfile } from '@prisma/client';
@@ -55,7 +55,7 @@ export function PostFeed({
               <img src={cover} alt="" className="h-40 w-full shrink-0 rounded-2xl object-cover sm:w-56" loading="lazy" />
             ) : null}
             <div className="min-w-0">
-              <p className="text-sm text-muted">{formatDate(post.publishedAt)}</p>
+              <p className="text-sm text-muted">{formatDate(post.publishedAt, locale)}</p>
               <h2 className="mt-1 font-display text-xl font-bold">
                 <Link href={withLocale(`${basePath}/${post.slug}`, locale)} className="hover:text-brand">
                   {pick(locale, post.titleKk, post.titleRu)}
@@ -116,10 +116,10 @@ export function GroupList({ groups, locale }: { groups: Group[]; locale: Locale 
         <article key={group.id} className="card p-5">
           <h2 className="font-display text-lg font-bold">{pick(locale, group.nameKk, group.nameRu)}</h2>
           <dl className="mt-3 space-y-1.5 text-sm">
-            {formatAgeRange(group.ageFrom, group.ageTo) ? (
+            {formatAgeRange(group.ageFrom, group.ageTo, locale) ? (
               <div className="flex gap-2">
                 <dt className="text-muted">{locale === 'kk' ? 'Жасы' : 'Возраст'}:</dt>
-                <dd>{formatAgeRange(group.ageFrom, group.ageTo)}</dd>
+                <dd>{formatAgeRange(group.ageFrom, group.ageTo, locale)}</dd>
               </div>
             ) : null}
             <div className="flex gap-2">
@@ -171,7 +171,7 @@ export function DocumentList({
       {[...grouped.entries()].map(([category, items]) => (
         <section key={category}>
           <h2 className="font-display text-xl font-bold">
-            {DOC_CATEGORY_LABEL[category as keyof typeof DOC_CATEGORY_LABEL]}
+            {DOC_CATEGORY[category as keyof typeof DOC_CATEGORY][locale]}
           </h2>
           <ul className="mt-3 space-y-2">
             {items.map((doc) => (
@@ -180,7 +180,7 @@ export function DocumentList({
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold">{pick(locale, doc.titleKk, doc.titleRu)}</span>
                   <span className="block text-sm text-muted">
-                    {formatDate(doc.publishedAt)} · {Math.max(1, Math.round(doc.media.size / 1024))} КБ
+                    {formatDate(doc.publishedAt, locale)} · {Math.max(1, Math.round(doc.media.size / 1024))} КБ
                   </span>
                 </span>
                 <a href={`/api/media/${doc.mediaId}?download=1`} className="btn-secondary text-sm">
@@ -202,7 +202,7 @@ export function MenuTable({ days, locale }: { days: MenuDay[]; locale: Locale })
     <div className="space-y-4">
       {days.map((day) => (
         <article key={day.id} className="card p-5">
-          <h2 className="font-display text-lg font-bold">{formatDate(day.date)}</h2>
+          <h2 className="font-display text-lg font-bold">{formatDate(day.date, locale)}</h2>
           <dl className="mt-3 grid gap-3 sm:grid-cols-2">
             <Meal label={T.breakfast[locale]} value={pick(locale, day.breakfastKk, day.breakfastRu)} />
             <Meal label={T.lunch[locale]} value={pick(locale, day.lunchKk, day.lunchRu)} />
@@ -256,7 +256,7 @@ export function AlbumGrid({
             <div className="p-4">
               <p className="font-display font-bold group-hover:text-brand">{pick(locale, album.titleKk, album.titleRu)}</p>
               <p className="mt-0.5 text-sm text-muted">
-                {album.takenOn ? `${formatDate(album.takenOn)} · ` : ''}
+                {album.takenOn ? `${formatDate(album.takenOn, locale)} · ` : ''}
                 {album._count?.items ?? album.items.length} {T.photos[locale]}
               </p>
             </div>

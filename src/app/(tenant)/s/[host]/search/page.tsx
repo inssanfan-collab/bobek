@@ -101,7 +101,7 @@ export default async function SearchPage({
                 key={post.id}
                 href={withLocale(`/${post.sectionSlug}/${post.slug}`, locale)}
                 title={pick(locale, post.titleKk, post.titleRu)}
-                note={formatDate(post.publishedAt)}
+                note={formatDate(post.publishedAt, locale)}
                 snippet={pick(locale, post.snippetKk, post.snippetRu)}
               />
             ))}

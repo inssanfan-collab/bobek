@@ -92,7 +92,7 @@ export default async function EntryPage({
         {album ? (
           <>
             <h1 className="mt-4 font-display text-3xl font-extrabold">{pick(locale, album.titleKk, album.titleRu)}</h1>
-            {album.takenOn ? <p className="mt-1 text-sm text-muted">{formatDate(album.takenOn)}</p> : null}
+            {album.takenOn ? <p className="mt-1 text-sm text-muted">{formatDate(album.takenOn, locale)}</p> : null}
             {pick(locale, album.descKk, album.descRu) ? (
               <p className="mt-3 text-muted">{pick(locale, album.descKk, album.descRu)}</p>
             ) : null}
@@ -111,7 +111,7 @@ export default async function EntryPage({
           </>
         ) : (
           <article>
-            <p className="mt-4 text-sm text-muted">{formatDate(post!.publishedAt)}</p>
+            <p className="mt-4 text-sm text-muted">{formatDate(post!.publishedAt, locale)}</p>
             <h1 className="mt-1 font-display text-3xl font-extrabold sm:text-4xl">
               {pick(locale, post!.titleKk, post!.titleRu)}
             </h1>

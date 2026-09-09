@@ -57,7 +57,7 @@ export function NewsCard({
           <div className={`bg-gradient-to-br from-brand/70 to-accent/60 ${featured ? 'h-64' : 'h-44'}`} aria-hidden />
         )}
         <div className="p-5">
-          <p className="text-sm text-muted">{formatDate(post.publishedAt)}</p>
+          <p className="text-sm text-muted">{formatDate(post.publishedAt, locale)}</p>
           <h3 className={`mt-1 font-display font-bold group-hover:text-brand ${featured ? 'text-2xl' : 'text-lg'}`}>
             {title}
           </h3>
@@ -85,7 +85,7 @@ export function AnnouncementList({
       <ul className="mt-3 space-y-2">
         {items.map((item) => (
           <li key={item.id} className="flex flex-wrap items-baseline gap-x-3">
-            <span className="text-sm text-amber-800">{formatDate(item.publishedAt)}</span>
+            <span className="text-sm text-amber-800">{formatDate(item.publishedAt, locale)}</span>
             <Link
               href={withLocale(`${basePath}/${item.slug}`, locale)}
               className="font-semibold text-amber-900 underline underline-offset-2"
@@ -155,7 +155,7 @@ export function GalleryStrip({
                 <p className="font-display font-bold group-hover:text-brand">
                   {pick(locale, album.titleKk, album.titleRu)}
                 </p>
-                {album.takenOn ? <p className="mt-0.5 text-sm text-muted">{formatDate(album.takenOn)}</p> : null}
+                {album.takenOn ? <p className="mt-0.5 text-sm text-muted">{formatDate(album.takenOn, locale)}</p> : null}
               </div>
             </Link>
           );

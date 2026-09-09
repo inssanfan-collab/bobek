@@ -61,3 +61,15 @@ test.describe('Двуязычие админки', () => {
     await expect(page.getByRole('link', { name: 'Педагоги' })).toBeVisible();
   });
 });
+
+test.describe('Двуязычие сайта сада', () => {
+  test('дата подстраивается под язык страницы', async ({ page }) => {
+    // По-казахски год идёт первым: «2026 жылғы 3 қыркүйек».
+    await page.goto(`${site('sad12')}/news?lang=kk`);
+    await expect(page.getByText(/\d{4} жылғы \d{1,2} /).first()).toBeVisible();
+    await expect(page.getByText(/\d{1,2} сентября \d{4}/)).toHaveCount(0);
+
+    await page.goto(`${site('sad12')}/news`);
+    await expect(page.getByText(/жылғы/)).toHaveCount(0);
+  });
+});
