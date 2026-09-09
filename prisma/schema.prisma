@@ -548,7 +548,7 @@ model Subscription {
   tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   periodStart DateTime
   periodEnd   DateTime
-  amount      Int      @default(20000) // тенге
+  amount      Int      @default(50000) // тенге
   isCurrent   Boolean  @default(true)
   note        String?
   createdAt   DateTime @default(now())

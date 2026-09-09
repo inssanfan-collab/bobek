@@ -34,7 +34,7 @@ export const env = {
    * виджет в iframe: тот работает без ключа и без лимита запросов.
    */
   yandexMapsKey: process.env.YANDEX_MAPS_KEY ?? '',
-  subscriptionPrice: int('SUBSCRIPTION_PRICE_KZT', 20000),
+  subscriptionPrice: int('SUBSCRIPTION_PRICE_KZT', 50000),
   subscriptionGraceDays: int('SUBSCRIPTION_GRACE_DAYS', 30),
   isProduction: process.env.NODE_ENV === 'production',
   /**

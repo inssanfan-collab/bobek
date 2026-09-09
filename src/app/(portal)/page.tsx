@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
+import { formatMoney } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 
@@ -9,7 +10,7 @@ export const dynamic = 'force-dynamic';
 const T = {
   region: { kk: 'Ақтөбе облысы', ru: 'Актюбинская область' },
   heroBefore: { kk: 'Балабақшаның жеке сайты —', ru: 'Свой сайт детского сада —' },
-  heroPrice: { kk: 'жылына 20 000 ₸', ru: 'за 20 000 ₸ в год' },
+  heroPrice: { kk: 'жылына %s', ru: 'за %s в год' },
   heroLead: {
     kk: 'Әкімші бөлімі бар дайын жүйе: жаңалықтар, хабарландырулар, фотогалерея, құжаттар, педагогтар, тамақтану мәзірі. Бағдарламашысыз, өзіңіз толтырасыз. Сайт қазақ және орыс тілдерінде.',
     ru: 'Готовый движок с админкой: новости, объявления, фотогалерея, документы, педагоги, меню питания. Заполняете сами, без программиста. Сайт на казахском и русском.',
@@ -30,11 +31,11 @@ const T = {
     ru: 'Набор разделов собран по требованиям к сайтам дошкольных организаций — то, что спрашивают проверяющие и ищут родители.',
   },
   howItWorks: { kk: 'Бұл қалай жұмыс істейді', ru: 'Как это работает' },
-  allInclusive: { kk: 'Жылына 20 000 ₸ — бәрі кіреді', ru: '20 000 ₸ в год — всё включено' },
+  allInclusive: { kk: 'Жылына %s — бәрі кіреді', ru: '%s в год — всё включено' },
   allInclusiveBefore: { kk: 'Мекенжай: ', ru: 'Адрес вида ' },
   allInclusiveAfter: {
-    kk: ', жүйе, әкімші бөлімі, хостинг, жаңартулар мен қолдау. Балабақша жеке домен қаласа — оны өзі сатып алады, ал біз тегін жалғаймыз.',
-    ru: ', движок, админка, хостинг, обновления и поддержка. Если сад хочет собственный домен — он покупает его самостоятельно, а мы бесплатно подключаем.',
+    kk: ', жүйе, әкімші бөлімі, хостинг, жаңартулар мен қолдау. edu.kz аймағындағы доменді өзіңіз сатып аласыз — біз баптауға көмектесеміз.',
+    ru: ', движок, админка, хостинг, обновления и поддержка. Домен на EDU.KZ покупаете сами, а мы поможем настроить.',
   },
   aboutTariff: { kk: 'Тариф туралы толығырақ', ru: 'Подробнее о тарифе' },
   gardensSection: { kk: 'Порталдағы балабақшалар', ru: 'Сады на портале' },
@@ -149,7 +150,7 @@ export default async function PortalHome({
             <p className="badge bg-brand-soft text-brand-ink">{T.region[locale]}</p>
             <h1 className="mt-4 font-display text-4xl font-extrabold leading-tight sm:text-5xl">
               {T.heroBefore[locale]}{' '}
-              <span className="text-brand">{T.heroPrice[locale]}</span>
+              <span className="text-brand">{T.heroPrice[locale].replace('%s', formatMoney(env.subscriptionPrice))}</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted">
               {T.heroLead[locale]}
@@ -239,7 +240,9 @@ export default async function PortalHome({
           </ol>
 
           <div className="mt-10 rounded-2xl border border-brand/30 bg-brand-soft p-6 sm:p-8">
-            <h3 className="font-display text-2xl font-extrabold text-brand-ink">{T.allInclusive[locale]}</h3>
+            <h3 className="font-display text-2xl font-extrabold text-brand-ink">
+              {T.allInclusive[locale].replace('%s', formatMoney(env.subscriptionPrice))}
+            </h3>
             <p className="mt-2 max-w-2xl text-brand-ink/80">
               {T.allInclusiveBefore[locale]}
               <strong>{T.yourGarden[locale]}{env.portalDomain}</strong>

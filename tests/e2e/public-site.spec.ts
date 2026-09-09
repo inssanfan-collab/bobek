@@ -4,7 +4,9 @@ import { PORTAL, site } from './helpers';
 test.describe('Публичная часть', () => {
   test('портал открывается и показывает тариф', async ({ page }) => {
     await page.goto(PORTAL);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('20 000 ₸');
+    // Значение должно совпадать с SUBSCRIPTION_PRICE_KZT: цена на страницу
+    // приходит из окружения, и расхождение здесь означает забытую настройку.
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('50 000 ₸');
   });
 
   test('каталог фильтрует сады по названию', async ({ page }) => {

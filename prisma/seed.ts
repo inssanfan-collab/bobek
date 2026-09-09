@@ -7,6 +7,9 @@ import { seedImage, seedPdf } from './seed-media';
 
 const prisma = new PrismaClient();
 
+/** Цена берётся из окружения: в текстах сайта она тоже из него, чтобы не разъезжались. */
+const SUBSCRIPTION_PRICE = Number.parseInt(process.env.SUBSCRIPTION_PRICE_KZT ?? '50000', 10);
+
 const ARGON = { memoryCost: 19456, timeCost: 2, parallelism: 1 } as const;
 const PORTAL_DOMAIN = (process.env.PORTAL_DOMAIN ?? 'bobegim.kz').toLowerCase();
 
@@ -169,7 +172,7 @@ async function main() {
           },
         },
         subscriptions: {
-          create: { periodStart, periodEnd, amount: 20000, isCurrent: true },
+          create: { periodStart, periodEnd, amount: SUBSCRIPTION_PRICE, isCurrent: true },
         },
       },
     });

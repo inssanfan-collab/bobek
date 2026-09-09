@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import '../globals.css';
+import { env } from '@/lib/env';
+import { formatMoney } from '@/lib/labels';
 
 export const metadata: Metadata = {
   title: {
@@ -7,7 +9,7 @@ export const metadata: Metadata = {
     template: '%s · Bobegim',
   },
   description:
-    'Готовый сайт для детского сада Актобе за 20 000 ₸ в год: своя админка, новости, галерея, документы и меню питания. Каталог садов города.',
+    `Готовый сайт для детского сада Актобе за ${formatMoney(env.subscriptionPrice)} в год: своя админка, новости, галерея, документы и меню питания. Каталог садов города.`,
   robots: { index: true, follow: true },
 };
 
