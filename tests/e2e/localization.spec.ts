@@ -15,6 +15,18 @@ async function switchTo(page: Page, label: 'ҚАЗ' | 'РУС') {
 }
 
 test.describe('Двуязычие админки', () => {
+  // Язык хранится у пользователя и переживает тест. Если оставить казахский,
+  // соседние наборы начнут искать русские кнопки в казахской админке —
+  // поэтому возвращаем русский даже после падения.
+  test.afterEach(async ({ page }) => {
+    try {
+      await page.goto(`${site('sad12')}/admin`);
+      await switchTo(page, 'РУС');
+    } catch {
+      /* восстановление не должно заслонять настоящую ошибку теста */
+    }
+  });
+
   test('админка сада переключается на казахский и обратно', async ({ page }) => {
     await login(page, site('sad12'), SAD12_ADMIN);
     await page.goto(`${site('sad12')}/admin`);
