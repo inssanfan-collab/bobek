@@ -6,17 +6,26 @@ import { NewTenantForm } from './NewTenantForm';
 
 export const dynamic = 'force-dynamic';
 
+const T = {
+  title: { kk: 'Балабақша құру', ru: 'Создание детского сада' },
+  lead: {
+    kk: 'Бес қадам: атауы, мекенжайы, байланыс, сыртқы көрінісі және әкімшісі. Соңында — кіру жаднамасы.',
+    ru: 'Пять шагов: название, адрес, контакты, внешний вид и администратор. В конце — памятка доступа.',
+  },
+} as const;
+
 export default async function NewTenantPage() {
-  await requireSuperadmin();
+  const user = await requireSuperadmin();
+  const locale = user.locale;
   const csrf = await csrfToken();
 
   return (
     <>
       <PageHeader
-        title="Создание детского сада"
-        description="Пять шагов: название, адрес, контакты, внешний вид и администратор. В конце — памятка доступа."
+        title={T.title[locale]}
+        description={T.lead[locale]}
       />
-      <NewTenantForm csrf={csrf} portalDomain={env.portalDomain} />
+      <NewTenantForm csrf={csrf} portalDomain={env.portalDomain} locale={locale} />
     </>
   );
 }

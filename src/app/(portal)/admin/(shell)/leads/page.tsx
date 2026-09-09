@@ -9,8 +9,21 @@ import { markLeadHandled } from './actions';
 
 export const dynamic = 'force-dynamic';
 
+const T = {
+  title: { kk: 'Өтінімдер', ru: 'Заявки' },
+  lead: { kk: 'Қосылу нысанынан келген балабақша өтініштері.', ru: 'Обращения садов с формы подключения.' },
+  empty: { kk: 'Әзірге өтінімдер жоқ', ru: 'Заявок пока нет' },
+  emptyHint: {
+    kk: 'Порталдағы нысаннан келген өтінімдер осында шығады.',
+    ru: 'Заявки с формы на портале появятся здесь.',
+  },
+  markHandled: { kk: 'Өңделді деп белгілеу', ru: 'Отметить обработанной' },
+  handled: { kk: 'Өңделді', ru: 'Обработана' },
+} as const;
+
 export default async function LeadsPage() {
-  await requireSuperadmin();
+  const user = await requireSuperadmin();
+  const locale = user.locale;
   const [leads, csrf] = await Promise.all([
     prisma.lead.findMany({ orderBy: [{ isHandled: 'asc' }, { createdAt: 'desc' }], take: 200 }),
     csrfToken(),
@@ -19,15 +32,15 @@ export default async function LeadsPage() {
   if (leads.length === 0) {
     return (
       <>
-        <PageHeader title="Заявки" />
-        <EmptyState icon="📥" title="Заявок пока нет" description="Заявки с формы на портале появятся здесь." />
+        <PageHeader title={T.title[locale]} />
+        <EmptyState icon="📥" title={T.empty[locale]} description={T.emptyHint[locale]} />
       </>
     );
   }
 
   return (
     <>
-      <PageHeader title="Заявки" description="Обращения садов с формы подключения." />
+      <PageHeader title={T.title[locale]} description={T.lead[locale]} />
       <div className="space-y-3">
         {leads.map((lead) => (
           <article key={lead.id} className={`card p-5 ${lead.isHandled ? 'opacity-60' : ''}`}>
@@ -39,17 +52,17 @@ export default async function LeadsPage() {
                   {lead.email ? ` · ${lead.email}` : ''}
                 </p>
               </div>
-              <span className="text-sm text-muted">{formatDateTime(lead.createdAt)}</span>
+              <span className="text-sm text-muted">{formatDateTime(lead.createdAt, locale)}</span>
             </div>
             {lead.comment ? <p className="mt-3 text-sm">{lead.comment}</p> : null}
             {!lead.isHandled ? (
               <form action={markLeadHandled} className="mt-4">
                 <input type="hidden" name={CSRF_FIELD} value={csrf} />
                 <input type="hidden" name="leadId" value={lead.id} />
-                <button type="submit" className="btn-secondary text-sm">Отметить обработанной</button>
+                <button type="submit" className="btn-secondary text-sm">{T.markHandled[locale]}</button>
               </form>
             ) : (
-              <p className="mt-3 text-sm font-semibold text-emerald-700">Обработана</p>
+              <p className="mt-3 text-sm font-semibold text-emerald-700">{T.handled[locale]}</p>
             )}
           </article>
         ))}

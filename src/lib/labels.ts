@@ -2,11 +2,10 @@ import type { DocumentCategory, TenantKind, TenantStatus, Role, FeedbackStatus }
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 
 /**
- * Подписи к перечислениям и форматирование дат.
+ * Подписи к перечислениям и форматирование дат — на обоих языках.
  *
- * Переходное состояние: рядом с двуязычными словарями оставлены прежние
- * русские константы — их ещё используют непереведённые экраны. По мере
- * перевода вызовы переходят на функции с locale, после чего константы уйдут.
+ * Дата по-казахски начинается с года: «2026 жылғы 3 қыркүйек», поэтому
+ * formatDate не сводится к подстановке названия месяца в общий шаблон.
  */
 
 type Phrase = { kk: string; ru: string };
@@ -50,50 +49,11 @@ export const FEEDBACK_STATUS: Record<FeedbackStatus, Phrase> = {
   ANSWERED: { kk: 'Жауап берілді', ru: 'Отвечено' },
 };
 
-export const KIND_LABEL: Record<TenantKind, string> = {
-  NURSERY_GARDEN: 'Ясли-сад',
-  KINDERGARTEN: 'Детский сад',
-  MINI_CENTER: 'Мини-центр',
-  PRIVATE: 'Частный сад',
-  FAMILY: 'Семейный ясли-сад',
-};
-
-export const STATUS_LABEL: Record<TenantStatus, string> = {
-  DRAFT: 'Черновик',
-  ACTIVE: 'Работает',
-  SUSPENDED: 'Приостановлен',
-  ARCHIVED: 'В архиве',
-};
-
 export const STATUS_TONE: Record<TenantStatus, string> = {
   DRAFT: 'bg-amber-100 text-amber-800',
   ACTIVE: 'bg-emerald-100 text-emerald-800',
   SUSPENDED: 'bg-red-100 text-red-800',
   ARCHIVED: 'bg-slate-200 text-slate-700',
-};
-
-export const ROLE_LABEL: Record<Role, string> = {
-  SUPERADMIN: 'Администратор портала',
-  TENANT_ADMIN: 'Администратор сада',
-  TENANT_EDITOR: 'Редактор',
-};
-
-export const DOC_CATEGORY_LABEL: Record<DocumentCategory, string> = {
-  CHARTER: 'Устав',
-  LICENSE: 'Лицензия',
-  ORDERS: 'Приказы',
-  RULES: 'Правила приёма',
-  PROCUREMENT: 'Государственные закупки',
-  REPORTS: 'Отчёты',
-  TRUSTEE: 'Попечительский совет',
-  ANTICORRUPTION: 'Противодействие коррупции',
-  OTHER: 'Прочее',
-};
-
-export const FEEDBACK_STATUS_LABEL: Record<FeedbackStatus, string> = {
-  NEW: 'Новое',
-  IN_PROGRESS: 'В работе',
-  ANSWERED: 'Отвечено',
 };
 
 const MONTHS: Record<Locale, string[]> = {

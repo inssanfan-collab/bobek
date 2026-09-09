@@ -5,28 +5,43 @@ import { formatDateTime } from '@/lib/labels';
 
 export const dynamic = 'force-dynamic';
 
-const ACTION_LABEL: Record<string, string> = {
-  'auth.login': 'Вход',
-  'auth.login_failed': 'Неудачная попытка входа',
-  'auth.logout': 'Выход',
-  'auth.password_changed': 'Смена пароля',
-  'tenant.create': 'Создан сад',
-  'tenant.update': 'Изменён сад',
-  'tenant.status_change': 'Изменён статус сада',
-  'tenant.impersonate': 'Вход под садом',
-  'domain.add': 'Добавлен домен',
-  'domain.verify': 'Проверка DNS',
-  'domain.delete': 'Удалён домен',
-  'domain.set_primary': 'Смена основного домена',
-  'user.create': 'Создан пользователь',
-  'user.reset_password': 'Сброшен пароль',
-  'user.deactivate': 'Пользователь отключён',
-  'user.activate': 'Пользователь включён',
-  'subscription.extend': 'Продлена подписка',
-  'payment.record': 'Отмечена оплата',
-  'content.create': 'Создан материал',
-  'content.update': 'Изменён материал',
-  'content.delete': 'Удалён материал',
+const T = {
+  title: { kk: 'Әрекеттер журналы', ru: 'Журнал действий' },
+  lead: {
+    kk: 'Құпия сөзді тастау, балабақша атынан кіру және мәртебе өзгерістері осында тіркеледі.',
+    ru: 'Сбросы паролей, входы под садом и изменения статусов фиксируются здесь.',
+  },
+  when: { kk: 'Қашан', ru: 'Когда' },
+  who: { kk: 'Кім', ru: 'Кто' },
+  action: { kk: 'Әрекет', ru: 'Действие' },
+  garden: { kk: 'Балабақша', ru: 'Сад' },
+  details: { kk: 'Егжей-тегжейі', ru: 'Детали' },
+  prev: { kk: '← Артқа', ru: '← Назад' },
+  next: { kk: 'Алға →', ru: 'Вперёд →' },
+} as const;
+
+const ACTION_LABEL: Record<string, { kk: string; ru: string }> = {
+  'auth.login': { kk: 'Кіру', ru: 'Вход' },
+  'auth.login_failed': { kk: 'Сәтсіз кіру әрекеті', ru: 'Неудачная попытка входа' },
+  'auth.logout': { kk: 'Шығу', ru: 'Выход' },
+  'auth.password_changed': { kk: 'Құпия сөзді ауыстыру', ru: 'Смена пароля' },
+  'tenant.create': { kk: 'Балабақша құрылды', ru: 'Создан сад' },
+  'tenant.update': { kk: 'Балабақша өзгертілді', ru: 'Изменён сад' },
+  'tenant.status_change': { kk: 'Балабақша мәртебесі өзгертілді', ru: 'Изменён статус сада' },
+  'tenant.impersonate': { kk: 'Балабақша атынан кіру', ru: 'Вход под садом' },
+  'domain.add': { kk: 'Домен қосылды', ru: 'Добавлен домен' },
+  'domain.verify': { kk: 'DNS тексеру', ru: 'Проверка DNS' },
+  'domain.delete': { kk: 'Домен жойылды', ru: 'Удалён домен' },
+  'domain.set_primary': { kk: 'Негізгі домен ауыстырылды', ru: 'Смена основного домена' },
+  'user.create': { kk: 'Пайдаланушы құрылды', ru: 'Создан пользователь' },
+  'user.reset_password': { kk: 'Құпия сөз тасталды', ru: 'Сброшен пароль' },
+  'user.deactivate': { kk: 'Пайдаланушы өшірілді', ru: 'Пользователь отключён' },
+  'user.activate': { kk: 'Пайдаланушы қосылды', ru: 'Пользователь включён' },
+  'subscription.extend': { kk: 'Жазылым ұзартылды', ru: 'Продлена подписка' },
+  'payment.record': { kk: 'Төлем белгіленді', ru: 'Отмечена оплата' },
+  'content.create': { kk: 'Материал құрылды', ru: 'Создан материал' },
+  'content.update': { kk: 'Материал өзгертілді', ru: 'Изменён материал' },
+  'content.delete': { kk: 'Материал жойылды', ru: 'Удалён материал' },
 };
 
 const SENSITIVE = new Set(['user.reset_password', 'tenant.impersonate', 'auth.login_failed', 'tenant.status_change']);
@@ -36,7 +51,8 @@ export default async function AuditPage({
 }: {
   searchParams: Promise<{ page?: string }>;
 }) {
-  await requireSuperadmin();
+  const user = await requireSuperadmin();
+  const locale = user.locale;
   const page = Math.max(1, Number.parseInt((await searchParams).page ?? '1', 10) || 1);
   const pageSize = 100;
 
@@ -55,19 +71,19 @@ export default async function AuditPage({
   return (
     <>
       <PageHeader
-        title="Журнал действий"
-        description="Сбросы паролей, входы под садом и изменения статусов фиксируются здесь."
+        title={T.title[locale]}
+        description={T.lead[locale]}
       />
 
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="border-b border-line text-left text-muted">
             <tr>
-              <th className="px-4 py-3 font-semibold">Когда</th>
-              <th className="px-4 py-3 font-semibold">Кто</th>
-              <th className="px-4 py-3 font-semibold">Действие</th>
-              <th className="px-4 py-3 font-semibold">Сад</th>
-              <th className="px-4 py-3 font-semibold">Детали</th>
+              <th className="px-4 py-3 font-semibold">{T.when[locale]}</th>
+              <th className="px-4 py-3 font-semibold">{T.who[locale]}</th>
+              <th className="px-4 py-3 font-semibold">{T.action[locale]}</th>
+              <th className="px-4 py-3 font-semibold">{T.garden[locale]}</th>
+              <th className="px-4 py-3 font-semibold">{T.details[locale]}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -75,7 +91,7 @@ export default async function AuditPage({
               <tr key={entry.id} className={SENSITIVE.has(entry.action) ? 'bg-amber-50/60' : ''}>
                 <td className="whitespace-nowrap px-4 py-2.5 text-muted">{formatDateTime(entry.createdAt)}</td>
                 <td className="px-4 py-2.5 font-mono">{entry.userLogin ?? '—'}</td>
-                <td className="px-4 py-2.5 font-semibold">{ACTION_LABEL[entry.action] ?? entry.action}</td>
+                <td className="px-4 py-2.5 font-semibold">{ACTION_LABEL[entry.action]?.[locale] ?? entry.action}</td>
                 <td className="px-4 py-2.5 text-muted">{entry.tenant?.profile?.nameRu ?? entry.tenant?.slug ?? '—'}</td>
                 <td className="px-4 py-2.5 font-mono text-xs text-muted">
                   {Object.keys(entry.meta as object).length ? JSON.stringify(entry.meta) : ''}
@@ -88,9 +104,9 @@ export default async function AuditPage({
 
       {pages > 1 ? (
         <div className="mt-4 flex items-center gap-2 text-sm">
-          {page > 1 ? <a href={`?page=${page - 1}`} className="btn-secondary">← Назад</a> : null}
+          {page > 1 ? <a href={`?page=${page - 1}`} className="btn-secondary">{T.prev[locale]}</a> : null}
           <span className="text-muted">Страница {page} из {pages}</span>
-          {page < pages ? <a href={`?page=${page + 1}`} className="btn-secondary">Вперёд →</a> : null}
+          {page < pages ? <a href={`?page=${page + 1}`} className="btn-secondary">{T.next[locale]}</a> : null}
         </div>
       ) : null}
     </>

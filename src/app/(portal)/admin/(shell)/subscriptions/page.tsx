@@ -4,11 +4,26 @@ import { requireSuperadmin } from '@/server/auth/guards';
 import { PageHeader, StatCard } from '@/components/admin/AdminShell';
 import { formatDate, formatMoney } from '@/lib/labels';
 import { env } from '@/lib/env';
+import { pick } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
+const T = {
+  title: { kk: 'Жазылымдар', ru: 'Подписки' },
+  lead: { kk: 'Төлемдер балабақша карточкасында белгіленеді.', ru: 'Оплаты отмечаются в карточке сада.' },
+  active: { kk: 'Белсенді жазылым', ru: 'Активных подписок' },
+  inGrace: { kk: 'Жеңілдік кезеңінде', ru: 'В льготном периоде' },
+  inGraceHint: { kk: 'әкімші бөлімі тек оқуға', ru: 'админка только на чтение' },
+  income: { kk: 'Жыл ішінде түсті', ru: 'Поступило за год' },
+  garden: { kk: 'Балабақша', ru: 'Сад' },
+  period: { kk: 'Кезең', ru: 'Период' },
+  left: { kk: 'Қалды', ru: 'Осталось' },
+  amount: { kk: 'Сомасы', ru: 'Сумма' },
+} as const;
+
 export default async function SubscriptionsPage() {
-  await requireSuperadmin();
+  const user = await requireSuperadmin();
+  const locale = user.locale;
 
   const [subs, paidThisYear] = await Promise.all([
     prisma.subscription.findMany({
@@ -29,22 +44,22 @@ export default async function SubscriptionsPage() {
 
   return (
     <>
-      <PageHeader title="Подписки" description="Оплаты отмечаются в карточке сада." />
+      <PageHeader title={T.title[locale]} description={T.lead[locale]} />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Активных подписок" value={subs.length - expired.length - inGrace.length} />
-        <StatCard label="В льготном периоде" value={inGrace.length} hint="админка только на чтение" />
-        <StatCard label="Поступило за год" value={formatMoney(paidThisYear._sum.amount ?? 0)} />
+        <StatCard label={T.active[locale]} value={subs.length - expired.length - inGrace.length} />
+        <StatCard label={T.inGrace[locale]} value={inGrace.length} hint={T.inGraceHint[locale]} />
+        <StatCard label={T.income[locale]} value={formatMoney(paidThisYear._sum.amount ?? 0)} />
       </div>
 
       <div className="card mt-6 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="border-b border-line text-left text-muted">
             <tr>
-              <th className="px-4 py-3 font-semibold">Сад</th>
-              <th className="px-4 py-3 font-semibold">Период</th>
-              <th className="px-4 py-3 font-semibold">Осталось</th>
-              <th className="px-4 py-3 font-semibold">Сумма</th>
+              <th className="px-4 py-3 font-semibold">{T.garden[locale]}</th>
+              <th className="px-4 py-3 font-semibold">{T.period[locale]}</th>
+              <th className="px-4 py-3 font-semibold">{T.left[locale]}</th>
+              <th className="px-4 py-3 font-semibold">{T.amount[locale]}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -54,7 +69,7 @@ export default async function SubscriptionsPage() {
                 <tr key={sub.id}>
                   <td className="px-4 py-3">
                     <Link href={`/admin/tenants/${sub.tenantId}`} className="font-semibold hover:text-brand">
-                      {sub.tenant.profile?.nameRu ?? sub.tenant.slug}
+                      {pick(locale, sub.tenant.profile?.nameKk, sub.tenant.profile?.nameRu) || sub.tenant.slug}
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-muted">

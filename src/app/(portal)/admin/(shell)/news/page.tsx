@@ -10,8 +10,25 @@ import { deletePortalPost } from './actions';
 
 export const dynamic = 'force-dynamic';
 
+const T = {
+  title: { kk: 'Портал жаңалықтары', ru: 'Новости портала' },
+  lead: {
+    kk: 'bobegim.kz/news бетінде жарияланады — бұл балабақшалардың жаңалықтары емес.',
+    ru: 'Публикуются на bobegim.kz/news — это не новости садов.',
+  },
+  add: { kk: 'Қосу', ru: 'Добавить' },
+  empty: { kk: 'Портал жаңалықтары жоқ', ru: 'Новостей портала нет' },
+  emptyHint: {
+    kk: 'Іске қосылу, тарифтегі өзгерістер немесе облыс білім жүйесінің жаңалықтары туралы жазыңыз.',
+    ru: 'Расскажите о запуске, изменениях в тарифе или новостях системы образования области.',
+  },
+  write: { kk: 'Жазу', ru: 'Написать' },
+  remove: { kk: 'Жою', ru: 'Удалить' },
+} as const;
+
 export default async function PortalNewsAdmin() {
-  await requireSuperadmin();
+  const user = await requireSuperadmin();
+  const locale = user.locale;
   const [posts, csrf] = await Promise.all([
     prisma.portalPost.findMany({ orderBy: [{ publishedAt: 'desc' }, { updatedAt: 'desc' }] }),
     csrfToken(),
@@ -20,17 +37,17 @@ export default async function PortalNewsAdmin() {
   return (
     <>
       <PageHeader
-        title="Новости портала"
-        description="Публикуются на bobegim.kz/news — это не новости садов."
-        action={<Link href="/admin/news/new" className="btn-primary">Добавить</Link>}
+        title={T.title[locale]}
+        description={T.lead[locale]}
+        action={<Link href="/admin/news/new" className="btn-primary">{T.add[locale]}</Link>}
       />
 
       {posts.length === 0 ? (
         <EmptyState
           icon="📰"
-          title="Новостей портала нет"
-          description="Расскажите о запуске, изменениях в тарифе или новостях системы образования области."
-          action={<Link href="/admin/news/new" className="btn-primary mt-2">Написать</Link>}
+          title={T.empty[locale]}
+          description={T.emptyHint[locale]}
+          action={<Link href="/admin/news/new" className="btn-primary mt-2">{T.write[locale]}</Link>}
         />
       ) : (
         <div className="card divide-y divide-line">
@@ -46,7 +63,7 @@ export default async function PortalNewsAdmin() {
               <form action={deletePortalPost}>
                 <input type="hidden" name={CSRF_FIELD} value={csrf} />
                 <input type="hidden" name="id" value={post.id} />
-                <button type="submit" className="btn-ghost px-3 py-1.5 text-xs text-red-600">Удалить</button>
+                <button type="submit" className="btn-ghost px-3 py-1.5 text-xs text-red-600">{T.remove[locale]}</button>
               </form>
             </div>
           ))}

@@ -4,11 +4,17 @@ import { requireSuperadmin } from '@/server/auth/guards';
 import { csrfToken } from '@/server/auth/csrf';
 import { PageHeader } from '@/components/admin/AdminShell';
 import { PortalPostForm } from '../PortalPostForm';
+import { pick } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
+const T = {
+  title: { kk: 'Жаңалықты өңдеу', ru: 'Редактирование новости' },
+} as const;
+
 export default async function EditPortalPostPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireSuperadmin();
+  const locale = user.locale;
   const { id } = await params;
 
   const [post, csrf] = await Promise.all([
@@ -19,7 +25,7 @@ export default async function EditPortalPostPage({ params }: { params: Promise<{
 
   return (
     <>
-      <PageHeader title="Редактирование новости" description={post.titleRu} />
+      <PageHeader title={T.title[locale]} description={pick(locale, post.titleKk, post.titleRu)} />
       <PortalPostForm csrf={csrf} post={post} locale={user.locale} />
     </>
   );

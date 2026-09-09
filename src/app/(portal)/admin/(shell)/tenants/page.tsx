@@ -2,16 +2,41 @@ import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { PageHeader } from '@/components/admin/AdminShell';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { formatDate, STATUS_LABEL, STATUS_TONE, KIND_LABEL } from '@/lib/labels';
+import { formatDate, STATUS, STATUS_TONE, KIND } from '@/lib/labels';
+import { pick } from '@/lib/i18n';
+import { requireSuperadmin } from '@/server/auth/guards';
 import type { Prisma } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
+
+const T = {
+  title: { kk: 'Балабақшалар', ru: 'Детские сады' },
+  total: { kk: 'Барлығы: %s', ru: 'Всего: %s' },
+  create: { kk: 'Балабақша құру', ru: 'Создать сад' },
+  search: { kk: 'Іздеу', ru: 'Поиск' },
+  searchExample: { kk: 'Атауы немесе мекенжайы', ru: 'Название или адрес' },
+  status: { kk: 'Мәртебесі', ru: 'Статус' },
+  exceptArchive: { kk: 'Мұрағаттан басқа', ru: 'Кроме архива' },
+  show: { kk: 'Көрсету', ru: 'Показать' },
+  empty: { kk: 'Әзірге балабақшалар жоқ', ru: 'Садов пока нет' },
+  emptyHint: {
+    kk: 'Алғашқы балабақшаны құрыңыз — ол мекенжай, әкімші бөлімі және бір жылдық жазылым алады.',
+    ru: 'Создайте первый сад — он получит адрес, админку и подписку на год.',
+  },
+  garden: { kk: 'Балабақша', ru: 'Сад' },
+  address: { kk: 'Мекенжай', ru: 'Адрес' },
+  subscriptionUntil: { kk: 'Жазылым мерзімі', ru: 'Подписка до' },
+  posts: { kk: 'Жарияланым', ru: 'Публикаций' },
+} as const;
 
 export default async function TenantsPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; status?: string }>;
 }) {
+  const user = await requireSuperadmin();
+  const locale = user.locale;
+
   const params = await searchParams;
   const query = params.q?.trim() ?? '';
 
@@ -42,45 +67,45 @@ export default async function TenantsPage({
   return (
     <>
       <PageHeader
-        title="Детские сады"
-        description={`Всего: ${tenants.length}`}
-        action={<Link href="/admin/tenants/new" className="btn-primary">Создать сад</Link>}
+        title={T.title[locale]}
+        description={T.total[locale].replace('%s', String(tenants.length))}
+        action={<Link href="/admin/tenants/new" className="btn-primary">{T.create[locale]}</Link>}
       />
 
       <form className="card mb-6 flex flex-wrap items-end gap-3 p-4">
         <div className="min-w-48 flex-1">
-          <label className="field-label" htmlFor="q">Поиск</label>
-          <input id="q" name="q" defaultValue={query} className="field" placeholder="Название или адрес" />
+          <label className="field-label" htmlFor="q">{T.search[locale]}</label>
+          <input id="q" name="q" defaultValue={query} className="field" placeholder={T.searchExample[locale]} />
         </div>
         <div>
-          <label className="field-label" htmlFor="status">Статус</label>
+          <label className="field-label" htmlFor="status">{T.status[locale]}</label>
           <select id="status" name="status" defaultValue={params.status ?? ''} className="field">
-            <option value="">Кроме архива</option>
-            {Object.entries(STATUS_LABEL).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+            <option value="">{T.exceptArchive[locale]}</option>
+            {Object.entries(STATUS).map(([value, phrase]) => (
+              <option key={value} value={value}>{phrase[locale]}</option>
             ))}
           </select>
         </div>
-        <button type="submit" className="btn-secondary">Показать</button>
+        <button type="submit" className="btn-secondary">{T.show[locale]}</button>
       </form>
 
       {tenants.length === 0 ? (
         <EmptyState
           icon="🏡"
-          title="Садов пока нет"
-          description="Создайте первый сад — он получит адрес, админку и подписку на год."
-          action={<Link href="/admin/tenants/new" className="btn-primary mt-2">Создать сад</Link>}
+          title={T.empty[locale]}
+          description={T.emptyHint[locale]}
+          action={<Link href="/admin/tenants/new" className="btn-primary mt-2">{T.create[locale]}</Link>}
         />
       ) : (
         <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-line text-left text-muted">
               <tr>
-                <th className="px-4 py-3 font-semibold">Сад</th>
-                <th className="px-4 py-3 font-semibold">Адрес</th>
-                <th className="px-4 py-3 font-semibold">Статус</th>
-                <th className="px-4 py-3 font-semibold">Подписка до</th>
-                <th className="px-4 py-3 font-semibold">Публикаций</th>
+                <th className="px-4 py-3 font-semibold">{T.garden[locale]}</th>
+                <th className="px-4 py-3 font-semibold">{T.address[locale]}</th>
+                <th className="px-4 py-3 font-semibold">{T.status[locale]}</th>
+                <th className="px-4 py-3 font-semibold">{T.subscriptionUntil[locale]}</th>
+                <th className="px-4 py-3 font-semibold">{T.posts[locale]}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -92,10 +117,10 @@ export default async function TenantsPage({
                   <tr key={tenant.id} className="hover:bg-brand-soft/40">
                     <td className="px-4 py-3">
                       <Link href={`/admin/tenants/${tenant.id}`} className="font-semibold hover:text-brand">
-                        {tenant.profile?.nameRu ?? tenant.slug}
+                        {pick(locale, tenant.profile?.nameKk, tenant.profile?.nameRu) || tenant.slug}
                       </Link>
                       {tenant.profile?.kind ? (
-                        <p className="text-xs text-muted">{KIND_LABEL[tenant.profile.kind]}</p>
+                        <p className="text-xs text-muted">{KIND[tenant.profile.kind][locale]}</p>
                       ) : null}
                     </td>
                     <td className="px-4 py-3">
@@ -108,10 +133,10 @@ export default async function TenantsPage({
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`badge ${STATUS_TONE[tenant.status]}`}>{STATUS_LABEL[tenant.status]}</span>
+                      <span className={`badge ${STATUS_TONE[tenant.status]}`}>{STATUS[tenant.status][locale]}</span>
                     </td>
                     <td className={`px-4 py-3 ${expired ? 'font-semibold text-red-600' : ''}`}>
-                      {sub ? formatDate(sub.periodEnd) : '—'}
+                      {sub ? formatDate(sub.periodEnd, locale) : '—'}
                     </td>
                     <td className="px-4 py-3 text-muted">{tenant._count.posts}</td>
                   </tr>

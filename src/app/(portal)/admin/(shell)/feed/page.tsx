@@ -7,9 +7,19 @@ import { formatDateTime } from '@/lib/labels';
 
 export const dynamic = 'force-dynamic';
 
+const T = {
+  title: { kk: 'Балабақшалардың жарияланымдары', ru: 'Публикации садов' },
+  lead: {
+    kk: 'Барлық сайттардағы соңғы жарияланған материалдар.',
+    ru: 'Последние опубликованные материалы со всех сайтов.',
+  },
+  empty: { kk: 'Әзірге жарияланымдар жоқ', ru: 'Публикаций пока нет' },
+} as const;
+
 /** Лента публикаций всех садов — быстрый способ заметить неуместный контент. */
 export default async function FeedPage() {
-  await requireSuperadmin();
+  const user = await requireSuperadmin();
+  const locale = user.locale;
 
   const posts = await prisma.post.findMany({
     where: { status: 'PUBLISHED' },
@@ -20,9 +30,9 @@ export default async function FeedPage() {
 
   return (
     <>
-      <PageHeader title="Публикации садов" description="Последние опубликованные материалы со всех сайтов." />
+      <PageHeader title={T.title[locale]} description={T.lead[locale]} />
       {posts.length === 0 ? (
-        <EmptyState icon="📰" title="Публикаций пока нет" />
+        <EmptyState icon="📰" title={T.empty[locale]} />
       ) : (
         <div className="card divide-y divide-line">
           {posts.map((post) => {

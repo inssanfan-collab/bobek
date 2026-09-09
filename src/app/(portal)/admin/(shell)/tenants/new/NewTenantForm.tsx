@@ -7,10 +7,75 @@ import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Alert } from '@/components/ui/Alert';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { TEMPLATES, PALETTES } from '@/lib/templates';
-import { KIND_LABEL } from '@/lib/labels';
+import { KIND } from '@/lib/labels';
+import { DEFAULT_LOCALE, pick, type Locale } from '@/lib/i18n';
 import { slugify } from '@/lib/slug';
 
-export function NewTenantForm({ csrf, portalDomain }: { csrf: string; portalDomain: string }) {
+const T = {
+  step1: { kk: 'Балабақша атауы', ru: 'Название сада' },
+  inRu: { kk: 'Орысша', ru: 'По-русски' },
+  inKk: { kk: 'Қазақша', ru: 'Қазақша' },
+  kind: { kk: 'Ұйым түрі', ru: 'Тип организации' },
+  step2: { kk: 'Сайт мекенжайы', ru: 'Адрес сайта' },
+  subdomain: { kk: 'Субдомен', ru: 'Поддомен' },
+  subdomainHint: {
+    kk: 'Латын әрпі, сандар және дефис. Бұл мекенжайды балабақша ата-аналарға айтады — қысқа болғаны жақсы.',
+    ru: 'Латиница, цифры и дефис. Этот адрес сад будет диктовать родителям — чем короче, тем лучше.',
+  },
+  step3: { kk: 'Байланыс және орналасуы', ru: 'Контакты и расположение' },
+  district: { kk: 'Қала ауданы', ru: 'Район города' },
+  districtHint: { kk: 'Портал каталогында сүзгі ретінде қолданылады.', ru: 'Используется как фильтр в каталоге портала.' },
+  address: { kk: 'Мекенжайы', ru: 'Адрес' },
+  phone: { kk: 'Телефон', ru: 'Телефон' },
+  email: { kk: 'Электрондық пошта', ru: 'Электронная почта' },
+  step4: { kk: 'Сыртқы көрінісі', ru: 'Внешний вид' },
+  template: { kk: 'Үлгі', ru: 'Шаблон' },
+  palette: { kk: 'Палитра', ru: 'Палитра' },
+  step5: { kk: 'Балабақша әкімшісі', ru: 'Администратор сада' },
+  fullName: { kk: 'Аты-жөні', ru: 'ФИО' },
+  login: { kk: 'Логин', ru: 'Логин' },
+  loginHint: { kk: 'Латын әрпі. Кіру кезінде осыны енгізеді.', ru: 'Латиница. Его будут вводить при входе.' },
+  creating: { kk: 'Балабақша құрылуда…', ru: 'Создаём сад…' },
+  create: { kk: 'Балабақша құру және кіру деректерін беру', ru: 'Создать сад и выдать доступы' },
+  cancel: { kk: 'Болдырмау', ru: 'Отмена' },
+  created: { kk: 'Балабақша құрылды', ru: 'Сад создан' },
+  memo: { kk: 'Кіру жаднамасы', ru: 'Памятка доступа' },
+  siteAddress: { kk: 'Сайт мекенжайы', ru: 'Адрес сайта' },
+  adminAddress: { kk: 'Әкімші бөліміне кіру', ru: 'Вход в админку' },
+  password: { kk: 'Құпия сөз', ru: 'Пароль' },
+  whatNext: { kk: 'Әрі қарай не істеу керек', ru: 'Что делать дальше' },
+  next1: {
+    kk: 'Әкімші бөлімінің мекенжайын ашып, осы логин мен құпия сөзбен кіріңіз.',
+    ru: 'Откройте адрес админки и войдите с этим логином и паролем.',
+  },
+  next2: {
+    kk: 'Жүйе құпия сөзді ауыстыруды сұрайды — өз құпия сөзіңізді ойлап тауып, жазып қойыңыз.',
+    ru: 'Система попросит сменить пароль — придумайте свой и запишите его.',
+  },
+  next3: {
+    kk: '«Балабақша туралы» бөлімін толтырыңыз, фото және алғашқы жаңалық қосыңыз.',
+    ru: 'Заполните раздел «О саде», добавьте фото и первую новость.',
+  },
+  next4: {
+    kk: 'Сайт дайын болғанда — портал әкімшісіне хабарлаңыз, ол оны жұртшылыққа ашады.',
+    ru: 'Когда сайт готов — сообщите администратору портала, он откроет его публично.',
+  },
+  createMore: { kk: 'Тағы біреуін құру', ru: 'Создать ещё один' },
+  saveMemo: {
+    kk: 'Жаднаманы сақтаңыз немесе басып шығарыңыз — құпия сөз тек қазір көрсетіледі.',
+    ru: 'Сохраните или распечатайте памятку — пароль показывается только сейчас.',
+  },
+} as const;
+
+export function NewTenantForm({
+  csrf,
+  portalDomain,
+  locale = DEFAULT_LOCALE,
+}: {
+  csrf: string;
+  portalDomain: string;
+  locale?: Locale;
+}) {
   const [state, action] = useActionState<CreateTenantState, FormData>(createTenantAction, {});
   const [slug, setSlug] = useState('');
   const [login, setLogin] = useState('');
@@ -18,7 +83,7 @@ export function NewTenantForm({ csrf, portalDomain }: { csrf: string; portalDoma
   const [loginTouched, setLoginTouched] = useState(false);
   const [palette, setPalette] = useState('mandarin');
 
-  if (state.created) return <AccessSheet created={state.created} />;
+  if (state.created) return <AccessSheet created={state.created} locale={locale} />;
 
   /** Адрес и логин подставляются из названия, пока админ их не поправил вручную. */
   function onNameChange(value: string) {
@@ -33,9 +98,9 @@ export function NewTenantForm({ csrf, portalDomain }: { csrf: string; portalDoma
 
       {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
 
-      <Step number={1} title="Название сада">
+      <Step number={1} title={T.step1[locale]}>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="По-русски *" error={state.errors?.nameRu}>
+          <Field label={`${T.inRu[locale]} *`} error={state.errors?.nameRu}>
             <input
               name="nameRu"
               required
@@ -44,16 +109,16 @@ export function NewTenantForm({ csrf, portalDomain }: { csrf: string; portalDoma
               onChange={(e) => onNameChange(e.target.value)}
             />
           </Field>
-          <Field label="Қазақша *" error={state.errors?.nameKk}>
+          <Field label={`${T.inKk[locale]} *`} error={state.errors?.nameKk}>
             <input name="nameKk" required className="field" placeholder="№12 «Балдырған» бөбекжайы" />
           </Field>
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Field label="Тип организации">
+          <Field label={T.kind[locale]}>
             <select name="kind" className="field" defaultValue="NURSERY_GARDEN">
-              {Object.entries(KIND_LABEL).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
+              {Object.entries(KIND).map(([value, phrase]) => (
+                <option key={value} value={value}>{phrase[locale]}</option>
               ))}
             </select>
           </Field>
@@ -64,8 +129,8 @@ export function NewTenantForm({ csrf, portalDomain }: { csrf: string; portalDoma
         </div>
       </Step>
 
-      <Step number={2} title="Адрес сайта">
-        <Field label="Поддомен *" error={state.errors?.slug} hint="Латиница, цифры и дефис. Этот адрес сад будет диктовать родителям — чем короче, тем лучше.">
+      <Step number={2} title={T.step2[locale]}>
+        <Field label={`${T.subdomain[locale]} *`} error={state.errors?.slug} hint={T.subdomainHint[locale]}>
           <div className="flex items-center gap-2">
             <input
               name="slug"
@@ -89,26 +154,26 @@ export function NewTenantForm({ csrf, portalDomain }: { csrf: string; portalDoma
         ) : null}
       </Step>
 
-      <Step number={3} title="Контакты и расположение">
+      <Step number={3} title={T.step3[locale]}>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Район города" hint="Используется как фильтр в каталоге портала.">
+          <Field label={T.district[locale]} hint={T.districtHint[locale]}>
             <input name="district" className="field" placeholder="Астана" />
           </Field>
-          <Field label="Адрес">
+          <Field label={T.address[locale]}>
             <input name="addressRu" className="field" placeholder="г. Актобе, ул. Абая, 12" />
           </Field>
-          <Field label="Телефон">
+          <Field label={T.phone[locale]}>
             <input name="phone" className="field" placeholder="+7 (7132) 00-00-00" />
           </Field>
-          <Field label="Электронная почта">
+          <Field label={T.email[locale]}>
             <input name="email" type="email" className="field" placeholder="sad12@mail.kz" />
           </Field>
         </div>
       </Step>
 
-      <Step number={4} title="Внешний вид">
+      <Step number={4} title={T.step4[locale]}>
         <fieldset>
-          <legend className="field-label">Шаблон</legend>
+          <legend className="field-label">{T.template[locale]}</legend>
           <div className="grid gap-3 sm:grid-cols-3">
             {TEMPLATES.map((template, index) => (
               <label key={template.code} className="card cursor-pointer p-4 has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30">
@@ -119,15 +184,15 @@ export function NewTenantForm({ csrf, portalDomain }: { csrf: string; portalDoma
                   defaultChecked={index === 0}
                   className="sr-only"
                 />
-                <p className="font-display font-bold">{template.nameRu}</p>
-                <p className="mt-1 text-xs text-muted">{template.descriptionRu}</p>
+                <p className="font-display font-bold">{pick(locale, template.nameKk, template.nameRu)}</p>
+                <p className="mt-1 text-xs text-muted">{pick(locale, template.descriptionKk, template.descriptionRu)}</p>
               </label>
             ))}
           </div>
         </fieldset>
 
         <fieldset className="mt-4">
-          <legend className="field-label">Палитра</legend>
+          <legend className="field-label">{T.palette[locale]}</legend>
           <div className="flex flex-wrap gap-2">
             {PALETTES.map((item) => (
               <label
@@ -145,25 +210,25 @@ export function NewTenantForm({ csrf, portalDomain }: { csrf: string; portalDoma
                   className="sr-only"
                 />
                 <span className="h-4 w-4 rounded-full" style={{ background: item.swatch }} aria-hidden />
-                {item.nameRu}
+                {pick(locale, item.nameKk, item.nameRu)}
               </label>
             ))}
           </div>
         </fieldset>
       </Step>
 
-      <Step number={5} title="Администратор сада">
+      <Step number={5} title={T.step5[locale]}>
         <p className="mb-3 text-sm text-muted">
           Пароль сгенерируется автоматически и покажется один раз — сразу после создания.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="ФИО *" error={state.errors?.adminFullName}>
+          <Field label={`${T.fullName[locale]} *`} error={state.errors?.adminFullName}>
             <input name="adminFullName" required className="field" placeholder="Сериккызы Айгүл" />
           </Field>
-          <Field label="Телефон">
+          <Field label={T.phone[locale]}>
             <input name="adminPhone" className="field" placeholder="+7 (777) 000-00-00" />
           </Field>
-          <Field label="Логин *" error={state.errors?.adminLogin} hint="Латиница. Его будут вводить при входе.">
+          <Field label={`${T.login[locale]} *`} error={state.errors?.adminLogin} hint={T.loginHint[locale]}>
             <input
               name="adminLogin"
               required
@@ -180,8 +245,8 @@ export function NewTenantForm({ csrf, portalDomain }: { csrf: string; portalDoma
       </Step>
 
       <div className="flex gap-3">
-        <SubmitButton pendingLabel="Создаём сад…">Создать сад и выдать доступы</SubmitButton>
-        <Link href="/admin/tenants" className="btn-secondary">Отмена</Link>
+        <SubmitButton pendingLabel={T.creating[locale]}>{T.create[locale]}</SubmitButton>
+        <Link href="/admin/tenants" className="btn-secondary">{T.cancel[locale]}</Link>
       </div>
     </form>
   );
@@ -220,31 +285,37 @@ function Field({
   );
 }
 
-function AccessSheet({ created }: { created: NonNullable<CreateTenantState['created']> }) {
+function AccessSheet({
+  created,
+  locale,
+}: {
+  created: NonNullable<CreateTenantState['created']>;
+  locale: Locale;
+}) {
   return (
     <div className="space-y-4">
-      <Alert tone="success" title="Сад создан">
-        Сохраните или распечатайте памятку — пароль показывается только сейчас.
+      <Alert tone="success" title={T.created[locale]}>
+        {T.saveMemo[locale]}
       </Alert>
 
       <div className="card p-6 print:border-none print:shadow-none" id="access-sheet">
-        <h2 className="font-display text-xl font-extrabold">Памятка доступа</h2>
+        <h2 className="font-display text-xl font-extrabold">{T.memo[locale]}</h2>
         <p className="mt-1 text-muted">{created.nameRu}</p>
 
         <dl className="mt-5 space-y-3">
-          <Row label="Адрес сайта" value={created.siteUrl} />
-          <Row label="Вход в админку" value={created.adminUrl} />
-          <Row label="Логин" value={created.login} />
-          <Row label="Пароль" value={created.password} />
+          <Row label={T.siteAddress[locale]} value={created.siteUrl} />
+          <Row label={T.adminAddress[locale]} value={created.adminUrl} />
+          <Row label={T.login[locale]} value={created.login} />
+          <Row label={T.password[locale]} value={created.password} />
         </dl>
 
         <div className="mt-5 rounded-2xl bg-brand-soft p-4 text-sm text-brand-ink">
-          <p className="font-semibold">Что делать дальше</p>
+          <p className="font-semibold">{T.whatNext[locale]}</p>
           <ol className="mt-2 list-decimal space-y-1 pl-5">
-            <li>Откройте адрес админки и войдите с этим логином и паролем.</li>
-            <li>Система попросит сменить пароль — придумайте свой и запишите его.</li>
-            <li>Заполните раздел «О саде», добавьте фото и первую новость.</li>
-            <li>Когда сайт готов — сообщите администратору портала, он откроет его публично.</li>
+            <li>{T.next1[locale]}</li>
+            <li>{T.next2[locale]}</li>
+            <li>{T.next3[locale]}</li>
+            <li>{T.next4[locale]}</li>
           </ol>
         </div>
       </div>
@@ -256,7 +327,7 @@ function AccessSheet({ created }: { created: NonNullable<CreateTenantState['crea
         <Link href={`/admin/tenants/${created.tenantId}`} className="btn-secondary">
           Открыть карточку сада
         </Link>
-        <Link href="/admin/tenants/new" className="btn-ghost">Создать ещё один</Link>
+        <Link href="/admin/tenants/new" className="btn-ghost">{T.createMore[locale]}</Link>
       </div>
     </div>
   );
