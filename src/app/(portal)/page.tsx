@@ -1,25 +1,133 @@
 import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
+import { PortalPage } from '@/components/portal/PortalChrome';
+import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
+const T = {
+  region: { kk: 'Ақтөбе облысы', ru: 'Актюбинская область' },
+  heroBefore: { kk: 'Балабақшаның жеке сайты —', ru: 'Свой сайт детского сада —' },
+  heroPrice: { kk: 'жылына 20 000 ₸', ru: 'за 20 000 ₸ в год' },
+  heroLead: {
+    kk: 'Әкімші бөлімі бар дайын жүйе: жаңалықтар, хабарландырулар, фотогалерея, құжаттар, педагогтар, тамақтану мәзірі. Бағдарламашысыз, өзіңіз толтырасыз. Сайт қазақ және орыс тілдерінде.',
+    ru: 'Готовый движок с админкой: новости, объявления, фотогалерея, документы, педагоги, меню питания. Заполняете сами, без программиста. Сайт на казахском и русском.',
+  },
+  connect: { kk: 'Балабақшамды қосу', ru: 'Подключить свой сад' },
+  viewCatalog: { kk: 'Каталогты қарау', ru: 'Посмотреть каталог' },
+  gardensOnPortal: { kk: 'Порталдағы балабақша', ru: 'Садов на портале' },
+  launch: { kk: 'Сайтты іске қосу', ru: 'Запуск сайта' },
+  oneDay: { kk: '1 күн', ru: '1 день' },
+  languages: { kk: 'Тілдер', ru: 'Языки' },
+  mockupNote: {
+    kk: 'Балабақша сайты қосылғаннан кейін осылай көрінеді — фото мен жаңалықтарды қосу ғана қалады.',
+    ru: 'Так выглядит сайт сада сразу после подключения — остаётся добавить фотографии и новости.',
+  },
+  whatInside: { kk: 'Сайтқа не кіреді', ru: 'Что входит в сайт' },
+  whatInsideLead: {
+    kk: 'Бөлімдер жиынтығы мектепке дейінгі ұйымдардың сайттарына қойылатын талаптар бойынша жиналған — тексерушілер сұрайтын және ата-аналар іздейтіні.',
+    ru: 'Набор разделов собран по требованиям к сайтам дошкольных организаций — то, что спрашивают проверяющие и ищут родители.',
+  },
+  howItWorks: { kk: 'Бұл қалай жұмыс істейді', ru: 'Как это работает' },
+  allInclusive: { kk: 'Жылына 20 000 ₸ — бәрі кіреді', ru: '20 000 ₸ в год — всё включено' },
+  allInclusiveBefore: { kk: 'Мекенжай: ', ru: 'Адрес вида ' },
+  allInclusiveAfter: {
+    kk: ', жүйе, әкімші бөлімі, хостинг, жаңартулар мен қолдау. Балабақша жеке домен қаласа — оны өзі сатып алады, ал біз тегін жалғаймыз.',
+    ru: ', движок, админка, хостинг, обновления и поддержка. Если сад хочет собственный домен — он покупает его самостоятельно, а мы бесплатно подключаем.',
+  },
+  aboutTariff: { kk: 'Тариф туралы толығырақ', ru: 'Подробнее о тарифе' },
+  gardensSection: { kk: 'Порталдағы балабақшалар', ru: 'Сады на портале' },
+  wholeCatalog: { kk: 'Толық каталог →', ru: 'Весь каталог →' },
+  openSite: { kk: 'Сайтты ашу →', ru: 'Открыть сайт →' },
+  yourGarden: { kk: 'сіздің-балабақша.', ru: 'ваш-сад.' },
+} as const;
+
 const FEATURES = [
-  { icon: '📰', title: 'Новости и объявления', text: 'Утренники, карантин, собрания — родители узнают сразу, а не из чата.' },
-  { icon: '📷', title: 'Фотогалерея', text: 'Альбомы с праздников. Загрузка пачкой, размер фото уменьшается сам.' },
-  { icon: '📄', title: 'Документы', text: 'Устав, лицензия, правила приёма, госзакупки — всё на виду у проверяющих.' },
-  { icon: '👩‍🏫', title: 'Педагоги и группы', text: 'Состав, образование, стаж, категории, свободные места по группам.' },
-  { icon: '🍎', title: 'Меню питания', text: 'Меню по дням или скан утверждённого. Самый частый вопрос родителей.' },
-  { icon: '✉️', title: 'Виртуальная приёмная', text: 'Обращения родителей приходят прямо в вашу админку.' },
-];
+  {
+    icon: '📰',
+    title: { kk: 'Жаңалықтар мен хабарландырулар', ru: 'Новости и объявления' },
+    text: {
+      kk: 'Ертеңгіліктер, карантин, жиналыстар — ата-аналар чаттан емес, бірден біледі.',
+      ru: 'Утренники, карантин, собрания — родители узнают сразу, а не из чата.',
+    },
+  },
+  {
+    icon: '📷',
+    title: { kk: 'Фотогалерея', ru: 'Фотогалерея' },
+    text: {
+      kk: 'Мерекелер альбомдары. Топтап жүктеу, фото өлшемі өзі кішірейеді.',
+      ru: 'Альбомы с праздников. Загрузка пачкой, размер фото уменьшается сам.',
+    },
+  },
+  {
+    icon: '📄',
+    title: { kk: 'Құжаттар', ru: 'Документы' },
+    text: {
+      kk: 'Жарғы, лицензия, қабылдау қағидалары, сатып алулар — бәрі тексерушінің көз алдында.',
+      ru: 'Устав, лицензия, правила приёма, госзакупки — всё на виду у проверяющих.',
+    },
+  },
+  {
+    icon: '👩‍🏫',
+    title: { kk: 'Педагогтар мен топтар', ru: 'Педагоги и группы' },
+    text: {
+      kk: 'Құрам, білімі, өтілі, санаттары, топтар бойынша бос орындар.',
+      ru: 'Состав, образование, стаж, категории, свободные места по группам.',
+    },
+  },
+  {
+    icon: '🍎',
+    title: { kk: 'Тамақтану мәзірі', ru: 'Меню питания' },
+    text: {
+      kk: 'Күн бойынша мәзір немесе бекітілгеннің сканы. Ата-аналардың ең жиі сұрағы.',
+      ru: 'Меню по дням или скан утверждённого. Самый частый вопрос родителей.',
+    },
+  },
+  {
+    icon: '✉️',
+    title: { kk: 'Виртуалды қабылдау', ru: 'Виртуальная приёмная' },
+    text: {
+      kk: 'Ата-аналардың өтініштері тікелей әкімші бөліміңізге келеді.',
+      ru: 'Обращения родителей приходят прямо в вашу админку.',
+    },
+  },
+] as const;
 
 const STEPS = [
-  { n: 1, title: 'Оставляете заявку', text: 'Звоните или заполняете форму. Нужны только название сада и телефон.' },
-  { n: 2, title: 'Получаете сайт и доступы', text: 'Мы создаём сайт и выдаём памятку: адрес, логин и пароль от админки.' },
-  { n: 3, title: 'Наполняете сами', text: 'Заходите в админку и добавляете новости, фото и документы. Обучение не нужно.' },
-];
+  {
+    n: 1,
+    title: { kk: 'Өтінім қалдырасыз', ru: 'Оставляете заявку' },
+    text: {
+      kk: 'Қоңырау шаласыз немесе нысанды толтырасыз. Тек балабақшаның атауы мен телефон қажет.',
+      ru: 'Звоните или заполняете форму. Нужны только название сада и телефон.',
+    },
+  },
+  {
+    n: 2,
+    title: { kk: 'Сайт пен кіру деректерін аласыз', ru: 'Получаете сайт и доступы' },
+    text: {
+      kk: 'Біз сайт жасап, жаднама береміз: мекенжай, логин және әкімші бөлімінің құпия сөзі.',
+      ru: 'Мы создаём сайт и выдаём памятку: адрес, логин и пароль от админки.',
+    },
+  },
+  {
+    n: 3,
+    title: { kk: 'Өзіңіз толтырасыз', ru: 'Наполняете сами' },
+    text: {
+      kk: 'Әкімші бөліміне кіріп, жаңалықтар, фото және құжаттар қосасыз. Оқыту қажет емес.',
+      ru: 'Заходите в админку и добавляете новости, фото и документы. Обучение не нужно.',
+    },
+  },
+] as const;
 
-export default async function PortalHome() {
+export default async function PortalHome({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}) {
+  const locale = localeFromParam((await searchParams).lang);
+
   const [gardenCount, latestGardens] = await Promise.all([
     prisma.tenant.count({ where: { status: 'ACTIVE' } }),
     prisma.tenant.findMany({
@@ -31,39 +139,38 @@ export default async function PortalHome() {
   ]);
 
   return (
-    <>
+    <PortalPage locale={locale} pathname="/">
       <section className="relative overflow-hidden">
         <div className="decor pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand-soft blur-3xl" aria-hidden />
         <div className="decor pointer-events-none absolute -bottom-32 -left-24 h-80 w-80 rounded-full bg-accent/10 blur-3xl" aria-hidden />
 
         <div className="container-page relative grid gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
           <div>
-            <p className="badge bg-brand-soft text-brand-ink">Актюбинская область</p>
+            <p className="badge bg-brand-soft text-brand-ink">{T.region[locale]}</p>
             <h1 className="mt-4 font-display text-4xl font-extrabold leading-tight sm:text-5xl">
-              Свой сайт детского сада —{' '}
-              <span className="text-brand">за 20 000 ₸ в год</span>
+              {T.heroBefore[locale]}{' '}
+              <span className="text-brand">{T.heroPrice[locale]}</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted">
-              Готовый движок с админкой: новости, объявления, фотогалерея, документы, педагоги,
-              меню питания. Заполняете сами, без программиста. Сайт на казахском и русском.
+              {T.heroLead[locale]}
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/apply" className="btn-primary px-6 py-3 text-base">Подключить свой сад</Link>
-              <Link href="/catalog" className="btn-secondary px-6 py-3 text-base">Посмотреть каталог</Link>
+              <Link href={withLocale('/apply', locale)} className="btn-primary px-6 py-3 text-base">{T.connect[locale]}</Link>
+              <Link href={withLocale('/catalog', locale)} className="btn-secondary px-6 py-3 text-base">{T.viewCatalog[locale]}</Link>
             </div>
 
             <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4">
               <div>
-                <dt className="text-sm text-muted">Садов на портале</dt>
+                <dt className="text-sm text-muted">{T.gardensOnPortal[locale]}</dt>
                 <dd className="font-display text-2xl font-extrabold">{gardenCount}</dd>
               </div>
               <div>
-                <dt className="text-sm text-muted">Запуск сайта</dt>
-                <dd className="font-display text-2xl font-extrabold">1 день</dd>
+                <dt className="text-sm text-muted">{T.launch[locale]}</dt>
+                <dd className="font-display text-2xl font-extrabold">{T.oneDay[locale]}</dd>
               </div>
               <div>
-                <dt className="text-sm text-muted">Языки</dt>
+                <dt className="text-sm text-muted">{T.languages[locale]}</dt>
                 <dd className="font-display text-2xl font-extrabold">ҚАЗ / РУС</dd>
               </div>
             </dl>
@@ -93,7 +200,7 @@ export default async function PortalHome() {
                 <div className="h-3 w-2/3 rounded-full bg-line" />
               </div>
               <p className="text-sm text-muted">
-                Так выглядит сайт сада сразу после подключения — остаётся добавить фотографии и новости.
+                {T.mockupNote[locale]}
               </p>
             </div>
           </div>
@@ -101,17 +208,16 @@ export default async function PortalHome() {
       </section>
 
       <section className="container-page py-14">
-        <h2 className="font-display text-3xl font-extrabold">Что входит в сайт</h2>
+        <h2 className="font-display text-3xl font-extrabold">{T.whatInside[locale]}</h2>
         <p className="mt-2 max-w-2xl text-muted">
-          Набор разделов собран по требованиям к сайтам дошкольных организаций — то,
-          что спрашивают проверяющие и ищут родители.
+          {T.whatInsideLead[locale]}
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
-            <div key={feature.title} className="card p-6">
+            <div key={feature.title.ru} className="card p-6">
               <span className="text-3xl" aria-hidden>{feature.icon}</span>
-              <h3 className="mt-3 font-display text-lg font-bold">{feature.title}</h3>
-              <p className="mt-1.5 text-sm text-muted">{feature.text}</p>
+              <h3 className="mt-3 font-display text-lg font-bold">{feature.title[locale]}</h3>
+              <p className="mt-1.5 text-sm text-muted">{feature.text[locale]}</p>
             </div>
           ))}
         </div>
@@ -119,27 +225,27 @@ export default async function PortalHome() {
 
       <section className="bg-card py-14">
         <div className="container-page">
-          <h2 className="font-display text-3xl font-extrabold">Как это работает</h2>
+          <h2 className="font-display text-3xl font-extrabold">{T.howItWorks[locale]}</h2>
           <ol className="mt-8 grid gap-6 md:grid-cols-3">
             {STEPS.map((step) => (
               <li key={step.n} className="relative rounded-2xl border border-line p-6">
                 <span className="grid h-10 w-10 place-items-center rounded-2xl bg-brand font-display text-lg font-extrabold text-white">
                   {step.n}
                 </span>
-                <h3 className="mt-4 font-display text-lg font-bold">{step.title}</h3>
-                <p className="mt-1.5 text-sm text-muted">{step.text}</p>
+                <h3 className="mt-4 font-display text-lg font-bold">{step.title[locale]}</h3>
+                <p className="mt-1.5 text-sm text-muted">{step.text[locale]}</p>
               </li>
             ))}
           </ol>
 
           <div className="mt-10 rounded-2xl border border-brand/30 bg-brand-soft p-6 sm:p-8">
-            <h3 className="font-display text-2xl font-extrabold text-brand-ink">20 000 ₸ в год — всё включено</h3>
+            <h3 className="font-display text-2xl font-extrabold text-brand-ink">{T.allInclusive[locale]}</h3>
             <p className="mt-2 max-w-2xl text-brand-ink/80">
-              Адрес вида <strong>ваш-сад.{env.portalDomain}</strong>, движок, админка, хостинг,
-              обновления и поддержка. Если сад хочет собственный домен — он покупает его
-              самостоятельно, а мы бесплатно подключаем.
+              {T.allInclusiveBefore[locale]}
+              <strong>{T.yourGarden[locale]}{env.portalDomain}</strong>
+              {T.allInclusiveAfter[locale]}
             </p>
-            <Link href="/pricing" className="btn-primary mt-5">Подробнее о тарифе</Link>
+            <Link href={withLocale('/pricing', locale)} className="btn-primary mt-5">{T.aboutTariff[locale]}</Link>
           </div>
         </div>
       </section>
@@ -147,8 +253,8 @@ export default async function PortalHome() {
       {latestGardens.length > 0 ? (
         <section className="container-page py-14">
           <div className="flex items-end justify-between gap-4">
-            <h2 className="font-display text-3xl font-extrabold">Сады на портале</h2>
-            <Link href="/catalog" className="btn-ghost">Весь каталог →</Link>
+            <h2 className="font-display text-3xl font-extrabold">{T.gardensSection[locale]}</h2>
+            <Link href={withLocale('/catalog', locale)} className="btn-ghost">{T.wholeCatalog[locale]}</Link>
           </div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {latestGardens.map((tenant) => (
@@ -157,16 +263,16 @@ export default async function PortalHome() {
                 href={`https://${tenant.domains[0]?.host ?? `${tenant.slug}.${env.portalDomain}`}`}
                 className="card p-5 transition hover:shadow-lift"
               >
-                <p className="font-display text-lg font-bold">{tenant.profile?.nameRu ?? tenant.slug}</p>
+                <p className="font-display text-lg font-bold">{pick(locale, tenant.profile?.nameKk, tenant.profile?.nameRu) || tenant.slug}</p>
                 {tenant.profile?.district ? (
                   <p className="mt-1 text-sm text-muted">{tenant.profile.district}</p>
                 ) : null}
-                <p className="mt-3 text-sm font-semibold text-brand">Открыть сайт →</p>
+                <p className="mt-3 text-sm font-semibold text-brand">{T.openSite[locale]}</p>
               </a>
             ))}
           </div>
         </section>
       ) : null}
-    </>
+    </PortalPage>
   );
 }

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { login, site, SAD12_ADMIN } from './helpers';
+import { login, site, PORTAL, SAD12_ADMIN } from './helpers';
 
 /**
  * Выбранный язык хранится у пользователя и переживает прогон, поэтому тесты
@@ -71,5 +71,21 @@ test.describe('Двуязычие сайта сада', () => {
 
     await page.goto(`${site('sad12')}/news`);
     await expect(page.getByText(/жылғы/)).toHaveCount(0);
+  });
+});
+
+test.describe('Двуязычие портала', () => {
+  test('портал переключается на казахский и запоминает язык в ссылках', async ({ page }) => {
+    await page.goto(`${PORTAL}/pricing`);
+    await expect(page.getByRole('heading', { name: 'Что входит' })).toBeVisible();
+
+    await page.getByRole('link', { name: 'ҚАЗ' }).click();
+    await expect(page).toHaveURL(/lang=kk/);
+    await expect(page.getByRole('heading', { name: 'Не кіреді' })).toBeVisible();
+
+    // Язык должен ехать по ссылкам дальше, иначе посетитель вываливается в русский.
+    await page.getByRole('link', { name: 'Балабақшалар каталогы' }).first().click();
+    await expect(page).toHaveURL(/lang=kk/);
+    await expect(page.getByRole('heading', { name: 'Ақтөбе балабақшалары' })).toBeVisible();
   });
 });

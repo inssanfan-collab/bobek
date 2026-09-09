@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { resolveTenantByHost, isPubliclyVisible, type ResolvedTenant } from './resolve';
 import { scoped, type TenantScope } from '@/server/db/scope';
-import { DEFAULT_LOCALE, isLocale, type Locale } from '@/lib/i18n';
+import { localeFromParam, withLocale } from '@/lib/i18n';
 
 export type SiteContext = ResolvedTenant & { db: TenantScope };
 
@@ -24,13 +24,6 @@ export const publicSiteContext = cache(async (hostParam: string): Promise<SiteCo
   return context;
 });
 
-export function localeFrom(value: string | string[] | undefined): Locale {
-  const raw = Array.isArray(value) ? value[0] : value;
-  return isLocale(raw) ? raw : DEFAULT_LOCALE;
-}
+export const localeFrom = localeFromParam;
 
-/** Ссылка с сохранением выбранного языка. */
-export function withLocale(href: string, locale: Locale): string {
-  if (locale === DEFAULT_LOCALE) return href;
-  return href.includes('?') ? `${href}&lang=${locale}` : `${href}?lang=${locale}`;
-}
+export { withLocale };

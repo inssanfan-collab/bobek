@@ -33,3 +33,18 @@ export function pickOrNull(
 
 export const LOCALE_LABEL: Record<Locale, string> = { kk: 'ҚАЗ', ru: 'РУС' };
 export const LOCALE_FULL: Record<Locale, string> = { kk: 'Қазақша', ru: 'Русский' };
+
+/**
+ * Ссылка с сохранением выбранного языка. Русский — язык по умолчанию,
+ * поэтому для него параметр не добавляется: адреса остаются чистыми.
+ */
+export function withLocale(href: string, locale: Locale): string {
+  if (locale === DEFAULT_LOCALE) return href;
+  return href.includes('?') ? `${href}&lang=${locale}` : `${href}?lang=${locale}`;
+}
+
+/** Язык из параметра адреса. Неизвестное значение — русский. */
+export function localeFromParam(value: string | string[] | undefined): Locale {
+  const raw = Array.isArray(value) ? value[0] : value;
+  return isLocale(raw) ? raw : DEFAULT_LOCALE;
+}
