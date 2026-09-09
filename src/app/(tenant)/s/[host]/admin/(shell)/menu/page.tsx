@@ -67,6 +67,14 @@ export default async function MenuPage({ params }: { params: Promise<{ host: str
             <label className="field-label" htmlFor="snackKk">Бесін ас</label>
             <textarea id="snackKk" name="snackKk" rows={2} className="field" />
           </div>
+          <div>
+            <label className="field-label" htmlFor="dinnerRu">Ужин</label>
+            <textarea id="dinnerRu" name="dinnerRu" rows={2} className="field" />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="dinnerKk">Кешкі ас</label>
+            <textarea id="dinnerKk" name="dinnerKk" rows={2} className="field" />
+          </div>
           <div className="sm:col-span-2">
             <SubmitButton>Сохранить меню</SubmitButton>
           </div>

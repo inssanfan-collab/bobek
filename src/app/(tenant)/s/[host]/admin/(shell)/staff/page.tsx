@@ -44,8 +44,12 @@ export default async function StaffPage({ params }: { params: Promise<{ host: st
             <input id="positionKk" name="positionKk" className="field" placeholder="Тәрбиеші" />
           </div>
           <div>
-            <label className="field-label" htmlFor="educationRu">Образование</label>
+            <label className="field-label" htmlFor="educationRu">Образование (рус.)</label>
             <input id="educationRu" name="educationRu" className="field" placeholder="Высшее педагогическое" />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="educationKk">Білімі (қаз.)</label>
+            <input id="educationKk" name="educationKk" className="field" placeholder="Жоғары педагогикалық" />
           </div>
           <div>
             <label className="field-label" htmlFor="experience">Стаж</label>

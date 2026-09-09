@@ -14,6 +14,7 @@ export function AdminShell({
   nav,
   headerRight,
   banner,
+  navLabel = 'Разделы админки',
   children,
 }: {
   title: string;
@@ -22,6 +23,8 @@ export function AdminShell({
   nav: NavItem[];
   headerRight?: ReactNode;
   banner?: ReactNode;
+  /** Подпись меню для читалок: у админок портала и сада она на разных языках. */
+  navLabel?: string;
   children: ReactNode;
 }) {
   return (
@@ -44,7 +47,7 @@ export function AdminShell({
       {banner}
 
       <div className="mx-auto flex w-full max-w-[100rem] flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row">
-        <nav className="lg:w-60 lg:shrink-0" aria-label="Разделы админки">
+        <nav className="lg:w-60 lg:shrink-0" aria-label={navLabel}>
           <ul className="flex gap-1 overflow-x-auto lg:flex-col lg:overflow-visible">
             {nav.map((item) => (
               <li key={item.href}>

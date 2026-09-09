@@ -4,13 +4,22 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
 import type { Role, User } from '@prisma/client';
+import { DEFAULT_LOCALE, isLocale, type Locale } from '@/lib/i18n';
 
 export const SESSION_COOKIE = 'bobegim_session';
 
 export type AuthUser = Pick<
   User,
   'id' | 'login' | 'fullName' | 'role' | 'tenantId' | 'mustChangePassword' | 'email' | 'phone'
-> & { impersonatedBy: string | null };
+> & {
+  impersonatedBy: string | null;
+  /**
+   * Язык админки. В базе это обычная строка, поэтому здесь она приводится
+   * к известному значению: неизвестный код в колонке не должен превращаться
+   * в пустой интерфейс.
+   */
+  locale: Locale;
+};
 
 /** В БД лежит только хеш токена: дамп базы не даёт войти под чужой сессией. */
 function hashToken(token: string): string {
@@ -99,6 +108,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     email: user.email,
     phone: user.phone,
     impersonatedBy: session.impersonatedBy,
+    locale: isLocale(user.locale) ? user.locale : DEFAULT_LOCALE,
   };
 }
 

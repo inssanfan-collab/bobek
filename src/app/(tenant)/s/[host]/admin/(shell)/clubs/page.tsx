@@ -42,8 +42,12 @@ export default async function ClubsPage({ params }: { params: Promise<{ host: st
             <input id="nameKk" name="nameKk" className="field" placeholder="Ағылшын тілі" />
           </div>
           <div className="sm:col-span-2">
-            <label className="field-label" htmlFor="descRu">Описание</label>
+            <label className="field-label" htmlFor="descRu">Описание (рус.)</label>
             <textarea id="descRu" name="descRu" rows={2} className="field" placeholder="Игровые занятия в малых группах по 8 детей" />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="field-label" htmlFor="descKk">Сипаттамасы (қаз.)</label>
+            <textarea id="descKk" name="descKk" rows={2} className="field" placeholder="8 баладан тұратын шағын топтардағы ойын сабақтары" />
           </div>
           <div>
             <label className="field-label" htmlFor="teacher">Кто ведёт</label>

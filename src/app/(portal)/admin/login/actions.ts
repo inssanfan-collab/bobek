@@ -8,6 +8,7 @@ import { createSession, requestMeta } from '@/server/auth/session';
 import { assertCsrf } from '@/server/auth/csrf';
 import { hit, reset, LOGIN_LIMIT, LOGIN_WINDOW_MS } from '@/server/auth/rate-limit';
 import { audit } from '@/server/audit';
+import { DEFAULT_LOCALE, isLocale } from '@/lib/i18n';
 
 export type LoginState = { error?: string; redirectTo?: string };
 
@@ -79,7 +80,7 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
 
   await createSession(user.id, { ip, userAgent });
   await audit(
-    { id: user.id, login: user.login, fullName: user.fullName, role: user.role, tenantId: user.tenantId, mustChangePassword: user.mustChangePassword, email: user.email, phone: user.phone, impersonatedBy: null },
+    { id: user.id, login: user.login, fullName: user.fullName, role: user.role, tenantId: user.tenantId, mustChangePassword: user.mustChangePassword, email: user.email, phone: user.phone, impersonatedBy: null, locale: isLocale(user.locale) ? user.locale : DEFAULT_LOCALE },
     'auth.login',
     { tenantId: user.tenantId },
   );
