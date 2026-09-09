@@ -7,8 +7,17 @@ import { SubmitButton } from '@/components/ui/SubmitButton';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { savePortalPost } from './actions';
 import type { PortalPost } from '@prisma/client';
+import type { Locale } from '@/lib/i18n';
 
-export function PortalPostForm({ csrf, post }: { csrf: string; post?: PortalPost | null }) {
+export function PortalPostForm({
+  csrf,
+  post,
+  locale,
+}: {
+  csrf: string;
+  post?: PortalPost | null;
+  locale: Locale;
+}) {
   return (
     <form action={savePortalPost} className="space-y-5">
       <input type="hidden" name={CSRF_FIELD} value={csrf} />
@@ -31,8 +40,8 @@ export function PortalPostForm({ csrf, post }: { csrf: string; post?: PortalPost
       <section className="card p-6">
         <BilingualField
           label="Текст"
-          ru={<RichText name="bodyRu" defaultValue={post?.bodyRu ?? ''} placeholder="Текст новости…" />}
-          kk={<RichText name="bodyKk" defaultValue={post?.bodyKk ?? ''} placeholder="Жаңалық мәтіні…" />}
+          ru={<RichText locale={locale} name="bodyRu" defaultValue={post?.bodyRu ?? ''} placeholder="Текст новости…" />}
+          kk={<RichText locale={locale} name="bodyKk" defaultValue={post?.bodyKk ?? ''} placeholder="Жаңалық мәтіні…" />}
         />
       </section>
 

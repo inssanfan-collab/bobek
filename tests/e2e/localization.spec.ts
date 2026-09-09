@@ -30,6 +30,25 @@ test.describe('Двуязычие админки', () => {
     await expect(page.getByRole('link', { name: 'Новости' })).toBeVisible();
   });
 
+  test('форма новости открывается на казахском с обеими вкладками', async ({ page }) => {
+    await login(page, site('sad12'), SAD12_ADMIN);
+    await page.goto(`${site('sad12')}/admin`);
+    await switchTo(page, 'ҚАЗ');
+
+    await page.goto(`${site('sad12')}/admin/posts/new?type=NEWS`);
+    await expect(page.getByText('Тақырып', { exact: true })).toBeVisible();
+    await expect(page.getByText('Жариялау', { exact: true }).first()).toBeVisible();
+
+    // Вкладки языка контента остаются на месте: интерфейс казахский,
+    // но заполнить нужно обе версии новости.
+    const tabs = page.getByRole('tab');
+    await expect(tabs.filter({ hasText: 'ҚАЗ' }).first()).toBeVisible();
+    await expect(tabs.filter({ hasText: 'РУС' }).first()).toBeVisible();
+
+    await page.goto(`${site('sad12')}/admin`);
+    await switchTo(page, 'РУС');
+  });
+
   test('выбранный язык переживает переход по разделам', async ({ page }) => {
     await login(page, site('sad12'), SAD12_ADMIN);
     await page.goto(`${site('sad12')}/admin`);

@@ -35,7 +35,7 @@ export default async function NewPostPage({
   return (
     <>
       <PageHeader title={type === 'NEWS' ? 'Новая новость' : 'Новое объявление'} />
-      <PostForm csrf={csrf} host={host} section={section} library={library} canEdit={ctx.canEdit} />
+      <PostForm csrf={csrf} host={host} section={section} library={library} canEdit={ctx.canEdit} locale={ctx.user.locale} />
     </>
   );
 }

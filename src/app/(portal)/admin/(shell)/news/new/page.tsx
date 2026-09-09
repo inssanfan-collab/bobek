@@ -6,13 +6,13 @@ import { PortalPostForm } from '../PortalPostForm';
 export const dynamic = 'force-dynamic';
 
 export default async function NewPortalPostPage() {
-  await requireSuperadmin();
+  const user = await requireSuperadmin();
   const csrf = await csrfToken();
 
   return (
     <>
       <PageHeader title="Новая новость портала" />
-      <PortalPostForm csrf={csrf} />
+      <PortalPostForm csrf={csrf} locale={user.locale} />
     </>
   );
 }

@@ -8,7 +8,7 @@ import { PortalPostForm } from '../PortalPostForm';
 export const dynamic = 'force-dynamic';
 
 export default async function EditPortalPostPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireSuperadmin();
+  const user = await requireSuperadmin();
   const { id } = await params;
 
   const [post, csrf] = await Promise.all([
@@ -20,7 +20,7 @@ export default async function EditPortalPostPage({ params }: { params: Promise<{
   return (
     <>
       <PageHeader title="Редактирование новости" description={post.titleRu} />
-      <PortalPostForm csrf={csrf} post={post} />
+      <PortalPostForm csrf={csrf} post={post} locale={user.locale} />
     </>
   );
 }

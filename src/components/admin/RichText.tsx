@@ -1,17 +1,28 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import type { Locale } from '@/lib/i18n';
 
-type Command = { label: string; title: string; run: (exec: (cmd: string, value?: string) => void) => void };
+type Phrase = { kk: string; ru: string };
+type Command = { label: Phrase; title: Phrase; run: (exec: (cmd: string, value?: string) => void) => void };
+
+const T = {
+  link: { kk: 'Сілтеме', ru: 'Ссылка' },
+  linkPrompt: {
+    kk: 'Сілтеме мекенжайы (мысалы, https://egov.kz)',
+    ru: 'Адрес ссылки (например, https://egov.kz)',
+  },
+  text: { kk: 'Мәтін', ru: 'Текст' },
+} as const;
 
 const COMMANDS: Command[] = [
-  { label: 'Ж', title: 'Полужирный', run: (e) => e('bold') },
-  { label: 'К', title: 'Курсив', run: (e) => e('italic') },
-  { label: 'H2', title: 'Подзаголовок', run: (e) => e('formatBlock', 'h2') },
-  { label: 'H3', title: 'Малый подзаголовок', run: (e) => e('formatBlock', 'h3') },
-  { label: '¶', title: 'Обычный текст', run: (e) => e('formatBlock', 'p') },
-  { label: '• Список', title: 'Маркированный список', run: (e) => e('insertUnorderedList') },
-  { label: '1. Список', title: 'Нумерованный список', run: (e) => e('insertOrderedList') },
+  { label: { kk: 'Ж', ru: 'Ж' }, title: { kk: 'Қалың', ru: 'Полужирный' }, run: (e) => e('bold') },
+  { label: { kk: 'К', ru: 'К' }, title: { kk: 'Көлбеу', ru: 'Курсив' }, run: (e) => e('italic') },
+  { label: { kk: 'H2', ru: 'H2' }, title: { kk: 'Ішкі тақырып', ru: 'Подзаголовок' }, run: (e) => e('formatBlock', 'h2') },
+  { label: { kk: 'H3', ru: 'H3' }, title: { kk: 'Кіші ішкі тақырып', ru: 'Малый подзаголовок' }, run: (e) => e('formatBlock', 'h3') },
+  { label: { kk: '¶', ru: '¶' }, title: { kk: 'Кәдімгі мәтін', ru: 'Обычный текст' }, run: (e) => e('formatBlock', 'p') },
+  { label: { kk: '• Тізім', ru: '• Список' }, title: { kk: 'Таңбаланған тізім', ru: 'Маркированный список' }, run: (e) => e('insertUnorderedList') },
+  { label: { kk: '1. Тізім', ru: '1. Список' }, title: { kk: 'Нөмірленген тізім', ru: 'Нумерованный список' }, run: (e) => e('insertOrderedList') },
 ];
 
 /**
@@ -24,11 +35,13 @@ export function RichText({
   defaultValue = '',
   placeholder,
   disabled = false,
+  locale,
 }: {
   name: string;
   defaultValue?: string;
   placeholder?: string;
   disabled?: boolean;
+  locale: Locale;
 }) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [value, setValue] = useState(defaultValue);
@@ -53,7 +66,7 @@ export function RichText({
   }
 
   function addLink() {
-    const url = window.prompt('Адрес ссылки (например, https://egov.kz)');
+    const url = window.prompt(T.linkPrompt[locale]);
     if (url) exec('createLink', url);
   }
 
@@ -62,19 +75,19 @@ export function RichText({
       <div className="flex flex-wrap gap-1 border-b border-line p-2">
         {COMMANDS.map((command) => (
           <button
-            key={command.label}
+            key={command.label.ru}
             type="button"
-            title={command.title}
+            title={command.title[locale]}
             disabled={disabled}
             onClick={() => command.run(exec)}
             className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-muted hover:bg-brand-soft hover:text-brand-ink"
           >
-            {command.label}
+            {command.label[locale]}
           </button>
         ))}
         <button
           type="button"
-          title="Ссылка"
+          title={T.link[locale]}
           disabled={disabled}
           onClick={addLink}
           className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-muted hover:bg-brand-soft hover:text-brand-ink"
@@ -89,7 +102,7 @@ export function RichText({
         suppressContentEditableWarning
         role="textbox"
         aria-multiline="true"
-        aria-label={placeholder ?? 'Текст'}
+        aria-label={placeholder ?? T.text[locale]}
         data-placeholder={placeholder}
         onInput={sync}
         onBlur={sync}

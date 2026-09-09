@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { Locale } from '@/lib/i18n';
 
 export type PickableMedia = { id: string; origName: string };
 
@@ -9,18 +10,32 @@ export type PickableMedia = { id: string; origName: string };
  * Библиотека показывается по кнопке — воспитателю не нужен экран с сотней картинок,
  * пока он просто пишет новость.
  */
+const T = {
+  cover: { kk: 'Мұқаба', ru: 'Обложка' },
+  remove: { kk: 'Мұқабаны алып тастау', ru: 'Убрать обложку' },
+  none: {
+    kk: 'Мұқаба таңдалмаған — тізімде жаңалық түсті фонмен көрсетіледі.',
+    ru: 'Обложка не выбрана — в списке новость покажется с цветной заливкой.',
+  },
+  upload: { kk: 'Жаңа фото жүктеу', ru: 'Загрузить новое фото' },
+  hideLibrary: { kk: 'Жүктелгендерді жасыру', ru: 'Скрыть загруженные' },
+  openLibrary: { kk: 'Жүктелгендерден таңдау', ru: 'Выбрать из загруженных' },
+} as const;
+
 export function CoverPicker({
   name = 'coverMediaId',
   fileName = 'coverFile',
   defaultMediaId = '',
   library,
   disabled = false,
+  locale,
 }: {
   name?: string;
   fileName?: string;
   defaultMediaId?: string;
   library: PickableMedia[];
   disabled?: boolean;
+  locale: Locale;
 }) {
   const [selected, setSelected] = useState(defaultMediaId);
   const [preview, setPreview] = useState<string | null>(null);
@@ -30,7 +45,7 @@ export function CoverPicker({
 
   return (
     <div>
-      <span className="field-label">Обложка</span>
+      <span className="field-label">{T.cover[locale]}</span>
 
       {currentSrc ? (
         <div className="mb-3 flex flex-wrap items-start gap-3">
@@ -45,18 +60,18 @@ export function CoverPicker({
             }}
             className="btn-ghost text-sm text-red-600"
           >
-            Убрать обложку
+            {T.remove[locale]}
           </button>
         </div>
       ) : (
-        <p className="mb-3 text-sm text-muted">Обложка не выбрана — в списке новость покажется с цветной заливкой.</p>
+        <p className="mb-3 text-sm text-muted">{T.none[locale]}</p>
       )}
 
       <input type="hidden" name={name} value={selected} />
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-56 flex-1">
-          <label className="field-hint mb-1 block" htmlFor={fileName}>Загрузить новое фото</label>
+          <label className="field-hint mb-1 block" htmlFor={fileName}>{T.upload[locale]}</label>
           <input
             id={fileName}
             name={fileName}
@@ -81,7 +96,7 @@ export function CoverPicker({
             onClick={() => setLibraryOpen((open) => !open)}
             className="btn-secondary text-sm"
           >
-            {libraryOpen ? 'Скрыть загруженные' : 'Выбрать из загруженных'}
+            {libraryOpen ? T.hideLibrary[locale] : T.openLibrary[locale]}
           </button>
         ) : null}
       </div>

@@ -13,7 +13,7 @@ pnpm db:setup     # миграции + демо-сады
 pnpm dev          # разработка
 pnpm typecheck && pnpm lint
 pnpm test         # 44 юнит-теста (vitest)
-pnpm test:e2e     # 32 сквозных (playwright, поднимает сервер сам)
+pnpm test:e2e     # 33 сквозных (playwright, поднимает сервер сам)
 ```
 
 Открывать **http://bobegim.local:3000**, не `localhost` — сад определяется по домену.

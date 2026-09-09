@@ -39,8 +39,8 @@ export default async function EditPagePage({
         <section className="card p-6">
           <BilingualField
             label="Текст страницы"
-            ru={<RichText name="bodyRu" defaultValue={section.page?.bodyRu ?? ''} placeholder="Расскажите о саде…" disabled={!ctx.canEdit} />}
-            kk={<RichText name="bodyKk" defaultValue={section.page?.bodyKk ?? ''} placeholder="Балабақша туралы жазыңыз…" disabled={!ctx.canEdit} />}
+            ru={<RichText name="bodyRu" defaultValue={section.page?.bodyRu ?? ''} placeholder="Расскажите о саде…" disabled={!ctx.canEdit} locale={ctx.user.locale} />}
+            kk={<RichText name="bodyKk" defaultValue={section.page?.bodyKk ?? ''} placeholder="Балабақша туралы жазыңыз…" disabled={!ctx.canEdit} locale={ctx.user.locale} />}
           />
         </section>
 

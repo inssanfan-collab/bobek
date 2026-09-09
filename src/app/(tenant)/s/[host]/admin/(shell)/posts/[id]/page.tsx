@@ -42,6 +42,7 @@ export default async function EditPostPage({
         cover={post.coverMedia}
         library={library}
         canEdit={ctx.canEdit}
+        locale={ctx.user.locale}
       />
     </>
   );
