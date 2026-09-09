@@ -29,13 +29,13 @@ jobs:
       STORAGE_DIR: ./storage
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Версию pnpm берём из packageManager в package.json. Если задать её ещё
       # и здесь, action останавливается на «Multiple versions of pnpm specified».
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -73,7 +73,7 @@ jobs:
       - name: Сквозные тесты
         run: pnpm test:e2e
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { mapView, type MapPoint } from '@/lib/map';
 
 /**
@@ -9,6 +9,11 @@ import { mapView, type MapPoint } from '@/lib/map';
  * Клиентский компонент: API рисует карту только в браузере. Скрипт грузится
  * один раз на вкладку — в dev React монтирует эффекты дважды, и без общего
  * промиса на странице оказалось бы две карты.
+ *
+ * Карта строится по нажатию, а не сразу. У бесплатного тарифа сто запросов
+ * в сутки, и на каждый заход в каталог их хватило бы на сотню родителей:
+ * сто первый увидел бы пустое место. По клику тот же лимит расходуется только
+ * на тех, кому карта действительно нужна, а страница остаётся лёгкой.
  */
 
 export type MapGarden = MapPoint & {
@@ -64,8 +69,11 @@ export function CatalogMapInteractive({
   apiKey: string;
 }) {
   const container = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (!open) return;
+
     const element = container.current;
     if (!element) return;
 
@@ -120,7 +128,25 @@ export function CatalogMapInteractive({
       cancelled = true;
       map?.destroy();
     };
-  }, [gardens, apiKey]);
+  }, [open, gardens, apiKey]);
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex w-full items-center gap-3 px-5 py-4 text-left hover:bg-brand-soft/40"
+      >
+        <span aria-hidden className="text-2xl">🗺️</span>
+        <span>
+          <span className="block font-semibold">Показать на карте</span>
+          <span className="block text-sm text-muted">
+            Садов с адресом на карте: {gardens.length}. Номер метки совпадает с номером карточки.
+          </span>
+        </span>
+      </button>
+    );
+  }
 
   return <div ref={container} className="h-72 w-full sm:h-96" style={{ minHeight: 288 }} />;
 }
