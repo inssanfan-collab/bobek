@@ -15,7 +15,6 @@ const T = {
   skip: { kk: 'Мазмұнға өту', ru: 'Перейти к содержимому' },
   mainMenu: { kk: 'Негізгі мәзір', ru: 'Основное меню' },
   connect: { kk: 'Балабақшаны қосу', ru: 'Подключить сад' },
-  login: { kk: 'Кіру', ru: 'Вход' },
   languageGroup: { kk: 'Сайт тілі', ru: 'Язык сайта' },
   about: {
     kk: 'Ақтөбе облысының балабақшаларына арналған сайттар. Дайын жүйе, жеке әкімші бөлімі, қазақ және орыс тілдерінде қолдау.',
@@ -108,9 +107,6 @@ export function PortalHeader({ locale, pathname }: { locale: Locale; pathname: s
             <PortalLocaleSwitch locale={locale} pathname={pathname} />
             <Link href={withLocale('/apply', locale)} className="btn-primary text-sm">
               {T.connect[locale]}
-            </Link>
-            <Link href="/admin" className="btn-secondary hidden text-sm sm:inline-flex">
-              {T.login[locale]}
             </Link>
           </div>
         </div>

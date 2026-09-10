@@ -3,7 +3,6 @@ import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
 import { formatMoney } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
-import { VersionCompareBar } from '@/components/portal/redesign/VersionCompareBar';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
@@ -186,8 +185,6 @@ export default async function PortalHome({
 
   return (
     <PortalPage locale={locale} pathname="/">
-      <VersionCompareBar locale={locale} currentMode="original" />
-
       {/* ── герой ─────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
         <div
