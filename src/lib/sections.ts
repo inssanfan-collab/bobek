@@ -66,8 +66,8 @@ export const SECTION_CATALOG: SectionMeta[] = [
   },
   {
     type: 'PAGE', slug: 'parents', titleKk: 'Ата-аналарға', titleRu: 'Родителям',
-    hintRu: 'Как встать в очередь через egov, что взять в сад, режим дня, оплата.',
-    hintKk: 'egov арқылы кезекке қалай тұру керек, балабақшаға не алып келу керек, күн тәртібі, төлем.',
+    hintRu: 'Как встать в очередь через Darabala.kz, что взять в сад, режим дня, оплата.',
+    hintKk: 'Darabala.kz арқылы кезекке қалай тұру керек, балабақшаға не алып келу керек, күн тәртібі, төлем.',
     defaultOn: true, singleton: false, icon: '👪',
   },
   {

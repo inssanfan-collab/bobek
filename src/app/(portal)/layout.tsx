@@ -23,12 +23,14 @@ export const metadata: Metadata = {
  */
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" data-palette="mandarin" data-a11y="off">
+    <html lang="ru" data-palette="mandarin" data-skin="portal" data-a11y="off">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        {/* Geist и Manrope выбраны за покрытие казахских букв: ә ғ қ ң ө ұ ү һ і
+            рисует сам шрифт, а не системная подмена. */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:wght@400;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>

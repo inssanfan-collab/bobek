@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
-import { ActionError, type ActionState, toActionError } from '@/lib/action-state';
+import { ActionError, EMPTY_ACTION_STATE, type ActionState, toActionError } from '@/lib/action-state';
 import { z } from 'zod';
 import { prisma } from '@/server/db';
 import { tenantAdmin } from '@/server/tenant/admin-context';
@@ -474,6 +474,40 @@ export async function saveGroup(formData: FormData) {
 
   await syncFreePlaces(ctx.tenantId);
   revalidatePath('/admin/groups');
+}
+
+/**
+ * Отдельное действие для свободных мест: цифра меняется чаще всего остального,
+ * и заведующая правит её прямо в строке списка. Через `saveGroup` так нельзя —
+ * оно перезаписывает всю группу, и короткая форма стёрла бы возраст, язык
+ * и педагогов пустыми значениями.
+ */
+export async function setGroupPlaces(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    const ctx = await gate(formData);
+    const id = str(formData, 'id');
+    await assertOwned('group', id, ctx.tenantId);
+
+    const placesFree = num(formData, 'placesFree') ?? 0;
+    if (placesFree < 0) {
+      throw new ActionError({ kk: 'Бос орын теріс болмайды', ru: 'Свободных мест не может быть меньше нуля' });
+    }
+
+    const group = await prisma.group.findUniqueOrThrow({ where: { id }, select: { placesTotal: true } });
+    if (group.placesTotal !== null && placesFree > group.placesTotal) {
+      throw new ActionError({
+        kk: `Барлығы ${group.placesTotal} орын`,
+        ru: `Всего мест — ${group.placesTotal}`,
+      });
+    }
+
+    await prisma.group.update({ where: { id }, data: { placesFree } });
+    await syncFreePlaces(ctx.tenantId);
+    revalidatePath('/admin/groups');
+    return EMPTY_ACTION_STATE;
+  } catch (error) {
+    return toActionError(error, (await getCurrentUser())?.locale);
+  }
 }
 
 export async function deleteGroup(formData: FormData) {

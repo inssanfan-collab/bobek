@@ -23,7 +23,7 @@ const T = {
   },
   sections: { kk: 'Бөлімдер', ru: 'Разделы' },
   parents: { kk: 'Ата-аналарға', ru: 'Родителям' },
-  queue: { kk: 'Балабақшаға кезек (egov.kz)', ru: 'Очередь в детский сад (egov.kz)' },
+  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   preschoolPortal: { kk: 'Мектепке дейінгі білім порталы', ru: 'Портал дошкольного образования' },
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
   city: { kk: 'Ақтөбе қ.', ru: 'г. Актобе' },
@@ -73,11 +73,23 @@ export function PortalHeader({ locale, pathname }: { locale: Locale; pathname: s
 
       <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
         <div className="container-page flex h-16 items-center gap-6">
-          <Link href={withLocale('/', locale)} className="flex shrink-0 items-center gap-2">
-            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-brand text-lg text-white" aria-hidden>
-              🧸
+          <Link href={withLocale('/', locale)} className="flex shrink-0 items-center gap-2.5">
+            <span
+              className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-brand to-brand-ink font-display text-lg font-extrabold text-white"
+              aria-hidden
+            >
+              Б
             </span>
-            <span className="font-display text-xl font-extrabold tracking-tight">Bobegim</span>
+            <span>
+              <span className="block font-display text-xl font-extrabold leading-none tracking-tight">
+                Бөбегім
+              </span>
+              {/* На узком экране подпись прячется: вместе с кнопками шапки
+                  она не помещается в 375 px и вызывала горизонтальный скролл. */}
+              <span className="mt-0.5 hidden text-[0.5625rem] font-bold uppercase tracking-[0.16em] text-muted sm:block">
+                Ақтөбе балабақшалары
+              </span>
+            </span>
           </Link>
 
           <nav className="hidden flex-1 items-center gap-1 md:flex" aria-label={T.mainMenu[locale]}>
@@ -164,7 +176,7 @@ export function PortalFooter({ locale }: { locale: Locale }) {
           <p className="mb-2 font-semibold">{T.parents[locale]}</p>
           <ul className="space-y-1.5 text-sm text-muted">
             <li>
-              <a href="https://egov.kz/cms/ru/articles/child/2Fdetskiii_sad_rk" target="_blank" rel="noopener noreferrer">
+              <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">
                 {T.queue[locale]}
               </a>
             </li>

@@ -29,7 +29,7 @@ const T = {
     kk: 'Порталдағы балабақшалардың ресми сайттары. Кезекке тұру үшін ',
     ru: 'Официальные сайты садов на портале. Чтобы встать в очередь, воспользуйтесь ',
   },
-  egovLink: { kk: 'egov.kz қызметін пайдаланыңыз', ru: 'услугой на egov.kz' },
+  queueLink: { kk: 'Darabala.kz қызметін пайдаланыңыз', ru: 'услугой на Darabala.kz' },
   searchLabel: { kk: 'Атауы, мекенжайы немесе ауданы', ru: 'Название, адрес или район' },
   searchExample: { kk: 'Мысалы: Балдырған', ru: 'Например: Балдырған' },
   district: { kk: 'Аудан', ru: 'Район' },
@@ -128,8 +128,8 @@ export default async function CatalogPage({
       <h1 className="font-display text-4xl font-extrabold">{T.title[locale]}</h1>
       <p className="mt-2 max-w-2xl text-muted">
         {T.leadBefore[locale]}
-        <a href="https://egov.kz/cms/ru/articles/child/2Fdetskiii_sad_rk" target="_blank" rel="noopener noreferrer" className="font-semibold text-brand underline">
-          {T.egovLink[locale]}
+        <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer" className="font-semibold text-brand underline">
+          {T.queueLink[locale]}
         </a>
         .
       </p>

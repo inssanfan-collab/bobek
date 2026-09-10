@@ -285,11 +285,11 @@ export function VacanciesBlock({
         <p className="font-display text-4xl font-extrabold">{profile?.placesFree ?? 0}</p>
         <p className="mt-2 text-sm text-muted">
           {locale === 'kk'
-            ? 'Кезекке тұру — egov.kz порталы арқылы.'
-            : 'Постановка в очередь — через портал egov.kz.'}
+            ? 'Кезекке тұру — Darabala.kz порталы арқылы.'
+            : 'Постановка в очередь — через портал Darabala.kz.'}
         </p>
         <a
-          href="https://egov.kz/cms/ru/articles/child/2Fdetskiii_sad_rk"
+          href="https://darabala.kz"
           target="_blank"
           rel="noopener noreferrer"
           className="btn-secondary mt-4 text-sm"

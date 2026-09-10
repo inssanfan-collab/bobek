@@ -8,10 +8,13 @@ import { login, site, PORTAL, SAD12_ADMIN } from './helpers';
  */
 async function switchTo(page: Page, label: 'ҚАЗ' | 'РУС') {
   const button = page.getByRole('button', { name: label });
-  // Кнопка выбранного языка выключена — значит переключать уже нечего.
-  if (await button.isDisabled()) return;
+  // Признак выбранного языка — aria-current, а не disabled: пока запрос
+  // выполняется, переключатель выключает обе кнопки. Дождавшись disabled,
+  // тест уходил на следующую страницу и обрывал начатую смену языка —
+  // админка оставалась на прежнем языке.
+  if ((await button.getAttribute('aria-current')) === 'true') return;
   await button.click();
-  await expect(page.getByRole('button', { name: label })).toBeDisabled();
+  await expect(button).toHaveAttribute('aria-current', 'true');
 }
 
 test.describe('Двуязычие админки', () => {

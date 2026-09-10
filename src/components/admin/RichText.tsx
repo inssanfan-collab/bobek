@@ -9,8 +9,8 @@ type Command = { label: Phrase; title: Phrase; run: (exec: (cmd: string, value?:
 const T = {
   link: { kk: 'Сілтеме', ru: 'Ссылка' },
   linkPrompt: {
-    kk: 'Сілтеме мекенжайы (мысалы, https://egov.kz)',
-    ru: 'Адрес ссылки (например, https://egov.kz)',
+    kk: 'Сілтеме мекенжайы (мысалы, https://darabala.kz)',
+    ru: 'Адрес ссылки (например, https://darabala.kz)',
   },
   text: { kk: 'Мәтін', ru: 'Текст' },
 } as const;
