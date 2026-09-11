@@ -31,9 +31,20 @@ export function SiteHeader({
     <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
       <div className="container-page flex items-center gap-4 py-3">
         <Link href={withLocale('/', locale)} className="flex min-w-0 items-center gap-3">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand text-xl text-white" aria-hidden>
-            🧸
-          </span>
+          {profile?.logoMediaId ? (
+            // Логотип сада вместо заглушки. object-contain, а не cover:
+            // у садов гербы и эмблемы непредсказуемых пропорций, обрезать их нельзя.
+            // eslint-disable-next-line @next/next/no-img-element -- файл отдаёт /api/media, оптимизатор Next с ним не работает
+            <img
+              src={`/api/media/${profile.logoMediaId}`}
+              alt=""
+              className="h-11 w-11 shrink-0 rounded-2xl object-contain"
+            />
+          ) : (
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand text-xl text-white" aria-hidden>
+              🧸
+            </span>
+          )}
           <span className="min-w-0">
             <span className={`block truncate font-display font-extrabold leading-tight ${compact ? 'text-base' : 'text-lg'}`}>
               {name || 'Балабақша'}
