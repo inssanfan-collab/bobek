@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
@@ -21,9 +22,14 @@ const T = {
   oneDay: { kk: '1 күн', ru: '1 день' },
   untilLaunch: { kk: 'сайтты іске қосуға дейін', ru: 'до запуска сайта' },
   twoLanguages: { kk: 'бірден екі тіл', ru: 'два языка сразу' },
-  mockPhoto: { kk: 'Мұнда балабақшаңыздың фотосы', ru: 'Здесь фотография вашего сада' },
+  mockPhotoAlt: {
+    kk: 'Балабақша тобы: үстел басындағы балалар мен тәрбиеші',
+    ru: 'Группа детского сада: дети с воспитателем за столом',
+  },
   mockNews: { kk: 'Жаңалықтар', ru: 'Новости' },
-  mockMenu: { kk: 'Тамақтану мәзірі', ru: 'Меню питания' },
+  mockNewsItem: { kk: 'Наурыз мейрамы — 21 наурыз', ru: 'Наурыз мейрамы — 21 марта' },
+  mockMenu: { kk: 'Мәзір', ru: 'Меню' },
+  mockMenuItem: { kk: 'Сүтпен ботқа, жеміс', ru: 'Каша с ягодами, фрукты' },
   floatEyebrow: { kk: 'Бүгінгі мәзір', ru: 'Бүгінгі мәзір' },
   floatValue: { kk: 'Таңғы ас — Сүтпен ботқа', ru: 'Таңғы ас — Сүтпен ботқа' },
 
@@ -254,15 +260,26 @@ export default async function PortalHome({
                 </span>
               </div>
               <div className="space-y-3.5 p-5">
-                <div className="grid h-44 place-items-center rounded-2xl border border-dashed border-brand/40 bg-gradient-to-br from-brand-soft to-accent-soft text-sm font-bold text-brand-ink">
-                  {T.mockPhoto[locale]}
-                </div>
+                <Image
+                  src="/images/group-room.webp"
+                  alt={T.mockPhotoAlt[locale]}
+                  width={512}
+                  height={286}
+                  priority
+                  className="h-44 w-full rounded-2xl object-cover"
+                />
                 <div className="grid grid-cols-2 gap-3.5">
-                  <div className="grid h-[4.5rem] place-items-center rounded-2xl border border-dashed border-brand/40 bg-brand-soft text-xs font-bold text-brand-ink">
-                    {T.mockNews[locale]}
+                  <div className="rounded-2xl bg-brand-soft px-4 py-3">
+                    <p className="text-[0.625rem] font-extrabold uppercase tracking-[0.1em] text-brand-ink">
+                      {T.mockNews[locale]}
+                    </p>
+                    <p className="mt-1 text-xs font-bold leading-snug">{T.mockNewsItem[locale]}</p>
                   </div>
-                  <div className="grid h-[4.5rem] place-items-center rounded-2xl border border-dashed border-accent/50 bg-accent-soft text-xs font-bold text-accent-ink">
-                    {T.mockMenu[locale]}
+                  <div className="rounded-2xl bg-accent-soft px-4 py-3">
+                    <p className="text-[0.625rem] font-extrabold uppercase tracking-[0.1em] text-accent-ink">
+                      {T.mockMenu[locale]}
+                    </p>
+                    <p className="mt-1 text-xs font-bold leading-snug">{T.mockMenuItem[locale]}</p>
                   </div>
                 </div>
               </div>
@@ -302,78 +319,133 @@ export default async function PortalHome({
         </h2>
         <p className="mt-3 max-w-2xl text-muted">{T.featuresLead[locale]}</p>
 
-        <div className="mt-9 grid gap-5 lg:grid-cols-4">
-          <div className="rounded-3xl bg-gradient-to-br from-brand to-brand-ink p-7 text-white shadow-soft lg:col-span-2">
-            <h3 className="font-display text-2xl font-bold">
-              {locale === 'kk' ? 'Бос орындар' : 'Свободные места'}
-            </h3>
-            <p className="mt-2 text-white/85">
-              {locale === 'kk'
-                ? '«Күншуақ» тобында 5 орын — ата-ана қоңырау шалмай-ақ санды бірден көреді.'
-                : '5 мест в группе «Күншуақ» — родитель видит цифру сразу, без звонка заведующей.'}
-            </p>
-          </div>
+        <div className="mt-9 grid auto-rows-fr gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {/* Свободные места — то, ради чего родитель заходит на сайт сада,
+              поэтому плитка занимает две колонки и открывает ряд. */}
+          <article className="group relative overflow-hidden rounded-3xl bg-night text-surface shadow-soft md:col-span-2">
+            <Image
+              src="/images/story-time.webp"
+              alt=""
+              width={512}
+              height={286}
+              className="absolute inset-0 h-full w-full object-cover opacity-45 transition duration-500 group-hover:scale-105"
+            />
+            <div className="relative flex h-full flex-col justify-end bg-gradient-to-t from-night via-night/85 to-night/20 p-7">
+              <p className="text-[0.6875rem] font-extrabold uppercase tracking-[0.14em] text-accent">
+                {locale === 'kk' ? 'Ата-ана бірден көреді' : 'Родитель видит сразу'}
+              </p>
+              <h3 className="mt-2 font-display text-2xl font-bold">
+                {locale === 'kk' ? 'Бос орындар' : 'Свободные места'}
+              </h3>
+              <p className="mt-2 max-w-md text-surface/80">
+                {locale === 'kk'
+                  ? '«Күншуақ» тобында 5 орын — қоңырау шалудың қажеті жоқ.'
+                  : '5 мест в группе «Күншуақ» — звонить заведующей не нужно.'}
+              </p>
+            </div>
+          </article>
 
-          <div className="rounded-3xl border border-line bg-card p-7 shadow-soft lg:row-span-2">
-            <h3 className="font-display text-2xl font-bold">Мәзір · {locale === 'kk' ? 'Мәзір' : 'Меню'}</h3>
-            <dl className="mt-4 text-sm">
-              {[
-                { k: 'Таңғы ас', v: 'Сүтпен ботқа' },
-                { k: locale === 'kk' ? 'Түскі ас' : 'Обед', v: locale === 'kk' ? 'Сорпа' : 'Сорпа' },
-                { k: 'Бесін ас', v: locale === 'kk' ? 'Запеканка' : 'Запеканка' },
-              ].map((row) => (
-                <div
-                  key={row.k}
-                  className="flex justify-between gap-3 border-b border-dashed border-line py-2.5 last:border-0"
-                >
-                  <dt className="text-muted">{row.k}</dt>
-                  <dd className="font-bold">{row.v}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className="mt-4 text-sm text-muted">
-              {locale === 'kk'
-                ? 'Апталық мәзір бір рет толтырылады және ата-аналарға күн бойынша көрсетіледі.'
-                : 'Меню на неделю заполняется один раз и показывается родителям по дням.'}
-            </p>
-          </div>
+          {/* Меню: фотография сверху, под ней настоящий день недели */}
+          <article className="overflow-hidden rounded-3xl border border-line bg-card shadow-soft">
+            <Image
+              src="/images/menu-porridge.webp"
+              alt=""
+              width={512}
+              height={382}
+              className="h-36 w-full object-cover"
+            />
+            <div className="p-6">
+              <h3 className="font-display text-xl font-bold">
+                Мәзір · {locale === 'kk' ? 'Мәзір' : 'Меню'}
+              </h3>
+              <dl className="mt-3 text-sm">
+                {[
+                  { k: 'Таңғы ас', v: 'Сүтпен ботқа' },
+                  { k: locale === 'kk' ? 'Түскі ас' : 'Обед', v: 'Сорпа' },
+                  { k: 'Бесін ас', v: locale === 'kk' ? 'Кеспе' : 'Запеканка' },
+                ].map((row) => (
+                  <div
+                    key={row.k}
+                    className="flex justify-between gap-3 border-b border-dashed border-line py-1.5 last:border-0"
+                  >
+                    <dt className="text-muted">{row.k}</dt>
+                    <dd className="font-bold">{row.v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </article>
 
-          <div className="rounded-3xl border border-accent/30 bg-accent-soft p-7">
-            <h3 className="font-display text-xl font-bold">Наурыз мейрамы</h3>
-            <p className="mt-1.5 text-sm text-accent-ink">
-              {locale === 'kk' ? 'Фотосы мен күні бар жаңалықтар' : 'Новости с фотографиями и датами'}
-            </p>
-          </div>
+          {/* Новости */}
+          <article className="overflow-hidden rounded-3xl border border-line bg-card shadow-soft">
+            <Image
+              src="/images/drawings.webp"
+              alt=""
+              width={512}
+              height={382}
+              className="h-36 w-full object-cover"
+            />
+            <div className="p-6">
+              <h3 className="font-display text-xl font-bold">
+                {locale === 'kk' ? 'Жаңалықтар мен хабарландырулар' : 'Новости и объявления'}
+              </h3>
+              <p className="mt-2 text-sm text-muted">
+                {locale === 'kk'
+                  ? 'Наурыз мейрамы, ертеңгіліктер, карантин — ата-аналар чаттан емес, сайттан біледі.'
+                  : 'Наурыз мейрамы, утренники, карантин — родители узнают с сайта, а не из чата.'}
+              </p>
+            </div>
+          </article>
 
-          <div className="rounded-3xl border border-line bg-card p-7 shadow-soft">
-            <h3 className="font-display text-xl font-bold">{locale === 'kk' ? 'Педагогтар' : 'Педагоги'}</h3>
-            <p className="mt-1.5 text-sm text-muted">
-              {locale === 'kk' ? 'Құрамы, санаты, өтілі' : 'Состав, категории, стаж'}
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-night p-7 text-surface lg:col-span-2">
-            <h3 className="font-display text-2xl font-bold">
+          {/* Документы */}
+          <article className="rounded-3xl border border-line bg-card p-6 shadow-soft">
+            <h3 className="font-display text-xl font-bold">
               Құжаттар · {locale === 'kk' ? 'Құжаттар' : 'Документы'}
             </h3>
-            <p className="mt-2 text-surface/75">
+            <p className="mt-2 text-sm text-muted">
               {locale === 'kk'
-                ? 'Жарғы, лицензия, қабылдау ережелері — тексеруші де, ата-ана да іздейтін жерде.'
-                : 'Жарғы, лицензия, правила приёма — там, где их ищет проверка и родитель.'}
+                ? 'Тексеруші де, ата-ана да іздейтін жерде.'
+                : 'Там, где их ищет и проверка, и родитель.'}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {['Жарғы', locale === 'kk' ? 'Лицензия' : 'Лицензия', locale === 'kk' ? 'Қабылдау ережелері' : 'Правила приёма'].map(
+              {['Жарғы', 'Лицензия', locale === 'kk' ? 'Қабылдау ережелері' : 'Правила приёма'].map(
                 (chip) => (
-                  <span key={chip} className="rounded-full bg-surface/15 px-3 py-1.5 text-sm font-bold">
+                  <span
+                    key={chip}
+                    className="rounded-full bg-brand-soft px-3 py-1.5 text-xs font-bold text-brand-ink"
+                  >
                     {chip}
                   </span>
                 ),
               )}
             </div>
-          </div>
+          </article>
+
+          {/* Педагоги */}
+          <article className="rounded-3xl border border-line bg-card p-6 shadow-soft">
+            <h3 className="font-display text-xl font-bold">
+              {locale === 'kk' ? 'Педагогтар' : 'Педагоги'}
+            </h3>
+            <p className="mt-2 text-sm text-muted">
+              {locale === 'kk'
+                ? 'Құрамы, санаты, өтілі және біліктілікті арттыру курстары.'
+                : 'Состав, категории, стаж и курсы повышения квалификации.'}
+            </p>
+          </article>
+
+          {/* Галерея */}
+          <article className="rounded-3xl border border-accent/30 bg-accent-soft p-6">
+            <h3 className="font-display text-xl font-bold">
+              {locale === 'kk' ? 'Фотогалерея' : 'Фотогалерея'}
+            </h3>
+            <p className="mt-2 text-sm text-accent-ink">
+              {locale === 'kk'
+                ? 'Ертеңгіліктер мен серуендердің альбомдары. Фотолар қысылады, EXIF өшіріледі.'
+                : 'Альбомы утренников и прогулок. Фото сжимаются, EXIF удаляется.'}
+            </p>
+          </article>
         </div>
       </section>
-
       {/* ── родителям ─────────────────────────────────────────────────── */}
       <section className="container-page pb-16">
         <div className="grid gap-8 rounded-[2.5rem] border border-line bg-card p-8 shadow-soft sm:p-12 lg:grid-cols-2 lg:items-center">
