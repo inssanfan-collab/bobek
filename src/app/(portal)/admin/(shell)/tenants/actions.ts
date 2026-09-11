@@ -7,6 +7,8 @@ import { requireSuperadmin } from '@/server/auth/guards';
 import { assertCsrf } from '@/server/auth/csrf';
 import { audit } from '@/server/audit';
 import { createTenant, ProvisionError } from '@/server/tenant/provision';
+import { applyAnketa } from '@/server/tenant/apply-anketa';
+import { parseAnketa, AnketaError, type Anketa } from '@/server/import/anketa';
 import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { generatePassword, hashPassword } from '@/server/auth/password';
 import { destroyAllSessions, createSession, requestMeta } from '@/server/auth/session';
@@ -42,6 +44,41 @@ const createSchema = z.object({
   adminPhone: z.string().trim().max(60).optional(),
 });
 
+export type AnketaState = {
+  anketa?: Anketa;
+  message?: string;
+};
+
+/**
+ * Разбор присланной садом анкеты. Ничего не создаёт: заполняет форму,
+ * чтобы администратор портала увидел данные глазами до того, как сад появится.
+ */
+export async function parseAnketaAction(_prev: AnketaState, formData: FormData): Promise<AnketaState> {
+  await requireSuperadmin();
+  try {
+    await assertCsrf(formData);
+  } catch (error) {
+    return { message: (error as Error).message };
+  }
+
+  const file = formData.get('anketa');
+  if (!(file instanceof File) || file.size === 0) {
+    return { message: 'Выберите файл анкеты.' };
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return { message: 'Файл больше 5 МБ — это не анкета. Пришлите тот файл, который скачали у нас.' };
+  }
+
+  try {
+    const anketa = await parseAnketa(await file.arrayBuffer());
+    return { anketa };
+  } catch (error) {
+    if (error instanceof AnketaError) return { message: error.message };
+    console.error('[anketa.parse]', error);
+    return { message: 'Не удалось разобрать анкету. Проверьте, что файл открывается в Excel.' };
+  }
+}
+
 export type CreateTenantState = {
   errors?: Record<string, string>;
   message?: string;
@@ -53,6 +90,8 @@ export type CreateTenantState = {
     login: string;
     password: string;
     nameRu: string;
+    /** Что дополнительно перенесено из анкеты — показывается в памятке. */
+    applied?: { groups: number; staff: number; failed?: boolean };
   };
 };
 
@@ -111,6 +150,27 @@ export async function createTenantAction(
       meta: { slug: result.slug, login: result.login },
     });
 
+    // Остальное из анкеты — уже после создания. Сад создан и доступы показаны;
+    // упасть здесь значит потерять пароль, который второй раз не показать.
+    let applied: { groups: number; staff: number; failed?: boolean } | undefined;
+    const anketaJson = formData.get('anketaJson');
+    if (typeof anketaJson === 'string' && anketaJson.length > 2) {
+      try {
+        const anketa = JSON.parse(anketaJson) as Anketa;
+        await applyAnketa(result.tenantId, anketa);
+        applied = { groups: anketa.groups?.length ?? 0, staff: anketa.staff?.length ?? 0 };
+        await audit(admin, 'tenant.anketa_import', {
+          tenantId: result.tenantId,
+          entity: 'tenant',
+          entityId: result.tenantId,
+          meta: applied,
+        });
+      } catch (error) {
+        console.error('[tenant.anketa]', error);
+        applied = { groups: 0, staff: 0, failed: true };
+      }
+    }
+
     revalidatePath('/admin/tenants');
 
     return {
@@ -121,6 +181,7 @@ export async function createTenantAction(
         login: result.login,
         password: result.password,
         nameRu: parsed.data.nameRu,
+        applied,
       },
     };
   } catch (error) {

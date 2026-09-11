@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<title>Сайт детского сада</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Comfortaa:wght@600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --brand: #0e8f7e;
+    --brand-dark: #0a6d60;
+    --brand-soft: #e3f3f0;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e2e8e7;
+    --amber: #b45309;
+    --amber-soft: #fef6e7;
+  }
+
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm 18mm;
+  }
+  @page :first { margin: 0; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.6;
+    color: var(--ink);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, h3, .chapter-number, .cover-title {
+    font-family: 'Comfortaa', 'Nunito Sans', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: var(--brand-soft);
+    color: var(--brand-dark);
+    padding: 0 .25em;
+    border-radius: .25em;
+    font-size: .92em;
+  }
+
+  /* ── Обложка ── */
+  .cover {
+    height: 297mm;
+    padding: 32mm 22mm;
+    background: linear-gradient(150deg, #0e8f7e 0%, #14b8a6 55%, #5eead4 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    page-break-after: always;
+  }
+  .cover-mark {
+    font-size: 12pt;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    opacity: .85;
+  }
+  .cover-title {
+    font-size: 40pt;
+    line-height: 1.1;
+    font-weight: 700;
+    margin: 0 0 6mm;
+  }
+  .cover-sub {
+    font-size: 14pt;
+    max-width: 120mm;
+    opacity: .95;
+    margin: 0;
+  }
+  .cover-foot {
+    font-size: 10pt;
+    opacity: .85;
+    border-top: 1px solid rgba(255,255,255,.35);
+    padding-top: 5mm;
+  }
+
+  /* ── Оглавление ── */
+  .toc { page-break-after: always; }
+  .toc h2 {
+    font-size: 20pt;
+    color: var(--brand-dark);
+    margin: 0 0 8mm;
+  }
+  .toc ol { list-style: none; margin: 0; padding: 0; counter-reset: none; }
+  .toc li {
+    display: flex;
+    gap: 6mm;
+    align-items: baseline;
+    padding: 2.4mm 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .toc-number {
+    width: 8mm;
+    font-weight: 700;
+    color: var(--brand);
+  }
+  .toc-title { font-weight: 600; }
+
+  /* ── Разделы ── */
+  /* Разделы идут подряд: принудительный разрыв перед каждым оставлял
+     полупустые страницы у коротких глав и раздувал инструкцию вдвое. */
+  .chapter { margin-top: 10mm; }
+  .chapter:first-of-type { margin-top: 0; }
+  .chapter-head {
+    /* Заголовок не отрывается ни внутри себя, ни от первого абзаца:
+       иначе подзаголовок уезжает на следующую страницу без номера главы */
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: avoid;
+    page-break-after: avoid;
+    display: flex;
+    gap: 5mm;
+    align-items: flex-start;
+    padding-bottom: 4mm;
+    margin-bottom: 5mm;
+    border-bottom: 2px solid var(--brand-soft);
+  }
+  .chapter-number {
+    flex: none;
+    width: 11mm;
+    height: 11mm;
+    border-radius: 3mm;
+    background: var(--brand);
+    color: #fff;
+    font-size: 14pt;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+  }
+  .chapter h2 {
+    font-size: 19pt;
+    margin: 0;
+    color: var(--brand-dark);
+    line-height: 1.2;
+  }
+  .chapter-lead {
+    margin: 1.5mm 0 0;
+    color: var(--muted);
+    font-size: 10.5pt;
+  }
+
+  p { margin: 0 0 3.5mm; }
+
+  .steps {
+    margin: 0 0 4mm;
+    padding-left: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 9mm;
+    margin-bottom: 2.6mm;
+    page-break-inside: avoid;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: .2mm;
+    width: 6mm;
+    height: 6mm;
+    border-radius: 50%;
+    background: var(--brand-soft);
+    color: var(--brand-dark);
+    font-weight: 700;
+    font-size: 9pt;
+    display: grid;
+    place-items: center;
+  }
+
+  .list { margin: 0 0 4mm; padding-left: 5mm; }
+  .list li { margin-bottom: 1.8mm; page-break-inside: avoid; }
+
+  .callout {
+    border-left: 3px solid var(--brand);
+    background: var(--brand-soft);
+    padding: 3.5mm 4mm;
+    border-radius: 0 2mm 2mm 0;
+    margin: 0 0 4mm;
+    page-break-inside: avoid;
+  }
+  .callout.warn {
+    border-left-color: var(--amber);
+    background: var(--amber-soft);
+  }
+  .callout p { margin: 0; }
+  .callout-title {
+    font-weight: 700;
+    margin-bottom: 1mm !important;
+    color: var(--brand-dark);
+  }
+  .callout.warn .callout-title { color: var(--amber); }
+
+  .fields {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 4mm;
+    font-size: 10pt;
+  }
+  .fields th {
+    text-align: left;
+    vertical-align: top;
+    width: 42mm;
+    padding: 2.2mm 4mm 2.2mm 0;
+    font-weight: 700;
+    color: var(--brand-dark);
+    border-bottom: 1px solid var(--line);
+  }
+  .fields td {
+    vertical-align: top;
+    padding: 2.2mm 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .fields tr { page-break-inside: avoid; }
+
+  .shot {
+    margin: 0 0 5mm;
+    page-break-inside: avoid;
+  }
+  .shot img {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 2.5mm;
+  }
+  .shot figcaption {
+    margin-top: 1.5mm;
+    font-size: 9pt;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="cover-mark">Bobegim</div>
+  <div>
+    <h1 class="cover-title">Сайт детского сада</h1>
+    <p class="cover-sub">Инструкция для заведующих и ответственных за сайт</p>
+  </div>
+  <div class="cover-foot">
+    Портал детских садов Актюбинской области · 2026
+  </div>
+</div>
+
+<section class="toc">
+  <h2>Содержание</h2>
+  <ol><li><span class="toc-number">1</span><span class="toc-title">Что у вас теперь есть</span></li><li><span class="toc-number">2</span><span class="toc-title">Первый вход и смена пароля</span></li><li><span class="toc-number">3</span><span class="toc-title">Экран «Обзор»</span></li><li><span class="toc-number">4</span><span class="toc-title">Паспорт сада</span></li><li><span class="toc-number">5</span><span class="toc-title">Свободные места</span></li><li><span class="toc-number">6</span><span class="toc-title">Новости</span></li><li><span class="toc-number">7</span><span class="toc-title">Объявления и срочная полоса</span></li><li><span class="toc-number">8</span><span class="toc-title">Фотогалерея</span></li><li><span class="toc-number">9</span><span class="toc-title">Документы</span></li><li><span class="toc-number">10</span><span class="toc-title">Педагогический состав</span></li><li><span class="toc-number">11</span><span class="toc-title">Разделы меню</span></li><li><span class="toc-number">12</span><span class="toc-title">Внешний вид</span></li><li><span class="toc-number">13</span><span class="toc-title">Обращения родителей</span></li><li><span class="toc-number">14</span><span class="toc-title">Версия для слабовидящих</span></li><li><span class="toc-number">15</span><span class="toc-title">Чего публиковать нельзя</span></li><li><span class="toc-number">16</span><span class="toc-title">Частые вопросы</span></li></ol>
+</section>
+
+<section class="chapter" id="start">
+      <header class="chapter-head">
+        <span class="chapter-number">1</span>
+        <div>
+          <h2>Что у вас теперь есть</h2>
+          <p class="chapter-lead">Два адреса: сайт, который видят родители, и админка, где вы им управляете.</p>
+        </div>
+      </header>
+      <p>Сайт детского сада открыт всем: родители читают новости, смотрят фотографии, находят телефон и узнают, есть ли свободные места. Админка закрыта паролем — там вы меняете всё, что показывает сайт. Чтобы попасть в неё, к адресу сайта добавляется <code>/admin</code>.</p>
+<table class="fields"><tbody><tr><th>Адрес сайта</th><td>например, nursat.vsesad.kz — его вы диктуете родителям</td></tr><tr><th>Адрес админки</th><td>тот же адрес плюс /admin</td></tr><tr><th>Логин и пароль</th><td>выдаёт администратор портала при подключении</td></tr></tbody></table>
+
+<aside class="callout note"><p class="callout-title">Сайт работает сам</p><p>Вам не нужно ничего включать по утрам и выключать на ночь. Сайт открыт круглосуточно, даже когда компьютер в саду выключен.</p></aside>
+    </section>
+<section class="chapter" id="first-login">
+      <header class="chapter-head">
+        <span class="chapter-number">2</span>
+        <div>
+          <h2>Первый вход и смена пароля</h2>
+          <p class="chapter-lead">Пароль, который вам выдали, временный — система попросит заменить его сразу.</p>
+        </div>
+      </header>
+      <ol class="steps"><li>Откройте адрес админки в браузере (Chrome, Edge, Яндекс — любой).</li><li>Введите логин и пароль из памятки, которую вам передали.</li><li>Система попросит придумать новый пароль. Придумайте такой, который не угадает посторонний: не «12345» и не название сада.</li><li>Запишите новый пароль и храните там же, где ключи от кабинета. Мы его не видим и восстановить не можем — только сбросить и выдать новый.</li></ol>
+
+<aside class="callout warn"><p class="callout-title">Один человек — один вход</p><p>Не передавайте свой логин другим сотрудникам. Если сайт ведут двое, попросите администратора портала завести второй вход: тогда видно, кто что опубликовал, и увольнение сотрудника не означает смену пароля у всех.</p></aside>
+    </section>
+<section class="chapter" id="overview">
+      <header class="chapter-head">
+        <span class="chapter-number">3</span>
+        <div>
+          <h2>Экран «Обзор»</h2>
+          <p class="chapter-lead">Первое, что вы видите после входа: что уже сделано и что осталось.</p>
+        </div>
+      </header>
+      <p>Вверху — полоса заполнения сайта. Пока она не дошла до конца, сайт выглядит пустым для родителей. Ниже — сколько человек заходило за месяц, сколько новых обращений и файлов.</p>
+
+<p>Слева — список разделов. Он длинный, но заполнять всё сразу не нужно: начните с паспорта сада, групп и одной новости, остальное добавляйте по мере сил.</p>
+    </section>
+<section class="chapter" id="profile">
+      <header class="chapter-head">
+        <span class="chapter-number">4</span>
+        <div>
+          <h2>Паспорт сада</h2>
+          <p class="chapter-lead">Название, адрес, телефон, режим работы, фото — то, что показывается на каждой странице.</p>
+        </div>
+      </header>
+      <p>Этот раздел заполняется один раз и потом почти не меняется. Заполните его первым: пока он пуст, сайт выглядит недоделанным.</p>
+
+<table class="fields"><tbody><tr><th>Название</th><td>полное — как в уставе, короткое — как называют в разговоре. Короткое показывается в шапке сайта.</td></tr><tr><th>Логотип</th><td>квадратная картинка. Появится в шапке и станет значком вкладки в браузере.</td></tr><tr><th>Обложка</th><td>широкая фотография здания или группы. Показывается на главной и в каталоге портала.</td></tr><tr><th>Адрес</th><td>по нему сайт сам находит место на карте — вводить координаты не нужно.</td></tr><tr><th>Телефон</th><td>на телефоне родителя он станет кнопкой: нажал — звонит.</td></tr><tr><th>Режим работы</th><td>например «Пн–Пт, 07:30–18:30».</td></tr><tr><th>О саде</th><td>пять–десять предложений: когда открылся, чем живёт, чем гордится.</td></tr><tr><th>WhatsApp, Instagram</th><td>если ведёте — укажите: родители чаще пишут туда, чем звонят.</td></tr></tbody></table>
+<aside class="callout note"><p class="callout-title">Про два языка</p><p>У текстов есть две строки — казахская и русская. Заполняйте обе. Если перевода нет, посетитель увидит текст на другом языке вместо родного, а сайт дошкольной организации обязан работать на государственном языке.</p></aside>
+    </section>
+<section class="chapter" id="places">
+      <header class="chapter-head">
+        <span class="chapter-number">5</span>
+        <div>
+          <h2>Свободные места</h2>
+          <p class="chapter-lead">Самое частое, что вы будете менять, — и главное, ради чего родители заходят на сайт.</p>
+        </div>
+      </header>
+      <p>Число свободных мест стоит в каждой группе. Меняется оно отдельной кнопкой, чтобы не открывать всю карточку группы: зашли, поправили цифру, сохранили.</p>
+<ol class="steps"><li>Откройте раздел «Группы».</li><li>Найдите нужную группу и впишите новое число в поле «Свободно мест».</li><li>Нажмите «Сохранить» рядом с этим полем.</li></ol>
+
+<aside class="callout note"><p class="callout-title">Обновляйте хотя бы раз в неделю</p><p>Устаревшее число хуже, чем его отсутствие: родитель приедет в сад зря и запомнит это. Если мест нет — так и поставьте ноль, это честно и экономит всем время.</p></aside>
+    </section>
+<section class="chapter" id="news">
+      <header class="chapter-head">
+        <span class="chapter-number">6</span>
+        <div>
+          <h2>Новости</h2>
+          <p class="chapter-lead">Утренники, конкурсы, будни групп — главный повод вернуться на сайт.</p>
+        </div>
+      </header>
+      <ol class="steps"><li>Раздел «Новости» → «Добавить новость».</li><li>Заголовок — коротко и по делу: «Наурыз в старшей группе», а не «Мероприятие».</li><li>Текст — несколько абзацев. Разметку можно не придумывать: пишите как в обычном письме.</li><li>Прикрепите обложку — фотографию с события. Новость с фотографией читают втрое чаще.</li><li>Нажмите «Опубликовать». Новость сразу появится на сайте.</li></ol>
+
+<aside class="callout note"><p class="callout-title">Черновик</p><p>Если новость не дописана — сохраните её черновиком. Родители её не увидят, а вы вернётесь к ней завтра.</p></aside>
+    </section>
+<section class="chapter" id="announcements">
+      <header class="chapter-head">
+        <span class="chapter-number">7</span>
+        <div>
+          <h2>Объявления и срочная полоса</h2>
+          <p class="chapter-lead">Карантин, собрание, изменение режима — короткие сообщения, которые нужно заметить.</p>
+        </div>
+      </header>
+      <p>Объявления живут отдельно от новостей и показываются выше. А если случилось что-то, о чём должен узнать каждый зашедший, есть «Срочное объявление» — цветная полоса на всех страницах сайта.</p>
+
+<aside class="callout warn"><p class="callout-title">Ставьте срок</p><p>У срочной полосы есть дата, до которой она висит. Поставьте её сразу: снятый карантин, о котором сайт сообщает третий месяц, подрывает доверие ко всему остальному.</p></aside>
+    </section>
+<section class="chapter" id="gallery">
+      <header class="chapter-head">
+        <span class="chapter-number">8</span>
+        <div>
+          <h2>Фотогалерея</h2>
+          <p class="chapter-lead">Альбомы с праздников и занятий.</p>
+        </div>
+      </header>
+      <ol class="steps"><li>Раздел «Фотогалерея» → «Новый альбом». Назовите его по событию: «Наурыз 2026».</li><li>Откройте альбом и загрузите фотографии — можно сразу несколько.</li><li>Фотографии уменьшаются автоматически: отправлять их заранее через сжималку не нужно.</li></ol>
+
+<aside class="callout warn"><p class="callout-title">Фотографии детей — только с согласия родителей</p><p>Соберите письменные согласия законных представителей до того, как выложите снимки. Это требование закона о персональных данных, и отвечает за него сад, а не платформа. Если согласия нет хотя бы от одной семьи — выберите другой кадр.</p></aside>
+<aside class="callout note"><p class="callout-title">Геометки снимаются автоматически</p><p>Телефон записывает в фотографию координаты места съёмки. При загрузке мы их удаляем, поэтому по снимку нельзя определить адрес сада или дома сотрудника.</p></aside>
+    </section>
+<section class="chapter" id="documents">
+      <header class="chapter-head">
+        <span class="chapter-number">9</span>
+        <div>
+          <h2>Документы</h2>
+          <p class="chapter-lead">Устав, лицензия, приказы, самооценка — то, что спрашивают при проверках.</p>
+        </div>
+      </header>
+      <p>Документы складываются по разделам, которые вы придумываете сами: «Самооценка», «Циклограммы», «Приказы 2026». На сайте каждый раздел показывается свёрнутым — родитель раскрывает нужный и не листает сотню файлов подряд.</p>
+<ol class="steps"><li>Раздел «Документы» → впишите название раздела и нажмите «Добавить раздел».</li><li>В форме справа выберите файл, впишите его название и укажите, в какой раздел он ложится.</li><li>Порядок разделов меняется стрелками ↑ ↓.</li></ol>
+
+<aside class="callout note"><p class="callout-title">Удаление раздела не удаляет файлы</p><p>Если удалить раздел, документы из него перейдут в список «Без раздела» — оттуда их можно разложить заново. Потерять файл случайным нажатием нельзя.</p></aside>
+    </section>
+<section class="chapter" id="staff">
+      <header class="chapter-head">
+        <span class="chapter-number">10</span>
+        <div>
+          <h2>Педагогический состав</h2>
+          <p class="chapter-lead">ФИО, должность, образование, стаж, категория — требуется при проверках.</p>
+        </div>
+      </header>
+      <p>Добавьте сотрудников по одному. Фотография не обязательна, но со снимками страница выглядит живой, а не ведомостью.</p>
+
+<aside class="callout note"><p class="callout-title">Уволился сотрудник</p><p>Не удаляйте карточку сразу — снимите галочку «Показывать». Сотрудник исчезнет с сайта, но данные останутся, если понадобятся для отчёта.</p></aside>
+    </section>
+<section class="chapter" id="sections">
+      <header class="chapter-head">
+        <span class="chapter-number">11</span>
+        <div>
+          <h2>Разделы меню</h2>
+          <p class="chapter-lead">Какие страницы показывать, а какие пока спрятать.</p>
+        </div>
+      </header>
+      <p>Сайт создаётся сразу с набором разделов: о саде, новости, группы, документы, меню питания, родителям, контакты и другие. Ненужные можно выключить, порядок — поменять.</p>
+
+<aside class="callout note"><p class="callout-title">Пустой раздел лучше спрятать</p><p>Родитель, нажавший «Кружки» и увидевший пустоту, решит, что сайт заброшен. Включите раздел тогда, когда в нём есть что показать.</p></aside>
+    </section>
+<section class="chapter" id="appearance">
+      <header class="chapter-head">
+        <span class="chapter-number">12</span>
+        <div>
+          <h2>Внешний вид</h2>
+          <p class="chapter-lead">Шаблон, цвета и узор фона — сайт не обязан выглядеть как у соседей.</p>
+        </div>
+      </header>
+      <p>Шаблон задаёт расположение блоков на главной, палитра — цвета, узор — рисунок фона: горошек, конфетти, волны, казахский орнамент. Меняется в любой момент, содержимое от этого не страдает.</p>
+
+<aside class="callout note"><p class="callout-title">Посмотрите, как получилось</p><p>После смены откройте сайт (кнопка «Мой сайт» вверху) и взгляните глазами родителя. Особенно на телефоне — с телефонов заходят чаще, чем с компьютеров.</p></aside>
+    </section>
+<section class="chapter" id="feedback">
+      <header class="chapter-head">
+        <span class="chapter-number">13</span>
+        <div>
+          <h2>Обращения родителей</h2>
+          <p class="chapter-lead">Виртуальная приёмная: вопросы с сайта приходят сюда.</p>
+        </div>
+      </header>
+      <p>Родитель пишет вопрос через форму на сайте, обращение попадает в этот раздел. Непрочитанные отмечены цифрой в левом меню.</p>
+
+<aside class="callout warn"><p class="callout-title">Отвечайте в течение рабочего дня</p><p>Оставленный без ответа вопрос родители обсуждают между собой, и разбираться приходится уже с несколькими семьями сразу. Ответ в тот же день снимает большинство вопросов.</p></aside>
+    </section>
+<section class="chapter" id="accessibility">
+      <header class="chapter-head">
+        <span class="chapter-number">14</span>
+        <div>
+          <h2>Версия для слабовидящих</h2>
+          <p class="chapter-lead">Есть на каждом сайте и включается самим посетителем.</p>
+        </div>
+      </header>
+      <p>В шапке сайта есть переключатель: крупный шрифт, высокий контраст, фон без узоров. Ничего настраивать не нужно — версия работает на всех страницах сразу. Наличие такой версии проверяют, и она у вас уже есть.</p>
+    </section>
+<section class="chapter" id="rules">
+      <header class="chapter-head">
+        <span class="chapter-number">15</span>
+        <div>
+          <h2>Чего публиковать нельзя</h2>
+          <p class="chapter-lead">Короткий список, который избавит от разбирательств.</p>
+        </div>
+      </header>
+      <ul class="list"><li>Фотографии и имена детей без письменного согласия законных представителей.</li><li>Списки детей, домашние адреса, телефоны родителей, данные свидетельств о рождении.</li><li>Медицинские сведения о ребёнке — даже без фамилии их часто узнают.</li><li>Сканы документов сотрудников с ИИН и паспортными данными.</li><li>Чужие фотографии и тексты из интернета — на них есть авторские права.</li></ul>
+<aside class="callout note"><p class="callout-title">Сомневаетесь — не публикуйте</p><p>Снять с сайта легко, но к тому времени страницу успевают сохранить и переслать. Спросите администратора портала до публикации, а не после.</p></aside>
+    </section>
+<section class="chapter" id="faq">
+      <header class="chapter-head">
+        <span class="chapter-number">16</span>
+        <div>
+          <h2>Частые вопросы</h2>
+          
+        </div>
+      </header>
+      <table class="fields"><tbody><tr><th>Забыли пароль</th><td>позвоните администратору портала — он сбросит пароль и выдаст новый. По телефону мы пароль не диктуем, поэтому подойдите или запросите письменно.</td></tr><tr><th>Ошиблись в опубликованной новости</th><td>откройте её в разделе «Новости», исправьте и сохраните. Изменения появятся сразу.</td></tr><tr><th>Сайт не открывается</th><td>проверьте адрес и интернет в саду. Если у соседей открывается, а у вас нет — напишите нам, мы посмотрим.</td></tr><tr><th>Хотим свой адрес вида сад.edu.kz</th><td>домен в зоне edu.kz сад покупает сам — она для организаций образования. Мы поможем его настроить, сертификат безопасности выпустится автоматически.</td></tr><tr><th>Можно вести сайт с телефона</th><td>да. Админка работает на телефоне, фотографии можно загружать прямо из галереи.</td></tr><tr><th>Что будет, если не продлить подписку</th><td>сайт продолжит работать, но админка перейдёт в режим чтения: посмотреть можно, изменить — нет.</td></tr></tbody></table>
+    </section>
+
+</body>
+</html>

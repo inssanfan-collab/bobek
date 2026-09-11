@@ -9,6 +9,7 @@ export type AuditAction =
   | 'auth.logout'
   | 'auth.password_changed'
   | 'tenant.create'
+  | 'tenant.anketa_import'
   | 'tenant.update'
   | 'tenant.status_change'
   | 'tenant.impersonate'

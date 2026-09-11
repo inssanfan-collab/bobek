@@ -27,6 +27,13 @@ const T = {
   address: { kk: 'Мекенжай', ru: 'Адрес' },
   subscriptionUntil: { kk: 'Жазылым мерзімі', ru: 'Подписка до' },
   posts: { kk: 'Жарияланым', ru: 'Публикаций' },
+  handouts: { kk: 'Балабақшаларға арналған материалдар', ru: 'Материалы для садов' },
+  anketa: { kk: 'Сауалнама (Excel)', ru: 'Анкета (Excel)' },
+  guide: { kk: 'Нұсқаулық (PDF)', ru: 'Инструкция (PDF)' },
+  handoutsHint: {
+    kk: 'Қосылуға дейін сауалнаманы, кіру деректерімен бірге нұсқаулықты жіберіңіз.',
+    ru: 'Анкету отправляйте до подключения, инструкцию — вместе с доступами.',
+  },
 } as const;
 
 export default async function TenantsPage({
@@ -71,6 +78,18 @@ export default async function TenantsPage({
         description={T.total[locale].replace('%s', String(tenants.length))}
         action={<Link href="/admin/tenants/new" className="btn-primary">{T.create[locale]}</Link>}
       />
+
+      {/* Оба файла раздаются садам руками, поэтому лежат там, где заводят сад */}
+      <div className="card mb-6 flex flex-wrap items-center gap-3 p-4">
+        <span className="font-semibold">{T.handouts[locale]}:</span>
+        <a href="/downloads/bobegim-anketa.xlsx" className="btn-secondary text-sm" download>
+          {T.anketa[locale]}
+        </a>
+        <a href="/downloads/bobegim-instrukciya.pdf" className="btn-secondary text-sm" download>
+          {T.guide[locale]}
+        </a>
+        <span className="text-sm text-muted">{T.handoutsHint[locale]}</span>
+      </div>
 
       <form className="card mb-6 flex flex-wrap items-end gap-3 p-4">
         <div className="min-w-48 flex-1">

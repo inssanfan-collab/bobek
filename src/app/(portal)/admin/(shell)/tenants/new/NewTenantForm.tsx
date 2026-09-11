@@ -1,8 +1,9 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { createTenantAction, type CreateTenantState } from '../actions';
+import { createTenantAction, parseAnketaAction, type AnketaState, type CreateTenantState } from '../actions';
+import type { Anketa } from '@/server/import/anketa';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Alert } from '@/components/ui/Alert';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
@@ -82,6 +83,23 @@ export function NewTenantForm({
   const [slugTouched, setSlugTouched] = useState(false);
   const [loginTouched, setLoginTouched] = useState(false);
   const [palette, setPalette] = useState('mandarin');
+  const [anketa, setAnketa] = useState<Anketa | null>(null);
+  /** Меняется при каждой загрузке анкеты — заставляет форму перечитать значения. */
+  const [version, setVersion] = useState(0);
+
+  const f = anketa?.fields ?? {};
+
+  /** Анкета загружена: подставляем значения и подбираем адрес с логином. */
+  function onAnketaLoaded(loaded: Anketa) {
+    const name = loaded.fields.nameRu || loaded.fields.nameKk || '';
+    const suggestion = (loaded.fields.slug || slugify(name)).slice(0, 24);
+    setAnketa(loaded);
+    setSlug(suggestion);
+    setLogin(loaded.fields.adminLogin || (suggestion ? `${suggestion}-admin`.slice(0, 40) : ''));
+    setSlugTouched(false);
+    setLoginTouched(false);
+    setVersion((n) => n + 1);
+  }
 
   if (state.created) return <AccessSheet created={state.created} locale={locale} />;
 
@@ -93,10 +111,14 @@ export function NewTenantForm({
   }
 
   return (
-    <form action={action} className="space-y-6">
-      <input type="hidden" name={CSRF_FIELD} value={csrf} />
+    <>
+      <AnketaBox csrf={csrf} anketa={anketa} onLoaded={onAnketaLoaded} />
 
-      {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
+      <form action={action} className="space-y-6" key={version}>
+        <input type="hidden" name={CSRF_FIELD} value={csrf} />
+        {anketa ? <input type="hidden" name="anketaJson" value={JSON.stringify(anketa)} /> : null}
+
+        {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
 
       <Step number={1} title={T.step1[locale]}>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -105,25 +127,26 @@ export function NewTenantForm({
               name="nameRu"
               required
               className="field"
+              defaultValue={f.nameRu ?? ''}
               placeholder="Ясли-сад №12 «Балдырған»"
               onChange={(e) => onNameChange(e.target.value)}
             />
           </Field>
           <Field label={`${T.inKk[locale]} *`} error={state.errors?.nameKk}>
-            <input name="nameKk" required className="field" placeholder="№12 «Балдырған» бөбекжайы" />
+            <input name="nameKk" required className="field" defaultValue={f.nameKk ?? ''} placeholder="№12 «Балдырған» бөбекжайы" />
           </Field>
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label={T.kind[locale]}>
-            <select name="kind" className="field" defaultValue="NURSERY_GARDEN">
+            <select name="kind" className="field" defaultValue={f.kind ?? 'NURSERY_GARDEN'}>
               {Object.entries(KIND).map(([value, phrase]) => (
                 <option key={value} value={value}>{phrase[locale]}</option>
               ))}
             </select>
           </Field>
           <label className="flex items-end gap-2 pb-2.5 text-sm font-semibold">
-            <input type="checkbox" name="isPrivate" className="h-4 w-4" />
+            <input type="checkbox" name="isPrivate" className="h-4 w-4" defaultChecked={f.isPrivate === 'on'} />
             Частный сад
           </label>
         </div>
@@ -157,16 +180,16 @@ export function NewTenantForm({
       <Step number={3} title={T.step3[locale]}>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={T.district[locale]} hint={T.districtHint[locale]}>
-            <input name="district" className="field" placeholder="Астана" />
+            <input name="district" className="field" defaultValue={f.district ?? ''} placeholder="Астана" />
           </Field>
           <Field label={T.address[locale]}>
-            <input name="addressRu" className="field" placeholder="г. Актобе, ул. Абая, 12" />
+            <input name="addressRu" className="field" defaultValue={f.addressRu ?? ''} placeholder="г. Актобе, ул. Абая, 12" />
           </Field>
           <Field label={T.phone[locale]}>
-            <input name="phone" className="field" placeholder="+7 (7132) 00-00-00" />
+            <input name="phone" className="field" defaultValue={f.phone ?? ''} placeholder="+7 (7132) 00-00-00" />
           </Field>
           <Field label={T.email[locale]}>
-            <input name="email" type="email" className="field" placeholder="sad12@mail.kz" />
+            <input name="email" type="email" className="field" defaultValue={f.email ?? ''} placeholder="sad12@mail.kz" />
           </Field>
         </div>
       </Step>
@@ -223,10 +246,10 @@ export function NewTenantForm({
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={`${T.fullName[locale]} *`} error={state.errors?.adminFullName}>
-            <input name="adminFullName" required className="field" placeholder="Сериккызы Айгүл" />
+            <input name="adminFullName" required className="field" defaultValue={f.adminFullName ?? ''} placeholder="Сериккызы Айгүл" />
           </Field>
           <Field label={T.phone[locale]}>
-            <input name="adminPhone" className="field" placeholder="+7 (777) 000-00-00" />
+            <input name="adminPhone" className="field" defaultValue={f.adminPhone ?? ''} placeholder="+7 (777) 000-00-00" />
           </Field>
           <Field label={`${T.login[locale]} *`} error={state.errors?.adminLogin} hint={T.loginHint[locale]}>
             <input
@@ -244,11 +267,71 @@ export function NewTenantForm({
         </div>
       </Step>
 
-      <div className="flex gap-3">
-        <SubmitButton pendingLabel={T.creating[locale]}>{T.create[locale]}</SubmitButton>
-        <Link href="/admin/tenants" className="btn-secondary">{T.cancel[locale]}</Link>
-      </div>
-    </form>
+        <div className="flex gap-3">
+          <SubmitButton pendingLabel={T.creating[locale]}>{T.create[locale]}</SubmitButton>
+          <Link href="/admin/tenants" className="btn-secondary">{T.cancel[locale]}</Link>
+        </div>
+      </form>
+    </>
+  );
+}
+
+/**
+ * Загрузка анкеты. Отдельной формой, а не полем внутри основной: вложенные
+ * формы браузер не поддерживает, да и разбор анкеты — отдельный шаг, после
+ * которого администратор ещё проверяет данные глазами.
+ */
+function AnketaBox({
+  csrf,
+  anketa,
+  onLoaded,
+}: {
+  csrf: string;
+  anketa: Anketa | null;
+  onLoaded: (anketa: Anketa) => void;
+}) {
+  const [state, action] = useActionState<AnketaState, FormData>(parseAnketaAction, {});
+
+  useEffect(() => {
+    if (state.anketa) onLoaded(state.anketa);
+    // Переносим значения один раз на каждый разбор: onLoaded меняется каждый рендер
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.anketa]);
+
+  return (
+    <section className="card mb-6 p-6">
+      <h2 className="font-display text-lg font-bold">Анкета сада</h2>
+      <p className="mt-1 text-sm text-muted">
+        Если сад прислал заполненную анкету — загрузите её, и форма ниже заполнится сама.
+        Группы и педагоги добавятся после создания сайта. Заполнять руками по-прежнему можно.
+      </p>
+
+      <form action={action} className="mt-4 flex flex-wrap items-end gap-3">
+        <input type="hidden" name={CSRF_FIELD} value={csrf} />
+        <div className="min-w-[16rem] flex-1">
+          <label className="field-label" htmlFor="anketa">Файл анкеты (.xlsx)</label>
+          <input id="anketa" name="anketa" type="file" accept=".xlsx" required className="field" />
+        </div>
+        <SubmitButton className="btn-secondary" pendingLabel="Читаем…">Загрузить анкету</SubmitButton>
+        <a href="/downloads/bobegim-anketa.xlsx" className="btn-ghost" download>
+          Скачать пустую анкету
+        </a>
+      </form>
+
+      {state.message ? <Alert tone="danger" className="mt-4">{state.message}</Alert> : null}
+
+      {anketa ? (
+        <Alert tone="success" title="Анкета прочитана" className="mt-4">
+          Полей заполнено: {Object.keys(anketa.fields).length}. Групп: {anketa.groups.length}.
+          Педагогов: {anketa.staff.length}. Проверьте форму ниже и создайте сад.
+          {anketa.warnings.length > 0 ? (
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+              {anketa.warnings.map((warning) => <li key={warning}>{warning}</li>)}
+            </ul>
+          ) : null}
+        </Alert>
+      ) : null}
+    </section>
   );
 }
 
@@ -308,6 +391,14 @@ function AccessSheet({
           <Row label={T.login[locale]} value={created.login} />
           <Row label={T.password[locale]} value={created.password} />
         </dl>
+
+        {created.applied ? (
+          <p className="mt-4 text-sm text-muted">
+            {created.applied.failed
+              ? 'Сад создан, но данные из анкеты перенести не удалось — заполните их в карточке сада вручную.'
+              : `Из анкеты перенесены: паспорт сада, групп — ${created.applied.groups}, педагогов — ${created.applied.staff}.`}
+          </p>
+        ) : null}
 
         <div className="mt-5 rounded-2xl bg-brand-soft p-4 text-sm text-brand-ink">
           <p className="font-semibold">{T.whatNext[locale]}</p>

@@ -11,13 +11,15 @@ export function Alert({
   tone = 'info',
   title,
   children,
+  className = '',
 }: {
   tone?: keyof typeof TONES;
   title?: string;
   children?: ReactNode;
+  className?: string;
 }) {
   return (
-    <div className={`rounded-2xl border px-4 py-3 ${TONES[tone]}`} role={tone === 'danger' ? 'alert' : undefined}>
+    <div className={`rounded-2xl border px-4 py-3 ${TONES[tone]} ${className}`} role={tone === 'danger' ? 'alert' : undefined}>
       {title ? <p className="font-semibold">{title}</p> : null}
       {children ? <div className={title ? 'mt-1 text-sm' : 'text-sm'}>{children}</div> : null}
     </div>
