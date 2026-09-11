@@ -27,10 +27,12 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* Geist и Manrope выбраны за покрытие казахских букв: ә ғ қ ң ө ұ ү һ і
-            рисует сам шрифт, а не системная подмена. */}
+        {/* Шрифты проверены по глифам, а не по unicode-range: Google Fonts
+            объявляет подмножество cyrillic-ext и у тех гарнитур, где казахских
+            букв нет вовсе. Manrope оказался как раз таким — ә ғ қ ң ұ у него
+            отсутствуют, и браузер подменял их системным шрифтом. */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Onest:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>
