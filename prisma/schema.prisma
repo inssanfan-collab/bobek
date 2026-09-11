@@ -49,6 +49,7 @@ model Tenant {
   media         Media[]
   albums        Album[]
   documents     Document[]
+  docFolders    DocumentFolder[]
   staff         StaffMember[]
   groups        Group[]
   menuDays      MenuDay[]
@@ -378,34 +379,42 @@ model AlbumItem {
   @@index([albumId, position])
 }
 
-enum DocumentCategory {
-  CHARTER // устав
-  LICENSE // лицензия
-  ORDERS // приказы
-  RULES // правила приёма
-  PROCUREMENT // госзакупки
-  REPORTS // отчёты
-  TRUSTEE // попечительский совет
-  ANTICORRUPTION
-  OTHER
+/// Папка внутри раздела «Документы». Сад заводит их сам: у одного это
+/// «Самооценка» и «Циклограммы», у другого — «Приказы 2026». Фиксированный
+/// список категорий не подошёл — при проверках у каждого сада свой набор,
+/// а полторы сотни файлов подряд читать невозможно.
+model DocumentFolder {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  titleKk   String
+  titleRu   String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  documents Document[]
+
+  @@index([tenantId, position])
 }
 
 model Document {
-  id          String           @id @default(cuid())
+  id          String   @id @default(cuid())
   tenantId    String
-  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   titleKk     String
   titleRu     String
-  category    DocumentCategory @default(OTHER)
+  /// Без папки документ тоже живёт — показывается общим списком над папками.
+  folderId    String?
+  folder      DocumentFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
   mediaId     String
-  media       Media            @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  publishedAt DateTime         @default(now())
-  position    Int              @default(0)
+  media       Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  publishedAt DateTime @default(now())
+  position    Int      @default(0)
 
   /// Полнотекстовый индекс: считает сама база, см. миграцию fulltext_search.
   searchVector Unsupported("tsvector")? @default(dbgenerated())
 
-  @@index([tenantId, category, position])
+  @@index([tenantId, folderId, position])
   @@index([searchVector], type: Gin)
 }
 

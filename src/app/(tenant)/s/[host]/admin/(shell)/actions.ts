@@ -19,7 +19,6 @@ import { hashPassword, passwordProblem, verifyPassword } from '@/server/auth/pas
 import { destroyAllSessions, getCurrentUser } from '@/server/auth/session';
 import { isPaletteCode, isPatternCode, isTemplateCode } from '@/lib/templates';
 import { env } from '@/lib/env';
-import type { DocumentCategory } from '@prisma/client';
 
 /**
  * Все действия админки сада проходят один и тот же вход: определить сад по домену,
@@ -353,6 +352,88 @@ export async function deleteMediaAction(formData: FormData) {
 
 // ─────────────────────────── Документы ───────────────────────────
 
+/**
+ * Папка документа проверяется отдельно: без этого сад мог бы подставить чужой
+ * folderId и увести файл на соседний сайт.
+ */
+async function folderIdFrom(formData: FormData, tenantId: string): Promise<string | null> {
+  const folderId = str(formData, 'folderId');
+  if (!folderId) return null;
+  await assertOwned('documentFolder', folderId, tenantId);
+  return folderId;
+}
+
+export async function createDocFolder(formData: FormData) {
+  const ctx = await gate(formData);
+  const titleRu = str(formData, 'titleRu');
+  if (titleRu.length < 2) throw new ActionError({ kk: 'Бөлім атауын көрсетіңіз', ru: 'Укажите название раздела' });
+
+  const last = await prisma.documentFolder.findFirst({
+    where: { tenantId: ctx.tenantId },
+    orderBy: { position: 'desc' },
+    select: { position: true },
+  });
+
+  await prisma.documentFolder.create({
+    data: {
+      tenantId: ctx.tenantId,
+      titleRu,
+      titleKk: str(formData, 'titleKk') || titleRu,
+      position: (last?.position ?? -1) + 1,
+    },
+  });
+
+  revalidatePath('/admin/documents');
+}
+
+export async function renameDocFolder(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  const titleRu = str(formData, 'titleRu');
+  if (titleRu.length < 2) throw new ActionError({ kk: 'Бөлім атауын көрсетіңіз', ru: 'Укажите название раздела' });
+
+  await assertOwned('documentFolder', id, ctx.tenantId);
+  await prisma.documentFolder.update({
+    where: { id },
+    data: { titleRu, titleKk: str(formData, 'titleKk') || titleRu },
+  });
+
+  revalidatePath('/admin/documents');
+}
+
+/** Папка удаляется вместе с порядком, но не с файлами: они уходят в общий список. */
+export async function deleteDocFolder(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  await assertOwned('documentFolder', id, ctx.tenantId);
+  await prisma.documentFolder.delete({ where: { id } });
+  revalidatePath('/admin/documents');
+}
+
+export async function moveDocFolder(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  const up = str(formData, 'direction') === 'up';
+  await assertOwned('documentFolder', id, ctx.tenantId);
+
+  const folders = await prisma.documentFolder.findMany({
+    where: { tenantId: ctx.tenantId },
+    orderBy: { position: 'asc' },
+    select: { id: true },
+  });
+
+  const index = folders.findIndex((f) => f.id === id);
+  const target = up ? index - 1 : index + 1;
+  if (index < 0 || target < 0 || target >= folders.length) return;
+
+  [folders[index], folders[target]] = [folders[target]!, folders[index]!];
+  await prisma.$transaction(
+    folders.map((f, position) => prisma.documentFolder.update({ where: { id: f.id }, data: { position } })),
+  );
+
+  revalidatePath('/admin/documents');
+}
+
 export async function saveDocument(formData: FormData) {
   const ctx = await gate(formData);
   const titleRu = str(formData, 'titleRu');
@@ -372,7 +453,7 @@ export async function saveDocument(formData: FormData) {
   const data = {
     titleRu,
     titleKk: str(formData, 'titleKk') || titleRu,
-    category: (str(formData, 'category') || 'OTHER') as DocumentCategory,
+    folderId: await folderIdFrom(formData, ctx.tenantId),
     mediaId,
   };
 

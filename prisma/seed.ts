@@ -402,15 +402,24 @@ async function main() {
     const charter = await seedPdf(prisma, tenant.id, 'Ustav organizacii', 'ustav.pdf');
     const rules = await seedPdf(prisma, tenant.id, 'Pravila priema detey', 'pravila-priema.pdf');
 
+    const docFolders = await Promise.all(
+      [
+        { titleRu: 'Учредительные документы', titleKk: 'Мекеме құжаттары' },
+        { titleRu: 'Правила приёма', titleKk: 'Қабылдау қағидалары' },
+      ].map((folder, position) =>
+        prisma.documentFolder.create({ data: { tenantId: tenant.id, ...folder, position } }),
+      ),
+    );
+
     await prisma.document.createMany({
       data: [
         {
           tenantId: tenant.id, titleRu: 'Устав организации', titleKk: 'Ұйым жарғысы',
-          category: 'CHARTER', mediaId: charter.id, position: 0,
+          folderId: docFolders[0]!.id, mediaId: charter.id, position: 0,
         },
         {
           tenantId: tenant.id, titleRu: 'Правила приёма детей', titleKk: 'Балаларды қабылдау ережелері',
-          category: 'RULES', mediaId: rules.id, position: 1,
+          folderId: docFolders[1]!.id, mediaId: rules.id, position: 1,
         },
       ],
     });

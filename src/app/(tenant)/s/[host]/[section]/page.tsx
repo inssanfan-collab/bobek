@@ -122,11 +122,14 @@ async function SectionBody({
     }
 
     case 'DOCUMENTS': {
-      const documents = await db.documents.findMany({
-        orderBy: [{ category: 'asc' }, { position: 'asc' }],
-        include: { media: true },
-      });
-      return <DocumentList documents={documents} locale={locale} />;
+      const [folders, documents] = await Promise.all([
+        db.docFolders.findMany({ orderBy: { position: 'asc' } }),
+        db.documents.findMany({
+          orderBy: [{ position: 'asc' }, { publishedAt: 'desc' }],
+          include: { media: true },
+        }),
+      ]);
+      return <DocumentList folders={folders} documents={documents} locale={locale} />;
     }
 
     case 'STAFF': {

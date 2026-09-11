@@ -1,4 +1,4 @@
-import type { DocumentCategory, TenantKind, TenantStatus, Role, FeedbackStatus } from '@prisma/client';
+import type { TenantKind, TenantStatus, Role, FeedbackStatus } from '@prisma/client';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 
 /**
@@ -31,17 +31,42 @@ export const ROLE: Record<Role, Phrase> = {
   TENANT_EDITOR: { kk: 'Редактор', ru: 'Редактор' },
 };
 
-export const DOC_CATEGORY: Record<DocumentCategory, Phrase> = {
-  CHARTER: { kk: 'Жарғы', ru: 'Устав' },
-  LICENSE: { kk: 'Лицензия', ru: 'Лицензия' },
-  ORDERS: { kk: 'Бұйрықтар', ru: 'Приказы' },
-  RULES: { kk: 'Қабылдау қағидалары', ru: 'Правила приёма' },
-  PROCUREMENT: { kk: 'Мемлекеттік сатып алулар', ru: 'Государственные закупки' },
-  REPORTS: { kk: 'Есептер', ru: 'Отчёты' },
-  TRUSTEE: { kk: 'Қамқоршылық кеңес', ru: 'Попечительский совет' },
-  ANTICORRUPTION: { kk: 'Сыбайлас жемқорлыққа қарсы іс-қимыл', ru: 'Противодействие коррупции' },
-  OTHER: { kk: 'Басқа', ru: 'Прочее' },
-};
+/**
+ * Готовые названия папок документов — подсказка, а не список: сад заводит
+ * свои папки, но начинать с чистого листа неудобно, а набор ниже повторяется
+ * почти на каждом сайте дошкольной организации.
+ */
+export const DOC_FOLDER_PRESETS: Phrase[] = [
+  { kk: 'Мекеме құжаттары', ru: 'Учредительные документы' },
+  { kk: 'Лицензия', ru: 'Лицензия' },
+  { kk: 'Бұйрықтар', ru: 'Приказы' },
+  { kk: 'Қабылдау қағидалары', ru: 'Правила приёма' },
+  { kk: 'Өзін-өзі бағалау', ru: 'Самооценка' },
+  { kk: 'Жылдық жоспар', ru: 'Годовой план' },
+  { kk: 'Циклограммалар', ru: 'Циклограммы' },
+  { kk: 'Перспективалық жоспарлар', ru: 'Перспективные планы' },
+  { kk: 'Штаттық кесте', ru: 'Штатное расписание' },
+  { kk: 'Мемлекеттік сатып алулар', ru: 'Государственные закупки' },
+  { kk: 'Есептер', ru: 'Отчёты' },
+  { kk: 'Қамқоршылық кеңес', ru: 'Попечительский совет' },
+  { kk: 'Сыбайлас жемқорлыққа қарсы іс-қимыл', ru: 'Противодействие коррупции' },
+  { kk: 'Медбике жұмысы', ru: 'Работа медсестры' },
+  { kk: 'Ата-аналармен жұмыс', ru: 'Работа с родителями' },
+];
+
+/**
+ * «1 документ», «2 документа», «5 документов». По-казахски счётное слово
+ * не изменяется — после числительного всегда единственное число.
+ */
+export function formatDocCount(count: number, locale: Locale = DEFAULT_LOCALE): string {
+  if (locale === 'kk') return `${count} құжат`;
+
+  const tail = count % 10;
+  const hundreds = count % 100;
+  if (tail === 1 && hundreds !== 11) return `${count} документ`;
+  if (tail >= 2 && tail <= 4 && (hundreds < 12 || hundreds > 14)) return `${count} документа`;
+  return `${count} документов`;
+}
 
 export const FEEDBACK_STATUS: Record<FeedbackStatus, Phrase> = {
   NEW: { kk: 'Жаңа', ru: 'Новое' },

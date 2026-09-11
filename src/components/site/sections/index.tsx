@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
-import { formatAgeRange, formatDate, DOC_CATEGORY } from '@/lib/labels';
+import { formatAgeRange, formatDate, formatDocCount } from '@/lib/labels';
 import { mediaUrl, type AlbumWithCover, type PostWithCover } from '@/components/site/blocks';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { Club, Document, FaqItem, Group, Media, MenuDay, StaffMember, TenantProfile } from '@prisma/client';
+import { UiIcon } from '@/components/site/UiIcon';
+import type {
+  Club, Document, DocumentFolder, FaqItem, Group, Media, MenuDay, StaffMember, TenantProfile,
+} from '@prisma/client';
 
 const T = {
   empty: { kk: 'Мазмұн әзірге қосылмаған', ru: 'Материалы пока не добавлены' },
@@ -150,47 +153,88 @@ export function GroupList({ groups, locale }: { groups: Group[]; locale: Locale 
   );
 }
 
+type DocWithMedia = Document & { media: Media };
+
+function DocRows({ items, locale }: { items: DocWithMedia[]; locale: Locale }) {
+  return (
+    <ul className="divide-y divide-line">
+      {items.map((doc) => (
+        <li key={doc.id} className="flex flex-wrap items-center gap-3 px-4 py-3 sm:px-5">
+          <UiIcon name="file" className="h-6 w-6 shrink-0 text-brand-ink" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold">{pick(locale, doc.titleKk, doc.titleRu)}</span>
+            <span className="block text-sm text-muted">
+              {formatDate(doc.publishedAt, locale)} · {Math.max(1, Math.round(doc.media.size / 1024))} КБ
+            </span>
+          </span>
+          <a href={`/api/media/${doc.mediaId}?download=1`} className="btn-secondary text-sm">
+            {T.download[locale]}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Документы разложены по папкам сада и свёрнуты: у иных садов их полторы сотни,
+ * и сплошной список читать невозможно. Сворачивание сделано на <details> —
+ * работает без JavaScript, открывается с клавиатуры, а браузерный поиск
+ * по странице сам раскрывает нужную папку.
+ */
 export function DocumentList({
+  folders,
   documents,
   locale,
 }: {
-  documents: (Document & { media: Media })[];
+  folders: DocumentFolder[];
+  documents: DocWithMedia[];
   locale: Locale;
 }) {
   if (documents.length === 0) return <Empty locale={locale} />;
 
-  const grouped = new Map<string, (Document & { media: Media })[]>();
+  const byFolder = new Map<string, DocWithMedia[]>();
+  const loose: DocWithMedia[] = [];
   for (const doc of documents) {
-    const list = grouped.get(doc.category) ?? [];
+    if (!doc.folderId) {
+      loose.push(doc);
+      continue;
+    }
+    const list = byFolder.get(doc.folderId) ?? [];
     list.push(doc);
-    grouped.set(doc.category, list);
+    byFolder.set(doc.folderId, list);
   }
 
+  const filled = folders.filter((folder) => (byFolder.get(folder.id)?.length ?? 0) > 0);
+  // Единственную папку прятать незачем — раскрываем сразу.
+  const openByDefault = filled.length === 1;
+
   return (
-    <div className="space-y-8">
-      {[...grouped.entries()].map(([category, items]) => (
-        <section key={category}>
-          <h2 className="font-display text-xl font-bold">
-            {DOC_CATEGORY[category as keyof typeof DOC_CATEGORY][locale]}
-          </h2>
-          <ul className="mt-3 space-y-2">
-            {items.map((doc) => (
-              <li key={doc.id} className="card flex flex-wrap items-center gap-3 p-4">
-                <span className="text-2xl" aria-hidden>📄</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold">{pick(locale, doc.titleKk, doc.titleRu)}</span>
-                  <span className="block text-sm text-muted">
-                    {formatDate(doc.publishedAt, locale)} · {Math.max(1, Math.round(doc.media.size / 1024))} КБ
-                  </span>
-                </span>
-                <a href={`/api/media/${doc.mediaId}?download=1`} className="btn-secondary text-sm">
-                  {T.download[locale]}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+    <div className="space-y-3">
+      {filled.map((folder) => {
+        const items = byFolder.get(folder.id) ?? [];
+        return (
+          <details key={folder.id} id={`doc-${folder.id}`} className="card group overflow-hidden" open={openByDefault}>
+            <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 font-display text-lg font-bold sm:px-5">
+              <UiIcon name="folder" className="h-6 w-6 shrink-0 text-brand-ink" />
+              <span className="min-w-0 flex-1">{pick(locale, folder.titleKk, folder.titleRu)}</span>
+              <span className="hidden text-sm font-normal text-muted sm:inline">
+                {formatDocCount(items.length, locale)}
+              </span>
+              <UiIcon name="chevron" className="h-5 w-5 shrink-0 text-muted transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="border-t border-line">
+              <DocRows items={items} locale={locale} />
+            </div>
+          </details>
+        );
+      })}
+
+      {loose.length > 0 ? (
+        <div className="card overflow-hidden">
+          <DocRows items={loose} locale={locale} />
+        </div>
+      ) : null}
     </div>
   );
 }

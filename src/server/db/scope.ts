@@ -75,6 +75,15 @@ export function scoped(tenantId: string) {
         prisma.document.findFirst(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.DocumentGetPayload<T> | null>,
     },
 
+    docFolders: {
+      findMany: <T extends Prisma.DocumentFolderFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.DocumentFolderFindManyArgs>) =>
+        prisma.documentFolder.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.DocumentFolderGetPayload<T>[]>,
+      findFirst: <T extends Prisma.DocumentFolderFindFirstArgs>(args?: Prisma.SelectSubset<T, Prisma.DocumentFolderFindFirstArgs>) =>
+        prisma.documentFolder.findFirst(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.DocumentFolderGetPayload<T> | null>,
+      count: (args?: { where?: Prisma.DocumentFolderWhereInput }) =>
+        prisma.documentFolder.count(withTenant(args as MaybeArgs, tenantId)),
+    },
+
     staff: {
       findMany: <T extends Prisma.StaffMemberFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.StaffMemberFindManyArgs>) =>
         prisma.staffMember.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.StaffMemberGetPayload<T>[]>,
@@ -110,7 +119,7 @@ export function scoped(tenantId: string) {
 export class NotFoundError extends Error {}
 
 type OwnedModel =
-  | 'post' | 'section' | 'media' | 'album' | 'document'
+  | 'post' | 'section' | 'media' | 'album' | 'document' | 'documentFolder'
   | 'staffMember' | 'group' | 'menuDay' | 'feedbackMessage' | 'page'
   | 'club' | 'faqItem';
 
@@ -121,7 +130,8 @@ type OwnedModel =
 export async function assertOwned(model: OwnedModel, id: string, tenantId: string): Promise<void> {
   const delegates = {
     post: prisma.post, section: prisma.section, media: prisma.media, album: prisma.album,
-    document: prisma.document, staffMember: prisma.staffMember, group: prisma.group,
+    document: prisma.document, documentFolder: prisma.documentFolder,
+    staffMember: prisma.staffMember, group: prisma.group,
     menuDay: prisma.menuDay, feedbackMessage: prisma.feedbackMessage, page: prisma.page,
     club: prisma.club, faqItem: prisma.faqItem,
   } as const;
