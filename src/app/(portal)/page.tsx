@@ -548,10 +548,19 @@ export default async function PortalHome({
                 href={`https://${tenant.domains[0]?.host ?? `${tenant.slug}.${env.portalDomain}`}`}
                 className="overflow-hidden rounded-3xl border border-line bg-card shadow-soft transition hover:-translate-y-1 hover:shadow-lift"
               >
-                <div
-                  className="h-32 bg-gradient-to-br from-brand-soft to-accent-soft"
-                  aria-hidden
-                />
+                {tenant.profile?.coverMediaId ? (
+                  // Обложка, которую сад загрузил у себя в админке. Через <img>,
+                  // а не next/image: файл отдаётся приложением по id, и гонять
+                  // его ещё и через оптимизатор незачем.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`/api/media/${tenant.profile.coverMediaId}`}
+                    alt=""
+                    className="h-32 w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-32 bg-gradient-to-br from-brand-soft to-accent-soft" aria-hidden />
+                )}
                 <div className="p-6">
                   <p className="font-display text-lg font-bold">
                     {pick(locale, tenant.profile?.nameKk, tenant.profile?.nameRu) || tenant.slug}

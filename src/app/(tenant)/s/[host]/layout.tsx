@@ -3,7 +3,7 @@ import '../../../globals.css';
 import { siteContext } from '@/server/tenant/context';
 import { pick } from '@/lib/i18n';
 import { env } from '@/lib/env';
-import { isPaletteCode } from '@/lib/templates';
+import { isPaletteCode, isPatternCode } from '@/lib/templates';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +23,15 @@ export async function generateMetadata({
     metadataBase: new URL(`https://${primaryHost}`),
     title: { default: name, template: `%s · ${name}` },
     description: profile?.aboutRu?.slice(0, 200) ?? `Официальный сайт: ${name}`,
-    openGraph: { type: 'website', siteName: name, locale: 'ru_RU' },
+    openGraph: {
+      type: 'website',
+      siteName: name,
+      locale: 'ru_RU',
+      // В ленте мессенджера ссылку на сайт сада узнают по его же обложке.
+      images: profile?.coverMediaId ? [`/api/media/${profile.coverMediaId}`] : undefined,
+    },
+    // Значок вкладки — логотип сада, который он загрузил в админке.
+    icons: profile?.logoMediaId ? { icon: `/api/media/${profile.logoMediaId}` } : undefined,
   };
 }
 
@@ -36,9 +44,10 @@ export default async function TenantLayout({
 }) {
   const { tenant, profile } = await siteContext((await params).host);
   const palette = isPaletteCode(tenant.palette) ? tenant.palette : 'mandarin';
+  const pattern = isPatternCode(tenant.pattern) ? tenant.pattern : 'none';
 
   return (
-    <html lang="ru" data-palette={palette} data-a11y="off">
+    <html lang="ru" data-palette={palette} data-pattern={pattern} data-a11y="off">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

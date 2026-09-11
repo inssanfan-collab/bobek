@@ -1,8 +1,8 @@
 import Link from 'next/link';
+import { SectionIcon } from './SectionIcon';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import { formatDate } from '@/lib/labels';
-import { sectionMeta } from '@/lib/sections';
 import type { Album, Media, Post, Section, TenantProfile } from '@prisma/client';
 
 export type PostWithCover = Post & { coverMedia: Media | null };
@@ -107,15 +107,14 @@ export function SectionTiles({ sections, locale }: { sections: Section[]; locale
       <h2 className="font-display text-2xl font-extrabold">{T.sections[locale]}</h2>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {sections.map((section) => {
-          const meta = sectionMeta(section.type, section.slug);
           return (
             <Link
               key={section.id}
               href={withLocale(`/${section.slug}`, locale)}
               className="card flex items-center gap-3 p-4 transition hover:shadow-lift"
             >
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-soft text-xl" aria-hidden>
-                {meta?.icon ?? '📄'}
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-soft text-brand-ink">
+                <SectionIcon type={section.type} />
               </span>
               <span className="font-semibold">{pick(locale, section.titleKk, section.titleRu)}</span>
             </Link>

@@ -1,4 +1,5 @@
 import { pick, type Locale } from '@/lib/i18n';
+import { UiIcon } from './UiIcon';
 import type { TenantProfile } from '@prisma/client';
 
 const TONES = {
@@ -7,7 +8,7 @@ const TONES = {
   URGENT: 'border-red-300 bg-red-50 text-red-900',
 } as const;
 
-const ICONS = { INFO: 'ℹ️', WARN: '⚠️', URGENT: '❗' } as const;
+const ICONS = { INFO: 'info', WARN: 'warn', URGENT: 'urgent' } as const;
 
 /**
  * Полоса срочного объявления на всех страницах: карантин, отмена занятий,
@@ -26,7 +27,7 @@ export function UrgentNotice({ profile, locale }: { profile: TenantProfile | nul
   return (
     <div className={`border-b ${TONES[profile.noticeTone]}`} role="status">
       <div className="container-page flex items-start gap-3 py-3">
-        <span aria-hidden className="text-lg leading-none">{ICONS[profile.noticeTone]}</span>
+        <UiIcon name={ICONS[profile.noticeTone]} className="mt-0.5 h-5 w-5 flex-none" />
         <p className="font-semibold">{text}</p>
       </div>
     </div>

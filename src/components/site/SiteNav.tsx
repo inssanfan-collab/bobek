@@ -56,7 +56,17 @@ export function SiteNav({ links, locale }: { links: NavLink[]; locale: Locale })
           className="btn-secondary w-full justify-between text-base"
         >
           <span className="flex items-center gap-2">
-            <span aria-hidden>{open ? '✕' : '☰'}</span>
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              aria-hidden
+            >
+              {open ? <path d="M6 6 18 18M18 6 6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
             {open ? T.close[locale] : T.menu[locale]}
           </span>
           <span className="text-sm text-muted">{links.length}</span>

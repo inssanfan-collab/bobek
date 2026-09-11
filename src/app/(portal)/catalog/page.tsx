@@ -185,7 +185,12 @@ export default async function CatalogPage({
               const host = siteHost(tenant);
               const number = numbers.get(tenant.id);
               return (
-                <article key={tenant.id} className="card flex flex-col p-5">
+                <article key={tenant.id} className="card flex flex-col overflow-hidden p-0">
+                  {p?.coverMediaId ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={`/api/media/${p.coverMediaId}`} alt="" className="h-36 w-full object-cover" />
+                  ) : null}
+                  <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="font-display text-lg font-bold">
                       {number ? (
@@ -223,6 +228,7 @@ export default async function CatalogPage({
                   <a href={`https://${host}`} className="btn-secondary mt-4 self-start text-sm">
                     {T.openSite[locale]}
                   </a>
+                  </div>
                 </article>
               );
             })}

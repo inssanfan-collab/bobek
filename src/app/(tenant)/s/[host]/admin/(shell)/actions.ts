@@ -17,7 +17,7 @@ import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { geocodeAddress } from '@/server/maps/yandex';
 import { hashPassword, passwordProblem, verifyPassword } from '@/server/auth/password';
 import { destroyAllSessions, getCurrentUser } from '@/server/auth/session';
-import { isPaletteCode, isTemplateCode } from '@/lib/templates';
+import { isPaletteCode, isPatternCode, isTemplateCode } from '@/lib/templates';
 import { env } from '@/lib/env';
 import type { DocumentCategory } from '@prisma/client';
 
@@ -605,7 +605,10 @@ export async function saveAppearance(formData: FormData) {
 
   const templateCode = str(formData, 'templateCode');
   const palette = str(formData, 'palette');
-  if (!isTemplateCode(templateCode) || !isPaletteCode(palette)) throw new ActionError({ kk: 'Үлгі немесе палитра белгісіз', ru: 'Неизвестный шаблон или палитра' });
+  const pattern = str(formData, 'pattern') || 'none';
+  if (!isTemplateCode(templateCode) || !isPaletteCode(palette) || !isPatternCode(pattern)) {
+    throw new ActionError({ kk: 'Үлгі, палитра немесе өрнек белгісіз', ru: 'Неизвестный шаблон, палитра или узор' });
+  }
 
   let coverMediaId = optionalStr(formData, 'coverMediaId');
   const cover = formData.get('cover');
@@ -620,7 +623,7 @@ export async function saveAppearance(formData: FormData) {
   }
 
   await prisma.$transaction([
-    prisma.tenant.update({ where: { id: ctx.tenantId }, data: { templateCode, palette } }),
+    prisma.tenant.update({ where: { id: ctx.tenantId }, data: { templateCode, palette, pattern } }),
     prisma.tenantProfile.update({ where: { tenantId: ctx.tenantId }, data: { coverMediaId, logoMediaId } }),
   ]);
 

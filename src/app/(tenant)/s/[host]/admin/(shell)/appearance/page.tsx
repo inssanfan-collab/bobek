@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/admin/AdminShell';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Alert } from '@/components/ui/Alert';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
-import { PALETTES, TEMPLATES } from '@/lib/templates';
+import { PALETTES, PATTERNS, TEMPLATES } from '@/lib/templates';
 import { pick } from '@/lib/i18n';
 import { saveAppearance } from '../actions';
 
@@ -22,6 +22,11 @@ const T = {
     ru: 'Менять шаблон и цвета может администратор сада. Обратитесь к нему или к администратору портала.',
   },
   template: { kk: 'Үлгі', ru: 'Шаблон' },
+  pattern: { kk: 'Фон өрнегі', ru: 'Узор фона' },
+  patternHint: {
+    kk: 'Өрнек палитра түсімен боялады, сондықтан кез келген түспен үйлеседі.',
+    ru: 'Узор красится цветом палитры, поэтому сочетается с любой гаммой.',
+  },
   palette: { kk: 'Палитра', ru: 'Палитра' },
   images: { kk: 'Суреттер', ru: 'Изображения' },
   cover: { kk: 'Басты беттің мұқабасы', ru: 'Обложка главной страницы' },
@@ -67,7 +72,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
 
         <fieldset className="card p-6">
           <legend className="font-display text-lg font-bold">{T.template[locale]}</legend>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {TEMPLATES.map((template) => (
               <label
                 key={template.code}
@@ -104,6 +109,28 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
                 />
                 <span className="h-5 w-5 rounded-full" style={{ background: palette.swatch }} aria-hidden />
                 {pick(locale, palette.nameKk, palette.nameRu)}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="card p-6">
+          <legend className="font-display text-lg font-bold">{T.pattern[locale]}</legend>
+          <p className="mt-1 text-sm text-muted">{T.patternHint[locale]}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {PATTERNS.map((item) => (
+              <label
+                key={item.code}
+                className="flex cursor-pointer items-center gap-2 rounded-xl border border-line px-3 py-2 text-sm font-semibold transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
+              >
+                <input
+                  type="radio"
+                  name="pattern"
+                  value={item.code}
+                  defaultChecked={(ctx.pattern || 'none') === item.code}
+                  className="sr-only"
+                />
+                {pick(locale, item.nameKk, item.nameRu)}
               </label>
             ))}
           </div>

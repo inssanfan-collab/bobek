@@ -41,8 +41,21 @@ export function SiteHeader({
               className="h-11 w-11 shrink-0 rounded-2xl object-contain"
             />
           ) : (
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand text-xl text-white" aria-hidden>
-              🧸
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand text-white">
+              <svg
+                className="h-6 w-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M4 20V9.5L12 4l8 5.5V20" />
+                <path d="M9.5 20v-5.5h5V20" />
+                <path d="M4 20h16" />
+              </svg>
             </span>
           )}
           <span className="min-w-0">

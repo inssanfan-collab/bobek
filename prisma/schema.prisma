@@ -33,6 +33,8 @@ model Tenant {
   status       TenantStatus @default(DRAFT)
   templateCode String       @default("klassik")
   palette      String       @default("mandarin")
+  /// Узор фона: отдельно от палитры, чтобы одна и та же гамма давала разные сайты.
+  pattern      String       @default("none")
   /// Тонкая настройка темы поверх шаблона: шрифт, обложка, скругления.
   theme        Json         @default("{}")
   createdAt    DateTime     @default(now())

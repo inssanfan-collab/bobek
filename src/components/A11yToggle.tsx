@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { UiIcon } from '@/components/site/UiIcon';
 
 const KEY = 'bobegim:a11y';
 
@@ -40,7 +41,7 @@ export function A11yToggle() {
       aria-pressed={on}
       title="Версия для слабовидящих"
     >
-      <span aria-hidden>👁</span>
+      <UiIcon name="eye" className="h-4 w-4" />
       <span className="hidden sm:inline">{on ? 'Обычная версия' : 'Для слабовидящих'}</span>
     </button>
   );

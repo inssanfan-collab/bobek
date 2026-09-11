@@ -9,6 +9,7 @@ export type TenantAdminContext = TenantSession & {
   tenantSlug: string;
   templateCode: string;
   palette: string;
+  pattern: string;
 };
 
 /**
@@ -27,5 +28,6 @@ export const tenantAdmin = cache(async (hostParam: string): Promise<TenantAdminC
     tenantSlug: site.tenant.slug,
     templateCode: site.tenant.templateCode,
     palette: site.tenant.palette,
+    pattern: site.tenant.pattern,
   };
 });

@@ -1,4 +1,5 @@
 import type { TenantProfile } from '@prisma/client';
+import { UiIcon, type UiIconName } from './UiIcon';
 import type { Locale } from '@/lib/i18n';
 
 const T = {
@@ -25,11 +26,11 @@ export function SocialLinks({
   if (!profile) return null;
 
   const items = [
-    profile.instagram && { label: 'Instagram', href: profile.instagram, icon: '📷' },
-    profile.youtube && { label: 'YouTube', href: profile.youtube, icon: '▶️' },
-    profile.facebook && { label: 'Facebook', href: profile.facebook, icon: '👍' },
-    profile.telegram && { label: 'Telegram', href: profile.telegram, icon: '✈️' },
-  ].filter(Boolean) as { label: string; href: string; icon: string }[];
+    profile.instagram && { label: 'Instagram', href: profile.instagram, icon: 'instagram' as const },
+    profile.youtube && { label: 'YouTube', href: profile.youtube, icon: 'youtube' as const },
+    profile.facebook && { label: 'Facebook', href: profile.facebook, icon: 'facebook' as const },
+    profile.telegram && { label: 'Telegram', href: profile.telegram, icon: 'telegram' as const },
+  ].filter(Boolean) as { label: string; href: string; icon: UiIconName }[];
 
   if (items.length === 0 && !profile.whatsapp) return null;
 
@@ -44,7 +45,7 @@ export function SocialLinks({
             rel="noopener noreferrer"
             className="btn-secondary text-sm"
           >
-            <span aria-hidden>💬</span> {T.write[locale]}
+            <UiIcon name="chat" className="h-4 w-4" /> {T.write[locale]}
           </a>
         ) : null}
         {items.map((item) => (
@@ -55,7 +56,7 @@ export function SocialLinks({
             rel="noopener noreferrer"
             className="btn-secondary text-sm"
           >
-            <span aria-hidden>{item.icon}</span> {item.label}
+            <UiIcon name={item.icon} className="h-4 w-4" /> {item.label}
           </a>
         ))}
       </div>

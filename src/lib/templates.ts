@@ -1,4 +1,4 @@
-export type TemplateCode = 'klassik' | 'zhuldyz' | 'ertegi';
+export type TemplateCode = 'klassik' | 'zhuldyz' | 'ertegi' | 'bulaq' | 'alatau' | 'kagaz';
 
 export type TemplateMeta = {
   code: TemplateCode;
@@ -41,6 +41,33 @@ export const TEMPLATES: TemplateMeta[] = [
     descriptionKk:
       'Ең жылысы: жұмсақ толқындар, ірі суреттер мен дөңгеленген бұрыштар. Жеке балабақшалар мен шағын орталықтарға жақсы.',
   },
+  {
+    code: 'bulaq',
+    nameRu: 'Бұлақ',
+    nameKk: 'Бұлақ',
+    descriptionRu:
+      'Фотография во весь экран, название поверх неё. Подойдёт саду с хорошим снимком здания или площадки.',
+    descriptionKk:
+      'Бүкіл экранға фотосурет, атауы соның үстінде. Ғимараттың немесе алаңның жақсы суреті бар балабақшаға қолайлы.',
+  },
+  {
+    code: 'alatau',
+    nameRu: 'Алатау',
+    nameKk: 'Алатау',
+    descriptionRu:
+      'Две колонки: слева новости и разделы, справа карточка с телефоном и свободными местами — она едет за прокруткой.',
+    descriptionKk:
+      'Екі баған: солда жаңалықтар мен бөлімдер, оңда телефон мен бос орындар картасы — ол айналдырумен бірге жылжиды.',
+  },
+  {
+    code: 'kagaz',
+    nameRu: 'Қағаз',
+    nameKk: 'Қағаз',
+    descriptionRu:
+      'Без карточек и теней — только текст и тонкие линии. На нём лучше всего виден фоновый узор.',
+    descriptionKk:
+      'Карточкасыз және көлеңкесіз — тек мәтін мен жіңішке сызықтар. Фондық өрнек осында ең жақсы көрінеді.',
+  },
 ];
 
 export type PaletteCode = 'mandarin' | 'mint' | 'berry' | 'sky' | 'meadow' | 'sun';
@@ -53,6 +80,31 @@ export const PALETTES: { code: PaletteCode; nameRu: string; nameKk: string; swat
   { code: 'meadow', nameRu: 'Луг', nameKk: 'Шалғын', swatch: '#4c983e' },
   { code: 'sun', nameRu: 'Солнце', nameKk: 'Күн', swatch: '#d69814' },
 ];
+
+
+export type PatternCode =
+  | 'none' | 'dots' | 'confetti' | 'grid' | 'zigzag' | 'waves' | 'rhombus' | 'oyu' | 'stripes';
+
+/**
+ * Узор фона выбирается отдельно от палитры: та же гамма с другим узором
+ * даёт непохожий сайт, и соседние сады перестают выглядеть одинаково.
+ * Узоры рисуются градиентами в цвете палитры — см. globals.css.
+ */
+export const PATTERNS: { code: PatternCode; nameRu: string; nameKk: string }[] = [
+  { code: 'none', nameRu: 'Без узора', nameKk: 'Өрнексіз' },
+  { code: 'dots', nameRu: 'Горошек', nameKk: 'Бұршақ' },
+  { code: 'confetti', nameRu: 'Конфетти', nameKk: 'Конфетти' },
+  { code: 'grid', nameRu: 'Клетка', nameKk: 'Торкөз' },
+  { code: 'zigzag', nameRu: 'Зигзаг', nameKk: 'Ирек' },
+  { code: 'waves', nameRu: 'Волны', nameKk: 'Толқын' },
+  { code: 'rhombus', nameRu: 'Ромбы', nameKk: 'Ромб' },
+  { code: 'oyu', nameRu: 'Ою-өрнек', nameKk: 'Ою-өрнек' },
+  { code: 'stripes', nameRu: 'Полоски', nameKk: 'Жолақ' },
+];
+
+export function isPatternCode(value: string): value is PatternCode {
+  return PATTERNS.some((p) => p.code === value);
+}
 
 export function isTemplateCode(value: string): value is TemplateCode {
   return TEMPLATES.some((t) => t.code === value);
