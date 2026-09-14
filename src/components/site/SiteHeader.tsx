@@ -7,7 +7,9 @@ import { withLocale } from '@/server/tenant/context';
 import type { Section, TenantProfile } from '@prisma/client';
 
 const T = {
-  menu: { kk: 'Мәзір', ru: 'Меню' },
+  /* По-казахски «Мәзір» — это и навигация, и меню питания: рядом с разделом
+     «Ас мәзірі» кнопка читалась как ссылка на еду. Оставлено русское слово. */
+  menu: { kk: 'Меню', ru: 'Меню' },
   home: { kk: 'Басты бет', ru: 'Главная' },
   search: { kk: 'Іздеу', ru: 'Поиск' },
 } as const;
