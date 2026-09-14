@@ -55,8 +55,8 @@ const T = {
   makePrimary: { kk: 'Негізгі ету', ru: 'Сделать основным' },
   ownDomain: { kk: 'Балабақшаның edu.kz домені', ru: 'Домен сада на EDU.KZ' },
   ownDomainHint: {
-    kk: 'Домен edu.kz аймағында сатып алынады және балабақшаға рәсімделеді. A-жазба сервердің IP-мекенжайын көрсетуі керек: .kz домені Қазақстандағы серверді көрсетуге міндетті.',
-    ru: 'Домен покупается в зоне edu.kz и оформляется на сад. A-запись должна указывать на IP сервера: домен .kz обязан указывать на сервер в Казахстане.',
+    kk: 'Толық жазыңыз, http:// және www-сыз. Домен edu.kz аймағында сатып алынады және балабақшаға рәсімделеді. A-жазба сервердің IP-мекенжайын көрсетуі керек: .kz домені Қазақстандағы серверді көрсетуге міндетті.',
+    ru: 'Пишите полностью, без http:// и www — например nursat.edu.kz. Домен покупается в зоне edu.kz и оформляется на сад. A-запись должна указывать на IP сервера: домен .kz обязан указывать на сервер в Казахстане.',
   },
   addDomain: { kk: 'Домен қосу', ru: 'Добавить домен' },
   users: { kk: 'Балабақша пайдаланушылары', ru: 'Пользователи сада' },
@@ -289,7 +289,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             <input type="hidden" name="tenantId" value={tenant.id} />
             <div className="min-w-64 flex-1">
               <label className="field-label" htmlFor="host">{T.ownDomain[locale]}</label>
-              <input id="host" name="host" className="field" placeholder="sad12-aqtobe.kz" />
+              <input id="host" name="host" className="field" placeholder="nursat.edu.kz" />
               <p className="field-hint">
                 {T.ownDomainHint[locale]}
               </p>

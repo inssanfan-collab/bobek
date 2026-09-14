@@ -387,9 +387,21 @@ export async function addDomain(formData: FormData) {
   await assertCsrf(formData);
 
   const tenantId = String(formData.get('tenantId'));
-  const host = normalizeHost(String(formData.get('host') ?? ''));
+  // Адрес чаще копируют из строки браузера целиком, чем набирают руками,
+  // поэтому схему и путь снимаем сами. www не трогаем: это отдельное имя,
+  // и его добавляют второй записью, чтобы выпустить на него сертификат.
+  const typed = String(formData.get('host') ?? '')
+    .trim()
+    .replace(/^[a-z]+:\/\//i, '')
+    .replace(/[/?#].*$/, '');
+  const host = normalizeHost(typed);
 
-  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(host)) throw new ActionError({ kk: 'Домен атауы дұрыс емес', ru: 'Некорректное доменное имя' });
+  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(host)) {
+    throw new ActionError({
+      kk: 'Домен атауы дұрыс емес. Толық жазыңыз: nursat.edu.kz',
+      ru: 'Некорректное доменное имя. Напишите полностью, без http:// и www — например nursat.edu.kz',
+    });
+  }
   if (host.endsWith(`.${env.portalDomain}`) || host === env.portalDomain) {
     throw new ActionError({ kk: 'Портал субдомендері автоматты түрде беріледі — мұнда тек балабақшаның жеке домендері қосылады.', ru: 'Поддомены портала выдаются автоматически — здесь добавляются только собственные домены сада.' });
   }
