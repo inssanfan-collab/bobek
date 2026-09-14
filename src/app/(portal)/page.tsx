@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
-import { formatGardenCount, formatMoney } from '@/lib/labels';
+import { formatMoney } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 
@@ -18,7 +18,6 @@ const T = {
   },
   connect: { kk: 'Балабақшамды қосу', ru: 'Подключить свой сад' },
   viewCatalog: { kk: 'Каталогты қарау', ru: 'Посмотреть каталог' },
-  onPortal: { kk: 'порталда', ru: 'на портале' },
   oneDay: { kk: '1 күн', ru: '1 день' },
   untilLaunch: { kk: 'сайтты іске қосуға дейін', ru: 'до запуска сайта' },
   twoLanguages: { kk: 'бірден екі тіл', ru: 'два языка сразу' },
@@ -58,13 +57,15 @@ const T = {
     ru: '%s в год за сайт детского сада',
   },
   tariffLead: {
-    kk: 'Жасырын қосымша төлемсіз және жаңалықтар мен фото санына шектеусіз бір тариф.',
-    ru: 'Один тариф без скрытых доплат и ограничений по количеству новостей и фотографий.',
+    kk: 'Бір төлем — сайт, әкімші бөлімі, хостинг және қолдау. Жаңалықтар, фото мен құжаттар санына шектеу жоқ, жасырын қосымша төлем жоқ.',
+    ru: 'Один платёж — сайт, админка, хостинг и поддержка. Без ограничений на количество новостей, фотографий и документов, без скрытых доплат.',
   },
+  tariffIncluded: { kk: 'Бағаға кіреді', ru: 'Входит в цену' },
+  tariffNotIncluded: { kk: 'Бағаға кірмейді', ru: 'Не входит' },
   apply: { kk: 'Өтінім қалдыру', ru: 'Оставить заявку' },
   eduDomain: {
-    kk: 'edu.kz аймағындағы доменді өзіңіз сатып аласыз — біз баптауға көмектесеміз.',
-    ru: 'Домен на EDU.KZ покупаете сами, а мы поможем настроить.',
+    kk: 'edu.kz аймағындағы жеке домен: ол білім беру ұйымдарына арналған, сондықтан балабақша оны өзі сатып алып, өзіне рәсімдейді. Баптауға тегін көмектесеміз, қауіпсіздік сертификаты автоматты беріледі.',
+    ru: 'Собственный домен в зоне edu.kz: она для организаций образования, поэтому сад покупает его сам и оформляет на себя. Настроить помогаем бесплатно, сертификат безопасности выпускается автоматически.',
   },
 
   gardensSection: { kk: 'Порталдағы балабақшалар', ru: 'Сады на портале' },
@@ -81,22 +82,53 @@ const T = {
   },
 } as const;
 
-/** Полоса доверия под героем: короткие типографские пункты, без громких иконок. */
-const TRUST = [
-  { kk: 'Хостинг Қазақстанда', ru: 'Хостинг в Казахстане' },
-  { kk: '«Тілдер туралы» заңға сәйкес', ru: 'Соответствие закону «О языках»' },
-  { kk: 'Күн сайын сақтық көшірме', ru: 'Резервные копии каждый день' },
-  { kk: 'Телефон арқылы қолдау', ru: 'Поддержка по телефону' },
-] as const;
-
-const PARENT_POINTS = [
+/**
+ * Шесть карточек одного размера. Раньше сетка была «бенто» — одна широкая
+ * тёмная плитка и мелкие вокруг, — и по ней не читалось, что главное.
+ */
+const FEATURES = [
   {
-    kk: 'Қоңырау шалмай бос орындарды көру',
-    ru: 'Посмотреть свободные места, не звоня заведующей',
+    image: '/images/story-time.webp',
+    titleKk: 'Бос орындар',
+    titleRu: 'Свободные места',
+    textKk: 'Ата-ана қоңырау шалмай көреді, меңгеруші санды бір өрісте өзгертеді.',
+    textRu: 'Родитель видит без звонка, заведующая меняет число в одном поле.',
   },
-  { kk: 'Аптаның тамақтану мәзірі', ru: 'Меню питания на неделю' },
-  { kk: 'Карантин және іс-шаралар туралы хабарландыру', ru: 'Объявления о карантине и утренниках' },
-  { kk: 'Жарғы, лицензия, қабылдау ережелері', ru: 'Устав, лицензия, правила приёма' },
+  {
+    image: '/images/menu-porridge.webp',
+    titleKk: 'Ас мәзірі',
+    titleRu: 'Меню питания',
+    textKk: 'Апталық мәзір немесе бекітілген мәзірдің сканы — ата-аналардың жиі сұрағы.',
+    textRu: 'Меню на неделю или скан утверждённого — самый частый вопрос родителей.',
+  },
+  {
+    image: '/images/drawings.webp',
+    titleKk: 'Жаңалықтар мен хабарландырулар',
+    titleRu: 'Новости и объявления',
+    textKk: 'Ертеңгіліктер, карантин, режимнің өзгеруі — чаттан емес, сайттан.',
+    textRu: 'Утренники, карантин, изменение режима — с сайта, а не из чата.',
+  },
+  {
+    image: null,
+    titleKk: 'Құжаттар',
+    titleRu: 'Документы',
+    textKk: 'Жарғы, лицензия, қабылдау ережелері, өзін-өзі бағалау — бөлімдерге бөлінген.',
+    textRu: 'Устав, лицензия, правила приёма, самооценка — разложены по разделам.',
+  },
+  {
+    image: null,
+    titleKk: 'Педагогтар мен топтар',
+    titleRu: 'Педагоги и группы',
+    textKk: 'Құрамы, санаты, өтілі; топтар жасы мен оқыту тілі бойынша.',
+    textRu: 'Состав, категории, стаж; группы по возрасту и языку обучения.',
+  },
+  {
+    image: null,
+    titleKk: 'Фотогалерея',
+    titleRu: 'Фотогалерея',
+    textKk: 'Альбомдар. Фотолар қысылады, GPS белгілері автоматты өшіріледі.',
+    textRu: 'Альбомы. Фото сжимаются, геометки снимаются автоматически.',
+  },
 ] as const;
 
 const STEPS = [
@@ -128,10 +160,11 @@ const STEPS = [
 
 const TARIFF_INCLUDED = [
   { kk: 'сіздің-балабақша.%s түріндегі мекенжай', ru: 'Адрес вида ваш-сад.%s' },
-  { kk: 'Қазақ және орыс тілдеріндегі әкімші бөлімі', ru: 'Админка на казахском и русском' },
+  { kk: 'Қазақ және орыс тілдеріндегі сайт пен әкімші бөлімі', ru: 'Сайт и админка на казахском и русском' },
   { kk: 'Алты үлгі, алты палитра және фон өрнектері', ru: 'Шесть шаблонов, шесть палитр и узоры фона' },
   { kk: 'Нашар көретіндерге арналған нұсқа', ru: 'Версия для слабовидящих' },
-  { kk: 'Қазақстандағы хостинг және сақтық көшірмелер', ru: 'Хостинг и резервные копии в Казахстане' },
+  { kk: 'Қазақстандағы хостинг, күн сайынғы сақтық көшірмелер', ru: 'Хостинг в Казахстане и ежедневные резервные копии' },
+  { kk: 'Телефон арқылы қолдау және қол жеткізуді қалпына келтіру', ru: 'Поддержка по телефону и восстановление доступа' },
 ] as const;
 
 function Check() {
@@ -198,15 +231,12 @@ export default async function PortalHome({
   const locale = localeFromParam((await searchParams).lang);
   const price = formatMoney(env.subscriptionPrice);
 
-  const [gardenCount, latestGardens] = await Promise.all([
-    prisma.tenant.count({ where: { status: 'ACTIVE' } }),
-    prisma.tenant.findMany({
-      where: { status: 'ACTIVE' },
-      include: { profile: true, domains: { where: { isPrimary: true }, take: 1 } },
-      orderBy: { createdAt: 'desc' },
-      take: 6,
-    }),
-  ]);
+  const latestGardens = await prisma.tenant.findMany({
+    where: { status: 'ACTIVE' },
+    include: { profile: true, domains: { where: { isPrimary: true }, take: 1 } },
+    orderBy: { createdAt: 'desc' },
+    take: 6,
+  });
 
   return (
     <PortalPage locale={locale} pathname="/">
@@ -247,23 +277,6 @@ export default async function PortalHome({
                 {T.viewCatalog[locale]}
               </Link>
             </div>
-
-            <dl className="mt-10 flex flex-wrap gap-x-11 gap-y-5">
-              <div>
-                <dd className="font-display text-3xl font-extrabold">{gardenCount}</dd>
-                <dt className="text-sm text-muted">
-                  {formatGardenCount(gardenCount, locale)} {T.onPortal[locale]}
-                </dt>
-              </div>
-              <div>
-                <dd className="font-display text-3xl font-extrabold">{T.oneDay[locale]}</dd>
-                <dt className="text-sm text-muted">{T.untilLaunch[locale]}</dt>
-              </div>
-              <div>
-                <dd className="font-display text-3xl font-extrabold">ҚАЗ / РУС</dd>
-                <dt className="text-sm text-muted">{T.twoLanguages[locale]}</dt>
-              </div>
-            </dl>
           </div>
 
           {/* макет сайта сада */}
@@ -305,17 +318,6 @@ export default async function PortalHome({
           </div>
         </div>
 
-        {/* полоса доверия */}
-        <div className="container-page relative pb-14">
-          <ul className="grid gap-3 rounded-3xl border border-line bg-card/60 p-5 sm:grid-cols-2 lg:grid-cols-4">
-            {TRUST.map((item) => (
-              <li key={item.ru} className="flex items-start gap-2.5 text-sm font-semibold">
-                <Check />
-                <span>{item[locale]}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
       </section>
 
       {/* ── что работает ──────────────────────────────────────────────── */}
@@ -328,170 +330,45 @@ export default async function PortalHome({
         </h2>
         <p className="mt-3 max-w-2xl text-muted">{T.featuresLead[locale]}</p>
 
-        <div className="mt-9 grid auto-rows-fr gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {/* Свободные места — то, ради чего родитель заходит на сайт сада,
-              поэтому плитка занимает две колонки и открывает ряд. */}
-          <article className="group relative overflow-hidden rounded-3xl bg-night text-surface shadow-soft md:col-span-2">
-            <Image
-              src="/images/story-time.webp"
-              alt=""
-              width={512}
-              height={286}
-              className="absolute inset-0 h-full w-full object-cover opacity-45 transition duration-500 group-hover:scale-105"
-            />
-            <div className="relative flex h-full flex-col justify-end bg-gradient-to-t from-night via-night/85 to-night/20 p-7">
-              <p className="text-[0.6875rem] font-extrabold uppercase tracking-[0.14em] text-accent">
-                {locale === 'kk' ? 'Ата-ана бірден көреді' : 'Родитель видит сразу'}
-              </p>
-              <h3 className="mt-2 font-display text-2xl font-bold">
-                {locale === 'kk' ? 'Бос орындар' : 'Свободные места'}
-              </h3>
-              <p className="mt-2 max-w-md text-surface/80">
-                {locale === 'kk'
-                  ? '«Күншуақ» тобында 5 орын — қоңырау шалудың қажеті жоқ.'
-                  : '5 мест в группе «Күншуақ» — звонить заведующей не нужно.'}
-              </p>
-            </div>
-          </article>
-
-          {/* Меню: фотография сверху, под ней настоящий день недели */}
-          <article className="overflow-hidden rounded-3xl border border-line bg-card shadow-soft">
-            <Image
-              src="/images/menu-porridge.webp"
-              alt=""
-              width={512}
-              height={382}
-              className="h-36 w-full object-cover"
-            />
-            <div className="p-6">
-              <h3 className="font-display text-xl font-bold">
-                {locale === 'kk' ? 'Ас мәзірі' : 'Меню питания'}
-              </h3>
-              <dl className="mt-3 text-sm">
-                {[
-                  locale === 'kk'
-                    ? { k: 'Таңғы ас', v: 'Сүтпен ботқа' }
-                    : { k: 'Завтрак', v: 'Молочная каша' },
-                  locale === 'kk' ? { k: 'Түскі ас', v: 'Сорпа' } : { k: 'Обед', v: 'Суп' },
-                  locale === 'kk' ? { k: 'Бесін ас', v: 'Кеспе' } : { k: 'Полдник', v: 'Запеканка' },
-                ].map((row) => (
-                  <div
-                    key={row.k}
-                    className="flex justify-between gap-3 border-b border-dashed border-line py-1.5 last:border-0"
-                  >
-                    <dt className="text-muted">{row.k}</dt>
-                    <dd className="font-bold">{row.v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </article>
-
-          {/* Новости */}
-          <article className="overflow-hidden rounded-3xl border border-line bg-card shadow-soft">
-            <Image
-              src="/images/drawings.webp"
-              alt=""
-              width={512}
-              height={382}
-              className="h-36 w-full object-cover"
-            />
-            <div className="p-6">
-              <h3 className="font-display text-xl font-bold">
-                {locale === 'kk' ? 'Жаңалықтар мен хабарландырулар' : 'Новости и объявления'}
-              </h3>
-              <p className="mt-2 text-sm text-muted">
-                {locale === 'kk'
-                  ? 'Наурыз мейрамы, ертеңгіліктер, карантин — ата-аналар чаттан емес, сайттан біледі.'
-                  : 'Наурыз мейрамы, утренники, карантин — родители узнают с сайта, а не из чата.'}
-              </p>
-            </div>
-          </article>
-
-          {/* Документы */}
-          <article className="rounded-3xl border border-line bg-card p-6 shadow-soft">
-            <h3 className="font-display text-xl font-bold">
-              {locale === 'kk' ? 'Құжаттар' : 'Документы'}
-            </h3>
-            <p className="mt-2 text-sm text-muted">
-              {locale === 'kk'
-                ? 'Тексеруші де, ата-ана да іздейтін жерде.'
-                : 'Там, где их ищет и проверка, и родитель.'}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {(locale === 'kk'
-                ? ['Жарғы', 'Лицензия', 'Қабылдау ережелері']
-                : ['Устав', 'Лицензия', 'Правила приёма']
-              ).map(
-                (chip) => (
-                  <span
-                    key={chip}
-                    className="rounded-full bg-brand-soft px-3 py-1.5 text-xs font-bold text-brand-ink"
-                  >
-                    {chip}
-                  </span>
-                ),
-              )}
-            </div>
-          </article>
-
-          {/* Педагоги */}
-          <article className="rounded-3xl border border-line bg-card p-6 shadow-soft">
-            <h3 className="font-display text-xl font-bold">
-              {locale === 'kk' ? 'Педагогтар' : 'Педагоги'}
-            </h3>
-            <p className="mt-2 text-sm text-muted">
-              {locale === 'kk'
-                ? 'Құрамы, санаты, өтілі және біліктілікті арттыру курстары.'
-                : 'Состав, категории, стаж и курсы повышения квалификации.'}
-            </p>
-          </article>
-
-          {/* Галерея */}
-          <article className="rounded-3xl border border-accent/30 bg-accent-soft p-6">
-            <h3 className="font-display text-xl font-bold">
-              {locale === 'kk' ? 'Фотогалерея' : 'Фотогалерея'}
-            </h3>
-            <p className="mt-2 text-sm text-accent-ink">
-              {locale === 'kk'
-                ? 'Ертеңгіліктер мен серуендердің альбомдары. Фотолар қысылады, EXIF өшіріледі.'
-                : 'Альбомы утренников и прогулок. Фото сжимаются, EXIF удаляется.'}
-            </p>
-          </article>
-        </div>
-      </section>
-      {/* ── родителям ─────────────────────────────────────────────────── */}
-      <section className="container-page pb-16">
-        <div className="grid gap-8 rounded-[2.5rem] border border-line bg-card p-8 shadow-soft sm:p-12 lg:grid-cols-2 lg:items-center">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-brand-ink">
-              {T.parentsEyebrow[locale]}
-            </p>
-            <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight">
-              {T.parentsTitle[locale]}
-            </h2>
-            <p className="mt-3 text-muted">{T.parentsLead[locale]}</p>
-            <Link
-              href={withLocale('/parents', locale)}
-              className="mt-6 inline-block font-bold text-brand-ink underline underline-offset-4"
+        {/* Без auto-rows-fr: карточки без фотографии тянулись до высоты
+            карточек с фотографией и наполовину состояли из пустоты. */}
+        <div className="mt-9 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((feature) => (
+            <article
+              key={feature.titleRu}
+              className="overflow-hidden rounded-3xl border border-line bg-card shadow-soft"
             >
-              {T.parentsMore[locale]}
-            </Link>
-          </div>
-          <ul className="grid gap-3">
-            {PARENT_POINTS.map((point) => (
-              <li
-                key={point.ru}
-                className="flex items-start gap-3 rounded-2xl border border-line bg-surface/60 px-5 py-4"
-              >
-                <Check />
-                <span className="font-semibold">{point[locale]}</span>
-              </li>
-            ))}
-          </ul>
+              {feature.image ? (
+                <Image
+                  src={feature.image}
+                  alt=""
+                  width={512}
+                  height={382}
+                  className="h-36 w-full object-cover"
+                />
+              ) : null}
+              <div className="p-6">
+                <h3 className="font-display text-xl font-bold">
+                  {locale === 'kk' ? feature.titleKk : feature.titleRu}
+                </h3>
+                <p className="mt-2 text-sm text-muted">
+                  {locale === 'kk' ? feature.textKk : feature.textRu}
+                </p>
+              </div>
+            </article>
+          ))}
         </div>
-      </section>
 
+        <p className="mt-6 text-muted">
+          {locale === 'kk' ? 'Ата-аналар не көретіні туралы — ' : 'Подробнее о том, что видит родитель, — '}
+          <Link
+            href={withLocale('/parents', locale)}
+            className="font-bold text-brand-ink underline underline-offset-4"
+          >
+            {T.parentsMore[locale]}
+          </Link>
+        </p>
+      </section>
       {/* ── три шага ──────────────────────────────────────────────────── */}
       <section className="container-page pb-16">
         <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-brand-ink">
@@ -530,16 +407,27 @@ export default async function PortalHome({
               <Arrow />
             </Link>
           </div>
-          <div className="space-y-3">
-            {TARIFF_INCLUDED.map((item) => (
-              <p key={item.ru} className="flex items-start gap-3">
-                <Check />
-                <span>{item[locale].replace('%s', env.portalDomain)}</span>
-              </p>
-            ))}
-            <p className="mt-5 rounded-2xl bg-surface/10 px-5 py-4 text-sm text-surface/85">
-              {T.eduDomain[locale]}
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-accent">
+              {T.tariffIncluded[locale]}
             </p>
+            <div className="mt-4 space-y-3">
+              {TARIFF_INCLUDED.map((item) => (
+                <p key={item.ru} className="flex items-start gap-3">
+                  <Check />
+                  <span>{item[locale].replace('%s', env.portalDomain)}</span>
+                </p>
+              ))}
+            </div>
+
+            {/* Собственный домен — первый вопрос покупателя, поэтому он назван
+                отдельно, а не спрятан строкой в общем списке. */}
+            <div className="mt-7 rounded-2xl bg-surface/10 px-5 py-4">
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-surface/60">
+                {T.tariffNotIncluded[locale]}
+              </p>
+              <p className="mt-2 text-sm text-surface/85">{T.eduDomain[locale]}</p>
+            </div>
           </div>
         </div>
       </section>

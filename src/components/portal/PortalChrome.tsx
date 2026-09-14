@@ -105,7 +105,13 @@ export function PortalHeader({ locale, pathname }: { locale: Locale; pathname: s
 
           <div className="ml-auto flex items-center gap-2">
             <PortalLocaleSwitch locale={locale} pathname={pathname} />
-            <Link href={withLocale('/apply', locale)} className="btn-primary text-sm">
+            {/* На телефоне кнопка не помещается рядом с переключателем языка
+                и растягивала страницу вбок. Тот же призыв стоит на первом
+                экране в двухстах пикселях ниже, поэтому здесь её прячем. */}
+            <Link
+              href={withLocale('/apply', locale)}
+              className="btn-primary hidden text-sm sm:inline-flex"
+            >
               {T.connect[locale]}
             </Link>
           </div>
