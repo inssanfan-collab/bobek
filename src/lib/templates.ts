@@ -82,6 +82,33 @@ export const PALETTES: { code: PaletteCode; nameRu: string; nameKk: string; swat
 ];
 
 
+/**
+ * Какая часть обложки остаётся видимой при кадрировании.
+ *
+ * На широком экране обложка показывается почти целиком, а на телефоне блок
+ * становится почти квадратным, и от панорамы 1920×815 остаётся узкая середина.
+ * Кадрирует браузер, и единственное, чем можно управлять, — какую часть
+ * он оставит.
+ */
+export type CoverFocus = 'center' | 'top' | 'bottom' | 'left' | 'right';
+
+export const COVER_FOCUS: { code: CoverFocus; nameRu: string; nameKk: string; css: string }[] = [
+  { code: 'center', nameRu: 'По центру', nameKk: 'Ортасы', css: 'center' },
+  { code: 'top', nameRu: 'Верх фото', nameKk: 'Жоғарғы жағы', css: 'center top' },
+  { code: 'bottom', nameRu: 'Низ фото', nameKk: 'Төменгі жағы', css: 'center bottom' },
+  { code: 'left', nameRu: 'Левая часть', nameKk: 'Сол жағы', css: 'left center' },
+  { code: 'right', nameRu: 'Правая часть', nameKk: 'Оң жағы', css: 'right center' },
+];
+
+export function isCoverFocus(value: string): value is CoverFocus {
+  return COVER_FOCUS.some((item) => item.code === value);
+}
+
+/** CSS-значение object-position для выбранной части. */
+export function coverPosition(value: string | null | undefined): string {
+  return COVER_FOCUS.find((item) => item.code === value)?.css ?? 'center';
+}
+
 export type PatternCode =
   | 'none' | 'dots' | 'confetti' | 'grid' | 'zigzag' | 'waves' | 'rhombus' | 'oyu' | 'stripes';
 

@@ -27,8 +27,19 @@ export async function generateMetadata({
       type: 'website',
       siteName: name,
       locale: 'ru_RU',
+      url: `https://${primaryHost}`,
       // В ленте мессенджера ссылку на сайт сада узнают по его же обложке.
-      images: profile?.coverMediaId ? [`/api/media/${profile.coverMediaId}`] : undefined,
+      // Берём её из /api/og, а не /api/media: там JPEG нужных пропорций,
+      // а WhatsApp не показывает WebP, в который пересжимаются все загрузки.
+      images: profile?.coverMediaId
+        ? [{
+            url: `/api/og/${profile.coverMediaId}`,
+            width: 1200,
+            height: 630,
+            type: 'image/jpeg',
+            alt: name,
+          }]
+        : undefined,
     },
     // Значок вкладки — логотип сада, который он загрузил в админке.
     icons: profile?.logoMediaId ? { icon: `/api/media/${profile.logoMediaId}` } : undefined,

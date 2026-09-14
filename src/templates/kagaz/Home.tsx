@@ -11,7 +11,7 @@ import type { HomeProps } from '../types';
  * Спокойный вариант для садов, которым яркая вёрстка не подходит: узор
  * фона на нём читается лучше всего, потому что ничем не закрыт.
  */
-export function KagazHome({ profile, sections, news, announcements, albums, locale, coverUrl }: HomeProps) {
+export function KagazHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -39,7 +39,7 @@ export function KagazHome({ profile, sections, news, announcements, albums, loca
 
       {coverUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={coverUrl} alt="" className="h-72 w-full object-cover" />
+        <img src={coverUrl} alt="" style={{ objectPosition: coverPosition }} className="h-72 w-full object-cover" />
       ) : null}
 
       <AnnouncementList items={announcements} locale={locale} />

@@ -11,7 +11,7 @@ import type { HomeProps } from '../types';
  * с самым важным. Расчёт на сады, у которых есть хорошая фотография здания
  * или площадки: она становится лицом сайта, а не полоской сверху.
  */
-export function BulaqHome({ profile, sections, news, announcements, albums, locale, coverUrl }: HomeProps) {
+export function BulaqHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -20,7 +20,7 @@ export function BulaqHome({ profile, sections, news, announcements, albums, loca
       <section className="relative isolate overflow-hidden">
         {coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={coverUrl} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
+          <img src={coverUrl} alt="" style={{ objectPosition: coverPosition }} className="absolute inset-0 -z-10 h-full w-full object-cover" />
         ) : (
           <div className="absolute inset-0 -z-10 bg-gradient-to-br from-brand via-brand to-accent" aria-hidden />
         )}

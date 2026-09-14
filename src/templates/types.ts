@@ -11,4 +11,6 @@ export type HomeProps = {
   albums: AlbumWithCover[];
   locale: Locale;
   coverUrl: string | null;
+  /** Готовое значение object-position: какую часть обложки оставить при кадрировании. */
+  coverPosition: string;
 };

@@ -17,7 +17,7 @@ import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { geocodeAddress } from '@/server/maps/yandex';
 import { hashPassword, passwordProblem, verifyPassword } from '@/server/auth/password';
 import { destroyAllSessions, getCurrentUser } from '@/server/auth/session';
-import { isPaletteCode, isPatternCode, isTemplateCode } from '@/lib/templates';
+import { isCoverFocus, isPaletteCode, isPatternCode, isTemplateCode } from '@/lib/templates';
 import { env } from '@/lib/env';
 
 /**
@@ -687,6 +687,7 @@ export async function saveAppearance(formData: FormData) {
   const templateCode = str(formData, 'templateCode');
   const palette = str(formData, 'palette');
   const pattern = str(formData, 'pattern') || 'none';
+  const coverFocus = str(formData, 'coverFocus') || 'center';
   if (!isTemplateCode(templateCode) || !isPaletteCode(palette) || !isPatternCode(pattern)) {
     throw new ActionError({ kk: 'Үлгі, палитра немесе өрнек белгісіз', ru: 'Неизвестный шаблон, палитра или узор' });
   }
@@ -705,7 +706,10 @@ export async function saveAppearance(formData: FormData) {
 
   await prisma.$transaction([
     prisma.tenant.update({ where: { id: ctx.tenantId }, data: { templateCode, palette, pattern } }),
-    prisma.tenantProfile.update({ where: { tenantId: ctx.tenantId }, data: { coverMediaId, logoMediaId } }),
+    prisma.tenantProfile.update({
+      where: { tenantId: ctx.tenantId },
+      data: { coverMediaId, logoMediaId, coverFocus: isCoverFocus(coverFocus) ? coverFocus : 'center' },
+    }),
   ]);
 
   // Палитра и шаблон читаются из кэша резолвера — иначе изменения увидят через минуту.

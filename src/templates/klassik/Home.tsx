@@ -7,7 +7,7 @@ import {
 import type { HomeProps } from '../types';
 
 /** Классик: строгая шапка-баннер, новости колонкой, плитки разделов. */
-export function KlassikHome({ profile, sections, news, announcements, albums, locale, coverUrl }: HomeProps) {
+export function KlassikHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -16,7 +16,7 @@ export function KlassikHome({ profile, sections, news, announcements, albums, lo
       <section className="overflow-hidden rounded-3xl border border-line bg-card">
         {coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={coverUrl} alt="" className="h-56 w-full object-cover sm:h-72" />
+          <img src={coverUrl} alt="" style={{ objectPosition: coverPosition }} className="h-56 w-full object-cover sm:h-72" />
         ) : (
           <div className="h-56 bg-gradient-to-r from-brand to-accent sm:h-72" aria-hidden />
         )}

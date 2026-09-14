@@ -98,6 +98,9 @@ model TenantProfile {
   aboutRu      String?
   logoMediaId  String?
   coverMediaId String?
+  /// Какая часть обложки важна. На телефоне широкое фото обрезается
+  /// до узкой середины, и без этого выбора сад ничего не может сделать.
+  coverFocus   String  @default("center")
 
   /// Родители в Казахстане пишут в WhatsApp и смотрят Instagram —
   /// без этих ссылок сайт оторван от того, как сад общается на самом деле.

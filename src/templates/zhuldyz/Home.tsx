@@ -7,7 +7,7 @@ import {
 import type { HomeProps } from '../types';
 
 /** Жұлдыз: обложка во весь экран, первая новость крупной карточкой. */
-export function ZhuldyzHome({ profile, sections, news, announcements, albums, locale, coverUrl }: HomeProps) {
+export function ZhuldyzHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
   const [lead, ...rest] = news;
@@ -17,7 +17,7 @@ export function ZhuldyzHome({ profile, sections, news, announcements, albums, lo
       <section className="relative isolate">
         {coverUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={coverUrl} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
+          <img src={coverUrl} alt="" style={{ objectPosition: coverPosition }} className="absolute inset-0 -z-10 h-full w-full object-cover" />
         ) : (
           <div className="absolute inset-0 -z-10 bg-gradient-to-br from-brand via-brand to-accent" aria-hidden />
         )}

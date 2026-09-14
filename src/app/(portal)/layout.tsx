@@ -11,6 +11,17 @@ export const metadata: Metadata = {
   description:
     `Готовый сайт для детского сада Актобе за ${formatMoney(env.subscriptionPrice)} в год: своя админка, новости, галерея, документы и меню питания. Каталог садов города.`,
   robots: { index: true, follow: true },
+  metadataBase: new URL(`https://${env.portalDomain}`),
+  // Карточка превью в WhatsApp и Telegram. Статичный JPEG: WebP там
+  // не показывается, а сборщики ссылок ходят за картинкой при каждой
+  // пересылке. Пересобрать — pnpm og:image.
+  openGraph: {
+    type: 'website',
+    siteName: 'EduSad',
+    locale: 'ru_RU',
+    url: `https://${env.portalDomain}`,
+    images: [{ url: '/og-edusad.jpg', width: 1200, height: 630, type: 'image/jpeg', alt: 'EduSad' }],
+  },
 };
 
 /**

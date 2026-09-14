@@ -7,7 +7,7 @@ import {
 import type { HomeProps } from '../types';
 
 /** Ертегі: мягкая волна вместо прямой границы, крупные скругления, тёплый тон. */
-export function ErtegiHome({ profile, sections, news, announcements, albums, locale, coverUrl }: HomeProps) {
+export function ErtegiHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -30,7 +30,7 @@ export function ErtegiHome({ profile, sections, news, announcements, albums, loc
           </div>
           {coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverUrl} alt="" className="h-64 w-full rounded-3xl object-cover shadow-lift lg:h-full" />
+            <img src={coverUrl} alt="" style={{ objectPosition: coverPosition }} className="h-64 w-full rounded-3xl object-cover shadow-lift lg:h-full" />
           ) : (
             <div className="h-64 rounded-3xl bg-gradient-to-br from-brand to-accent shadow-lift lg:h-full" aria-hidden />
           )}

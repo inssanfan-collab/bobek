@@ -4,6 +4,7 @@ import { SiteFooter } from '@/components/site/SiteFooter';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { recordVisit } from '@/server/stats';
 import { TemplateHome } from '@/templates';
+import { coverPosition } from '@/lib/templates';
 import { mediaUrl } from '@/components/site/blocks';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
@@ -62,6 +63,7 @@ export default async function TenantHome({
           albums={albums}
           locale={locale}
           coverUrl={mediaUrl(cover)}
+          coverPosition={coverPosition(profile?.coverFocus)}
         />
       </main>
       <SiteFooter profile={profile} sections={sections} locale={locale} portalDomain={env.portalDomain} />

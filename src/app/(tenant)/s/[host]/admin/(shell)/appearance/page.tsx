@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/admin/AdminShell';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Alert } from '@/components/ui/Alert';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
-import { PALETTES, PATTERNS, TEMPLATES } from '@/lib/templates';
+import { COVER_FOCUS, PALETTES, PATTERNS, TEMPLATES } from '@/lib/templates';
 import { pick } from '@/lib/i18n';
 import { saveAppearance } from '../actions';
 
@@ -23,6 +23,11 @@ const T = {
   },
   template: { kk: 'Үлгі', ru: 'Шаблон' },
   pattern: { kk: 'Фон өрнегі', ru: 'Узор фона' },
+  focus: { kk: 'Мұқабадағы маңызды бөлік', ru: 'Что важно на обложке' },
+  focusHint: {
+    kk: 'Телефонда фото ені бойынша қиылады. Мұнда қай бөлігі көрініп қалатынын таңдайсыз.',
+    ru: 'На телефоне фото обрезается по ширине — здесь выбирается, какая часть останется видимой. Лучше всего подходят горизонтальные снимки примерно 3:2.',
+  },
   patternHint: {
     kk: 'Өрнек палитра түсімен боялады, сондықтан кез келген түспен үйлеседі.',
     ru: 'Узор красится цветом палитры, поэтому сочетается с любой гаммой.',
@@ -128,6 +133,28 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
                   name="pattern"
                   value={item.code}
                   defaultChecked={(ctx.pattern || 'none') === item.code}
+                  className="sr-only"
+                />
+                {pick(locale, item.nameKk, item.nameRu)}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="card p-6">
+          <legend className="font-display text-lg font-bold">{T.focus[locale]}</legend>
+          <p className="mt-1 text-sm text-muted">{T.focusHint[locale]}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {COVER_FOCUS.map((item) => (
+              <label
+                key={item.code}
+                className="flex cursor-pointer items-center gap-2 rounded-xl border border-line px-3 py-2 text-sm font-semibold transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
+              >
+                <input
+                  type="radio"
+                  name="coverFocus"
+                  value={item.code}
+                  defaultChecked={(profile?.coverFocus || 'center') === item.code}
                   className="sr-only"
                 />
                 {pick(locale, item.nameKk, item.nameRu)}

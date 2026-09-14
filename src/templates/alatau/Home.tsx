@@ -11,7 +11,7 @@ import type { HomeProps } from '../types';
  * сада, которая едет вместе с прокруткой. Для садов, где родителю нужны
  * телефон и свободные места на любом экране, а не только в самом верху.
  */
-export function AlatauHome({ profile, sections, news, announcements, albums, locale, coverUrl }: HomeProps) {
+export function AlatauHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -23,7 +23,7 @@ export function AlatauHome({ profile, sections, news, announcements, albums, loc
           {about ? <p className="mt-4 max-w-2xl text-lg text-muted">{about}</p> : null}
           {coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverUrl} alt="" className="mt-6 h-64 w-full rounded-3xl object-cover shadow-soft sm:h-80" />
+            <img src={coverUrl} alt="" style={{ objectPosition: coverPosition }} className="mt-6 h-64 w-full rounded-3xl object-cover shadow-soft sm:h-80" />
           ) : (
             <div
               className="mt-6 h-64 rounded-3xl bg-gradient-to-br from-brand-soft to-accent-soft sm:h-80"
