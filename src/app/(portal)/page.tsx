@@ -1,15 +1,15 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
-import { formatMoney } from '@/lib/labels';
+import { formatGardenCount, formatMoney } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
 
 const T = {
-  eyebrow: { kk: 'Балабақшаның жеке сайты', ru: 'Балабақшаның жеке сайты' },
   heroBefore: { kk: 'Балабақшаның жеке сайты', ru: 'Свой сайт детского сада за' },
   heroAfter: { kk: 'жылына', ru: 'в год' },
   heroLead: {
@@ -18,7 +18,7 @@ const T = {
   },
   connect: { kk: 'Балабақшамды қосу', ru: 'Подключить свой сад' },
   viewCatalog: { kk: 'Каталогты қарау', ru: 'Посмотреть каталог' },
-  gardensOnPortal: { kk: 'порталдағы балабақша', ru: 'сада на портале' },
+  onPortal: { kk: 'порталда', ru: 'на портале' },
   oneDay: { kk: '1 күн', ru: '1 день' },
   untilLaunch: { kk: 'сайтты іске қосуға дейін', ru: 'до запуска сайта' },
   twoLanguages: { kk: 'бірден екі тіл', ru: 'два языка сразу' },
@@ -30,8 +30,6 @@ const T = {
   mockNewsItem: { kk: 'Наурыз мейрамы — 21 наурыз', ru: 'Наурыз мейрамы — 21 марта' },
   mockMenu: { kk: 'Мәзір', ru: 'Меню' },
   mockMenuItem: { kk: 'Сүтпен ботқа, жеміс', ru: 'Каша с ягодами, фрукты' },
-  floatEyebrow: { kk: 'Бүгінгі мәзір', ru: 'Бүгінгі мәзір' },
-  floatValue: { kk: 'Таңғы ас — Сүтпен ботқа', ru: 'Таңғы ас — Сүтпен ботқа' },
 
   featuresEyebrow: { kk: 'Платформа мүмкіндіктері', ru: 'Функции платформы' },
   featuresTitle: { kk: 'Балабақша сайтында не жұмыс істейді', ru: 'Что уже работает на сайте сада' },
@@ -131,7 +129,7 @@ const STEPS = [
 const TARIFF_INCLUDED = [
   { kk: 'сіздің-балабақша.%s түріндегі мекенжай', ru: 'Адрес вида ваш-сад.%s' },
   { kk: 'Қазақ және орыс тілдеріндегі әкімші бөлімі', ru: 'Админка на казахском и русском' },
-  { kk: 'Үш үлгі және алты түс палитрасы', ru: 'Три шаблона и шесть палитр' },
+  { kk: 'Алты үлгі, алты палитра және фон өрнектері', ru: 'Шесть шаблонов, шесть палитр и узоры фона' },
   { kk: 'Нашар көретіндерге арналған нұсқа', ru: 'Версия для слабовидящих' },
   { kk: 'Қазақстандағы хостинг және сақтық көшірмелер', ru: 'Хостинг и резервные копии в Казахстане' },
 ] as const;
@@ -171,6 +169,27 @@ function Arrow() {
   );
 }
 
+/** Заголовок вкладки тоже двуязычный: layout в Next не получает язык из адреса. */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ lang?: string }>;
+}): Promise<Metadata> {
+  const locale = localeFromParam((await searchParams).lang);
+  return {
+    title: {
+      absolute:
+        locale === 'kk'
+          ? 'Бөбегім — Ақтөбе облысы балабақшаларының сайттары'
+          : 'Bobegim — сайты для детских садов Актюбинской области',
+    },
+    description:
+      locale === 'kk'
+        ? 'Балабақшаның жеке сайты жылына 50 000 ₸: екі тілде, әкімші бөлімімен, Қазақстандағы хостингпен.'
+        : 'Свой сайт детского сада за 50 000 ₸ в год: на двух языках, с админкой и хостингом в Казахстане.',
+  };
+}
+
 export default async function PortalHome({
   searchParams,
 }: {
@@ -204,10 +223,7 @@ export default async function PortalHome({
 
         <div className="container-page relative grid items-center gap-12 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-brand-ink">
-              {T.eyebrow[locale]}
-            </p>
-            <h1 className="mt-4 font-display text-4xl font-extrabold leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="font-display text-4xl font-extrabold leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">
               {T.heroBefore[locale]}{' '}
               <span className="bg-gradient-to-r from-brand-ink via-brand to-accent bg-clip-text text-transparent">
                 {price}
@@ -235,7 +251,9 @@ export default async function PortalHome({
             <dl className="mt-10 flex flex-wrap gap-x-11 gap-y-5">
               <div>
                 <dd className="font-display text-3xl font-extrabold">{gardenCount}</dd>
-                <dt className="text-sm text-muted">{T.gardensOnPortal[locale]}</dt>
+                <dt className="text-sm text-muted">
+                  {formatGardenCount(gardenCount, locale)} {T.onPortal[locale]}
+                </dt>
               </div>
               <div>
                 <dd className="font-display text-3xl font-extrabold">{T.oneDay[locale]}</dd>
@@ -283,15 +301,6 @@ export default async function PortalHome({
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Карточка выступает из-под нижнего края макета: на одном уровне
-                с плитками она наезжала на «Меню питания». */}
-            <div className="decor absolute -bottom-11 right-4 rounded-2xl border border-line bg-card/90 px-4 py-3 shadow-lift backdrop-blur sm:-right-6">
-              <p className="text-[0.625rem] font-extrabold uppercase tracking-[0.1em] text-accent-ink">
-                {T.floatEyebrow[locale]}
-              </p>
-              <p className="mt-1 text-sm font-bold">{T.floatValue[locale]}</p>
             </div>
           </div>
         </div>
@@ -356,13 +365,15 @@ export default async function PortalHome({
             />
             <div className="p-6">
               <h3 className="font-display text-xl font-bold">
-                Мәзір · {locale === 'kk' ? 'Мәзір' : 'Меню'}
+                {locale === 'kk' ? 'Ас мәзірі' : 'Меню питания'}
               </h3>
               <dl className="mt-3 text-sm">
                 {[
-                  { k: 'Таңғы ас', v: 'Сүтпен ботқа' },
-                  { k: locale === 'kk' ? 'Түскі ас' : 'Обед', v: 'Сорпа' },
-                  { k: 'Бесін ас', v: locale === 'kk' ? 'Кеспе' : 'Запеканка' },
+                  locale === 'kk'
+                    ? { k: 'Таңғы ас', v: 'Сүтпен ботқа' }
+                    : { k: 'Завтрак', v: 'Молочная каша' },
+                  locale === 'kk' ? { k: 'Түскі ас', v: 'Сорпа' } : { k: 'Обед', v: 'Суп' },
+                  locale === 'kk' ? { k: 'Бесін ас', v: 'Кеспе' } : { k: 'Полдник', v: 'Запеканка' },
                 ].map((row) => (
                   <div
                     key={row.k}
@@ -400,7 +411,7 @@ export default async function PortalHome({
           {/* Документы */}
           <article className="rounded-3xl border border-line bg-card p-6 shadow-soft">
             <h3 className="font-display text-xl font-bold">
-              Құжаттар · {locale === 'kk' ? 'Құжаттар' : 'Документы'}
+              {locale === 'kk' ? 'Құжаттар' : 'Документы'}
             </h3>
             <p className="mt-2 text-sm text-muted">
               {locale === 'kk'
@@ -408,7 +419,10 @@ export default async function PortalHome({
                 : 'Там, где их ищет и проверка, и родитель.'}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {['Жарғы', 'Лицензия', locale === 'kk' ? 'Қабылдау ережелері' : 'Правила приёма'].map(
+              {(locale === 'kk'
+                ? ['Жарғы', 'Лицензия', 'Қабылдау ережелері']
+                : ['Устав', 'Лицензия', 'Правила приёма']
+              ).map(
                 (chip) => (
                   <span
                     key={chip}
