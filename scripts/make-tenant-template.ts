@@ -18,7 +18,7 @@ import {
   type TableColumn,
 } from '../src/lib/tenant-template';
 
-const OUT = resolve(process.cwd(), 'public/downloads/bobegim-anketa.xlsx');
+const OUT = resolve(process.cwd(), 'public/downloads/edusad-anketa.xlsx');
 
 const INK = 'FF1F2937';
 const BRAND = 'FF0E8F7E';
@@ -204,7 +204,7 @@ function buildTable(
 
 async function main() {
   const book = new ExcelJS.Workbook();
-  book.creator = 'Bobegim';
+  book.creator = 'EduSad';
   book.created = new Date();
 
   buildGuide(book);

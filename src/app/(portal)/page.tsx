@@ -213,8 +213,8 @@ export async function generateMetadata({
     title: {
       absolute:
         locale === 'kk'
-          ? 'Бөбегім — Ақтөбе облысы балабақшаларының сайттары'
-          : 'Bobegim — сайты для детских садов Актюбинской области',
+          ? 'EduSad — Ақтөбе облысы балабақшаларының сайттары'
+          : 'EduSad — сайты для детских садов Актюбинской области',
     },
     description:
       locale === 'kk'

@@ -5,8 +5,8 @@ import { formatMoney } from '@/lib/labels';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Bobegim — сайты для детских садов Актюбинской области',
-    template: '%s · Bobegim',
+    default: 'EduSad — сайты для детских садов Актюбинской области',
+    template: '%s · EduSad',
   },
   description:
     `Готовый сайт для детского сада Актобе за ${formatMoney(env.subscriptionPrice)} в год: своя админка, новости, галерея, документы и меню питания. Каталог садов города.`,

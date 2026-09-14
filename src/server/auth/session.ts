@@ -6,7 +6,7 @@ import { env } from '@/lib/env';
 import type { Role, User } from '@prisma/client';
 import { DEFAULT_LOCALE, isLocale, type Locale } from '@/lib/i18n';
 
-export const SESSION_COOKIE = 'bobegim_session';
+export const SESSION_COOKIE = 'edusad_session';
 
 export type AuthUser = Pick<
   User,

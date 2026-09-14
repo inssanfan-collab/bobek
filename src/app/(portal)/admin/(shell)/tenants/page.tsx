@@ -82,10 +82,10 @@ export default async function TenantsPage({
       {/* Оба файла раздаются садам руками, поэтому лежат там, где заводят сад */}
       <div className="card mb-6 flex flex-wrap items-center gap-3 p-4">
         <span className="font-semibold">{T.handouts[locale]}:</span>
-        <a href="/downloads/bobegim-anketa.xlsx" className="btn-secondary text-sm" download>
+        <a href="/downloads/edusad-anketa.xlsx" className="btn-secondary text-sm" download>
           {T.anketa[locale]}
         </a>
-        <a href="/downloads/bobegim-instrukciya.pdf" className="btn-secondary text-sm" download>
+        <a href="/downloads/edusad-instrukciya.pdf" className="btn-secondary text-sm" download>
           {T.guide[locale]}
         </a>
         <span className="text-sm text-muted">{T.handoutsHint[locale]}</span>

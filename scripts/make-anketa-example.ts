@@ -10,8 +10,8 @@
 import ExcelJS from 'exceljs';
 import { resolve } from 'node:path';
 
-const SRC = resolve(process.cwd(), 'public/downloads/bobegim-anketa.xlsx');
-const OUT = resolve(process.cwd(), 'public/downloads/bobegim-anketa-obrazec.xlsx');
+const SRC = resolve(process.cwd(), 'public/downloads/edusad-anketa.xlsx');
+const OUT = resolve(process.cwd(), 'public/downloads/edusad-anketa-obrazec.xlsx');
 
 const VALUES: Record<string, string> = {
   nameRu: 'Ясли-сад №7 «Күншуақ»',

@@ -313,7 +313,7 @@ function AnketaBox({
           <input id="anketa" name="anketa" type="file" accept=".xlsx" required className="field" />
         </div>
         <SubmitButton className="btn-secondary" pendingLabel="Читаем…">Загрузить анкету</SubmitButton>
-        <a href="/downloads/bobegim-anketa.xlsx" className="btn-ghost" download>
+        <a href="/downloads/edusad-anketa.xlsx" className="btn-ghost" download>
           Скачать пустую анкету
         </a>
       </form>

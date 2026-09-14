@@ -15,7 +15,7 @@ import { CHAPTERS, GUIDE_SUBTITLE, GUIDE_TITLE, type Block } from './guide-conte
 
 const DIR = resolve(process.cwd(), 'docs/guide');
 const HTML = resolve(DIR, 'guide.html');
-const PDF = resolve(process.cwd(), 'public/downloads/bobegim-instrukciya.pdf');
+const PDF = resolve(process.cwd(), 'public/downloads/edusad-instrukciya.pdf');
 
 const escape = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -348,7 +348,7 @@ async function buildHtml(): Promise<string> {
 <body>
 
 <div class="cover">
-  <div class="cover-mark">Bobegim</div>
+  <div class="cover-mark">EduSad</div>
   <div>
     <h1 class="cover-title">${escape(GUIDE_TITLE)}</h1>
     <p class="cover-sub">${escape(GUIDE_SUBTITLE)}</p>
@@ -391,7 +391,7 @@ async function main() {
     footerTemplate: `
       <div style="width:100%;font-size:8pt;color:#9aa3a1;font-family:'Segoe UI',sans-serif;
                   padding:0 16mm;display:flex;justify-content:space-between;">
-        <span>Bobegim · инструкция для детских садов</span>
+        <span>EduSad · инструкция для детских садов</span>
         <span class="pageNumber"></span>
       </div>`,
     margin: { top: '18mm', right: '16mm', bottom: '20mm', left: '18mm' },

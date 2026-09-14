@@ -13,6 +13,8 @@ import { LOCALES, LOCALE_LABEL, withLocale, type Locale } from '@/lib/i18n';
 
 const T = {
   skip: { kk: 'Мазмұнға өту', ru: 'Перейти к содержимому' },
+  /* Подпись под знаком была только по-казахски и в русской версии тоже. */
+  tagline: { kk: 'Ақтөбе балабақшалары', ru: 'Детские сады Актобе' },
   mainMenu: { kk: 'Негізгі мәзір', ru: 'Основное меню' },
   connect: { kk: 'Балабақшаны қосу', ru: 'Подключить сад' },
   languageGroup: { kk: 'Сайт тілі', ru: 'Язык сайта' },
@@ -73,20 +75,26 @@ export function PortalHeader({ locale, pathname }: { locale: Locale; pathname: s
       <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
         <div className="container-page flex h-16 items-center gap-6">
           <Link href={withLocale('/', locale)} className="flex shrink-0 items-center gap-2.5">
+            {/* Росток: «сад» читается буквально, и знак не путается с домиком —
+                домик стоит в шапке каждого сайта сада. */}
             <span
-              className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-brand to-brand-ink font-display text-lg font-extrabold text-white"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-brand to-brand-ink"
               aria-hidden
             >
-              Б
+              <svg viewBox="0 0 40 40" className="h-6 w-6" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 30v-9" />
+                <path d="M20 21c0-4-3-6.5-7-6.5 0 4 3 6.5 7 6.5z" />
+                <path d="M20 21c0-4.5 3.2-7 7.5-7 0 4.5-3.2 7-7.5 7z" />
+              </svg>
             </span>
             <span>
               <span className="block font-display text-xl font-extrabold leading-none tracking-tight">
-                Бөбегім
+                EduSad
               </span>
               {/* На узком экране подпись прячется: вместе с кнопками шапки
                   она не помещается в 375 px и вызывала горизонтальный скролл. */}
               <span className="mt-0.5 hidden text-[0.5625rem] font-bold uppercase tracking-[0.16em] text-muted sm:block">
-                Ақтөбе балабақшалары
+                {T.tagline[locale]}
               </span>
             </span>
           </Link>
@@ -159,7 +167,7 @@ export function PortalFooter({ locale }: { locale: Locale }) {
     <footer className="mt-20 border-t border-line bg-card">
       <div className="container-page grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p className="font-display text-lg font-extrabold">Bobegim</p>
+          <p className="font-display text-lg font-extrabold">EduSad</p>
           <p className="mt-2 text-sm text-muted">{T.about[locale]}</p>
         </div>
         <div>

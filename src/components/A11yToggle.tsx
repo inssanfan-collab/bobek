@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { UiIcon } from '@/components/site/UiIcon';
 
-const KEY = 'bobegim:a11y';
+const KEY = 'edusad:a11y';
 
 /**
  * Версия для слабовидящих. Состояние держим в localStorage самого сайта сада —
