@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { login, site, PORTAL, SAD12_ADMIN, SUPERADMIN } from './helpers';
+import { SESSION_COOKIE } from '../../src/server/auth/session.client';
 
 test.describe('Изоляция садов', () => {
   test('на домене чужого сада сотрудник не авторизован', async ({ page }) => {
@@ -16,7 +17,7 @@ test.describe('Изоляция садов', () => {
 
     // Самое важное: переносим cookie руками — так проверяется серверная проверка
     // владения, а не только браузерная привязка cookie к домену.
-    const session = (await context.cookies(site('sad12'))).find((c) => c.name === 'bobegim_session');
+    const session = (await context.cookies(site('sad12'))).find((c) => c.name === SESSION_COOKIE);
     expect(session, 'сессия должна быть выдана').toBeTruthy();
 
     await context.addCookies([{ ...session!, domain: 'kunshuaq.bobegim.local', path: '/' }]);
@@ -28,7 +29,7 @@ test.describe('Изоляция садов', () => {
   test('подставленная в портал сессия сада не даёт админку портала', async ({ page, context }) => {
     await login(page, site('sad12'), SAD12_ADMIN);
 
-    const session = (await context.cookies(site('sad12'))).find((c) => c.name === 'bobegim_session');
+    const session = (await context.cookies(site('sad12'))).find((c) => c.name === SESSION_COOKIE);
     await context.addCookies([{ ...session!, domain: 'bobegim.local', path: '/' }]);
 
     const response = await page.goto(`${PORTAL}/admin`);

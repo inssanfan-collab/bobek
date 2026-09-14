@@ -5,8 +5,9 @@ import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
 import type { Role, User } from '@prisma/client';
 import { DEFAULT_LOCALE, isLocale, type Locale } from '@/lib/i18n';
+import { SESSION_COOKIE } from './session.client';
 
-export const SESSION_COOKIE = 'edusad_session';
+export { SESSION_COOKIE } from './session.client';
 
 export type AuthUser = Pick<
   User,
