@@ -17,7 +17,7 @@ function int(name: string, fallback: number): number {
 
 export const env = {
   databaseUrl: required('DATABASE_URL'),
-  portalDomain: (process.env.PORTAL_DOMAIN ?? 'bobegim.kz').toLowerCase(),
+  portalDomain: (process.env.PORTAL_DOMAIN ?? 'edusad.kz').toLowerCase(),
   storageDir: process.env.STORAGE_DIR ?? './storage',
   maxUploadBytes: int('MAX_UPLOAD_MB', 20) * 1024 * 1024,
   sessionSecret: required('SESSION_SECRET'),

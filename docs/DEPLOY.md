@@ -45,9 +45,9 @@ systemctl enable --now docker
 | A | `*` | IP сервера |
 
 Запись `*` (wildcard) обязательна — именно она даёт работать адресам садов
-вида `sad12.bobegim.kz`. Без неё каждый новый сад пришлось бы добавлять в DNS руками.
+вида `sad12.edusad.kz`. Без неё каждый новый сад пришлось бы добавлять в DNS руками.
 
-Проверить: `dig +short sad12.bobegim.kz` должен вернуть IP сервера.
+Проверить: `dig +short sad12.edusad.kz` должен вернуть IP сервера.
 
 ## 3. Установка
 
@@ -63,8 +63,8 @@ nano .env
 Заполните в `.env`:
 
 ```env
-PORTAL_DOMAIN="bobegim.kz"
-NEXT_PUBLIC_PORTAL_DOMAIN="bobegim.kz"
+PORTAL_DOMAIN="edusad.kz"
+NEXT_PUBLIC_PORTAL_DOMAIN="edusad.kz"
 
 POSTGRES_PASSWORD="<openssl rand -hex 24>"
 SESSION_SECRET="<openssl rand -hex 32>"
@@ -99,7 +99,7 @@ SEED_DEMO=false SEED_ADMIN_LOGIN=admin SEED_ADMIN_PASSWORD='придумайте
   docker compose run --rm app pnpm exec tsx prisma/seed.ts
 ```
 
-Откройте `https://bobegim.kz/admin`, войдите и **сразу смените пароль** — система об этом
+Откройте `https://edusad.kz/admin`, войдите и **сразу смените пароль** — система об этом
 напомнит сама.
 
 ## 4. Как выдаются сертификаты
@@ -264,7 +264,7 @@ E2E поднимают сервер сами с `COOKIE_SECURE=false`: тест�
 ```bash
 docker compose logs -f app        # логи приложения
 docker compose logs -f caddy      # выпуск сертификатов
-curl -s https://bobegim.kz/api/health
+curl -s https://edusad.kz/api/health
 docker compose exec postgres psql -U bobegim -d bobegim -c '\dt'
 ```
 

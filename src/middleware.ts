@@ -7,7 +7,7 @@ import { classifyHost } from '@/lib/host';
  * layout сайта сада (там же и кэш доменов).
  */
 export function middleware(request: NextRequest) {
-  const portalDomain = process.env.PORTAL_DOMAIN ?? 'bobegim.kz';
+  const portalDomain = process.env.PORTAL_DOMAIN ?? 'edusad.kz';
   const parsed = classifyHost(request.headers.get('host'), portalDomain);
 
   // Внутренний префикс /s/<домен> — деталь реализации. Снаружи он не должен работать:

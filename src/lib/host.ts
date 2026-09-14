@@ -38,7 +38,7 @@ export function classifyHost(rawHost: string | null | undefined, portalDomain: s
 
   if (host.endsWith(`.${portal}`)) {
     const label = host.slice(0, -(portal.length + 1));
-    // Многоуровневые поддомены садам не выдаём: a.b.bobegim.kz — это не сад.
+    // Многоуровневые поддомены садам не выдаём: a.b.edusad.kz — это не сад.
     if (!label.includes('.') && isValidSlug(label)) return { kind: 'subdomain', slug: label };
     return { kind: 'portal' };
   }
