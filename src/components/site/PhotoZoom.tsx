@@ -127,7 +127,7 @@ export function PhotoZoom({ locale, children }: { locale: Locale; children: Reac
               role="dialog"
               aria-modal="true"
               aria-label={photo.alt || T.zoom[locale]}
-              className="fixed inset-0 z-[100] flex flex-col bg-black/90"
+              className="fixed inset-0 z-[100] flex flex-col bg-black/95"
               onClick={(event) => {
                 // Закрываем по фону, но не по самому снимку.
                 if (event.target === event.currentTarget) close();
@@ -152,7 +152,7 @@ export function PhotoZoom({ locale, children }: { locale: Locale; children: Reac
                   onClick={close}
                   autoFocus
                   aria-label={T.close[locale]}
-                  className="grid h-11 w-11 place-items-center rounded-full bg-white/10 text-2xl leading-none text-white transition hover:bg-white/20"
+                  className="grid h-11 w-11 place-items-center rounded-full bg-black/50 text-2xl leading-none text-white transition hover:bg-black/70"
                 >
                   ×
                 </button>
@@ -206,7 +206,7 @@ function ArrowButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className={`absolute top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-2xl leading-none text-white transition hover:bg-white/20 ${
+      className={`absolute top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-2xl leading-none text-white transition hover:bg-black/70 ${
         side === 'left' ? 'left-2' : 'right-2'
       }`}
     >
