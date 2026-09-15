@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import { SectionIcon } from './SectionIcon';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
@@ -174,37 +175,41 @@ export function ContactCard({ profile, locale }: { profile: TenantProfile | null
       <h2 className="font-display text-2xl font-extrabold">{T.contacts[locale]}</h2>
       <dl className="mt-4 space-y-3 text-sm">
         {address ? (
-          <div className="flex gap-3">
-            <dt className="w-36 shrink-0 text-muted">{locale === 'kk' ? 'Мекенжай' : 'Адрес'}</dt>
-            <dd>{address}</dd>
-          </div>
+          <ContactRow label={locale === 'kk' ? 'Мекенжай' : 'Адрес'}>{address}</ContactRow>
         ) : null}
         {profile.phone ? (
-          <div className="flex gap-3">
-            <dt className="w-36 shrink-0 text-muted">{locale === 'kk' ? 'Телефон' : 'Телефон'}</dt>
-            <dd><a href={`tel:${profile.phone.replace(/\s/g, '')}`} className="font-semibold text-brand">{profile.phone}</a></dd>
-          </div>
+          <ContactRow label="Телефон">
+            <a href={`tel:${profile.phone.replace(/\s/g, '')}`} className="font-semibold text-brand">
+              {profile.phone}
+            </a>
+          </ContactRow>
         ) : null}
         {profile.email ? (
-          <div className="flex gap-3">
-            <dt className="w-36 shrink-0 text-muted">E-mail</dt>
-            <dd><a href={`mailto:${profile.email}`} className="font-semibold text-brand">{profile.email}</a></dd>
-          </div>
+          <ContactRow label="E-mail">
+            <a href={`mailto:${profile.email}`} className="font-semibold text-brand">{profile.email}</a>
+          </ContactRow>
         ) : null}
         {profile.workHours ? (
-          <div className="flex gap-3">
-            <dt className="w-36 shrink-0 text-muted">{T.workHours[locale]}</dt>
-            <dd>{profile.workHours}</dd>
-          </div>
+          <ContactRow label={T.workHours[locale]}>{profile.workHours}</ContactRow>
         ) : null}
-        {head ? (
-          <div className="flex gap-3">
-            <dt className="w-36 shrink-0 text-muted">{T.head[locale]}</dt>
-            <dd>{head}</dd>
-          </div>
-        ) : null}
+        {head ? <ContactRow label={T.head[locale]}>{head}</ContactRow> : null}
       </dl>
     </section>
+  );
+}
+
+/**
+ * Строка контактов. На телефоне подпись встаёт над значением: колонка
+ * в 144 пикселя оставляла значению меньше половины экрана, и адрес
+ * рассыпался на четыре строки. Длинные значения переносятся по буквам —
+ * адрес почты одним словом иначе уезжает за край карточки.
+ */
+function ContactRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
+      <dt className="shrink-0 text-muted sm:w-36">{label}</dt>
+      <dd className="min-w-0 break-words">{children}</dd>
+    </div>
   );
 }
 

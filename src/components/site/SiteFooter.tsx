@@ -37,7 +37,8 @@ export function SiteFooter({
 
         <div>
           <p className="mb-2 font-semibold">{T.contacts[locale]}</p>
-          <ul className="space-y-1.5 text-sm text-muted">
+          {/* break-words — адрес почты одним словом иначе вылезает из колонки. */}
+          <ul className="space-y-1.5 break-words text-sm text-muted">
             {profile?.phone ? (
               <li><a href={`tel:${profile.phone.replace(/\s/g, '')}`} className="font-semibold text-brand">{profile.phone}</a></li>
             ) : null}
