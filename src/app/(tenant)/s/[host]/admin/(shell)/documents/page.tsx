@@ -1,4 +1,5 @@
 import { tenantAdmin } from '@/server/tenant/admin-context';
+import { sectionTitle } from '@/server/tenant/section-title';
 import { csrfToken } from '@/server/auth/csrf';
 import { PageHeader } from '@/components/admin/AdminShell';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -61,10 +62,11 @@ export default async function DocumentsPage({ params }: { params: Promise<{ host
   const ctx = await tenantAdmin(host);
   const locale = ctx.user.locale;
 
-  const [folders, documents, csrf] = await Promise.all([
+  const [folders, documents, csrf, title] = await Promise.all([
     ctx.db.docFolders.findMany({ orderBy: { position: 'asc' } }),
     ctx.db.documents.findMany({ orderBy: [{ position: 'asc' }, { publishedAt: 'desc' }], include: { media: true } }),
     csrfToken(),
+    sectionTitle(ctx.tenantId, 'DOCUMENTS', locale, T.title[locale]),
   ]);
 
   type Doc = (typeof documents)[number];
@@ -104,7 +106,7 @@ export default async function DocumentsPage({ params }: { params: Promise<{ host
 
   return (
     <>
-      <PageHeader title={T.title[locale]} description={T.lead[locale]} />
+      <PageHeader title={title} description={T.lead[locale]} />
 
       {ctx.canEdit ? (
         <div className="mb-6 grid gap-4 lg:grid-cols-2">
