@@ -5,6 +5,7 @@ import { formatAgeRange, formatDate, formatDocCount } from '@/lib/labels';
 import { mediaUrl, type AlbumWithCover, type PostWithCover } from '@/components/site/blocks';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { UiIcon } from '@/components/site/UiIcon';
+import { isOfficeDoc } from '@/lib/media-kind';
 import type {
   Club, Document, DocumentFolder, FaqItem, Group, Media, MenuDay, StaffMember, TenantProfile,
 } from '@prisma/client';
@@ -172,15 +173,24 @@ function DocRows({ items, locale }: { items: DocWithMedia[]; locale: Locale }) {
               правила приёма, а не завести их в папке «Загрузки». PDF браузер
               покажет сам; Word и Excel он открыть не умеет и всё равно
               скачает — поэтому отдельная кнопка «Скачать» остаётся. */}
+          {/* PDF браузер открывает сам. Word и Excel он не умеет, поэтому они
+              ведут на нашу страницу с просмотрщиком — посетитель остаётся
+              на сайте сада, а не уходит на чужой домен. */}
           <span className="flex shrink-0 gap-2">
-            <a
-              href={`/api/media/${doc.mediaId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary text-sm"
-            >
-              {T.openDoc[locale]}
-            </a>
+            {isOfficeDoc(doc.media.mime) ? (
+              <Link href={withLocale(`/doc/${doc.id}`, locale)} className="btn-secondary text-sm">
+                {T.openDoc[locale]}
+              </Link>
+            ) : (
+              <a
+                href={`/api/media/${doc.mediaId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary text-sm"
+              >
+                {T.openDoc[locale]}
+              </a>
+            )}
             <a
               href={`/api/media/${doc.mediaId}?download=1`}
               className="btn-ghost text-sm"
