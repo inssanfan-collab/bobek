@@ -87,13 +87,14 @@ export function StaffList({ staff, locale }: { staff: (StaffMember & { photo: Me
         return (
           <article key={member.id} className="card p-5 text-center">
             {photo ? (
+              // Портрет намеренно без увеличения: это подпись к карточке,
+              // а не снимок, который приходят разглядывать.
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={photo}
                 alt={member.fullName}
                 className="mx-auto h-28 w-28 rounded-full object-cover"
                 loading="lazy"
-                data-zoom
               />
             ) : (
               <div className="mx-auto grid h-28 w-28 place-items-center rounded-full bg-brand-soft text-3xl" aria-hidden>
