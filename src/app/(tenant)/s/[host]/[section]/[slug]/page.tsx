@@ -5,6 +5,7 @@ import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/conte
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
+import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { recordPostView, recordVisit } from '@/server/stats';
 import { mediaUrl } from '@/components/site/blocks';
 import { pick } from '@/lib/i18n';
@@ -85,52 +86,56 @@ export default async function EntryPage({
       <SiteHeader profile={context.profile} sections={menu} locale={locale} pathname={basePath} />
 
       <main id="main" className="container-page max-w-3xl py-8">
-        <Link href={withLocale(basePath, locale)} className="text-sm font-semibold text-brand">
-          ← {pick(locale, section.titleKk, section.titleRu)}
-        </Link>
+        <PhotoZoom locale={locale}>
+          <Link href={withLocale(basePath, locale)} className="text-sm font-semibold text-brand">
+            ← {pick(locale, section.titleKk, section.titleRu)}
+          </Link>
 
-        {album ? (
-          <>
-            <h1 className="mt-4 font-display text-3xl font-extrabold">{pick(locale, album.titleKk, album.titleRu)}</h1>
-            {album.takenOn ? <p className="mt-1 text-sm text-muted">{formatDate(album.takenOn, locale)}</p> : null}
-            {pick(locale, album.descKk, album.descRu) ? (
-              <p className="mt-3 text-muted">{pick(locale, album.descKk, album.descRu)}</p>
-            ) : null}
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {album.items.map((item) => (
+          {album ? (
+            <>
+              <h1 className="mt-4 font-display text-3xl font-extrabold">{pick(locale, album.titleKk, album.titleRu)}</h1>
+              {album.takenOn ? <p className="mt-1 text-sm text-muted">{formatDate(album.takenOn, locale)}</p> : null}
+              {pick(locale, album.descKk, album.descRu) ? (
+                <p className="mt-3 text-muted">{pick(locale, album.descKk, album.descRu)}</p>
+              ) : null}
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {album.items.map((item) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={item.id}
+                    src={mediaUrl(item.media) ?? ''}
+                    alt={pick(locale, item.media.altKk, item.media.altRu)}
+                    className="w-full rounded-2xl object-cover"
+                    loading="lazy"
+                    data-zoom
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <article>
+              <p className="mt-4 text-sm text-muted">{formatDate(post!.publishedAt, locale)}</p>
+              <h1 className="mt-1 font-display text-3xl font-extrabold sm:text-4xl">
+                {pick(locale, post!.titleKk, post!.titleRu)}
+              </h1>
+              {post!.coverMedia ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  key={item.id}
-                  src={mediaUrl(item.media) ?? ''}
-                  alt={pick(locale, item.media.altKk, item.media.altRu)}
-                  className="w-full rounded-2xl object-cover"
-                  loading="lazy"
+                  src={mediaUrl(post!.coverMedia) ?? ''}
+                  alt=""
+                  className="mt-6 w-full rounded-3xl object-cover"
+                  data-zoom
                 />
-              ))}
-            </div>
-          </>
-        ) : (
-          <article>
-            <p className="mt-4 text-sm text-muted">{formatDate(post!.publishedAt, locale)}</p>
-            <h1 className="mt-1 font-display text-3xl font-extrabold sm:text-4xl">
-              {pick(locale, post!.titleKk, post!.titleRu)}
-            </h1>
-            {post!.coverMedia ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={mediaUrl(post!.coverMedia) ?? ''}
-                alt=""
-                className="mt-6 w-full rounded-3xl object-cover"
+              ) : null}
+              <div
+                className="prose-content mt-6"
+                dangerouslySetInnerHTML={{
+                  __html: (locale === 'kk' ? post!.bodyKk || post!.bodyRu : post!.bodyRu || post!.bodyKk) ?? '',
+                }}
               />
-            ) : null}
-            <div
-              className="prose-content mt-6"
-              dangerouslySetInnerHTML={{
-                __html: (locale === 'kk' ? post!.bodyKk || post!.bodyRu : post!.bodyRu || post!.bodyKk) ?? '',
-              }}
-            />
-          </article>
-        )}
+            </article>
+          )}
+        </PhotoZoom>
       </main>
 
       <SiteFooter profile={context.profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />

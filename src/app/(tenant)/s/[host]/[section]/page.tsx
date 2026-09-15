@@ -4,6 +4,7 @@ import { publicSiteContext, localeFrom } from '@/server/tenant/context';
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
+import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { recordVisit } from '@/server/stats';
 import { ContactCard } from '@/components/site/blocks';
 import {
@@ -67,15 +68,17 @@ export default async function SectionPage({
       <SiteHeader profile={profile} sections={menu} locale={locale} pathname={basePath} />
       <main id="main" className="container-page py-8">
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{title}</h1>
-        <div className="mt-6">
-          <SectionBody
-            type={section.type}
-            sectionId={section.id}
-            basePath={basePath}
-            context={context}
-            locale={locale}
-          />
-        </div>
+        <PhotoZoom locale={locale}>
+          <div className="mt-6">
+            <SectionBody
+              type={section.type}
+              sectionId={section.id}
+              basePath={basePath}
+              context={context}
+              locale={locale}
+            />
+          </div>
+        </PhotoZoom>
       </main>
       <SiteFooter profile={profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
     </>

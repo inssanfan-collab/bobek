@@ -5,6 +5,7 @@ import { prisma } from '@/server/db';
 import { formatDate } from '@/lib/labels';
 import { toPlainText } from '@/lib/sanitize';
 import { PortalPage } from '@/components/portal/PortalChrome';
+import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
@@ -56,7 +57,11 @@ export default async function PortalNewsItem({
         </Link>
         <p className="mt-4 text-sm text-muted">{formatDate(post.publishedAt, locale)}</p>
         <h1 className="mt-1 font-display text-4xl font-extrabold">{pick(locale, post.titleKk, post.titleRu)}</h1>
-        {body ? <div className="prose-content mt-6" dangerouslySetInnerHTML={{ __html: body }} /> : null}
+        {body ? (
+          <PhotoZoom locale={locale}>
+            <div className="prose-content mt-6" dangerouslySetInnerHTML={{ __html: body }} />
+          </PhotoZoom>
+        ) : null}
       </article>
     </PortalPage>
   );
