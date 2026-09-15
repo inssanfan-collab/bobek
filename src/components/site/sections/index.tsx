@@ -16,6 +16,7 @@ const T = {
     ru: 'Раздел пока заполняется. Загляните позже.',
   },
   download: { kk: 'Жүктеу', ru: 'Скачать' },
+  openDoc: { kk: 'Ашу', ru: 'Открыть' },
   free: { kk: 'Бос орын', ru: 'Свободно мест' },
   total: { kk: 'Барлық орын', ru: 'Всего мест' },
   teachers: { kk: 'Тәрбиешілер', ru: 'Воспитатели' },
@@ -167,9 +168,27 @@ function DocRows({ items, locale }: { items: DocWithMedia[]; locale: Locale }) {
               {formatDate(doc.publishedAt, locale)} · {Math.max(1, Math.round(doc.media.size / 1024))} КБ
             </span>
           </span>
-          <a href={`/api/media/${doc.mediaId}?download=1`} className="btn-secondary text-sm">
-            {T.download[locale]}
-          </a>
+          {/* Сначала открыть, а не скачать: родитель обычно хочет прочитать
+              правила приёма, а не завести их в папке «Загрузки». PDF браузер
+              покажет сам; Word и Excel он открыть не умеет и всё равно
+              скачает — поэтому отдельная кнопка «Скачать» остаётся. */}
+          <span className="flex shrink-0 gap-2">
+            <a
+              href={`/api/media/${doc.mediaId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary text-sm"
+            >
+              {T.openDoc[locale]}
+            </a>
+            <a
+              href={`/api/media/${doc.mediaId}?download=1`}
+              className="btn-ghost text-sm"
+              aria-label={`${T.download[locale]}: ${pick(locale, doc.titleKk, doc.titleRu)}`}
+            >
+              {T.download[locale]}
+            </a>
+          </span>
         </li>
       ))}
     </ul>

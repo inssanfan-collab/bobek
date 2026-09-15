@@ -19,7 +19,7 @@ export const env = {
   databaseUrl: required('DATABASE_URL'),
   portalDomain: (process.env.PORTAL_DOMAIN ?? 'edusad.kz').toLowerCase(),
   storageDir: process.env.STORAGE_DIR ?? './storage',
-  maxUploadBytes: int('MAX_UPLOAD_MB', 20) * 1024 * 1024,
+  maxUploadBytes: int('MAX_UPLOAD_MB', 100) * 1024 * 1024,
   sessionSecret: required('SESSION_SECRET'),
   sessionTtlDays: int('SESSION_TTL_DAYS', 14),
   tlsAskToken: process.env.TLS_ASK_TOKEN ?? '',

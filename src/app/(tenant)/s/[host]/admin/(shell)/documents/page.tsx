@@ -7,6 +7,7 @@ import { SubmitButton } from '@/components/ui/SubmitButton';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { DOC_FOLDER_PRESETS, formatDate, formatDocCount } from '@/lib/labels';
 import { pick } from '@/lib/i18n';
+import { env } from '@/lib/env';
 import {
   createDocFolder, deleteDocFolder, deleteDocument, moveDocFolder, renameDocFolder, saveDocument,
 } from '../actions';
@@ -36,7 +37,7 @@ const T = {
   folder: { kk: 'Бөлім', ru: 'Раздел' },
   noFolder: { kk: 'Бөлімсіз', ru: 'Без раздела' },
   file: { kk: 'Файл', ru: 'Файл' },
-  fileHint: { kk: 'PDF, Word немесе Excel, 20 МБ дейін.', ru: 'PDF, Word или Excel, до 20 МБ.' },
+  fileHint: { kk: 'PDF, Word немесе Excel, %s МБ дейін.', ru: 'PDF, Word или Excel, до %s МБ.' },
   uploading: { kk: 'Жүктелуде…', ru: 'Загружаем…' },
   add: { kk: 'Құжат қосу', ru: 'Добавить документ' },
   empty: { kk: 'Әзірге құжаттар жоқ', ru: 'Документов пока нет' },
@@ -61,6 +62,9 @@ export default async function DocumentsPage({ params }: { params: Promise<{ host
   const { host } = await params;
   const ctx = await tenantAdmin(host);
   const locale = ctx.user.locale;
+  // Предел берётся из настроек, а не повторяется числом в тексте: иначе
+  // подсказка обещает одно, а загрузка отклоняет по другому.
+  const maxUploadMb = Math.round(env.maxUploadBytes / 1024 / 1024);
 
   const [folders, documents, csrf, title] = await Promise.all([
     ctx.db.docFolders.findMany({ orderBy: { position: 'asc' } }),
@@ -160,7 +164,9 @@ export default async function DocumentsPage({ params }: { params: Promise<{ host
               <div>
                 <label className="field-label" htmlFor="file">{T.file[locale]} *</label>
                 <input id="file" name="file" type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx" className="field" />
-                <p className="field-hint">{T.fileHint[locale]}</p>
+                <p className="field-hint">
+                  {T.fileHint[locale].replaceAll('%s', String(maxUploadMb))}
+                </p>
               </div>
             </div>
             <SubmitButton pendingLabel={T.uploading[locale]}>{T.add[locale]}</SubmitButton>
