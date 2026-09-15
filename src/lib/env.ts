@@ -42,8 +42,11 @@ export const env = {
    * Выключается только для локального запуска и e2e по обычному HTTP: браузер молча
    * отбрасывает Secure-cookie на http://, и вход выглядит как «пароль не подошёл».
    */
-  cookieSecure:
-    process.env.COOKIE_SECURE !== undefined
-      ? process.env.COOKIE_SECURE === 'true'
-      : process.env.NODE_ENV === 'production',
+  // Пустое значение считается незаданным. На бою в .env стояло
+  // «COOKIE_SECURE=» — переменная определена, сравнение с 'true' даёт ложь,
+  // и cookie сессии месяц ходила без защиты. Пустая строка не является
+  // осознанным «выключить», поэтому теперь она падает в умолчание.
+  cookieSecure: process.env.COOKIE_SECURE
+    ? process.env.COOKIE_SECURE === 'true'
+    : process.env.NODE_ENV === 'production',
 };
