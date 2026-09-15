@@ -11,6 +11,7 @@ import { assertCsrf } from '@/server/auth/csrf';
 import { assertOwned } from '@/server/db/scope';
 import { audit } from '@/server/audit';
 import { sanitizeContent, toPlainText } from '@/lib/sanitize';
+import { isVideoUrl } from '@/lib/video';
 import { uniqueSlug } from '@/lib/slug';
 import { saveUpload, deleteMedia, UploadError } from '@/server/media';
 import { invalidateTenantCacheById } from '@/server/tenant/resolve';
@@ -87,6 +88,13 @@ export async function savePost(_prev: ActionState, formData: FormData): Promise<
     coverMediaId = (await saveUpload(coverFile, ctx.tenantId)).id;
   }
 
+  // Ссылка на ролик: принимаем только YouTube и Instagram, чужую ссылку
+  // лучше отклонить сразу, чем показать родителю пустую рамку.
+  const videoRaw = optionalStr(formData, 'videoUrl');
+  if (videoRaw && !isVideoUrl(videoRaw)) {
+    throw new Error('Ссылка на видео должна вести на YouTube или Instagram');
+  }
+
   const data = {
     titleRu: parsed.data.titleRu,
     titleKk: parsed.data.titleKk || parsed.data.titleRu,
@@ -95,6 +103,7 @@ export async function savePost(_prev: ActionState, formData: FormData): Promise<
     bodyRu,
     bodyKk,
     coverMediaId,
+    videoUrl: videoRaw ?? null,
     isPinned: formData.get('isPinned') === 'on',
     status: publish ? ('PUBLISHED' as const) : ('DRAFT' as const),
   };

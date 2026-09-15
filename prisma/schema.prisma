@@ -288,6 +288,8 @@ model Post {
   bodyRu       String?
   coverMediaId String?
   coverMedia   Media?        @relation("PostCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  /// Ссылка на ролик в YouTube или Instagram. Видео у себя не храним.
+  videoUrl     String?
   status       PublishStatus @default(DRAFT)
   publishedAt  DateTime?
   isPinned     Boolean       @default(false)

@@ -6,12 +6,14 @@ import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { PhotoZoom } from '@/components/site/PhotoZoom';
+import { VideoEmbed } from '@/components/site/VideoEmbed';
 import { recordPostView, recordVisit } from '@/server/stats';
 import { mediaUrl } from '@/components/site/blocks';
 import { pick } from '@/lib/i18n';
 import { toPlainText } from '@/lib/sanitize';
 import { formatDate } from '@/lib/labels';
 import { env } from '@/lib/env';
+import { parseVideo } from '@/lib/video';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,6 +73,7 @@ export default async function EntryPage({
   const { context, section, post, album } = await load(resolvedParams);
   const locale = localeFrom(search.lang);
   const basePath = `/${section.slug}`;
+  const video = parseVideo(post?.videoUrl);
 
   const menu = await context.db.sections.findMany({
     where: { isVisible: true, parentId: null },
@@ -118,7 +121,16 @@ export default async function EntryPage({
               <h1 className="mt-1 font-display text-3xl font-extrabold sm:text-4xl">
                 {pick(locale, post!.titleKk, post!.titleRu)}
               </h1>
-              {post!.coverMedia ? (
+              {/* Есть ролик — он и есть главное в записи, обложка становится
+                  его заставкой и отдельно не показывается. */}
+              {video ? (
+                <VideoEmbed
+                  video={video}
+                  poster={mediaUrl(post!.coverMedia)}
+                  title={pick(locale, post!.titleKk, post!.titleRu)}
+                  locale={locale}
+                />
+              ) : post!.coverMedia ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={mediaUrl(post!.coverMedia) ?? ''}

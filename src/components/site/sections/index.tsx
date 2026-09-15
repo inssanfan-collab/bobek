@@ -56,8 +56,21 @@ export function PostFeed({
         return (
           <article key={post.id} className="card flex flex-col gap-4 p-5 sm:flex-row">
             {cover ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={cover} alt="" className="h-40 w-full shrink-0 rounded-2xl object-cover sm:w-56" loading="lazy" />
+              // Кружок на обложке: в списке должно быть видно, что внутри ролик,
+              // а не только текст.
+              <span className="relative block h-40 w-full shrink-0 sm:w-56">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={cover} alt="" className="h-full w-full rounded-2xl object-cover" loading="lazy" />
+                {post.videoUrl ? (
+                  <span className="absolute inset-0 grid place-items-center" aria-hidden>
+                    <span className="grid h-12 w-12 place-items-center rounded-full bg-white/85 shadow-soft">
+                      <svg viewBox="0 0 24 24" className="ml-0.5 h-6 w-6 fill-brand-ink">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </span>
+                  </span>
+                ) : null}
+              </span>
             ) : null}
             <div className="min-w-0">
               <p className="text-sm text-muted">{formatDate(post.publishedAt, locale)}</p>

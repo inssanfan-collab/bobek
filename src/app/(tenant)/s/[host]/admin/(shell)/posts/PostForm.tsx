@@ -23,6 +23,11 @@ const T = {
     ru: 'Показывается в списке новостей. Если оставить пустым — возьмём первые строки текста.',
   },
   body: { kk: 'Мәтін', ru: 'Текст' },
+  video: { kk: 'Бейнеге сілтеме', ru: 'Ссылка на видео' },
+  videoHint: {
+    kk: 'YouTube немесе Instagram сілтемесі. Бейне сол жерде қалады, біз оны жаңалық бетінде көрсетеміз.',
+    ru: 'Ссылка на YouTube или Instagram. Видео остаётся там, мы показываем его на странице новости.',
+  },
   publication: { kk: 'Жариялау', ru: 'Публикация' },
   status: { kk: 'Күйі', ru: 'Состояние' },
   publish: { kk: 'Жариялау', ru: 'Опубликовать' },
@@ -84,6 +89,21 @@ export function PostForm({
           ru={<RichText name="bodyRu" defaultValue={post?.bodyRu ?? ''} placeholder="Расскажите, как прошёл праздник…" disabled={!canEdit} locale={locale} />}
           kk={<RichText name="bodyKk" defaultValue={post?.bodyKk ?? ''} placeholder="Мереке қалай өткенін жазыңыз…" disabled={!canEdit} locale={locale} />}
         />
+      </section>
+
+      <section className="card space-y-2 p-6">
+        <label className="field-label" htmlFor="videoUrl">{T.video[locale]}</label>
+        <input
+          id="videoUrl"
+          name="videoUrl"
+          type="url"
+          inputMode="url"
+          defaultValue={post?.videoUrl ?? ''}
+          disabled={!canEdit}
+          className="field"
+          placeholder="https://www.instagram.com/reel/… или https://youtu.be/…"
+        />
+        <p className="text-sm text-muted">{T.videoHint[locale]}</p>
       </section>
 
       <section className="card space-y-4 p-6">
