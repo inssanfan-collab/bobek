@@ -44,6 +44,16 @@ export const env = {
     MANAGED: int('PLAN_MANAGED_PRICE_KZT', 120000),
   },
   subscriptionGraceDays: int('SUBSCRIPTION_GRACE_DAYS', 30),
+  /**
+   * Служебные уведомления владельцу портала: новая заявка и прочее.
+   * Пустой адрес — уведомления выключены (так на машине разработчика).
+   * Отправка идёт через почтовый сервер на той же машине, поэтому
+   * без пароля: postfix доверяет локальным подключениям.
+   */
+  notifyEmail: (process.env.NOTIFY_EMAIL ?? '').trim(),
+  mailFrom: process.env.MAIL_FROM || 'EduSad <edusad@e04.kz>',
+  smtpHost: process.env.SMTP_HOST || '127.0.0.1',
+  smtpPort: int('SMTP_PORT', 25),
   isProduction: process.env.NODE_ENV === 'production',
   /**
    * Флаг Secure у cookie сессии. В продакшене всегда true — сайт работает по HTTPS.

@@ -5,7 +5,9 @@ import { prisma } from '@/server/db';
 import { assertCsrf } from '@/server/auth/csrf';
 import { requestMeta } from '@/server/auth/session';
 import { hit, FORM_LIMIT, FORM_WINDOW_MS } from '@/server/auth/rate-limit';
-import { isPlanCode } from '@/lib/plans';
+import { isPlanCode, PLAN_INFO } from '@/lib/plans';
+import { notifyOwner } from '@/server/notify/mail';
+import { env } from '@/lib/env';
 
 const schema = z.object({
   gardenName: z.string().trim().min(2, 'Укажите название сада').max(200),
@@ -53,6 +55,9 @@ export async function submitLead(_prev: LeadState, formData: FormData): Promise<
   // Ловушка сработала — делаем вид, что всё хорошо, и ничего не сохраняем.
   if (parsed.data.website) return { ok: true };
 
+  const planRaw = formData.get('plan');
+  const plan = isPlanCode(planRaw) ? planRaw : null;
+
   await prisma.lead.create({
     data: {
       gardenName: parsed.data.gardenName,
@@ -60,10 +65,23 @@ export async function submitLead(_prev: LeadState, formData: FormData): Promise<
       phone: parsed.data.phone,
       email: parsed.data.email || null,
       comment: parsed.data.comment || null,
-      plan: isPlanCode(formData.get('plan')) ? String(formData.get('plan')) : null,
+      plan,
       ip,
     },
   });
+
+  // Заявка — это деньги, и перезвонить обещано в тот же день. Ждать, пока
+  // кто-нибудь зайдёт в админку, нельзя, поэтому сразу пишем владельцу.
+  await notifyOwner(`новая заявка — ${parsed.data.gardenName}`, [
+    `Сад: ${parsed.data.gardenName}`,
+    `Контакт: ${parsed.data.personName}`,
+    `Телефон: ${parsed.data.phone}`,
+    parsed.data.email ? `Почта: ${parsed.data.email}` : null,
+    `Тариф: ${plan ? PLAN_INFO[plan].name.ru : 'не выбран — обсудить по телефону'}`,
+    parsed.data.comment ? `\nКомментарий:\n${parsed.data.comment}` : null,
+    '',
+    `Все заявки: https://${env.portalDomain}/admin/leads`,
+  ]);
 
   return { ok: true };
 }

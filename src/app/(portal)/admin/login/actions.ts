@@ -8,6 +8,7 @@ import { createSession, requestMeta } from '@/server/auth/session';
 import { assertCsrf } from '@/server/auth/csrf';
 import { hit, reset, LOGIN_LIMIT, LOGIN_WINDOW_MS } from '@/server/auth/rate-limit';
 import { audit } from '@/server/audit';
+import { notifyOwner } from '@/server/notify/mail';
 import { DEFAULT_LOCALE, isLocale } from '@/lib/i18n';
 
 export type LoginState = { error?: string; redirectTo?: string };
@@ -69,6 +70,30 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
       tenantId: user.tenantId,
       meta: { login: loginValue, attempts },
     });
+
+    // Пишем один раз — в момент блокировки, а не на каждую ошибку: иначе
+    // перебор пароля превратился бы ещё и в перебор вашего почтового ящика.
+    // Чаще всего это заведующая, забывшая пароль, и она скоро позвонит;
+    // но если заблокирован вход в админку портала — это стоит знать сразу.
+    if (attempts === LOGIN_LIMIT) {
+      await notifyOwner(
+        user.role === 'SUPERADMIN'
+          ? `вход в админку портала заблокирован — ${loginValue}`
+          : `вход сотрудника сада заблокирован — ${loginValue}`,
+        [
+          `Логин: ${loginValue}`,
+          `Неудачных попыток подряд: ${attempts}`,
+          `Адрес: ${ip ?? 'неизвестен'}`,
+          `Браузер: ${userAgent ?? 'неизвестен'}`,
+          `Вход закрыт на ${LOCK_MINUTES} минут.`,
+          '',
+          user.role === 'SUPERADMIN'
+            ? 'Если это были не вы — кто-то подбирает пароль к админке портала.'
+            : 'Скорее всего, сотрудник забыл пароль. Сбросить его можно в карточке сада.',
+        ],
+      );
+    }
+
     return { error: GENERIC_ERROR };
   }
 
