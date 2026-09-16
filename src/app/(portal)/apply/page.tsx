@@ -5,6 +5,7 @@ import { env } from '@/lib/env';
 import { formatMoney } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam } from '@/lib/i18n';
+import { isPlanCode, PLAN_CODES, PLAN_INFO } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,10 +41,13 @@ export async function generateMetadata({
 export default async function ApplyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; plan?: string }>;
 }) {
   const [csrf, search] = await Promise.all([csrfToken(), searchParams]);
   const locale = localeFromParam(search.lang);
+  // Из карточки тарифа приходят с ?plan= — выбор уже сделан, не заставляем делать его заново.
+  const plan = isPlanCode(search.plan) ? search.plan : null;
+  const prices = { BASIC: env.planPrices.BASIC, MANAGED: env.planPrices.MANAGED };
 
   return (
     <PortalPage locale={locale} pathname="/apply">
@@ -56,9 +60,16 @@ export default async function ApplyPage({
           <div className="card mt-6 space-y-4 p-6">
             <div>
               <p className="text-sm text-muted">{T.price[locale]}</p>
-              <p className="font-display text-3xl font-extrabold">
-                {formatMoney(env.subscriptionPrice)} {T.perYear[locale]}
-              </p>
+              <dl className="mt-2 space-y-2">
+                {PLAN_CODES.map((code) => (
+                  <div key={code} className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <dt className="font-semibold">{PLAN_INFO[code].name[locale]}</dt>
+                    <dd className="font-display text-2xl font-extrabold">
+                      {formatMoney(prices[code])} <span className="text-sm font-normal text-muted">{T.perYear[locale]}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </div>
             <ul className="space-y-2 text-sm">
               <li className="flex gap-2"><span className="text-emerald-600" aria-hidden>✓</span> {T.addressLine[locale]}{env.portalDomain}</li>
@@ -69,7 +80,7 @@ export default async function ApplyPage({
           </div>
         </div>
 
-        <ApplyForm csrf={csrf} locale={locale} />
+        <ApplyForm csrf={csrf} locale={locale} plan={plan} prices={prices} />
         </div>
       </div>
     </PortalPage>

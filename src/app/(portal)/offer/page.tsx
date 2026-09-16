@@ -47,7 +47,8 @@ export default async function OfferPage({
   const fill = (text: string) =>
     text
       .replaceAll('%domain%', env.portalDomain)
-      .replaceAll('%price%', formatMoney(env.subscriptionPrice))
+      .replaceAll('%priceBasic%', formatMoney(env.planPrices.BASIC))
+      .replaceAll('%priceManaged%', formatMoney(env.planPrices.MANAGED))
       .replaceAll('%grace%', String(env.subscriptionGraceDays));
 
   const company = locale === 'kk' ? settings.companyNameKk : settings.companyNameRu;

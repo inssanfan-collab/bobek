@@ -1,6 +1,7 @@
 import 'server-only';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
+import type { PlanCode } from '@/lib/plans';
 import type { DocData } from './documents';
 
 /**
@@ -28,6 +29,7 @@ export async function createContract(input: {
   periodStart: Date;
   periodEnd: Date;
   amount: number;
+  plan: PlanCode;
 }) {
   const year = input.periodStart.getFullYear();
 
@@ -45,6 +47,7 @@ export async function createContract(input: {
         periodStart: input.periodStart,
         periodEnd: input.periodEnd,
         amount: input.amount,
+        plan: input.plan,
       },
     });
   });

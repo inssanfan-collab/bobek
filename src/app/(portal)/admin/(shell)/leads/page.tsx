@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { formatDateTime } from '@/lib/labels';
 import { markLeadHandled } from './actions';
+import { isPlanCode, PLAN_INFO } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,14 @@ export default async function LeadsPage() {
           <article key={lead.id} className={`card p-5 ${lead.isHandled ? 'opacity-60' : ''}`}>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="font-display text-lg font-bold">{lead.gardenName}</p>
+                <p className="font-display text-lg font-bold">
+                  {lead.gardenName}
+                  {isPlanCode(lead.plan) ? (
+                    <span className={`badge ml-2 align-middle text-xs ${lead.plan === 'MANAGED' ? 'bg-brand-soft text-brand-ink' : 'bg-slate-100 text-slate-700'}`}>
+                      {PLAN_INFO[lead.plan].name[locale]}
+                    </span>
+                  ) : null}
+                </p>
                 <p className="text-sm text-muted">
                   {lead.personName} · <a href={`tel:${lead.phone.replace(/\s/g, '')}`} className="font-semibold text-brand">{lead.phone}</a>
                   {lead.email ? ` · ${lead.email}` : ''}

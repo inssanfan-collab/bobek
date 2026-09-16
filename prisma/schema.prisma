@@ -566,6 +566,8 @@ model Subscription {
   periodStart DateTime
   periodEnd   DateTime
   amount      Int      @default(50000) // тенге
+  /// Тариф: BASIC — сад наполняет сам, MANAGED — наполняем мы по запросу.
+  plan        String   @default("BASIC")
   isCurrent   Boolean  @default(true)
   note        String?
   createdAt   DateTime @default(now())
@@ -620,6 +622,8 @@ model Lead {
   phone      String
   email      String?
   comment    String?
+  /// Какой тариф сад выбрал в заявке. Пусто — не выбрал, обсудим по телефону.
+  plan       String?
   isHandled  Boolean  @default(false)
   ip         String?
   createdAt  DateTime @default(now())
@@ -695,6 +699,8 @@ model Contract {
   periodStart  DateTime
   periodEnd    DateTime
   amount       Int
+  /// Тариф определяет предмет договора и наименование услуги в счёте и акте.
+  plan         String    @default("BASIC")
   /// Когда подписанный экземпляр вернулся от сада.
   signedAt     DateTime?
   /// Когда подписан акт оказанных услуг.

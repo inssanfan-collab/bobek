@@ -14,6 +14,7 @@ import { generatePassword, hashPassword } from '@/server/auth/password';
 import { destroyAllSessions, createSession, requestMeta } from '@/server/auth/session';
 import { extendSubscription } from '@/server/subscription';
 import { createContract } from '@/server/docs/contract';
+import { isPlanCode } from '@/lib/plans';
 import { isTemplateCode, isPaletteCode } from '@/lib/templates';
 import { env } from '@/lib/env';
 import { normalizeHost } from '@/lib/host';
@@ -341,14 +342,18 @@ export async function recordPayment(formData: FormData) {
   await assertCsrf(formData);
 
   const tenantId = String(formData.get('tenantId'));
-  const amount = Number.parseInt(String(formData.get('amount') ?? env.subscriptionPrice), 10);
+  const planRaw = formData.get('plan');
+  const plan = isPlanCode(planRaw) ? planRaw : 'BASIC';
+  // Пустая сумма — берём цену тарифа: так её не придётся помнить наизусть.
+  const amountRaw = String(formData.get('amount') ?? '').trim();
+  const amount = amountRaw ? Number.parseInt(amountRaw, 10) : env.planPrices[plan];
   const method = String(formData.get('method') ?? 'kaspi');
   const invoiceNo = String(formData.get('invoiceNo') ?? '').trim() || null;
   const months = Number.parseInt(String(formData.get('months') ?? '12'), 10);
 
   if (!Number.isFinite(amount) || amount <= 0) throw new ActionError({ kk: 'Сома дұрыс емес', ru: 'Некорректная сумма' });
 
-  const periodEnd = await extendSubscription(tenantId, Number.isFinite(months) ? months : 12);
+  const periodEnd = await extendSubscription(tenantId, Number.isFinite(months) ? months : 12, { plan, amount });
 
   const subscription = await prisma.subscription.findFirst({
     where: { tenantId, isCurrent: true },
@@ -376,7 +381,7 @@ export async function recordPayment(formData: FormData) {
   await audit(admin, 'payment.record', {
     tenantId,
     entity: 'subscription',
-    meta: { amount, method, invoiceNo, periodEnd: periodEnd.toISOString() },
+    meta: { amount, plan, method, invoiceNo, periodEnd: periodEnd.toISOString() },
   });
 
   revalidatePath(`/admin/tenants/${tenantId}`);
@@ -553,7 +558,10 @@ export async function createContractAction(formData: FormData) {
   await assertCsrf(formData);
 
   const tenantId = String(formData.get('tenantId'));
-  const amount = Number.parseInt(String(formData.get('amount') ?? env.subscriptionPrice), 10);
+  const planRaw = formData.get('plan');
+  const plan = isPlanCode(planRaw) ? planRaw : 'BASIC';
+  const amountRaw = String(formData.get('amount') ?? '').trim();
+  const amount = amountRaw ? Number.parseInt(amountRaw, 10) : env.planPrices[plan];
   const startRaw = String(formData.get('periodStart') ?? '').trim();
   const endRaw = String(formData.get('periodEnd') ?? '').trim();
 
@@ -567,13 +575,13 @@ export async function createContractAction(formData: FormData) {
     throw new ActionError({ kk: 'Кезең дұрыс емес', ru: 'Некорректный период' });
   }
 
-  const contract = await createContract({ tenantId, periodStart, periodEnd, amount });
+  const contract = await createContract({ tenantId, periodStart, periodEnd, amount, plan });
 
   await audit(admin, 'contract.create', {
     tenantId,
     entity: 'contract',
     entityId: contract.id,
-    meta: { number: contract.number, amount },
+    meta: { number: contract.number, amount, plan },
   });
 
   revalidatePath(`/admin/tenants/${tenantId}`);

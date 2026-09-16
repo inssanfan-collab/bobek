@@ -5,6 +5,7 @@ import { prisma } from '@/server/db';
 import { assertCsrf } from '@/server/auth/csrf';
 import { requestMeta } from '@/server/auth/session';
 import { hit, FORM_LIMIT, FORM_WINDOW_MS } from '@/server/auth/rate-limit';
+import { isPlanCode } from '@/lib/plans';
 
 const schema = z.object({
   gardenName: z.string().trim().min(2, 'Укажите название сада').max(200),
@@ -59,6 +60,7 @@ export async function submitLead(_prev: LeadState, formData: FormData): Promise<
       phone: parsed.data.phone,
       email: parsed.data.email || null,
       comment: parsed.data.comment || null,
+      plan: isPlanCode(formData.get('plan')) ? String(formData.get('plan')) : null,
       ip,
     },
   });

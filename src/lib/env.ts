@@ -34,7 +34,15 @@ export const env = {
    * виджет в iframe: тот работает без ключа и без лимита запросов.
    */
   yandexMapsKey: process.env.YANDEX_MAPS_KEY ?? '',
-  subscriptionPrice: int('SUBSCRIPTION_PRICE_KZT', 50000),
+  /**
+   * Цены тарифов за год. Базовый раньше был единственным и назывался
+   * SUBSCRIPTION_PRICE_KZT — эта переменная по-прежнему стоит в .env на сервере,
+   * поэтому читаем её, если новая не задана.
+   */
+  planPrices: {
+    BASIC: int('PLAN_BASIC_PRICE_KZT', int('SUBSCRIPTION_PRICE_KZT', 50000)),
+    MANAGED: int('PLAN_MANAGED_PRICE_KZT', 120000),
+  },
   subscriptionGraceDays: int('SUBSCRIPTION_GRACE_DAYS', 30),
   isProduction: process.env.NODE_ENV === 'production',
   /**

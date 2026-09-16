@@ -2,6 +2,7 @@ import 'server-only';
 import { DocBuilder, type Pair } from './pdf';
 import { amountInWords } from '@/lib/amount-words';
 import { formatDate } from '@/lib/labels';
+import { isPlanCode, PLAN_INFO, type PlanCode } from '@/lib/plans';
 import type { Contract, PortalSettings, Tenant, TenantProfile } from '@prisma/client';
 
 /**
@@ -26,6 +27,11 @@ export type DocData = {
 };
 
 const CITY: Pair = { kk: 'Ақтөбе қ.', ru: 'г. Актобе' };
+
+/** Тариф договора. Старые записи без поля считаются базовыми — других тогда не было. */
+function planOf(data: DocData): PlanCode {
+  return isPlanCode(data.contract.plan) ? data.contract.plan : 'BASIC';
+}
 
 function money(amount: number): string {
   return `${amount.toLocaleString('ru-RU')} ₸`;
@@ -137,10 +143,24 @@ export async function buildContractPdf(data: DocData): Promise<Buffer> {
   });
 
   b.heading({ kk: '1. ШАРТТЫҢ МӘНІ', ru: '1. ПРЕДМЕТ ДОГОВОРА' });
+  const plan = planOf(data);
   b.columns({
-    kk: `1.1. Орындаушы Тапсырыс берушіге мектепке дейінгі ұйымның ресми сайтын құру және жүргізу үшін EduSad веб-платформасына қол жеткізуді ұсынады, ал Тапсырыс беруші қызметтің ақысын төлейді.`,
-    ru: `1.1. Исполнитель предоставляет Заказчику доступ к веб-платформе EduSad для создания и ведения официального сайта дошкольной организации, а Заказчик оплачивает услуги.`,
+    kk: `1.1. Орындаушы Тапсырыс берушіге мектепке дейінгі ұйымның ресми сайтын құру және жүргізу үшін EduSad веб-платформасына қол жеткізуді «${PLAN_INFO[plan].name.kk}» тарифі бойынша ұсынады, ал Тапсырыс беруші қызметтің ақысын төлейді.`,
+    ru: `1.1. Исполнитель предоставляет Заказчику доступ к веб-платформе EduSad для создания и ведения официального сайта дошкольной организации по тарифу «${PLAN_INFO[plan].name.ru}», а Заказчик оплачивает услуги.`,
   });
+  // Кто наполняет сайт — единственное, чем тарифы отличаются, поэтому
+  // это записано в предмете договора, а не оставлено на словах.
+  b.columns(
+    plan === 'MANAGED'
+      ? {
+          kk: '1.1.1. Орындаушы Тапсырыс берушінің сұрауы бойынша ол берген материалдарды — жаңалықтарды, фотоларды, құжаттарды, мәзірді және өзге мәліметтерді — сайтқа орналастырады. Әкімші бөлімі Тапсырыс берушіде де сақталады.',
+          ru: '1.1.1. Исполнитель по запросу Заказчика размещает на сайте предоставленные им материалы — новости, фотографии, документы, меню и иные сведения. Административная панель сохраняется и у Заказчика.',
+        }
+      : {
+          kk: '1.1.1. Сайтты Тапсырыс беруші әкімші бөлімі арқылы өзі толтырады және жаңартады.',
+          ru: '1.1.1. Заказчик самостоятельно наполняет и актуализирует сайт через административную панель.',
+        },
+  );
   b.columns({
     kk: `1.2. Қызметтің құрамы: ${host} мекенжайы, сайт жүйесі мен әкімшілік панелі, орналастыру, сақтық көшірме, жаңартулар және жұмыс күндері техникалық қолдау.`,
     ru: `1.2. Состав услуги: адрес ${host}, движок сайта и административная панель, размещение, резервное копирование, обновления и техническая поддержка в рабочие дни.`,
@@ -329,7 +349,7 @@ export async function buildInvoicePdf(data: DocData): Promise<Buffer> {
     [
       ['Наименование услуги / Қызметтің атауы', 'Кол-во', 'Цена', 'Сумма'],
       [
-        `Доступ к веб-платформе EduSad для ведения официального сайта, ${period}\nEduSad веб-платформасына қол жеткізу, ${period}`,
+        `${PLAN_INFO[planOf(data)].serviceName.ru}, ${period}\n${PLAN_INFO[planOf(data)].serviceName.kk}`,
         '1',
         money(contract.amount),
         money(contract.amount),
@@ -389,7 +409,7 @@ export async function buildActPdf(data: DocData): Promise<Buffer> {
     [
       ['Наименование услуги / Қызметтің атауы', 'Кол-во', 'Цена', 'Сумма'],
       [
-        `Доступ к веб-платформе EduSad, ${period}\nEduSad веб-платформасына қол жеткізу`,
+        `${PLAN_INFO[planOf(data)].serviceName.ru}, ${period}\n${PLAN_INFO[planOf(data)].serviceName.kk}`,
         '1',
         money(contract.amount),
         money(contract.amount),

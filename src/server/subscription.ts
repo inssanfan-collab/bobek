@@ -1,9 +1,12 @@
 import 'server-only';
+import { isPlanCode, type PlanCode } from '@/lib/plans';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
 
 export type SubscriptionState = {
   periodEnd: Date | null;
+  /** Тариф текущего периода. Пока подписки нет — null. */
+  plan: PlanCode | null;
   daysLeft: number | null;
   /** Срок вышел, но grace-период ещё идёт: сайт работает, админка только на чтение. */
   isGrace: boolean;
@@ -23,7 +26,7 @@ export async function subscriptionState(tenantId: string): Promise<SubscriptionS
 
   if (!current) {
     // Сад ещё не оплачивал — это DRAFT сразу после создания, редактировать можно.
-    return { periodEnd: null, daysLeft: null, isGrace: false, isExpired: false, canEdit: true };
+    return { periodEnd: null, plan: null, daysLeft: null, isGrace: false, isExpired: false, canEdit: true };
   }
 
   const now = Date.now();
@@ -36,6 +39,7 @@ export async function subscriptionState(tenantId: string): Promise<SubscriptionS
 
   return {
     periodEnd: current.periodEnd,
+    plan: isPlanCode(current.plan) ? current.plan : 'BASIC',
     daysLeft,
     isGrace,
     isExpired,
@@ -43,8 +47,17 @@ export async function subscriptionState(tenantId: string): Promise<SubscriptionS
   };
 }
 
-/** Продлевает подписку на год от большей из дат: сегодня или текущего конца периода. */
-export async function extendSubscription(tenantId: string, months = 12, note?: string) {
+/**
+ * Продлевает подписку от большей из дат: сегодня или текущего конца периода.
+ * Тариф и сумма передаются явно: сад может перейти с базового на тариф
+ * с наполнением при продлении, и в истории должно остаться, за что платили.
+ */
+export async function extendSubscription(
+  tenantId: string,
+  months = 12,
+  options: { plan?: PlanCode; amount?: number; note?: string } = {},
+) {
+  const plan = options.plan ?? 'BASIC';
   const current = await prisma.subscription.findFirst({
     where: { tenantId, isCurrent: true },
     orderBy: { periodEnd: 'desc' },
@@ -61,9 +74,10 @@ export async function extendSubscription(tenantId: string, months = 12, note?: s
         tenantId,
         periodStart: start,
         periodEnd: end,
-        amount: env.subscriptionPrice,
+        amount: options.amount ?? env.planPrices[plan],
+        plan,
         isCurrent: true,
-        note: note ?? null,
+        note: options.note ?? null,
       },
     }),
   ]);

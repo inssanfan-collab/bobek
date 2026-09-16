@@ -6,6 +6,8 @@ import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Alert } from '@/components/ui/Alert';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
+import { PLAN_CODES, PLAN_INFO, type PlanCode } from '@/lib/plans';
+import { formatMoney } from '@/lib/labels';
 
 const initial: LeadState = { ok: false };
 
@@ -28,11 +30,24 @@ const T = {
     kk: 'Түймені басу арқылы сіз өтінім бойынша байланысу үшін көрсетілген байланыс деректерін өңдеуге келісім бересіз.',
     ru: 'Нажимая кнопку, вы соглашаетесь на обработку указанных контактных данных для связи по заявке.',
   },
+  plan: { kk: 'Тариф', ru: 'Тариф' },
+  planUndecided: { kk: 'Әлі шешпедім — телефонмен ақылдасайық', ru: 'Ещё не решили — обсудим по телефону' },
+  perYear: { kk: 'жылына', ru: 'в год' },
   sending: { kk: 'Жіберілуде…', ru: 'Отправляем…' },
   submit: { kk: 'Өтінім жіберу', ru: 'Отправить заявку' },
 } as const;
 
-export function ApplyForm({ csrf, locale = DEFAULT_LOCALE }: { csrf: string; locale?: Locale }) {
+export function ApplyForm({
+  csrf,
+  locale = DEFAULT_LOCALE,
+  plan,
+  prices,
+}: {
+  csrf: string;
+  locale?: Locale;
+  plan: PlanCode | null;
+  prices: Record<PlanCode, number>;
+}) {
   const [state, action] = useActionState(submitLead, initial);
 
   if (state.ok) {
@@ -50,6 +65,32 @@ export function ApplyForm({ csrf, locale = DEFAULT_LOCALE }: { csrf: string; loc
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
 
       {state.message ? <Alert tone="danger">{state.message}</Alert> : null}
+
+      <fieldset>
+        <legend className="field-label">{T.plan[locale]}</legend>
+        <div className="grid gap-2">
+          {PLAN_CODES.map((code) => (
+            <label
+              key={code}
+              className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line p-3 has-[:checked]:border-brand has-[:checked]:bg-brand-soft/60"
+            >
+              <input type="radio" name="plan" value={code} defaultChecked={plan === code} className="mt-1 h-4 w-4" />
+              <span className="min-w-0 flex-1">
+                <span className="flex flex-wrap justify-between gap-x-3">
+                  <span className="font-semibold">{PLAN_INFO[code].name[locale]}</span>
+                  <span className="font-semibold">{formatMoney(prices[code])} {T.perYear[locale]}</span>
+                </span>
+                <span className="block text-sm text-muted">{PLAN_INFO[code].tagline[locale]}</span>
+              </span>
+            </label>
+          ))}
+          {/* Выбор не обязателен: заведующая часто не знает, кто у них будет вести сайт. */}
+          <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-line p-3 has-[:checked]:border-brand">
+            <input type="radio" name="plan" value="" defaultChecked={plan === null} className="h-4 w-4" />
+            <span className="text-sm">{T.planUndecided[locale]}</span>
+          </label>
+        </div>
+      </fieldset>
 
       <div>
         <label className="field-label" htmlFor="gardenName">{T.gardenName[locale]} *</label>

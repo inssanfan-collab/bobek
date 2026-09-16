@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     template: '%s · EduSad',
   },
   description:
-    `Готовый сайт для детского сада Актобе за ${formatMoney(env.subscriptionPrice)} в год: своя админка, новости, галерея, документы и меню питания. Каталог садов города.`,
+    `Готовый сайт для детского сада Актобе от ${formatMoney(env.planPrices.BASIC)} в год: своя админка, новости, галерея, документы и меню питания. Наполняете сами или доверяете нам. Каталог садов города.`,
   robots: { index: true, follow: true },
   metadataBase: new URL(`https://${env.portalDomain}`),
   // Карточка превью в WhatsApp и Telegram. Статичный JPEG: WebP там

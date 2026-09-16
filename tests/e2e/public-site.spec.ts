@@ -2,11 +2,18 @@ import { expect, test } from '@playwright/test';
 import { PORTAL, site } from './helpers';
 
 test.describe('Публичная часть', () => {
-  test('портал открывается и показывает тариф', async ({ page }) => {
+  test('портал открывается и показывает цену базового тарифа', async ({ page }) => {
     await page.goto(PORTAL);
-    // Значение должно совпадать с SUBSCRIPTION_PRICE_KZT: цена на страницу
+    // Значение должно совпадать с PLAN_BASIC_PRICE_KZT: цена на страницу
     // приходит из окружения, и расхождение здесь означает забытую настройку.
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('50 000 ₸');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('от 50 000 ₸');
+  });
+
+  test('на странице тарифов оба тарифа с ценами', async ({ page }) => {
+    await page.goto(`${PORTAL}/pricing`);
+    await expect(page.getByText('Базовый', { exact: true })).toBeVisible();
+    await expect(page.getByText('С наполнением', { exact: true })).toBeVisible();
+    await expect(page.getByText('120 000 ₸')).toBeVisible();
   });
 
   test('каталог фильтрует сады по названию', async ({ page }) => {

@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
+import { PLAN_CODES, PLAN_INFO } from '@/lib/plans';
 import { formatMoney } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
@@ -10,8 +11,11 @@ import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 export const dynamic = 'force-dynamic';
 
 const T = {
-  heroBefore: { kk: 'Балабақшаның жеке сайты', ru: 'Свой сайт детского сада за' },
-  heroAfter: { kk: 'жылына', ru: 'в год' },
+  // По-казахски «от» — это падежное окончание, оно пишется слитно с ценой:
+  // «жылына 50 000 ₸-ден бастап». Поэтому пробел перед heroAfter ставится
+  // только в русском варианте.
+  heroBefore: { kk: 'Балабақшаның жеке сайты жылына', ru: 'Свой сайт детского сада от' },
+  heroAfter: { kk: '-ден бастап', ru: 'в год' },
   heroLead: {
     kk: 'Сайт бірден екі тілде — мұны «Тілдер туралы» заң талап етеді. Жаңалықтар, құжаттар, педагогтар, тамақтану мәзірі. Бағдарламашысыз, балабақша қызметкері толтырады.',
     ru: 'Сайт сразу на двух языках — этого требует закон «О языках». Новости, документы, педагоги, меню питания. Заполняет сотрудник сада, без программиста.',
@@ -51,16 +55,18 @@ const T = {
   stepsEyebrow: { kk: 'Қалай қосылу керек', ru: 'Как подключиться' },
   stepsTitle: { kk: 'Дайын сайтқа дейін үш қадам', ru: 'Три шага до готового сайта' },
 
-  tariffEyebrow: { kk: 'Тариф', ru: 'Тариф' },
+  tariffEyebrow: { kk: 'Тарифтер', ru: 'Тарифы' },
   tariffTitle: {
-    kk: 'Балабақша сайты үшін жылына %s',
-    ru: '%s в год за сайт детского сада',
+    kk: 'Сайт бірдей — толтыруды кім жүргізетінін таңдайсыз',
+    ru: 'Сайт одинаковый — выбираете, кто его наполняет',
   },
   tariffLead: {
-    kk: 'Бір төлем — сайт, әкімші бөлімі, хостинг және қолдау. Жаңалықтар, фото мен құжаттар санына шектеу жоқ, жасырын қосымша төлем жоқ.',
-    ru: 'Один платёж — сайт, админка, хостинг и поддержка. Без ограничений на количество новостей, фотографий и документов, без скрытых доплат.',
+    kk: 'Сайт, әкімші бөлімі, хостинг және қолдау екі тарифте де бар. Жаңалықтар, фото мен құжаттар санына шектеу жоқ, жасырын қосымша төлем жоқ.',
+    ru: 'Сайт, админка, хостинг и поддержка — в обоих тарифах. Без ограничений на количество новостей, фотографий и документов, без скрытых доплат.',
   },
-  tariffIncluded: { kk: 'Бағаға кіреді', ru: 'Входит в цену' },
+  perYear: { kk: 'жылына', ru: 'в год' },
+  allPlans: { kk: 'Тарифтерді салыстыру', ru: 'Сравнить тарифы' },
+  tariffIncluded: { kk: 'Екі тарифке де кіреді', ru: 'Входит в оба тарифа' },
   tariffNotIncluded: { kk: 'Бағаға кірмейді', ru: 'Не входит' },
   apply: { kk: 'Өтінім қалдыру', ru: 'Оставить заявку' },
   eduDomain: {
@@ -218,8 +224,8 @@ export async function generateMetadata({
     },
     description:
       locale === 'kk'
-        ? 'Балабақшаның жеке сайты жылына 50 000 ₸: екі тілде, әкімші бөлімімен, Қазақстандағы хостингпен.'
-        : 'Свой сайт детского сада за 50 000 ₸ в год: на двух языках, с админкой и хостингом в Казахстане.',
+        ? `Балабақшаның жеке сайты жылына ${formatMoney(env.planPrices.BASIC)}-ден бастап: екі тілде, әкімші бөлімімен, Қазақстандағы хостингпен.`
+        : `Свой сайт детского сада от ${formatMoney(env.planPrices.BASIC)} в год: на двух языках, с админкой и хостингом в Казахстане.`,
   };
 }
 
@@ -229,7 +235,7 @@ export default async function PortalHome({
   searchParams: Promise<{ lang?: string }>;
 }) {
   const locale = localeFromParam((await searchParams).lang);
-  const price = formatMoney(env.subscriptionPrice);
+  const price = formatMoney(env.planPrices.BASIC);
 
   const latestGardens = await prisma.tenant.findMany({
     where: { status: 'ACTIVE' },
@@ -257,7 +263,8 @@ export default async function PortalHome({
               {T.heroBefore[locale]}{' '}
               <span className="bg-gradient-to-r from-brand-ink via-brand to-accent bg-clip-text text-transparent">
                 {price}
-              </span>{' '}
+              </span>
+              {locale === 'kk' ? '' : ' '}
               {T.heroAfter[locale]}
             </h1>
             <p className="mt-6 max-w-xl text-lg text-muted">{T.heroLead[locale]}</p>
@@ -396,14 +403,32 @@ export default async function PortalHome({
               {T.tariffEyebrow[locale]}
             </p>
             <h2 className="mt-3.5 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-              {T.tariffTitle[locale].replace('%s', price)}
+              {T.tariffTitle[locale]}
             </h2>
             <p className="mt-3 text-surface/75">{T.tariffLead[locale]}</p>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              {PLAN_CODES.map((code) => (
+                <Link
+                  key={code}
+                  href={withLocale(`/apply?plan=${code}`, locale)}
+                  className="group rounded-2xl bg-surface/10 px-5 py-4 transition hover:bg-surface/15"
+                >
+                  <p className="font-bold">{PLAN_INFO[code].name[locale]}</p>
+                  <p className="mt-1 font-display text-2xl font-extrabold text-accent">
+                    {formatMoney(env.planPrices[code])}
+                  </p>
+                  <p className="text-xs text-surface/60">{T.perYear[locale]}</p>
+                  <p className="mt-2 text-sm text-surface/80">{PLAN_INFO[code].tagline[locale]}</p>
+                </Link>
+              ))}
+            </div>
+
             <Link
-              href={withLocale('/apply', locale)}
-              className="mt-7 inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-4 font-bold text-ink transition hover:-translate-y-0.5"
+              href={withLocale('/pricing', locale)}
+              className="mt-6 inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-4 font-bold text-ink transition hover:-translate-y-0.5"
             >
-              {T.apply[locale]}
+              {T.allPlans[locale]}
               <Arrow />
             </Link>
           </div>

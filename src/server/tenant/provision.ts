@@ -102,7 +102,7 @@ export async function createTenant(input: CreateTenantInput): Promise<CreateTena
           },
         },
         subscriptions: {
-          create: { periodStart, periodEnd, amount: env.subscriptionPrice, isCurrent: true },
+          create: { periodStart, periodEnd, amount: env.planPrices.BASIC, plan: 'BASIC', isCurrent: true },
         },
       },
       select: { id: true },

@@ -17,6 +17,7 @@ import {
   recordPayment, resetUserPassword, setPrimaryDomain, setTenantStatus, verifyDomain,
 } from '../actions';
 import { suggestedPeriod, portalSettings } from '@/server/docs/contract';
+import { isPlanCode, PLAN_CODES, PLAN_INFO } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +47,12 @@ const T = {
   statusBlock: { kk: 'Мәртебе және жазылым', ru: 'Статус и подписка' },
   currentStatus: { kk: 'Ағымдағы мәртебе', ru: 'Текущий статус' },
   subscriptionUntil: { kk: 'Жазылым мерзімі', ru: 'Подписка до' },
+  plan: { kk: 'Тариф', ru: 'Тариф' },
+  byPlan: { kk: 'тариф бойынша', ru: 'по тарифу' },
+  amountHint: {
+    kk: 'Бос қалдырсаңыз — таңдалған тарифтің бағасы.',
+    ru: 'Оставьте пустым — возьмём цену выбранного тарифа.',
+  },
   adminMode: { kk: 'Әкімші бөлімінің режимі', ru: 'Режим админки' },
   fullAccess: { kk: 'толық қолжетімділік', ru: 'полный доступ' },
   readOnly: { kk: 'тек оқу (жеңілдік кезеңі)', ru: 'только чтение (льготный период)' },
@@ -163,6 +170,10 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
               <span className={`badge ${STATUS_TONE[tenant.status]}`}>{STATUS[tenant.status][locale]}</span>
             </div>
             <div className="flex items-center gap-3">
+              <span className="w-40 text-muted">{T.plan[locale]}</span>
+              <strong>{subscription.plan ? PLAN_INFO[subscription.plan].name[locale] : '—'}</strong>
+            </div>
+            <div className="flex items-center gap-3">
               <span className="w-40 text-muted">{T.subscriptionUntil[locale]}</span>
               <strong>{subscription.periodEnd ? formatDate(subscription.periodEnd, locale) : T.noSubscription[locale]}</strong>
             </div>
@@ -210,8 +221,19 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             <input type="hidden" name={CSRF_FIELD} value={csrf} />
             <input type="hidden" name="tenantId" value={tenant.id} />
             <div>
+              <label className="field-label" htmlFor="paymentPlan">{T.plan[locale]}</label>
+              <select id="paymentPlan" name="plan" className="field" defaultValue={subscription.plan ?? 'BASIC'}>
+                {PLAN_CODES.map((code) => (
+                  <option key={code} value={code}>
+                    {PLAN_INFO[code].name[locale]} — {formatMoney(env.planPrices[code])}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="field-label" htmlFor="amount">{T.amount[locale]}</label>
-              <input id="amount" name="amount" type="number" min={1} defaultValue={env.subscriptionPrice} className="field" />
+              <input id="amount" name="amount" type="number" min={1} placeholder={T.byPlan[locale]} className="field" />
+              <p className="mt-1 text-xs text-muted">{T.amountHint[locale]}</p>
             </div>
             <div>
               <label className="field-label" htmlFor="months">{T.extendBy[locale]}</label>
@@ -260,9 +282,19 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             </Alert>
           )}
 
-          <form action={createContractAction} className="mt-4 grid gap-3 sm:grid-cols-4">
+          <form action={createContractAction} className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <input type="hidden" name={CSRF_FIELD} value={csrf} />
             <input type="hidden" name="tenantId" value={tenant.id} />
+            <div>
+              <label className="field-label" htmlFor="contractPlan">{T.plan[locale]}</label>
+              <select id="contractPlan" name="plan" className="field" defaultValue={subscription.plan ?? 'BASIC'}>
+                {PLAN_CODES.map((code) => (
+                  <option key={code} value={code}>
+                    {PLAN_INFO[code].name[locale]} — {formatMoney(env.planPrices[code])}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="field-label" htmlFor="periodStart">{T.periodStart[locale]}</label>
               <input
@@ -290,7 +322,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                 name="amount"
                 type="number"
                 min={1}
-                defaultValue={env.subscriptionPrice}
+                placeholder={T.byPlan[locale]}
                 className="field"
               />
             </div>
@@ -311,6 +343,9 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                       {formatDate(contract.periodStart, locale)} — {formatDate(contract.periodEnd, locale)}
                     </span>
                     <span className="text-sm font-semibold">{formatMoney(contract.amount)}</span>
+                    <span className="badge bg-slate-100 text-xs text-slate-700">
+                      {PLAN_INFO[isPlanCode(contract.plan) ? contract.plan : 'BASIC'].name[locale]}
+                    </span>
                   </div>
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
