@@ -24,6 +24,9 @@ export type AuditAction =
   | 'user.activate'
   | 'subscription.extend'
   | 'payment.record'
+  | 'contract.create'
+  | 'contract.update'
+  | 'settings.update'
   | 'content.create'
   | 'content.update'
   | 'content.delete';

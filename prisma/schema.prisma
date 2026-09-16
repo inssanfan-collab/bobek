@@ -57,6 +57,7 @@ model Tenant {
   faq           FaqItem[]
   stats         DailyStat[]
   feedback      FeedbackMessage[]
+  contracts     Contract[]
   subscriptions Subscription[]
   payments      Payment[]
   auditLogs     AuditLog[]
@@ -642,4 +643,65 @@ model PortalPost {
   updatedAt   DateTime      @updatedAt
 
   @@index([status, publishedAt])
+}
+
+/// Реквизиты исполнителя для договоров, счетов и актов. Строка одна:
+/// портал продаётся от одного лица, а держать их в коде нельзя — меняются
+/// банк и адрес, а править ради этого исходники неправильно.
+model PortalSettings {
+  id String @id @default("singleton")
+
+  companyNameKk String @default("")
+  companyNameRu String @default("")
+  ownerNameKk   String @default("")
+  ownerNameRu   String @default("")
+  /// ИИН предпринимателя или БИН товарищества.
+  taxId         String @default("")
+  /// Чем подтверждается право работать: свидетельство или уведомление о регистрации.
+  basisKk       String @default("")
+  basisRu       String @default("")
+  addressKk     String @default("")
+  addressRu     String @default("")
+  phone         String @default("")
+  email         String @default("")
+
+  bankNameKk String @default("")
+  bankNameRu String @default("")
+  iban       String @default("")
+  bic        String @default("")
+  /// Код бенефициара — без него казначейство сада не проведёт платёж.
+  kbe        String @default("17")
+  /// Строка о налоговом режиме: «без НДС», «плательщик НДС, серия…».
+  taxNoteKk  String @default("")
+  taxNoteRu  String @default("")
+
+  signerNameKk  String @default("")
+  signerNameRu  String @default("")
+  signerTitleKk String @default("")
+  signerTitleRu String @default("")
+
+  updatedAt DateTime @updatedAt
+}
+
+/// Договор с садом. Хранится ради номера и дат: пересчитывать номер
+/// при каждой печати нельзя — у сада в бухгалтерии останется первый.
+model Contract {
+  id           String    @id @default(cuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  /// Человеческий номер вида EDU-2026-0007.
+  number       String    @unique
+  issuedAt     DateTime  @default(now())
+  periodStart  DateTime
+  periodEnd    DateTime
+  amount       Int
+  /// Когда подписанный экземпляр вернулся от сада.
+  signedAt     DateTime?
+  /// Когда подписан акт оказанных услуг.
+  actSignedAt  DateTime?
+  note         String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([tenantId, issuedAt])
 }

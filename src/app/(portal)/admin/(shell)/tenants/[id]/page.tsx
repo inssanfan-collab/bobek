@@ -13,14 +13,35 @@ import {
 } from '@/lib/labels';
 import { pick } from '@/lib/i18n';
 import {
-  addDomain, deleteDomain, impersonate, recordPayment, resetUserPassword,
-  setPrimaryDomain, setTenantStatus, verifyDomain,
+  addDomain, createContractAction, deleteDomain, impersonate, markContractSigned,
+  recordPayment, resetUserPassword, setPrimaryDomain, setTenantStatus, verifyDomain,
 } from '../actions';
+import { suggestedPeriod, portalSettings } from '@/server/docs/contract';
 
 export const dynamic = 'force-dynamic';
 
 const T = {
   openSite: { kk: 'Сайтты ашу', ru: 'Открыть сайт' },
+  docs: { kk: 'Құжаттар', ru: 'Документы' },
+  docsLead: {
+    kk: 'Шарт, шот және акт — үшеуі бір нөмірмен. Мемлекеттік балабақша осы үшеуінсіз шығынды өткізе алмайды.',
+    ru: 'Договор, счёт и акт — все три под одним номером. Без них государственный сад не проведёт расход.',
+  },
+  newContract: { kk: 'Шарт жасау', ru: 'Сформировать договор' },
+  periodStart: { kk: 'Кезеңнің басы', ru: 'Начало периода' },
+  periodEnd: { kk: 'Кезеңнің соңы', ru: 'Конец периода' },
+  contractFile: { kk: 'Шарт', ru: 'Договор' },
+  invoiceFile: { kk: 'Шот', ru: 'Счёт' },
+  actFile: { kk: 'Акт', ru: 'Акт' },
+  signed: { kk: 'Қол қойылды', ru: 'Подписан' },
+  notSigned: { kk: 'Қол қойылмаған', ru: 'Не подписан' },
+  actSigned: { kk: 'Акт қабылданды', ru: 'Акт подписан' },
+  noRequisites: { kk: 'Деректемелер толтырылмаған', ru: 'Реквизиты не заполнены' },
+  noRequisitesText: {
+    kk: 'Құжаттарда орындаушының деректемелері бос қалады. «Деректемелер» бөлімінде толтырыңыз.',
+    ru: 'В документах останутся пустые реквизиты исполнителя. Заполните их в разделе «Реквизиты».',
+  },
+  noContracts: { kk: 'Шарт әлі жасалмаған', ru: 'Договоров пока нет' },
   impersonate: { kk: 'Балабақша атынан кіру', ru: 'Войти как сад' },
   statusBlock: { kk: 'Мәртебе және жазылым', ru: 'Статус и подписка' },
   currentStatus: { kk: 'Ағымдағы мәртебе', ru: 'Текущий статус' },
@@ -99,6 +120,14 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
 
   const subscription = await subscriptionState(tenant.id);
   const primary = tenant.domains.find((d) => d.isPrimary) ?? tenant.domains[0];
+
+  const [contracts, period, settings] = await Promise.all([
+    prisma.contract.findMany({ where: { tenantId: tenant.id }, orderBy: { issuedAt: 'desc' } }),
+    suggestedPeriod(tenant.id),
+    portalSettings(),
+  ]);
+  // Без реквизитов документы печатаются с пустыми полями — предупреждаем заранее.
+  const requisitesReady = Boolean(settings.companyNameRu && settings.iban && settings.taxId);
 
   return (
     <>
@@ -216,6 +245,107 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
               ))}
             </ul>
           ) : null}
+        </section>
+
+        <section className="card p-6 lg:col-span-2">
+          <h2 className="font-display text-lg font-bold">{T.docs[locale]}</h2>
+          <p className="mt-1 text-sm text-muted">{T.docsLead[locale]}</p>
+
+          {requisitesReady ? null : (
+            <Alert tone="warn" title={T.noRequisites[locale]} className="mt-4">
+              <p>{T.noRequisitesText[locale]}</p>
+              <Link href="/admin/requisites" className="mt-2 inline-block font-semibold underline">
+                /admin/requisites
+              </Link>
+            </Alert>
+          )}
+
+          <form action={createContractAction} className="mt-4 grid gap-3 sm:grid-cols-4">
+            <input type="hidden" name={CSRF_FIELD} value={csrf} />
+            <input type="hidden" name="tenantId" value={tenant.id} />
+            <div>
+              <label className="field-label" htmlFor="periodStart">{T.periodStart[locale]}</label>
+              <input
+                id="periodStart"
+                name="periodStart"
+                type="date"
+                defaultValue={period.start.toISOString().slice(0, 10)}
+                className="field"
+              />
+            </div>
+            <div>
+              <label className="field-label" htmlFor="periodEnd">{T.periodEnd[locale]}</label>
+              <input
+                id="periodEnd"
+                name="periodEnd"
+                type="date"
+                defaultValue={period.end.toISOString().slice(0, 10)}
+                className="field"
+              />
+            </div>
+            <div>
+              <label className="field-label" htmlFor="contractAmount">{T.amount[locale]}</label>
+              <input
+                id="contractAmount"
+                name="amount"
+                type="number"
+                min={1}
+                defaultValue={env.subscriptionPrice}
+                className="field"
+              />
+            </div>
+            <div className="flex items-end">
+              <button type="submit" className="btn-primary w-full">{T.newContract[locale]}</button>
+            </div>
+          </form>
+
+          {contracts.length === 0 ? (
+            <p className="mt-5 border-t border-line pt-4 text-sm text-muted">{T.noContracts[locale]}</p>
+          ) : (
+            <ul className="mt-5 space-y-3 border-t border-line pt-4">
+              {contracts.map((contract) => (
+                <li key={contract.id} className="rounded-2xl border border-line p-4">
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <span className="font-display text-base font-bold">{contract.number}</span>
+                    <span className="text-sm text-muted">
+                      {formatDate(contract.periodStart, locale)} — {formatDate(contract.periodEnd, locale)}
+                    </span>
+                    <span className="text-sm font-semibold">{formatMoney(contract.amount)}</span>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <a href={`/admin/contracts/${contract.id}/contract`} target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">
+                      {T.contractFile[locale]} PDF
+                    </a>
+                    <a href={`/admin/contracts/${contract.id}/invoice`} target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">
+                      {T.invoiceFile[locale]} PDF
+                    </a>
+                    <a href={`/admin/contracts/${contract.id}/act`} target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">
+                      {T.actFile[locale]} PDF
+                    </a>
+
+                    <form action={markContractSigned} className="inline">
+                      <input type="hidden" name={CSRF_FIELD} value={csrf} />
+                      <input type="hidden" name="contractId" value={contract.id} />
+                      <input type="hidden" name="field" value="signedAt" />
+                      <button type="submit" className={`badge ${contract.signedAt ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}`}>
+                        {contract.signedAt ? `${T.signed[locale]}: ${formatDate(contract.signedAt, locale)}` : T.notSigned[locale]}
+                      </button>
+                    </form>
+
+                    <form action={markContractSigned} className="inline">
+                      <input type="hidden" name={CSRF_FIELD} value={csrf} />
+                      <input type="hidden" name="contractId" value={contract.id} />
+                      <input type="hidden" name="field" value="actSignedAt" />
+                      <button type="submit" className={`badge ${contract.actSignedAt ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}`}>
+                        {contract.actSignedAt ? `${T.actSigned[locale]}: ${formatDate(contract.actSignedAt, locale)}` : T.actFile[locale]}
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         <section className="card p-6 lg:col-span-2">

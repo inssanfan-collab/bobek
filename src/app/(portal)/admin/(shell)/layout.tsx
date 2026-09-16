@@ -22,6 +22,7 @@ const T = {
     news: { kk: 'Портал жаңалықтары', ru: 'Новости портала' },
     feed: { kk: 'Балабақшалардың жарияланымдары', ru: 'Публикации садов' },
     audit: { kk: 'Әрекеттер журналы', ru: 'Журнал действий' },
+    requisites: { kk: 'Деректемелер', ru: 'Реквизиты' },
     system: { kk: 'Сервер', ru: 'Сервер' },
   },
 } as const;
@@ -46,6 +47,7 @@ export default async function PortalAdminLayout({ children }: { children: React.
     { href: '/admin/news', label: n.news[locale], icon: '✍️' },
     { href: '/admin/feed', label: n.feed[locale], icon: '📰', badge: newFeedback || undefined },
     { href: '/admin/audit', label: n.audit[locale], icon: '🧾' },
+    { href: '/admin/requisites', label: n.requisites[locale], icon: '🏦' },
     { href: '/admin/system', label: n.system[locale], icon: '🖥️' },
   ];
 

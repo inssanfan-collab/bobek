@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { env } from '@/lib/env';
-import { formatMoney } from '@/lib/labels';
+import { formatMoney, formatDate } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam } from '@/lib/i18n';
+import { OFFER, OFFER_REVISION } from '@/lib/offer';
+import { portalSettings } from '@/server/docs/contract';
 
 export async function generateMetadata({
   searchParams,
@@ -12,45 +14,24 @@ export async function generateMetadata({
   const locale = localeFromParam((await searchParams).lang);
   return {
     title: locale === 'kk' ? 'Жария оферта' : 'Публичная оферта',
+    description: locale === 'kk'
+      ? 'Мектепке дейінгі ұйымдарға сайт жүргізу қызметін ұсыну шарттары.'
+      : 'Условия оказания услуги ведения сайта для дошкольных организаций.',
   };
 }
 
 const T = {
   title: { kk: 'Жария оферта', ru: 'Публичная оферта' },
-  disclaimer: {
-    kk: 'Төменде — офертаның жұмыс қаңқасы. Жарияламас бұрын оны заңгермен келісіп, орындаушының деректемелерімен толықтыру қажет: бұл үлгі, дайын заңды құжат емес.',
-    ru: 'Ниже — рабочий каркас оферты. Перед публикацией его необходимо согласовать с юристом и дополнить реквизитами исполнителя: это шаблон, а не готовый юридический документ.',
+  revision: { kk: 'Редакция күні', ru: 'Редакция от' },
+  requisites: { kk: 'Орындаушының деректемелері', ru: 'Реквизиты Исполнителя' },
+  notFilled: {
+    kk: 'Деректемелер толтырылу үстінде.',
+    ru: 'Реквизиты заполняются.',
   },
-  h1: { kk: '1. Мәні', ru: '1. Предмет' },
-  p1: {
-    kk: 'Орындаушы Тапсырыс берушіге (мектепке дейінгі ұйымға) ұйымның ресми сайтын жасау және жүргізу үшін %s веб-платформасына қол жеткізуді ұсынады.',
-    ru: 'Исполнитель предоставляет Заказчику (дошкольной организации) доступ к веб-платформе %s для создания и ведения официального сайта организации.',
-  },
-  h2: { kk: '2. Құны және төлеу тәртібі', ru: '2. Стоимость и порядок оплаты' },
-  p2: {
-    kk: 'Қызметтің құны бір жылға %s құрайды. Төлем бүкіл кезеңге алдын ала жүргізіледі.',
-    ru: 'Стоимость услуги составляет %s за один год. Оплата производится авансом за весь период.',
-  },
-  h3: { kk: '3. Қызметке не кіреді', ru: '3. Что входит в услугу' },
-  p3: {
-    kk: 'Орындаушының доменіндегі үшінші деңгейлі мекенжай, сайт жүйесі, әкімшілік панель, хостинг, сақтық көшірме, жаңартулар және техникалық қолдау.',
-    ru: 'Адрес третьего уровня на домене Исполнителя, движок сайта, административная панель, хостинг, резервное копирование, обновления и техническая поддержка.',
-  },
-  h4: { kk: '4. EDU.KZ домені', ru: '4. Домен на EDU.KZ' },
-  p4: {
-    kk: 'edu.kz аймағындағы домендік атауды тіркеу және оның ақысы қызметке кірмейді: оны Тапсырыс беруші өзі сатып алады және өз атына рәсімдейді. Орындаушы баптауға тегін көмектеседі.',
-    ru: 'Регистрация и оплата доменного имени в зоне edu.kz в услугу не входят: Заказчик покупает его сам и оформляет на себя. Исполнитель бесплатно помогает с настройкой.',
-  },
-  h5: { kk: '5. Төлемнің тоқтатылуы', ru: '5. Прекращение оплаты' },
-  p5: {
-    kk: 'Келесі кезеңге төлем болмаған жағдайда сайт тағы %s күн қолжетімді болады, әкімшілік панель тек оқу режиміне ауысады. Осы мерзім өткен соң қол жеткізу тоқтатылады.',
-    ru: 'При отсутствии оплаты за следующий период сайт остаётся доступен ещё %s дней, административная панель переводится в режим только для чтения. По истечении этого срока доступ приостанавливается.',
-  },
-  h6: { kk: '6. Сайт мазмұны және дербес деректер', ru: '6. Содержание сайта и персональные данные' },
-  p6: {
-    kk: 'Тапсырыс беруші сайтты өзі толтырады және орналастырылған материалдар үшін жауап береді, оның ішінде балалардың суреттерін жариялауға заңды өкілдердің келісімінің болуы. Деректер Қазақстан Республикасының аумағындағы серверлерде сақталады.',
-    ru: 'Заказчик самостоятельно наполняет сайт и несёт ответственность за размещаемые материалы, включая наличие согласия законных представителей на публикацию изображений детей. Данные размещаются на серверах на территории Республики Казахстан.',
-  },
+  bin: { kk: 'ЖСН/БСН', ru: 'ИИН/БИН' },
+  address: { kk: 'Мекенжайы', ru: 'Адрес' },
+  phone: { kk: 'Телефон', ru: 'Телефон' },
+  bank: { kk: 'Банк', ru: 'Банк' },
 } as const;
 
 export default async function OfferPage({
@@ -59,31 +40,55 @@ export default async function OfferPage({
   searchParams: Promise<{ lang?: string }>;
 }) {
   const locale = localeFromParam((await searchParams).lang);
+  const settings = await portalSettings();
+
+  // Подстановки делаем здесь: цена и отсрочка живут в настройках приложения,
+  // и дублировать их в тексте оферты значило бы однажды разойтись с правдой.
+  const fill = (text: string) =>
+    text
+      .replaceAll('%domain%', env.portalDomain)
+      .replaceAll('%price%', formatMoney(env.subscriptionPrice))
+      .replaceAll('%grace%', String(env.subscriptionGraceDays));
+
+  const company = locale === 'kk' ? settings.companyNameKk : settings.companyNameRu;
+  const owner = locale === 'kk' ? settings.ownerNameKk : settings.ownerNameRu;
+  const address = locale === 'kk' ? settings.addressKk : settings.addressRu;
+  const bank = locale === 'kk' ? settings.bankNameKk : settings.bankNameRu;
+  const taxNote = locale === 'kk' ? settings.taxNoteKk : settings.taxNoteRu;
 
   return (
     <PortalPage locale={locale} pathname="/offer">
       <div className="container-page max-w-3xl py-12">
         <h1 className="font-display text-4xl font-extrabold">{T.title[locale]}</h1>
-        <div className="prose-content mt-6 text-muted">
-          <p>{T.disclaimer[locale]}</p>
+        <p className="mt-2 text-sm text-muted">
+          {T.revision[locale]}: {formatDate(new Date(OFFER_REVISION), locale)}
+        </p>
 
-          <h2>{T.h1[locale]}</h2>
-          <p>{T.p1[locale].replace('%s', env.portalDomain)}</p>
+        <div className="prose-content mt-8">
+          {OFFER.map((section) => (
+            <section key={section.title.ru}>
+              <h2>{section.title[locale]}</h2>
+              {section.items.map((item) => (
+                <p key={item.ru}>{fill(item[locale])}</p>
+              ))}
+            </section>
+          ))}
 
-          <h2>{T.h2[locale]}</h2>
-          <p>{T.p2[locale].replace('%s', formatMoney(env.subscriptionPrice))}</p>
-
-          <h2>{T.h3[locale]}</h2>
-          <p>{T.p3[locale]}</p>
-
-          <h2>{T.h4[locale]}</h2>
-          <p>{T.p4[locale]}</p>
-
-          <h2>{T.h5[locale]}</h2>
-          <p>{T.p5[locale].replace('%s', String(env.subscriptionGraceDays))}</p>
-
-          <h2>{T.h6[locale]}</h2>
-          <p>{T.p6[locale]}</p>
+          <h2>{T.requisites[locale]}</h2>
+          {company ? (
+            <ul>
+              <li>{company}</li>
+              {owner ? <li>{owner}</li> : null}
+              {settings.taxId ? <li>{T.bin[locale]}: {settings.taxId}</li> : null}
+              {address ? <li>{T.address[locale]}: {address}</li> : null}
+              {settings.phone ? <li>{T.phone[locale]}: {settings.phone}</li> : null}
+              {settings.email ? <li>E-mail: {settings.email}</li> : null}
+              {bank ? <li>{T.bank[locale]}: {bank}{settings.iban ? `, ИИК ${settings.iban}` : ''}{settings.bic ? `, БИК ${settings.bic}` : ''}</li> : null}
+              {taxNote ? <li>{taxNote}</li> : null}
+            </ul>
+          ) : (
+            <p>{T.notFilled[locale]}</p>
+          )}
         </div>
       </div>
     </PortalPage>

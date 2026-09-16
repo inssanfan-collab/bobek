@@ -13,6 +13,7 @@ import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { generatePassword, hashPassword } from '@/server/auth/password';
 import { destroyAllSessions, createSession, requestMeta } from '@/server/auth/session';
 import { extendSubscription } from '@/server/subscription';
+import { createContract } from '@/server/docs/contract';
 import { isTemplateCode, isPaletteCode } from '@/lib/templates';
 import { env } from '@/lib/env';
 import { normalizeHost } from '@/lib/host';
@@ -541,4 +542,68 @@ export async function impersonate(formData: FormData) {
   const targetHost = port ? `${domain.host}:${port}` : domain.host;
 
   redirect(`${proto}://${targetHost}/admin/enter?t=${encodeURIComponent(token)}`);
+}
+
+/**
+ * Договор на новый период. Номер присваивается здесь и больше не меняется:
+ * в бухгалтерии сада останется тот, что напечатали первым.
+ */
+export async function createContractAction(formData: FormData) {
+  const admin = await requireSuperadmin();
+  await assertCsrf(formData);
+
+  const tenantId = String(formData.get('tenantId'));
+  const amount = Number.parseInt(String(formData.get('amount') ?? env.subscriptionPrice), 10);
+  const startRaw = String(formData.get('periodStart') ?? '').trim();
+  const endRaw = String(formData.get('periodEnd') ?? '').trim();
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new ActionError({ kk: 'Сома дұрыс емес', ru: 'Некорректная сумма' });
+  }
+
+  const periodStart = startRaw ? new Date(startRaw) : new Date();
+  const periodEnd = endRaw ? new Date(endRaw) : new Date();
+  if (Number.isNaN(periodStart.valueOf()) || Number.isNaN(periodEnd.valueOf()) || periodEnd <= periodStart) {
+    throw new ActionError({ kk: 'Кезең дұрыс емес', ru: 'Некорректный период' });
+  }
+
+  const contract = await createContract({ tenantId, periodStart, periodEnd, amount });
+
+  await audit(admin, 'contract.create', {
+    tenantId,
+    entity: 'contract',
+    entityId: contract.id,
+    meta: { number: contract.number, amount },
+  });
+
+  revalidatePath(`/admin/tenants/${tenantId}`);
+}
+
+/** Отметка, что подписанный экземпляр вернулся от сада. */
+export async function markContractSigned(formData: FormData) {
+  const admin = await requireSuperadmin();
+  await assertCsrf(formData);
+
+  const id = String(formData.get('contractId'));
+  const field = String(formData.get('field') ?? 'signedAt');
+  if (field !== 'signedAt' && field !== 'actSignedAt') {
+    throw new ActionError({ kk: 'Белгісіз өріс', ru: 'Неизвестное поле' });
+  }
+
+  const contract = await prisma.contract.findUnique({ where: { id } });
+  if (!contract) throw new ActionError({ kk: 'Шарт табылмады', ru: 'Договор не найден' });
+
+  await prisma.contract.update({
+    where: { id },
+    data: { [field]: contract[field] ? null : new Date() },
+  });
+
+  await audit(admin, 'contract.update', {
+    tenantId: contract.tenantId,
+    entity: 'contract',
+    entityId: id,
+    meta: { field },
+  });
+
+  revalidatePath(`/admin/tenants/${contract.tenantId}`);
 }
