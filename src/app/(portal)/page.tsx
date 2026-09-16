@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
-import { formatDate, formatMoney, KIND } from '@/lib/labels';
+import { formatDate, formatGardenCount, formatMoney, KIND } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, pick, withLocale, type Locale } from '@/lib/i18n';
 
@@ -40,8 +40,12 @@ const T = {
     kk: 'Тәрбиеші балаларға кітап оқып отыр',
     ru: 'Воспитатель читает детям книгу',
   },
-  statGardens: { kk: 'порталдағы балабақша', ru: 'садов на портале' },
-  statFree: { kk: 'балабақшада қазір бос орын бар', ru: 'садов со свободными местами' },
+  // Счётное слово склоняется по-русски («1 сад», «2 сада», «5 садов»);
+  // по-казахски после числа не меняется, поэтому казахская подпись целиком здесь.
+  statGardensKk: { kk: 'балабақша порталда', ru: '' },
+  statGardensRu: { kk: '', ru: 'на портале' },
+  statFreeKk: { kk: 'балабақшада бос орын бар', ru: '' },
+  statFreeRu: { kk: '', ru: 'со свободными местами' },
 
   gardensTitle: { kk: 'Порталдағы балабақшалар', ru: 'Сады на портале' },
   gardensLead: {
@@ -311,11 +315,19 @@ export default async function PortalHome({
               <div className="absolute -bottom-6 left-4 right-4 grid grid-cols-2 gap-3 sm:left-6 sm:right-auto sm:w-80">
                 <div className="rounded-2xl border border-line bg-card px-4 py-3 shadow-soft">
                   <p className="font-display text-3xl font-extrabold leading-none">{gardensTotal}</p>
-                  <p className="mt-1 text-xs font-semibold text-muted">{T.statGardens[locale]}</p>
+                  <p className="mt-1 text-xs font-semibold text-muted">
+                    {locale === 'kk'
+                      ? T.statGardensKk.kk
+                      : `${formatGardenCount(gardensTotal, 'ru')} ${T.statGardensRu.ru}`}
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-line bg-card px-4 py-3 shadow-soft">
                   <p className="font-display text-3xl font-extrabold leading-none text-emerald-700">{freeTotal}</p>
-                  <p className="mt-1 text-xs font-semibold text-muted">{T.statFree[locale]}</p>
+                  <p className="mt-1 text-xs font-semibold text-muted">
+                    {locale === 'kk'
+                      ? T.statFreeKk.kk
+                      : `${formatGardenCount(freeTotal, 'ru')} ${T.statFreeRu.ru}`}
+                  </p>
                 </div>
               </div>
             ) : null}
