@@ -19,9 +19,11 @@ const T = {
   connect: { kk: 'Балабақшаны қосу', ru: 'Подключить сад' },
   languageGroup: { kk: 'Сайт тілі', ru: 'Язык сайта' },
   about: {
-    kk: 'Ақтөбе облысының балабақшаларына арналған сайттар. Дайын жүйе, жеке әкімші бөлімі, қазақ және орыс тілдерінде қолдау.',
-    ru: 'Сайты для детских садов Актюбинской области. Готовый движок, своя админка, поддержка на казахском и русском.',
+    kk: 'Ақтөбе балабақшаларының ресми сайттары бір жерде: бос орындар, ас мәзірі, құжаттар мен жаңалықтар.',
+    ru: 'Официальные сайты детских садов Актобе в одном месте: свободные места, меню, документы и новости.',
   },
+  forGardens: { kk: 'Балабақшаларға', ru: 'Детским садам' },
+  plans: { kk: 'Тарифтер', ru: 'Тарифы' },
   sections: { kk: 'Бөлімдер', ru: 'Разделы' },
   parents: { kk: 'Ата-аналарға', ru: 'Родителям' },
   queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
@@ -32,12 +34,16 @@ const T = {
   offer: { kk: 'Жария оферта', ru: 'Публичная оферта' },
 } as const;
 
+/**
+ * Меню для родителей: портал в первую очередь для них. Всё для садов —
+ * один пункт «Садам» и кнопка «Подключить сад»; тарифы живут внутри.
+ */
 const NAV = [
   { href: '/catalog', label: { kk: 'Балабақшалар каталогы', ru: 'Каталог садов' } },
   { href: '/parents', label: { kk: 'Ата-аналарға', ru: 'Родителям' } },
-  { href: '/pricing', label: { kk: 'Тарифтер', ru: 'Тарифы' } },
   { href: '/news', label: { kk: 'Жаңалықтар', ru: 'Новости' } },
   { href: '/contacts', label: { kk: 'Байланыс', ru: 'Контакты' } },
+  { href: '/connect', label: { kk: 'Балабақшаларға', ru: 'Садам' } },
 ] as const;
 
 /**
@@ -117,7 +123,7 @@ export function PortalHeader({ locale, pathname }: { locale: Locale; pathname: s
                 и растягивала страницу вбок. Тот же призыв стоит на первом
                 экране в двухстах пикселях ниже, поэтому здесь её прячем. */}
             <Link
-              href={withLocale('/apply', locale)}
+              href={withLocale('/connect', locale)}
               className="btn-primary hidden text-sm sm:inline-flex"
             >
               {T.connect[locale]}
@@ -198,11 +204,20 @@ export function PortalFooter({ locale }: { locale: Locale }) {
           </ul>
         </div>
         <div>
-          <p className="mb-2 font-semibold">{T.contacts[locale]}</p>
+          <p className="mb-2 font-semibold">{T.forGardens[locale]}</p>
           <ul className="space-y-1.5 text-sm text-muted">
-            <li>{T.city[locale]}</li>
             <li>
-              <Link href={withLocale('/apply', locale)} className="font-semibold text-brand-ink">
+              <Link href={withLocale('/connect', locale)} className="font-semibold text-brand-ink">
+                {T.connect[locale]}
+              </Link>
+            </li>
+            <li>
+              <Link href={withLocale('/pricing', locale)} className="hover:text-brand-ink">
+                {T.plans[locale]}
+              </Link>
+            </li>
+            <li>
+              <Link href={withLocale('/apply', locale)} className="hover:text-brand-ink">
                 {T.apply[locale]}
               </Link>
             </li>
@@ -211,6 +226,7 @@ export function PortalFooter({ locale }: { locale: Locale }) {
                 {T.offer[locale]}
               </Link>
             </li>
+            <li>{T.city[locale]}</li>
           </ul>
         </div>
       </div>

@@ -2,8 +2,13 @@ import { expect, test } from '@playwright/test';
 import { PORTAL, site } from './helpers';
 
 test.describe('Публичная часть', () => {
-  test('портал открывается и показывает цену базового тарифа', async ({ page }) => {
+  test('главная для родителей ведёт в каталог, а сады — на свою страницу', async ({ page }) => {
     await page.goto(PORTAL);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Найдите детский сад');
+    await expect(page.getByRole('search')).toBeVisible();
+
+    await page.getByRole('link', { name: 'Подключить сад' }).last().click();
+    await expect(page).toHaveURL(/\/connect/);
     // Значение должно совпадать с PLAN_BASIC_PRICE_KZT: цена на страницу
     // приходит из окружения, и расхождение здесь означает забытую настройку.
     await expect(page.getByRole('heading', { level: 1 })).toContainText('от 50 000 ₸');
