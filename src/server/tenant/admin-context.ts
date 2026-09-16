@@ -21,8 +21,18 @@ export const tenantAdmin = cache(async (hostParam: string): Promise<TenantAdminC
   const site = await siteContext(hostParam);
   const session = await requireTenantUser(site.tenant.id);
 
+  // Приостановленный сад заходит в админку, но только смотрит: иначе он мог бы
+  // продолжать вести сайт, который посетители всё равно не видят, и не заметить,
+  // что пора платить. Суперадмину правка остаётся — поправить что-то по просьбе
+  // сада нужно и в этом состоянии.
+  const suspended = site.tenant.status === 'SUSPENDED';
+  const locked = suspended && session.user.role !== 'SUPERADMIN';
+
   return {
     ...session,
+    suspended,
+    canEdit: session.canEdit && !locked,
+    canManageSettings: session.canManageSettings && !locked,
     host: site.host,
     primaryHost: site.primaryHost,
     tenantSlug: site.tenant.slug,

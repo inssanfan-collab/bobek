@@ -23,6 +23,11 @@ export type TenantSession = {
   /** Учитывает и роль, и состояние подписки. */
   canEdit: boolean;
   canManageSettings: boolean;
+  /**
+   * Сад приостановлен: сайт закрыт для посетителей, админка только на просмотр.
+   * Проставляется там, где известен статус сада (`tenantAdmin`).
+   */
+  suspended: boolean;
 };
 
 /**
@@ -54,12 +59,19 @@ export async function requireTenantUser(
     subscription,
     canEdit: roleCanEdit && (subscription.canEdit || isSuperadmin),
     canManageSettings: roleCanManage && (subscription.canEdit || isSuperadmin),
+    suspended: false,
   };
 }
 
 /** Бросает понятную ошибку в server action, если редактирование сейчас запрещено. */
 export function assertCanEdit(session: TenantSession): void {
   if (session.canEdit) return;
+  if (session.suspended) {
+    throw new ActionError({
+      kk: 'Сайт тоқтатылған — жазылым төленбеген. Қазір тек қарауға болады. Ұзарту үшін портал әкімшісіне хабарласыңыз.',
+      ru: 'Сайт приостановлен — подписка не оплачена. Сейчас доступен только просмотр. Для продления свяжитесь с администратором портала.',
+    });
+  }
   if (session.subscription.isGrace || session.subscription.isExpired) {
     throw new Error(
       'Подписка истекла — сейчас доступен только просмотр. Обратитесь к администратору портала для продления.',

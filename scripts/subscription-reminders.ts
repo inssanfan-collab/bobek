@@ -107,7 +107,7 @@ async function main() {
     }
     if (toSuspend.length) {
       parts.push(
-        `Приостановлены — льготные ${graceDays} дн. истекли:\n` +
+        `Приостановлены — льготные ${graceDays} дн. истекли, сайт закрыт до оплаты:\n` +
           toSuspend.map((t) => `  • ${t.name}`).join('\n'),
       );
     }

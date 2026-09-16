@@ -44,8 +44,10 @@ export async function submitFeedback(_prev: FeedbackState, formData: FormData): 
   if (parsed.data.website) return { ok: true };
 
   // Сад должен существовать и быть виден публично — иначе это подделанный tenantId.
+  // Приостановленный сад обращений не принимает: его админка только на просмотр,
+  // и ответить родителю всё равно некому.
   const tenant = await prisma.tenant.findFirst({
-    where: { id: parsed.data.tenantId, status: { in: ['ACTIVE', 'SUSPENDED'] } },
+    where: { id: parsed.data.tenantId, status: 'ACTIVE' },
     select: { id: true },
   });
   if (!tenant) return { ok: false, message: 'Не удалось отправить обращение. Обновите страницу.' };

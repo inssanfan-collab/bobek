@@ -85,7 +85,10 @@ export async function invalidateTenantCacheById(tenantId: string) {
   for (const d of domains) cache.delete(d.host);
 }
 
-/** Статусы, при которых публичный сайт сада виден посетителям. */
+/**
+ * Статусы, при которых публичный сайт сада виден посетителям. Приостановленный
+ * сад сюда не входит: подписка не оплачена, и сайт закрыт до оплаты.
+ */
 export function isPubliclyVisible(status: TenantStatus): boolean {
-  return status === 'ACTIVE' || status === 'SUSPENDED';
+  return status === 'ACTIVE';
 }
