@@ -42,14 +42,13 @@ export default async function OfferPage({
   const locale = localeFromParam((await searchParams).lang);
   const settings = await portalSettings();
 
-  // Подстановки делаем здесь: цена и отсрочка живут в настройках приложения,
+  // Подстановки делаем здесь: цены живут в настройках приложения,
   // и дублировать их в тексте оферты значило бы однажды разойтись с правдой.
   const fill = (text: string) =>
     text
       .replaceAll('%domain%', env.portalDomain)
       .replaceAll('%priceBasic%', formatMoney(env.planPrices.BASIC))
-      .replaceAll('%priceManaged%', formatMoney(env.planPrices.MANAGED))
-      .replaceAll('%grace%', String(env.subscriptionGraceDays));
+      .replaceAll('%priceManaged%', formatMoney(env.planPrices.MANAGED));
 
   const company = locale === 'kk' ? settings.companyNameKk : settings.companyNameRu;
   const owner = locale === 'kk' ? settings.ownerNameKk : settings.ownerNameRu;

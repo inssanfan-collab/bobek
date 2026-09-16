@@ -140,7 +140,7 @@ crontab -e
 0 3 * * * /opt/bobegim/deploy/backup.sh >> /var/log/bobegim-backup.log 2>&1
 
 # Проверка подписок каждое утро в 09:00: список садов на обзвон
-# и автоматическая приостановка тех, у кого истёк льготный период
+# и автоматическая приостановка тех, у кого закончился оплаченный период
 0 9 * * * cd /opt/bobegim && docker compose run --rm app pnpm subscriptions:check >> /var/log/bobegim-subs.log 2>&1
 ```
 

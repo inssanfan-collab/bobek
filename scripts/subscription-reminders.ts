@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import nodemailer from 'nodemailer';
+import { periodIsOver } from '../src/lib/subscription-period';
 
 const prisma = new PrismaClient();
 
@@ -13,7 +14,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  *
  * Что делает:
  *  - печатает список садов, которым сегодня пора напомнить об оплате;
- *  - переводит в SUSPENDED тех, у кого закончился и льготный период.
+ *  - переводит в SUSPENDED тех, у кого закончился оплаченный период. Льготных
+ *    дней нет: последний оплаченный день сад работает, на следующее утро закрыт.
  *
  * Садам отсюда почта не отправляется намеренно: у них часто общий ящик, который
  * никто не читает, а обзвон всё равно делает администратор портала. Ему и уходит
@@ -47,7 +49,6 @@ async function mailOwner(subject: string, text: string) {
   }
 }
 async function main() {
-  const graceDays = Number.parseInt(process.env.SUBSCRIPTION_GRACE_DAYS ?? '30', 10);
   const now = Date.now();
 
   const subscriptions = await prisma.subscription.findMany({
@@ -76,7 +77,7 @@ async function main() {
       toRemind.push(`  • ${name} — осталось ${daysLeft} дн. (${contact})`);
     }
 
-    if (daysLeft < -graceDays) {
+    if (periodIsOver(sub.periodEnd, now)) {
       toSuspend.push({ id: sub.tenantId, name });
     }
   }
@@ -95,7 +96,7 @@ async function main() {
       where: { id: { in: toSuspend.map((t) => t.id) } },
       data: { status: 'SUSPENDED' },
     });
-    console.log(`\nПриостановлены (льготный период ${graceDays} дн. истёк):`);
+    console.log(`\nПриостановлены (оплаченный период закончился):`);
     for (const tenant of toSuspend) console.log(`  • ${tenant.name}`);
   }
 
@@ -107,7 +108,7 @@ async function main() {
     }
     if (toSuspend.length) {
       parts.push(
-        `Приостановлены — льготные ${graceDays} дн. истекли, сайт закрыт до оплаты:\n` +
+        `Приостановлены — подписка закончилась, сайт закрыт до оплаты:\n` +
           toSuspend.map((t) => `  • ${t.name}`).join('\n'),
       );
     }

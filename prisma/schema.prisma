@@ -15,7 +15,7 @@ datasource db {
 enum TenantStatus {
   DRAFT // создан, но ещё не открыт публично
   ACTIVE
-  SUSPENDED // подписка просрочена сверх grace-периода
+  SUSPENDED // подписка не оплачена: сайт закрыт, админка только на просмотр
   ARCHIVED
 }
 

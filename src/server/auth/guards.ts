@@ -72,7 +72,7 @@ export function assertCanEdit(session: TenantSession): void {
       ru: 'Сайт приостановлен — подписка не оплачена. Сейчас доступен только просмотр. Для продления свяжитесь с администратором портала.',
     });
   }
-  if (session.subscription.isGrace || session.subscription.isExpired) {
+  if (session.subscription.isExpired) {
     throw new Error(
       'Подписка истекла — сейчас доступен только просмотр. Обратитесь к администратору портала для продления.',
     );

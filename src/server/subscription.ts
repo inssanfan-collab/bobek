@@ -2,15 +2,17 @@ import 'server-only';
 import { isPlanCode, type PlanCode } from '@/lib/plans';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
+import { periodIsOver } from '@/lib/subscription-period';
 
 export type SubscriptionState = {
   periodEnd: Date | null;
   /** Тариф текущего периода. Пока подписки нет — null. */
   plan: PlanCode | null;
   daysLeft: number | null;
-  /** Срок вышел, но grace-период ещё идёт: сайт работает, админка только на чтение. */
-  isGrace: boolean;
-  /** Срок и grace вышли: сад блокируется. */
+  /**
+   * Оплаченный период закончился. Льготных дней нет: админка сразу только
+   * на просмотр, а утренняя проверка приостанавливает сад и закрывает сайт.
+   */
   isExpired: boolean;
   /** Можно ли редактировать контент прямо сейчас. */
   canEdit: boolean;
@@ -26,24 +28,19 @@ export async function subscriptionState(tenantId: string): Promise<SubscriptionS
 
   if (!current) {
     // Сад ещё не оплачивал — это DRAFT сразу после создания, редактировать можно.
-    return { periodEnd: null, plan: null, daysLeft: null, isGrace: false, isExpired: false, canEdit: true };
+    return { periodEnd: null, plan: null, daysLeft: null, isExpired: false, canEdit: true };
   }
 
   const now = Date.now();
-  const end = current.periodEnd.getTime();
-  const daysLeft = Math.ceil((end - now) / DAY_MS);
-  const graceEnd = end + env.subscriptionGraceDays * DAY_MS;
-
-  const isGrace = now > end && now <= graceEnd;
-  const isExpired = now > graceEnd;
+  const daysLeft = Math.ceil((current.periodEnd.getTime() - now) / DAY_MS);
+  const isExpired = periodIsOver(current.periodEnd, now);
 
   return {
     periodEnd: current.periodEnd,
     plan: isPlanCode(current.plan) ? current.plan : 'BASIC',
     daysLeft,
-    isGrace,
     isExpired,
-    canEdit: !isGrace && !isExpired,
+    canEdit: !isExpired,
   };
 }
 

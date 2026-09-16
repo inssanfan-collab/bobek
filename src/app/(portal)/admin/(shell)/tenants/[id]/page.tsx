@@ -55,12 +55,11 @@ const T = {
   },
   adminMode: { kk: 'Әкімші бөлімінің режимі', ru: 'Режим админки' },
   fullAccess: { kk: 'толық қолжетімділік', ru: 'полный доступ' },
-  readOnly: { kk: 'тек оқу (жеңілдік кезеңі)', ru: 'только чтение (льготный период)' },
-  blocked: { kk: 'бұғатталған', ru: 'заблокирована' },
+  blocked: { kk: 'тек қарау', ru: 'только просмотр' },
   expired: { kk: 'Жазылым аяқталды', ru: 'Подписка истекла' },
   expiredText: {
-    kk: 'Сайт жұмыс істейді, әкімші бөлімі аяқталу күнінен бастап тағы %s күн тек оқу режимінде.',
-    ru: 'Сайт работает, админка в режиме только чтения ещё %s дней с даты окончания.',
+    kk: 'Әкімші бөлімі тек қарау режимінде. Ертеңгі тексерісте балабақша тоқтатылады және сайт жабылады. Төлемді төменде белгілесеңіз — бәрі бірден қалпына келеді.',
+    ru: 'Админка только на просмотр. На ближайшей утренней проверке сад будет приостановлен, а сайт закрыт. Отметьте оплату ниже — всё сразу вернётся.',
   },
   changeStatus: { kk: 'Мәртебені өзгерту', ru: 'Изменить статус' },
   apply: { kk: 'Қолдану', ru: 'Применить' },
@@ -180,19 +179,16 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             <div className="flex items-center gap-3">
               <span className="w-40 text-muted">{T.adminMode[locale]}</span>
               <span>
-                {subscription.canEdit
-                  ? T.fullAccess[locale]
-                  : subscription.isGrace
-                    ? T.readOnly[locale]
-                    : T.blocked[locale]}
+                {subscription.canEdit && tenant.status !== 'SUSPENDED' ? T.fullAccess[locale] : T.blocked[locale]}
               </span>
             </div>
           </div>
 
-          {subscription.isGrace ? (
+          {/* Срок вышел, а утренняя проверка ещё не приостановила сад. */}
+          {subscription.isExpired && tenant.status === 'ACTIVE' ? (
             <div className="mt-4">
               <Alert tone="warn" title={T.expired[locale]}>
-                {T.expiredText[locale].replace('%s', String(env.subscriptionGraceDays))}
+                {T.expiredText[locale]}
               </Alert>
             </div>
           ) : null}

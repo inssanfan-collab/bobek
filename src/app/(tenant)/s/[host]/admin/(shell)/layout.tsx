@@ -20,9 +20,9 @@ const T = {
     ru: 'Вы вошли как администратор портала. Все действия записываются в журнал.',
   },
   readOnly: { kk: 'Тек оқу режимі', ru: 'Режим только чтения' },
-  graceHint: {
-    kk: 'Жазылым %s аяқталды. Сайт жұмыс істейді, бірақ өңдеу қолжетімсіз. Ұзарту үшін портал әкімшісіне хабарласыңыз.',
-    ru: 'Подписка истекла %s. Сайт работает, но редактирование недоступно. Свяжитесь с администратором портала для продления.',
+  expiredHint: {
+    kk: 'Жазылым %s аяқталды. Өңдеу қолжетімсіз, ал сайт жақын арада келушілер үшін жабылады. Ұзарту үшін портал әкімшісіне хабарласыңыз.',
+    ru: 'Подписка истекла %s. Редактирование недоступно, а сайт в ближайшее время будет закрыт для посетителей. Для продления свяжитесь с администратором портала.',
   },
   suspended: { kk: 'Сайт тоқтатылған', ru: 'Сайт приостановлен' },
   suspendedHint: {
@@ -129,8 +129,8 @@ export default async function TenantAdminLayout({
       ) : !ctx.subscription.canEdit ? (
         <div className="px-4 pt-4 sm:px-6">
           <Alert tone="warn" title={T.readOnly[locale]}>
-            {ctx.subscription.isGrace
-              ? T.graceHint[locale].replace('%s', formatDate(ctx.subscription.periodEnd))
+            {ctx.subscription.isExpired
+              ? T.expiredHint[locale].replace('%s', formatDate(ctx.subscription.periodEnd, locale))
               : T.blockedHint[locale]}
           </Alert>
         </div>

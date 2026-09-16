@@ -43,7 +43,6 @@ export const env = {
     BASIC: int('PLAN_BASIC_PRICE_KZT', int('SUBSCRIPTION_PRICE_KZT', 50000)),
     MANAGED: int('PLAN_MANAGED_PRICE_KZT', 120000),
   },
-  subscriptionGraceDays: int('SUBSCRIPTION_GRACE_DAYS', 30),
   /**
    * Служебные уведомления владельцу портала: новая заявка и прочее.
    * Пустой адрес — уведомления выключены (так на машине разработчика).
