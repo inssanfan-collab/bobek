@@ -7,8 +7,9 @@
  * приходят в файле, иначе на сайте оказался бы машинный русский рядом
  * с живым казахским.
  *
- * Запуск:
- *   pnpm tsx scripts/import-video-posts.ts <домен сада> <файл.json>
+ * Запуск (условие react-server обязательно: сохранение файлов помечено
+ * server-only, и без него импорт падает ещё до первой строки):
+ *   node --conditions=react-server --import tsx scripts/import-video-posts.ts <домен> <файл.json>
  *
  * Формат файла: { "posts": [ { "url", "date", "titleKk", "titleRu",
  *                              "bodyKk", "bodyRu", "coverUrl" } ] }
