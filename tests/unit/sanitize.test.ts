@@ -39,3 +39,19 @@ describe('toPlainText', () => {
     expect(result.endsWith('…')).toBe(true);
   });
 });
+
+describe('фото из редактора', () => {
+  it('раскладка сохраняется, служебные пометки и чужие классы — нет', () => {
+    const html = sanitizeContent('<img src="/api/media/abc" alt="Утренник" class="img-left evil" data-selected="">');
+    expect(html).toContain('class="img-left"');
+    expect(html).not.toContain('evil');
+    expect(html).not.toContain('data-selected');
+  });
+
+  it('таблица, цитата и линия проходят', () => {
+    const html = sanitizeContent('<blockquote>Важно</blockquote><hr><table><thead><tr><th>Время</th></tr></thead><tbody><tr><td>08:00</td></tr></tbody></table>');
+    expect(html).toContain('<blockquote>');
+    expect(html).toContain('<hr />');
+    expect(html).toContain('<th>Время</th>');
+  });
+});

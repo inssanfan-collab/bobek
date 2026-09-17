@@ -7,7 +7,7 @@ import { SubmitButton } from '@/components/ui/SubmitButton';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { ActionForm } from '@/components/ActionForm';
 import { CoverPicker, type PickableMedia } from '@/components/admin/CoverPicker';
-import { savePost } from '../actions';
+import { savePost, uploadEditorFile } from '../actions';
 import type { Media, Post, Section } from '@prisma/client';
 import type { Locale } from '@/lib/i18n';
 
@@ -59,6 +59,7 @@ export function PostForm({
 }) {
   const publishedAt = post?.publishedAt ?? new Date();
   const dateValue = publishedAt.toISOString().slice(0, 10);
+  const upload = { action: uploadEditorFile, csrf, host };
 
   return (
     <ActionForm action={savePost} className="space-y-5">
@@ -86,8 +87,8 @@ export function PostForm({
       <section className="card space-y-4 p-6">
         <BilingualField
           label={T.body[locale]}
-          ru={<RichText name="bodyRu" defaultValue={post?.bodyRu ?? ''} placeholder="Расскажите, как прошёл праздник…" disabled={!canEdit} locale={locale} />}
-          kk={<RichText name="bodyKk" defaultValue={post?.bodyKk ?? ''} placeholder="Мереке қалай өткенін жазыңыз…" disabled={!canEdit} locale={locale} />}
+          ru={<RichText name="bodyRu" defaultValue={post?.bodyRu ?? ''} placeholder="Расскажите, как прошёл праздник…" disabled={!canEdit} locale={locale} upload={upload} />}
+          kk={<RichText name="bodyKk" defaultValue={post?.bodyKk ?? ''} placeholder="Мереке қалай өткенін жазыңыз…" disabled={!canEdit} locale={locale} upload={upload} />}
         />
       </section>
 

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { tenantAdmin } from '@/server/tenant/admin-context';
 import { PageHeader } from '@/components/admin/AdminShell';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { sectionMeta } from '@/lib/sections';
+import { sectionMeta, sectionSettings } from '@/lib/sections';
 import { toPlainText } from '@/lib/sanitize';
 import { pick } from '@/lib/i18n';
 
@@ -52,7 +52,7 @@ export default async function PagesListPage({ params }: { params: Promise<{ host
         <div className="card divide-y divide-line">
           {sections.map((section) => {
             const preview = toPlainText(pick(locale, section.page?.bodyKk, section.page?.bodyRu), 120);
-            const meta = sectionMeta(section.type, section.slug);
+            const meta = sectionSettings(section.settings).custom ? null : sectionMeta(section.type, section.slug);
             return (
               <Link
                 key={section.id}

@@ -327,12 +327,57 @@ body {
     @apply font-semibold text-brand underline underline-offset-2;
   }
   .prose-content :where(img) {
-    @apply my-4 rounded-2xl;
+    @apply my-4 block h-auto max-w-full rounded-2xl;
+  }
+  /* Раскладка фото из редактора. На телефоне обтекание не влезает —
+     фото снова встаёт во всю ширину. */
+  .prose-content img.img-left {
+    @apply sm:float-left sm:mb-3 sm:mr-6 sm:mt-1 sm:w-1/2;
+  }
+  .prose-content img.img-right {
+    @apply sm:float-right sm:mb-3 sm:ml-6 sm:mt-1 sm:w-1/2;
+  }
+  .prose-content img.img-small {
+    @apply mx-auto w-full max-w-xs;
+  }
+  .prose-content::after {
+    content: '';
+    @apply block clear-both;
+  }
+  .prose-content :where(h2, h3, hr, table) {
+    @apply clear-both;
+  }
+  .prose-content :where(blockquote) {
+    @apply my-5 rounded-r-2xl border-l-4 border-brand bg-brand-soft/50 px-5 py-3;
+  }
+  .prose-content :where(hr) {
+    @apply my-8 border-line;
   }
   .prose-content :where(table) {
     @apply my-4 w-full border-collapse text-left;
   }
+  .prose-content :where(th) {
+    @apply bg-brand-soft/50 font-semibold;
+  }
   .prose-content :where(th, td) {
-    @apply border border-line px-3 py-2;
+    @apply border border-line px-3 py-2 align-top;
+  }
+  /* Широкая таблица (меню на неделю) на телефоне прокручивается сама,
+     а не растягивает всю страницу вбок. */
+  @media (max-width: 639px) {
+    .prose-content :where(table) {
+      @apply block overflow-x-auto;
+    }
+  }
+
+  /* Редактор: выбранное фото и пустые ячейки, в которые можно кликнуть. */
+  .rich-editor img {
+    @apply cursor-pointer;
+  }
+  .rich-editor img[data-selected] {
+    @apply outline outline-4 outline-offset-2 outline-brand;
+  }
+  .rich-editor :where(td, th) {
+    @apply min-w-16;
   }
 }

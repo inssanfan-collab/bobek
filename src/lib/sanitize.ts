@@ -18,6 +18,8 @@ const OPTIONS: sanitizeHtml.IOptions = {
     td: ['colspan', 'rowspan'],
     th: ['colspan', 'rowspan'],
   },
+  // Раскладка фото из редактора: слева или справа от текста, маленькое.
+  allowedClasses: { img: ['img-left', 'img-right', 'img-small'] },
   allowedSchemes: ['http', 'https', 'mailto', 'tel'],
   // Картинки разрешаем только свои: чужие ломают приватность и отваливаются со временем.
   allowedSchemesByTag: { img: ['https', 'http'] },

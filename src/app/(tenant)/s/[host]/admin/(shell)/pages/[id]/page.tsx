@@ -7,9 +7,9 @@ import { RichText } from '@/components/admin/RichText';
 import { BilingualField } from '@/components/admin/BilingualField';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
-import { sectionMeta } from '@/lib/sections';
+import { CUSTOM_KINDS, sectionMeta, sectionSettings } from '@/lib/sections';
 import { ActionForm } from '@/components/ActionForm';
-import { savePage } from '../../actions';
+import { savePage, uploadEditorFile } from '../../actions';
 import { pick } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +21,8 @@ const T = {
     kk: 'Бір-екі сөйлем. Іздеу нәтижелерінде көрсетіледі.',
     ru: 'Одно-два предложения. Показывается в результатах поиска.',
   },
+  placeholderRu: { kk: 'Беттің мәтіні орысша…', ru: 'Текст страницы по-русски…' },
+  placeholderKk: { kk: 'Беттің мәтіні қазақша…', ru: 'Текст страницы по-казахски…' },
   save: { kk: 'Сақтау', ru: 'Сохранить' },
   cancel: { kk: 'Болдырмау', ru: 'Отмена' },
 } as const;
@@ -38,11 +40,17 @@ export default async function EditPagePage({
 
   const csrf = await csrfToken();
   const locale = ctx.user.locale;
-  const meta = sectionMeta(section.type, section.slug);
+  // У своего раздела подсказка своя: иначе «Госзакупки» получали
+  // подсказку раздела «О саде» — первого в каталоге с тем же типом.
+  const custom = sectionSettings(section.settings).custom;
+  const meta = custom ? null : sectionMeta(section.type, section.slug);
+  const kind = CUSTOM_KINDS.find((item) => item.type === section.type);
+  const description = custom ? kind?.hint[locale] : pick(locale, meta?.hintKk, meta?.hintRu);
+  const upload = { action: uploadEditorFile, csrf, host };
 
   return (
     <>
-      <PageHeader title={pick(locale, section.titleKk, section.titleRu)} description={pick(locale, meta?.hintKk, meta?.hintRu)} />
+      <PageHeader title={pick(locale, section.titleKk, section.titleRu)} description={description} />
 
       <ActionForm action={savePage} className="space-y-5">
         <input type="hidden" name={CSRF_FIELD} value={csrf} />
@@ -52,8 +60,8 @@ export default async function EditPagePage({
         <section className="card p-6">
           <BilingualField
             label={T.bodyLabel[locale]}
-            ru={<RichText name="bodyRu" defaultValue={section.page?.bodyRu ?? ''} placeholder="Расскажите о саде…" disabled={!ctx.canEdit} locale={ctx.user.locale} />}
-            kk={<RichText name="bodyKk" defaultValue={section.page?.bodyKk ?? ''} placeholder="Балабақша туралы жазыңыз…" disabled={!ctx.canEdit} locale={ctx.user.locale} />}
+            ru={<RichText name="bodyRu" defaultValue={section.page?.bodyRu ?? ''} placeholder={T.placeholderRu[locale]} disabled={!ctx.canEdit} locale={locale} upload={upload} previewTitle={section.titleRu} />}
+            kk={<RichText name="bodyKk" defaultValue={section.page?.bodyKk ?? ''} placeholder={T.placeholderKk[locale]} disabled={!ctx.canEdit} locale={locale} upload={upload} previewTitle={section.titleKk || section.titleRu} />}
           />
         </section>
 

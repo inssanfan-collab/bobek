@@ -12,6 +12,7 @@ import { assertOwned } from '@/server/db/scope';
 import { audit } from '@/server/audit';
 import { sanitizeContent, toPlainText } from '@/lib/sanitize';
 import { isVideoUrl } from '@/lib/video';
+import type { EditorUpload } from '@/components/admin/RichText';
 import { slugify, uniqueSlug } from '@/lib/slug';
 import {
   canDeleteSection, CUSTOM_KINDS, isCustomKind, isValidSectionSlug, normalizeLinkUrl,
@@ -183,6 +184,32 @@ export async function savePage(_prev: ActionState, formData: FormData): Promise<
   return { redirectTo: await hostUrl('/admin/pages') };
   } catch (error) {
     return toActionError(error, (await getCurrentUser())?.locale);
+  }
+}
+
+/**
+ * Фото или файл, вставленные прямо в текст страницы или новости. Проходят
+ * тот же `saveUpload`, что и галерея: пересжатие и снятие EXIF обязательны
+ * и здесь — фото в текст вставляют с телефона чаще, чем в альбом.
+ */
+export async function uploadEditorFile(formData: FormData): Promise<EditorUpload> {
+  try {
+    const ctx = await gate(formData);
+    const file = formData.get('file');
+    if (!(file instanceof File) || file.size === 0) {
+      throw new ActionError({ kk: 'Файл таңдалмады', ru: 'Файл не выбран' });
+    }
+    const media = await saveUpload(file, ctx.tenantId);
+    await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'media', entityId: media.id });
+    return {
+      url: `/api/media/${media.id}`,
+      name: media.origName,
+      image: media.mime.startsWith('image/'),
+      width: media.width,
+      height: media.height,
+    };
+  } catch (error) {
+    return { error: toActionError(error, (await getCurrentUser())?.locale).error ?? 'Ошибка загрузки' };
   }
 }
 
