@@ -370,6 +370,51 @@ body {
     }
   }
 
+  /* Файл, прикреплённый в тексте (собирается в src/lib/file-cards.ts).
+     Разметка из span: карточка может стоять внутри абзаца, а div там
+     браузер разорвал бы. */
+  .prose-content .file-card {
+    @apply my-3 flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-card p-3 sm:flex-nowrap sm:px-4;
+  }
+  .prose-content .file-card-badge {
+    @apply grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-soft text-xs font-extrabold tracking-wide text-brand-ink;
+  }
+  .prose-content .file-card[data-kind='pdf'] .file-card-badge {
+    @apply bg-red-100 text-red-700;
+  }
+  .prose-content .file-card[data-kind='word'] .file-card-badge {
+    @apply bg-blue-100 text-blue-700;
+  }
+  .prose-content .file-card[data-kind='excel'] .file-card-badge {
+    @apply bg-emerald-100 text-emerald-700;
+  }
+  .prose-content .file-card-text {
+    @apply block min-w-0 flex-1;
+  }
+  .prose-content .file-card-name {
+    @apply block break-words font-semibold leading-snug text-ink;
+  }
+  .prose-content .file-card-meta {
+    @apply block text-sm text-muted;
+  }
+  .prose-content .file-card-actions {
+    @apply flex w-full shrink-0 gap-2 sm:w-auto;
+  }
+  .prose-content .file-card-actions a {
+    @apply inline-flex flex-1 items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold no-underline transition sm:flex-none;
+  }
+  .prose-content a.file-card-open {
+    @apply bg-brand text-white hover:opacity-90;
+  }
+  .prose-content a.file-card-download {
+    @apply border border-line text-ink hover:bg-brand-soft;
+  }
+
+  /* В самом редакторе прикреплённый файл — заметная плашка, а не просто ссылка. */
+  .rich-editor a[href^='/api/media/'] {
+    @apply inline-block rounded-lg border border-line bg-brand-soft/60 px-2 py-0.5 no-underline;
+  }
+
   /* Редактор: выбранное фото и пустые ячейки, в которые можно кликнуть. */
   .rich-editor img {
     @apply cursor-pointer;

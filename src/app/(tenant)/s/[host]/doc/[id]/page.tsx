@@ -28,9 +28,17 @@ type Params = { host: string; id: string };
 async function load(host: string, id: string) {
   const context = await publicSiteContext(host);
   // Через scoped: документ ищется только внутри своего сада, чужой id не откроется.
-  const doc = await context.db.documents.findFirst({ where: { id }, include: { media: true } });
-  if (!doc || !isOfficeDoc(doc.media.mime)) notFound();
-  return { context, doc };
+  const found = await context.db.documents.findFirst({ where: { id }, include: { media: true } });
+  if (found) {
+    if (!isOfficeDoc(found.media.mime)) notFound();
+    return { context, doc: found, fromText: false };
+  }
+  // Файл, прикреплённый в тексте страницы или новости: документа у него нет,
+  // названием служит имя файла.
+  const media = await context.db.media.findFirst({ where: { id } });
+  if (!media || !isOfficeDoc(media.mime)) notFound();
+  const doc = { mediaId: media.id, titleRu: media.origName, titleKk: media.origName };
+  return { context, doc, fromText: true };
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
@@ -48,7 +56,7 @@ export default async function DocumentViewPage({
 }) {
   const [{ host, id }, search] = await Promise.all([params, searchParams]);
   const locale = localeFrom(search.lang);
-  const { context, doc } = await load(host, id);
+  const { context, doc, fromText } = await load(host, id);
   const { profile, primaryHost } = context;
 
   const sections = await siteMenu(context.db);
@@ -68,7 +76,7 @@ export default async function DocumentViewPage({
       <UrgentNotice profile={profile} locale={locale} />
       <SiteHeader profile={profile} sections={sections} locale={locale} pathname={`/doc/${id}`} />
       <main id="main" className="container-page py-8">
-        {documentsSection ? (
+        {documentsSection && !fromText ? (
           <Link
             href={withLocale(`/${documentsSection.slug}`, locale)}
             className="text-sm font-semibold text-brand-ink"

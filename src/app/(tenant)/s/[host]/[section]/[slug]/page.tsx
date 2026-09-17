@@ -15,6 +15,7 @@ import { toPlainText } from '@/lib/sanitize';
 import { formatDate } from '@/lib/labels';
 import { env } from '@/lib/env';
 import { parseVideo } from '@/lib/video';
+import { withFileCards } from '@/server/content/file-cards';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,6 +78,9 @@ export default async function EntryPage({
   const video = parseVideo(post?.videoUrl);
 
   const menu = await siteMenu(context.db);
+  const postBody = post
+    ? await withFileCards((locale === 'kk' ? post.bodyKk || post.bodyRu : post.bodyRu || post.bodyKk) ?? '', context.db, locale)
+    : '';
 
   await recordVisit(context.tenant.id);
   if (post) await recordPostView(post.id);
@@ -139,9 +143,7 @@ export default async function EntryPage({
               ) : null}
               <div
                 className="prose-content mt-6"
-                dangerouslySetInnerHTML={{
-                  __html: (locale === 'kk' ? post!.bodyKk || post!.bodyRu : post!.bodyRu || post!.bodyKk) ?? '',
-                }}
+                dangerouslySetInnerHTML={{ __html: postBody }}
               />
             </article>
           )}

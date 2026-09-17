@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Locale } from '@/lib/i18n';
+import { renderFileCards } from '@/lib/file-cards';
 
 const T = {
   heading: { kk: 'Сайтта қалай көрінеді', ru: 'Как это увидят на сайте' },
@@ -89,7 +90,7 @@ export function EditorPreview({
     h1.textContent = title || T.untitled[locale];
     const body = doc.createElement('div');
     body.className = 'prose-content mt-6 max-w-3xl';
-    body.innerHTML = html;
+    body.innerHTML = renderFileCards(html, locale, null);
     main.append(h1, body);
     doc.body.replaceChildren(main);
   }

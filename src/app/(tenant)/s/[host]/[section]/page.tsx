@@ -20,6 +20,7 @@ import { csrfToken } from '@/server/auth/csrf';
 import { pick } from '@/lib/i18n';
 import { env } from '@/lib/env';
 import { prisma } from '@/server/db';
+import { withFileCards } from '@/server/content/file-cards';
 import { sectionLink, sectionSettings } from '@/lib/sections';
 import { SectionIcon } from '@/components/site/SectionIcon';
 
@@ -269,7 +270,8 @@ async function SectionBody({
       // Раздел-«папка» для вложенных часто без своего текста: плашка
       // «материалы пока не добавлены» под списком вложенных сбивала бы с толку.
       if (!body) return hasChildren ? null : <Empty locale={locale} />;
-      return <div className="prose-content max-w-3xl" dangerouslySetInnerHTML={{ __html: body }} />;
+      const html = await withFileCards(body, db, locale);
+      return <div className="prose-content max-w-3xl" dangerouslySetInnerHTML={{ __html: html }} />;
     }
   }
 }
