@@ -138,3 +138,125 @@ export const DEFAULT_SECTIONS = SECTION_CATALOG.filter((s) => s.defaultOn);
 
 /** Разделы, которые ведут на список записей, а не на статическую страницу. */
 export const FEED_TYPES: SectionType[] = ['NEWS', 'ANNOUNCEMENT'];
+
+// ─────────────────────────── Свои разделы сада ───────────────────────────
+
+/**
+ * Настройки раздела, которые не ложатся в колонки таблицы. Лежат в
+ * Section.settings (JSON), поэтому разбираются здесь, а не читаются напрямую:
+ * в базе может оказаться что угодно, и сайт не должен падать из-за мусора.
+ */
+export type SectionSettings = {
+  /** Раздел создан садом, а не взят из стандартного набора. */
+  custom: boolean;
+  /** «Документы из папки»: какую папку показывать. */
+  folderId: string | null;
+  /** «Ссылка»: куда ведёт пункт меню. */
+  url: string | null;
+};
+
+export function sectionSettings(raw: unknown): SectionSettings {
+  const value = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  return {
+    custom: value.custom === true,
+    folderId: typeof value.folderId === 'string' && value.folderId ? value.folderId : null,
+    url: typeof value.url === 'string' && value.url ? value.url : null,
+  };
+}
+
+/** Виды разделов, которые сад создаёт сам — сколько угодно раз. */
+export const CUSTOM_KINDS = [
+  {
+    kind: 'page',
+    type: 'PAGE',
+    icon: '📝',
+    title: { kk: 'Мәтіндік бет', ru: 'Текстовая страница' },
+    hint: {
+      kk: 'Мәтін, фото, кестелер. Мысалы: «Логопед», «Мемлекеттік сатып алу», «Инклюзивті білім».',
+      ru: 'Текст, фото, таблицы. Например: «Логопед», «Госзакупки», «Инклюзивное образование».',
+    },
+  },
+  {
+    kind: 'folder',
+    type: 'DOCUMENTS',
+    icon: '🗂',
+    title: { kk: 'Бумадағы құжаттар', ru: 'Документы из папки' },
+    hint: {
+      kk: 'Мәзірдің жеке тармағы бір буманың құжаттарын көрсетеді. Мысалы: «Өзін-өзі бағалау материалдары».',
+      ru: 'Отдельный пункт меню показывает документы одной папки. Например: «Материалы самооценки».',
+    },
+  },
+  {
+    kind: 'link',
+    type: 'LINK',
+    icon: '🔗',
+    title: { kk: 'Сілтеме', ru: 'Ссылка' },
+    hint: {
+      kk: 'Мәзір тармағы басқа мекенжайға апарады: Darabala.kz, балабақшаның Instagram парақшасы.',
+      ru: 'Пункт меню ведёт на другой адрес: Darabala.kz, Instagram сада.',
+    },
+  },
+] as const;
+
+export type CustomKind = (typeof CUSTOM_KINDS)[number]['kind'];
+
+export function isCustomKind(value: unknown): value is CustomKind {
+  return CUSTOM_KINDS.some((item) => item.kind === value);
+}
+
+/**
+ * Адреса, которые раздел занять не может: по ним живёт сам сайт сада.
+ * Раздел «search» перекрыл бы поиск, «admin» — вход в админку.
+ */
+export const RESERVED_SECTION_SLUGS = new Set([
+  'admin', 'api', 'search', 'doc', 'unavailable', 'sitemap.xml', 'robots.txt', '_next', 's',
+]);
+
+const SECTION_SLUG_RE = /^[a-z0-9][a-z0-9-]{0,58}[a-z0-9]$/;
+
+export function isValidSectionSlug(slug: string): boolean {
+  return SECTION_SLUG_RE.test(slug) && !slug.includes('--') && !RESERVED_SECTION_SLUGS.has(slug);
+}
+
+/**
+ * Можно ли удалить раздел. Страницы, ссылки и свои разделы — да. Ленты,
+ * галерею, педагогов и прочие — нет: вместе с разделом ушли бы все новости
+ * или альбомы, а такое случайно делать нельзя. Их можно скрыть.
+ */
+export function canDeleteSection(section: { type: SectionType; settings: unknown }): boolean {
+  if (section.type === 'PAGE' || section.type === 'LINK') return true;
+  return sectionSettings(section.settings).custom;
+}
+
+/**
+ * Приводит адрес ссылки к рабочему виду. Принимает то, что вставляет человек:
+ * «darabala.kz», «https://…», «/contacts». Возвращает null для мусора и для
+ * javascript:, data: и прочих схем, которыми через меню можно навредить.
+ */
+export function normalizeLinkUrl(raw: string): string | null {
+  const value = raw.trim();
+  if (!value) return null;
+  if (value.startsWith('/') && !value.startsWith('//')) return value;
+
+  const candidate = /^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value}`;
+  try {
+    const url = new URL(candidate);
+    if (!['http:', 'https:', 'mailto:', 'tel:'].includes(url.protocol)) return null;
+    if ((url.protocol === 'http:' || url.protocol === 'https:') && !url.hostname.includes('.')) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+/** Куда ведёт пункт меню. Внешняя ссылка открывается в новой вкладке. */
+export function sectionLink(
+  section: { type: SectionType; slug: string; settings: unknown },
+  withLang: (href: string) => string,
+): { href: string; external: boolean } {
+  if (section.type === 'LINK') {
+    const url = sectionSettings(section.settings).url;
+    if (url) return { href: url, external: !url.startsWith('/') };
+  }
+  return { href: withLang(`/${section.slug}`), external: false };
+}

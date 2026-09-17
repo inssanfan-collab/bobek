@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
+import { siteMenu } from '@/server/tenant/menu';
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
@@ -46,10 +47,7 @@ export default async function SearchPage({
   const locale = localeFrom(search.lang);
   const query = (search.q ?? '').trim();
 
-  const menu = await db.sections.findMany({
-    where: { isVisible: true, parentId: null },
-    orderBy: { position: 'asc' },
-  });
+  const menu = await siteMenu(db);
 
   const results = query ? await db.search(query) : null;
 

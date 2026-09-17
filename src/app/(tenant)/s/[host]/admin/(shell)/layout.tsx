@@ -6,6 +6,7 @@ import { AdminLocaleSwitch } from '@/components/admin/AdminLocaleSwitch';
 import { LogoutButton } from '@/components/admin/LogoutButton';
 import { Alert } from '@/components/ui/Alert';
 import { formatDate } from '@/lib/labels';
+import { sectionSettings } from '@/lib/sections';
 import { pick } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
@@ -73,7 +74,7 @@ export default async function TenantAdminLayout({
     prisma.section.findMany({
       where: { tenantId: ctx.tenantId },
       orderBy: { position: 'asc' },
-      select: { type: true, titleKk: true, titleRu: true },
+      select: { type: true, titleKk: true, titleRu: true, settings: true },
     }),
   ]);
 
@@ -82,6 +83,9 @@ export default async function TenantAdminLayout({
   // сотрудник ищет свой раздел и не находит: на сайте он называется иначе.
   const sectionTitles = new Map<string, string>();
   for (const section of sections) {
+    // Свои разделы сада не в счёт: «документы из папки» — это одна папка,
+    // и её название не должно подменить пункт «Документы», где лежат все.
+    if (sectionSettings(section.settings).custom) continue;
     if (!sectionTitles.has(section.type)) {
       sectionTitles.set(section.type, pick(locale, section.titleKk, section.titleRu));
     }

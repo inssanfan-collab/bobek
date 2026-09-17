@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
+import { siteMenu } from '@/server/tenant/menu';
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
@@ -75,10 +76,7 @@ export default async function EntryPage({
   const basePath = `/${section.slug}`;
   const video = parseVideo(post?.videoUrl);
 
-  const menu = await context.db.sections.findMany({
-    where: { isVisible: true, parentId: null },
-    orderBy: { position: 'asc' },
-  });
+  const menu = await siteMenu(context.db);
 
   await recordVisit(context.tenant.id);
   if (post) await recordPostView(post.id);

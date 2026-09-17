@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { SectionIcon } from './SectionIcon';
+import { sectionLink } from '@/lib/sections';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import { formatDate } from '@/lib/labels';
@@ -108,16 +109,23 @@ export function SectionTiles({ sections, locale }: { sections: Section[]; locale
       <h2 className="font-display text-2xl font-extrabold">{T.sections[locale]}</h2>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {sections.map((section) => {
-          return (
-            <Link
-              key={section.id}
-              href={withLocale(`/${section.slug}`, locale)}
-              className="card flex items-center gap-3 p-4 transition hover:shadow-lift"
-            >
+          const link = sectionLink(section, (path) => withLocale(path, locale));
+          const inner = (
+            <>
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-soft text-brand-ink">
                 <SectionIcon type={section.type} />
               </span>
               <span className="font-semibold">{pick(locale, section.titleKk, section.titleRu)}</span>
+            </>
+          );
+          const className = 'card flex items-center gap-3 p-4 transition hover:shadow-lift';
+          return link.external ? (
+            <a key={section.id} href={link.href} target="_blank" rel="noopener noreferrer" className={className}>
+              {inner}
+            </a>
+          ) : (
+            <Link key={section.id} href={link.href} className={className}>
+              {inner}
             </Link>
           );
         })}

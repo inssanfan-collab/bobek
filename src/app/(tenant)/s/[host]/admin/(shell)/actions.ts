@@ -12,7 +12,12 @@ import { assertOwned } from '@/server/db/scope';
 import { audit } from '@/server/audit';
 import { sanitizeContent, toPlainText } from '@/lib/sanitize';
 import { isVideoUrl } from '@/lib/video';
-import { uniqueSlug } from '@/lib/slug';
+import { slugify, uniqueSlug } from '@/lib/slug';
+import {
+  canDeleteSection, CUSTOM_KINDS, isCustomKind, isValidSectionSlug, normalizeLinkUrl,
+  RESERVED_SECTION_SLUGS, sectionSettings,
+} from '@/lib/sections';
+import type { SectionType } from '@prisma/client';
 import { saveUpload, deleteMedia, UploadError } from '@/server/media';
 import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { geocodeAddress } from '@/server/maps/yandex';
@@ -195,26 +200,242 @@ export async function toggleSection(formData: FormData) {
   revalidatePath('/admin/sections');
 }
 
-export async function renameSection(formData: FormData) {
-  const ctx = await gate(formData);
-  const id = str(formData, 'id');
-  await assertOwned('section', id, ctx.tenantId);
-
-  await prisma.section.update({
-    where: { id },
-    data: { titleRu: str(formData, 'titleRu'), titleKk: str(formData, 'titleKk') },
-  });
-  revalidatePath('/admin/sections');
+/** Ошибка настройки раздела — сразу на двух языках. */
+function sectionError(kk: string, ru: string): never {
+  throw new ActionError({ kk, ru });
 }
 
+/** Занят ли адрес другим разделом этого сада. */
+async function slugTaken(tenantId: string, slug: string, exceptId?: string): Promise<boolean> {
+  const row = await prisma.section.findFirst({
+    where: { tenantId, slug, ...(exceptId ? { NOT: { id: exceptId } } : {}) },
+    select: { id: true },
+  });
+  return Boolean(row);
+}
+
+/**
+ * Проверки, общие для создания и настройки раздела: название, адрес,
+ * место в меню, папка и ссылка. Возвращает уже очищенные значения.
+ */
+async function readSectionForm(
+  formData: FormData,
+  tenantId: string,
+  options: { id?: string; type: SectionType; hasChildren: boolean },
+) {
+  const titleRu = str(formData, 'titleRu');
+  const titleKk = str(formData, 'titleKk') || titleRu;
+  if (titleRu.length < 2) sectionError('Орысша атауын жазыңыз', 'Укажите название по-русски');
+  if (titleRu.length > 80 || titleKk.length > 80) {
+    sectionError('Атауы тым ұзын — 80 таңбаға дейін', 'Название слишком длинное — до 80 символов');
+  }
+
+  // Адрес: пустой — собираем из русского названия и подбираем свободный;
+  // введённый — только приводим к виду и проверяем.
+  const rawSlug = str(formData, 'slug');
+  let slug = slugify(rawSlug || titleRu);
+  if (!rawSlug) {
+    const root = slug.length >= 2 ? slug : 'razdel';
+    slug = root;
+    for (let i = 2; (await slugTaken(tenantId, slug, options.id)) || RESERVED_SECTION_SLUGS.has(slug); i += 1) {
+      slug = `${root}-${i}`;
+    }
+  }
+  if (!isValidSectionSlug(slug)) {
+    sectionError(
+      'Мекенжай жарамсыз: латын әріптері, сандар және сызықша, 2–60 таңба. admin, search сияқты мекенжайлар бос емес.',
+      'Адрес не подходит: латинские буквы, цифры и дефис, 2–60 символов. Адреса вроде admin и search заняты сайтом.',
+    );
+  }
+  if (await slugTaken(tenantId, slug, options.id)) {
+    sectionError(`«/${slug}» мекенжайы бос емес`, `Адрес «/${slug}» уже занят другим разделом`);
+  }
+
+  // Место в меню. Вложенность одна: раздел внутри раздела, не глубже.
+  const parentId = optionalStr(formData, 'parentId');
+  if (parentId) {
+    if (parentId === options.id) sectionError('Бөлімді өзінің ішіне салуға болмайды', 'Раздел нельзя вложить в самого себя');
+    const parent = await prisma.section.findFirst({
+      where: { id: parentId, tenantId },
+      select: { parentId: true, type: true },
+    });
+    if (!parent) sectionError('Ата-бөлім табылмады', 'Раздел-родитель не найден');
+    if (parent.parentId) {
+      sectionError('Ішкі бөлімнің ішіне салуға болмайды — бір деңгей ғана', 'Нельзя вкладывать во вложенный раздел — уровень только один');
+    }
+    if (parent.type === 'LINK') sectionError('Сілтеменің ішіне бөлім салуға болмайды', 'Внутрь ссылки раздел не вложить');
+    if (options.hasChildren) {
+      sectionError(
+        'Бұл бөлімнің өз ішкі бөлімдері бар — оны басқаның ішіне салуға болмайды',
+        'У этого раздела есть свои вложенные — его нельзя вложить в другой',
+      );
+    }
+  }
+
+  // Настройки вида раздела.
+  let folderId: string | null = null;
+  let url: string | null = null;
+  if (options.type === 'DOCUMENTS' && formData.has('folderId')) {
+    folderId = optionalStr(formData, 'folderId');
+    if (!folderId) sectionError('Буманы таңдаңыз', 'Выберите папку с документами');
+    await assertOwned('documentFolder', folderId, tenantId);
+  }
+  if (options.type === 'LINK') {
+    url = normalizeLinkUrl(str(formData, 'url'));
+    if (!url) sectionError('Сілтеме мекенжайын тексеріңіз', 'Проверьте адрес ссылки — например, darabala.kz или https://…');
+  }
+
+  return { titleRu, titleKk, slug, parentId, folderId, url };
+}
+
+/** Позиция в конце уровня: новый или перенесённый раздел встаёт последним. */
+async function lastPosition(tenantId: string, parentId: string | null): Promise<number> {
+  const last = await prisma.section.findFirst({
+    where: { tenantId, parentId },
+    orderBy: { position: 'desc' },
+    select: { position: true },
+  });
+  return (last?.position ?? -1) + 1;
+}
+
+/**
+ * Свой раздел: текстовая страница, документы из папки или ссылка.
+ * Страницу сразу открываем в редакторе — пустой раздел заведующая создаёт,
+ * чтобы наполнить, а не чтобы потом искать его в списке.
+ */
+export async function createSection(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    const ctx = await gate(formData);
+    const kind = formData.get('kind');
+    if (!isCustomKind(kind)) sectionError('Бөлімнің түрін таңдаңыз', 'Выберите вид раздела');
+    const type = CUSTOM_KINDS.find((item) => item.kind === kind)!.type;
+
+    const form = await readSectionForm(formData, ctx.tenantId, { type, hasChildren: false });
+
+    const section = await prisma.section.create({
+      data: {
+        tenantId: ctx.tenantId,
+        type,
+        slug: form.slug,
+        titleRu: form.titleRu,
+        titleKk: form.titleKk,
+        parentId: form.parentId,
+        position: await lastPosition(ctx.tenantId, form.parentId),
+        settings: {
+          custom: true,
+          ...(form.folderId ? { folderId: form.folderId } : {}),
+          ...(form.url ? { url: form.url } : {}),
+        },
+      },
+    });
+    if (type === 'PAGE') {
+      await prisma.page.create({ data: { tenantId: ctx.tenantId, sectionId: section.id } });
+    }
+
+    await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'section', entityId: section.id });
+    revalidatePath('/admin', 'layout');
+    return { redirectTo: await hostUrl(type === 'PAGE' ? `/admin/pages/${section.id}` : '/admin/sections') };
+  } catch (error) {
+    return toActionError(error, (await getCurrentUser())?.locale);
+  }
+}
+
+/** Название, адрес, место в меню и настройки вида — одной формой. */
+export async function updateSection(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    const ctx = await gate(formData);
+    const id = str(formData, 'id');
+    await assertOwned('section', id, ctx.tenantId);
+
+    const current = await prisma.section.findUnique({
+      where: { id },
+      include: { _count: { select: { children: true } } },
+    });
+    if (!current) sectionError('Бөлім табылмады', 'Раздел не найден');
+
+    const form = await readSectionForm(formData, ctx.tenantId, {
+      id,
+      type: current.type,
+      hasChildren: current._count.children > 0,
+    });
+
+    const settings = sectionSettings(current.settings);
+    const movedLevel = form.parentId !== current.parentId;
+
+    await prisma.section.update({
+      where: { id },
+      data: {
+        titleRu: form.titleRu,
+        titleKk: form.titleKk,
+        slug: form.slug,
+        parentId: form.parentId,
+        ...(movedLevel ? { position: await lastPosition(ctx.tenantId, form.parentId) } : {}),
+        settings: {
+          ...(settings.custom ? { custom: true } : {}),
+          ...(current.type === 'DOCUMENTS' && settings.custom && form.folderId ? { folderId: form.folderId } : {}),
+          ...(current.type === 'LINK' && form.url ? { url: form.url } : {}),
+        },
+      },
+    });
+
+    await audit(ctx.user, 'content.update', { tenantId: ctx.tenantId, entity: 'section', entityId: id });
+    revalidatePath('/admin', 'layout');
+    return { redirectTo: await hostUrl('/admin/sections') };
+  } catch (error) {
+    return toActionError(error, (await getCurrentUser())?.locale);
+  }
+}
+
+/**
+ * Удалить можно страницу, ссылку и свой раздел. Ленты, галерею, педагогов
+ * и прочие — только скрыть: вместе с ними ушли бы все новости и альбомы.
+ */
+export async function deleteSection(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    const ctx = await gate(formData);
+    const id = str(formData, 'id');
+    await assertOwned('section', id, ctx.tenantId);
+
+    const section = await prisma.section.findUnique({ where: { id } });
+    if (!section) sectionError('Бөлім табылмады', 'Раздел не найден');
+
+    if (!canDeleteSection(section)) {
+      sectionError('Бұл бөлімді жоюға болмайды, тек жасыруға болады', 'Этот раздел нельзя удалить, только скрыть');
+    }
+    if (formData.get('confirm') !== 'on') {
+      sectionError('Жоюды растаңыз — белгішені қойыңыз', 'Подтвердите удаление — поставьте галочку');
+    }
+
+    // Вложенные разделы не пропадают, а поднимаются в главное меню — в конец.
+    const children = await prisma.section.findMany({ where: { parentId: id }, orderBy: { position: 'asc' } });
+    let position = await lastPosition(ctx.tenantId, null);
+    await prisma.$transaction([
+      ...children.map((child) =>
+        prisma.section.update({ where: { id: child.id }, data: { parentId: null, position: position++ } }),
+      ),
+      prisma.section.delete({ where: { id } }),
+    ]);
+
+    await audit(ctx.user, 'content.delete', { tenantId: ctx.tenantId, entity: 'section', entityId: id });
+    revalidatePath('/admin', 'layout');
+    return { redirectTo: await hostUrl('/admin/sections') };
+  } catch (error) {
+    return toActionError(error, (await getCurrentUser())?.locale);
+  }
+}
+
+/** Выше или ниже — среди разделов того же уровня. */
 export async function moveSection(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   const direction = str(formData, 'direction');
   await assertOwned('section', id, ctx.tenantId);
 
+  const moving = await prisma.section.findUnique({ where: { id }, select: { parentId: true } });
+  if (!moving) return;
+
   const sections = await prisma.section.findMany({
-    where: { tenantId: ctx.tenantId, parentId: null },
+    where: { tenantId: ctx.tenantId, parentId: moving.parentId },
     orderBy: { position: 'asc' },
   });
 
@@ -222,7 +443,7 @@ export async function moveSection(formData: FormData) {
   const target = direction === 'up' ? index - 1 : index + 1;
   if (index < 0 || target < 0 || target >= sections.length) return;
 
-  // Позиции могут быть неплотными, поэтому переставляем и переномеровываем весь список.
+  // Позиции могут быть неплотными, поэтому переставляем и переномеровываем весь уровень.
   const reordered = [...sections];
   [reordered[index], reordered[target]] = [reordered[target]!, reordered[index]!];
 
@@ -245,11 +466,6 @@ export async function addSection(formData: FormData) {
   const exists = await prisma.section.findFirst({ where: { tenantId: ctx.tenantId, slug } });
   if (exists) throw new ActionError({ kk: 'Мұндай бөлім бұрыннан бар', ru: 'Такой раздел уже есть' });
 
-  const last = await prisma.section.findFirst({
-    where: { tenantId: ctx.tenantId },
-    orderBy: { position: 'desc' },
-  });
-
   const section = await prisma.section.create({
     data: {
       tenantId: ctx.tenantId,
@@ -257,7 +473,7 @@ export async function addSection(formData: FormData) {
       slug: meta.slug,
       titleKk: meta.titleKk,
       titleRu: meta.titleRu,
-      position: (last?.position ?? -1) + 1,
+      position: await lastPosition(ctx.tenantId, null),
     },
   });
 

@@ -4,6 +4,7 @@ import { LocaleSwitch } from './LocaleSwitch';
 import { SiteNav } from './SiteNav';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
+import { sectionLink } from '@/lib/sections';
 import type { Section, TenantProfile } from '@prisma/client';
 
 const T = {
@@ -22,11 +23,17 @@ export function SiteHeader({
   compact = false,
 }: {
   profile: TenantProfile | null;
-  sections: Section[];
+  /** Разделы верхнего уровня; вложенные — в children (см. siteMenu). */
+  sections: (Section & { children?: Section[] })[];
   locale: Locale;
   pathname: string;
   compact?: boolean;
 }) {
+  const toLink = (section: Section) => {
+    const { href, external } = sectionLink(section, (path) => withLocale(path, locale));
+    return { href, external, label: pick(locale, section.titleKk, section.titleRu) };
+  };
+
   const name = pick(locale, profile?.shortNameKk ?? profile?.nameKk, profile?.shortNameRu ?? profile?.nameRu);
 
   return (
@@ -81,8 +88,8 @@ export function SiteHeader({
         links={[
           { href: withLocale('/', locale), label: T.home[locale] },
           ...sections.map((section) => ({
-            href: withLocale(`/${section.slug}`, locale),
-            label: pick(locale, section.titleKk, section.titleRu),
+            ...toLink(section),
+            children: section.children?.map(toLink),
           })),
           { href: withLocale('/search', locale), label: T.search[locale] },
         ]}

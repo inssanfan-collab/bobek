@@ -233,6 +233,8 @@ enum SectionType {
   CONTACTS
   CLUBS
   FAQ
+  /// Пункт меню, ведущий на другой адрес: Darabala.kz, Instagram сада и т.п.
+  LINK
 }
 
 enum NoticeTone {
@@ -254,6 +256,8 @@ model Section {
   parentId  String?
   parent    Section?    @relation("SectionTree", fields: [parentId], references: [id], onDelete: SetNull)
   children  Section[]   @relation("SectionTree")
+  /// Настройки своего раздела: { custom, folderId } для документов из папки,
+  /// { custom, url } для ссылки. Разбор — sectionSettings() в src/lib/sections.ts.
   settings  Json        @default("{}")
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt

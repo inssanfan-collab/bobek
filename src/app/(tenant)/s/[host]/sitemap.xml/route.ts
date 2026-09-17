@@ -13,7 +13,8 @@ export async function GET(
   const base = `https://${primaryHost}`;
 
   const [sections, posts, albums] = await Promise.all([
-    db.sections.findMany({ where: { isVisible: true }, orderBy: { position: 'asc' } }),
+    // Ссылка своей страницы не имеет — в карте сайта ей не место.
+    db.sections.findMany({ where: { isVisible: true, type: { not: 'LINK' } }, orderBy: { position: 'asc' } }),
     db.posts.findMany({
       where: { status: 'PUBLISHED', publishedAt: { lte: new Date() } },
       include: { section: true },

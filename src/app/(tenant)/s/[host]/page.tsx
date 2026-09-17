@@ -1,4 +1,5 @@
 import { publicSiteContext, localeFrom } from '@/server/tenant/context';
+import { siteMenu } from '@/server/tenant/menu';
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
@@ -23,7 +24,7 @@ export default async function TenantHome({
   const locale = localeFrom(search.lang);
 
   const [sections, news, announcements, albums, cover] = await Promise.all([
-    db.sections.findMany({ where: { isVisible: true, parentId: null }, orderBy: { position: 'asc' } }),
+    siteMenu(db),
     db.posts.findMany({
       where: { status: 'PUBLISHED', publishedAt: { lte: new Date() }, section: { type: 'NEWS' } },
       orderBy: [{ isPinned: 'desc' }, { publishedAt: 'desc' }],

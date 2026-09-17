@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
+import { siteMenu } from '@/server/tenant/menu';
+import { sectionSettings } from '@/lib/sections';
 import { SiteHeader } from '@/components/site/SiteHeader';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
@@ -49,16 +51,17 @@ export default async function DocumentViewPage({
   const { context, doc } = await load(host, id);
   const { profile, primaryHost } = context;
 
-  const sections = await context.db.sections.findMany({
-    where: { isVisible: true },
-    orderBy: { position: 'asc' },
-  });
+  const sections = await siteMenu(context.db);
 
   const title = pick(locale, doc.titleKk, doc.titleRu);
   const fileUrl = `https://${primaryHost}/api/media/${doc.mediaId}`;
   const viewer = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
 
-  const documentsSection = sections.find((s) => s.type === 'DOCUMENTS');
+  // Общий раздел документов, а не «документы из папки»: ссылка «ко всем
+  // документам» должна вести туда, где лежат все папки.
+  const documentsSection = sections
+    .flatMap((s) => [s, ...s.children])
+    .find((s) => s.type === 'DOCUMENTS' && !sectionSettings(s.settings).folderId);
 
   return (
     <>

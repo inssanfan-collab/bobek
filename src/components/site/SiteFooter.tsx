@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { sectionLink } from '@/lib/sections';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import { SocialLinks } from './SocialLinks';
@@ -59,13 +60,22 @@ export function SiteFooter({
         <div>
           <p className="mb-2 font-semibold">{T.sections[locale]}</p>
           <ul className="space-y-1.5 text-sm text-muted">
-            {sections.slice(0, 8).map((section) => (
-              <li key={section.id}>
-                <Link href={withLocale(`/${section.slug}`, locale)} className="hover:text-brand-ink">
-                  {pick(locale, section.titleKk, section.titleRu)}
-                </Link>
-              </li>
-            ))}
+            {sections.slice(0, 8).map((section) => {
+              const link = sectionLink(section, (path) => withLocale(path, locale));
+              return (
+                <li key={section.id}>
+                  {link.external ? (
+                    <a href={link.href} target="_blank" rel="noopener noreferrer" className="hover:text-brand-ink">
+                      {pick(locale, section.titleKk, section.titleRu)} ↗
+                    </a>
+                  ) : (
+                    <Link href={link.href} className="hover:text-brand-ink">
+                      {pick(locale, section.titleKk, section.titleRu)}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
