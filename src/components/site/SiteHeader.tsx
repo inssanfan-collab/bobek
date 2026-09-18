@@ -60,7 +60,7 @@ export function SiteHeader({
   const name = pick(locale, profile?.shortNameKk ?? profile?.nameKk, profile?.shortNameRu ?? profile?.nameRu);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
+    <header className="site-header sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
       <div className="container-page flex items-center gap-4 py-3">
         <Link href={withLocale('/', locale)} className="flex min-w-0 items-center gap-3">
           {profile?.logoMediaId ? (

@@ -11,7 +11,7 @@ import type { HomeProps } from '../types';
  * сада, которая едет вместе с прокруткой. Для садов, где родителю нужны
  * телефон и свободные места на любом экране, а не только в самом верху.
  */
-export function AlatauHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
+export function AlatauHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -70,7 +70,7 @@ export function AlatauHome({ profile, sections, news, announcements, albums, loc
             <p className="mt-4 text-sm text-muted">{profile.workHours}</p>
           ) : null}
         </div>
-        <ContactCard profile={profile} locale={locale} />
+        {showContacts ? <ContactCard profile={profile} locale={locale} /> : null}
       </aside>
     </div>
   );

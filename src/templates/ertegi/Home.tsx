@@ -7,7 +7,7 @@ import {
 import type { HomeProps } from '../types';
 
 /** Ертегі: мягкая волна вместо прямой границы, крупные скругления, тёплый тон. */
-export function ErtegiHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
+export function ErtegiHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -57,7 +57,7 @@ export function ErtegiHome({ profile, sections, news, announcements, albums, loc
         ) : null}
 
         <GalleryStrip albums={albums} locale={locale} />
-        <ContactCard profile={profile} locale={locale} />
+        {showContacts ? <ContactCard profile={profile} locale={locale} /> : null}
       </div>
     </>
   );

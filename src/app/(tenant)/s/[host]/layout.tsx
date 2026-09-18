@@ -63,7 +63,16 @@ export default async function TenantLayout({
   const theme = await activeTheme(tenant.themeCode);
 
   return (
-    <html lang="ru" data-palette={palette} data-pattern={pattern} data-theme={theme?.code} data-a11y="off">
+    <html
+      lang="ru"
+      data-palette={palette}
+      data-pattern={pattern}
+      data-theme={theme?.code}
+      // Шапка не закреплена — одно CSS-правило в globals.css. Атрибутом, а не
+      // пропом шапки: так настройка работает и в шаблонах, и в темах.
+      data-header={tenant.headerSticky ? undefined : 'static'}
+      data-a11y="off"
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

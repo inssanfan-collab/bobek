@@ -9,7 +9,7 @@ import type { HomeProps } from '@/templates/types';
  * с наплывом, дальше — новости в две колонки и разделы. Собрана из тех же
  * блоков, что и стандартные шаблоны: своя тут только раскладка.
  */
-export function ObrazecHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
+export function ObrazecHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -53,7 +53,7 @@ export function ObrazecHome({ profile, sections, news, announcements, albums, lo
         <SectionTiles sections={sections} locale={locale} />
 
         <GalleryStrip albums={albums} locale={locale} />
-        <ContactCard profile={profile} locale={locale} />
+        {showContacts ? <ContactCard profile={profile} locale={locale} /> : null}
       </div>
     </>
   );

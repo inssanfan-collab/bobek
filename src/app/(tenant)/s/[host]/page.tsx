@@ -4,6 +4,7 @@ import { ThemedFooter, ThemedHeader, ThemedHome } from '@/components/site/Themed
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { recordVisit } from '@/server/stats';
 import { coverPosition } from '@/lib/templates';
+import { homeTileSections } from '@/lib/sections';
 import { mediaUrl } from '@/components/site/blocks';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
@@ -57,7 +58,8 @@ export default async function TenantHome({
           themeCode={tenant.themeCode}
           templateCode={tenant.templateCode}
           profile={profile}
-          sections={sections}
+          sections={homeTileSections(sections, tenant)}
+          showContacts={tenant.homeShowContacts}
           news={news}
           announcements={announcements}
           albums={albums}

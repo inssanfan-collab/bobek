@@ -7,7 +7,7 @@ import {
 import type { HomeProps } from '../types';
 
 /** Классик: строгая шапка-баннер, новости колонкой, плитки разделов. */
-export function KlassikHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
+export function KlassikHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -47,7 +47,7 @@ export function KlassikHome({ profile, sections, news, announcements, albums, lo
 
       <SectionTiles sections={sections} locale={locale} />
       <GalleryStrip albums={albums} locale={locale} />
-      <ContactCard profile={profile} locale={locale} />
+      {showContacts ? <ContactCard profile={profile} locale={locale} /> : null}
     </div>
   );
 }

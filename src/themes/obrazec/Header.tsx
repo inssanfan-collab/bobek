@@ -11,7 +11,7 @@ export function ObrazecHeader({ profile, locale, homeHref, tools, nav }: ThemeHe
   const name = pick(locale, profile?.shortNameKk ?? profile?.nameKk, profile?.shortNameRu ?? profile?.nameRu);
 
   return (
-    <header className="obrazec-header sticky top-0 z-40">
+    <header className="site-header obrazec-header sticky top-0 z-40">
       <div className="obrazec-topbar">
         <div className="container-page flex items-center justify-between gap-3 py-1.5 text-sm">
           <span className="truncate opacity-80">{profile?.phone ?? ''}</span>

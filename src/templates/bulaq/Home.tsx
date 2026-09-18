@@ -11,7 +11,7 @@ import type { HomeProps } from '../types';
  * с самым важным. Расчёт на сады, у которых есть хорошая фотография здания
  * или площадки: она становится лицом сайта, а не полоской сверху.
  */
-export function BulaqHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
+export function BulaqHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
 
@@ -66,7 +66,7 @@ export function BulaqHome({ profile, sections, news, announcements, albums, loca
         ) : null}
 
         <GalleryStrip albums={albums} locale={locale} />
-        <ContactCard profile={profile} locale={locale} />
+        {showContacts ? <ContactCard profile={profile} locale={locale} /> : null}
       </div>
     </>
   );

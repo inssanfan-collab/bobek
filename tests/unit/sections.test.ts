@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  canDeleteSection, isValidSectionSlug, normalizeLinkUrl, sectionLink, sectionSettings,
+  canDeleteSection, homeTileSections, isValidSectionSlug, normalizeLinkUrl, sectionLink, sectionSettings,
 } from '@/lib/sections';
 
 describe('normalizeLinkUrl', () => {
@@ -75,5 +75,25 @@ describe('sectionSettings и sectionLink', () => {
       .toEqual({ href: 'https://darabala.kz/', external: true });
     expect(sectionLink({ type: 'PAGE', slug: 'logoped', settings: {} }, withLang))
       .toEqual({ href: '/logoped?lang=kk', external: false });
+  });
+});
+
+describe('homeTileSections', () => {
+  const menu = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
+
+  it('ничего не выбрано — все разделы, как раньше', () => {
+    expect(homeTileSections(menu, { homeShowSections: true, homeSectionIds: [] })).toEqual(menu);
+  });
+
+  it('выбранные — в порядке меню, а не выбора', () => {
+    expect(homeTileSections(menu, { homeShowSections: true, homeSectionIds: ['c', 'a'] })).toEqual([{ id: 'a' }, { id: 'c' }]);
+  });
+
+  it('удалённый или скрытый раздел из выбора просто пропадает', () => {
+    expect(homeTileSections(menu, { homeShowSections: true, homeSectionIds: ['b', 'gone'] })).toEqual([{ id: 'b' }]);
+  });
+
+  it('блок выключен — пусто', () => {
+    expect(homeTileSections(menu, { homeShowSections: false, homeSectionIds: [] })).toEqual([]);
   });
 });

@@ -7,7 +7,7 @@ import {
 import type { HomeProps } from '../types';
 
 /** Жұлдыз: обложка во весь экран, первая новость крупной карточкой. */
-export function ZhuldyzHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition }: HomeProps) {
+export function ZhuldyzHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
   const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
   const [lead, ...rest] = news;
@@ -50,7 +50,7 @@ export function ZhuldyzHome({ profile, sections, news, announcements, albums, lo
 
         <GalleryStrip albums={albums} locale={locale} />
         <SectionTiles sections={sections} locale={locale} />
-        <ContactCard profile={profile} locale={locale} />
+        {showContacts ? <ContactCard profile={profile} locale={locale} /> : null}
       </div>
     </>
   );

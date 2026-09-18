@@ -42,6 +42,23 @@ const T = {
   },
   logo: { kk: 'Логотип', ru: 'Логотип' },
   save: { kk: 'Сыртқы көріністі сақтау', ru: 'Сохранить внешний вид' },
+  layout: { kk: 'Тақырыпша мен басты бет', ru: 'Шапка и главная страница' },
+  headerSticky: { kk: 'Айналдырғанда тақырыпшаны жоғарыда бекіту', ru: 'Закреплять шапку при прокрутке' },
+  headerStickyHint: {
+    kk: 'Қосулы болса, мәзір мен байланыс батырмалары әрдайым көрінеді. Өшірулі болса, тақырыпша бетпен бірге жоғары кетеді — кішкентай экранда мәтінге көбірек орын қалады.',
+    ru: 'Включено — меню и кнопки всегда под рукой. Выключено — шапка уезжает вверх вместе со страницей, и на маленьком экране больше места для текста.',
+  },
+  homeShowSections: { kk: 'Басты бетте «Сайт бөлімдері» блогын көрсету', ru: 'Показывать на главной блок «Разделы сайта»' },
+  homeSections: { kk: 'Блоктағы бөлімдер', ru: 'Какие разделы показывать в блоке' },
+  homeSectionsHint: {
+    kk: 'Бәрі белгіленсе, кейін қосылған жаңа бөлімдер де блокқа өздігінен түседі. Мәзірге бұл әсер етпейді.',
+    ru: 'Если отмечены все, новые разделы тоже будут попадать в блок сами. На меню сайта это не влияет.',
+  },
+  homeShowContacts: { kk: 'Басты бетте «Байланыс» блогын көрсету', ru: 'Показывать на главной блок «Контакты»' },
+  homeShowContactsHint: {
+    kk: 'Байланыс бәрібір сайттың төменгі бөлігінде және «Байланыс» бөлімінде қалады.',
+    ru: 'Контакты всё равно остаются в подвале сайта и в разделе «Контакты».',
+  },
   customTheme: {
     kk: 'Сайтыңыз «%s» жеке дизайнымен көрсетіледі. Төмендегі шаблон мен түстер ол өшірілгенде ғана қолданылады. Логотип пен мұқаба жеке дизайнда да жұмыс істейді.',
     ru: 'Ваш сайт показывается в индивидуальном дизайне «%s». Шаблон и цвета ниже применятся, только если его отключить. Логотип и обложка работают и в индивидуальном дизайне.',
@@ -54,10 +71,19 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
   const locale = ctx.user.locale;
   const theme = findThemeInfo(ctx.themeCode);
 
-  const [profile, csrf] = await Promise.all([
+  const [profile, csrf, layout, rootSections] = await Promise.all([
     prisma.tenantProfile.findUnique({ where: { tenantId: ctx.tenantId } }),
     csrfToken(),
+    prisma.tenant.findUnique({
+      where: { id: ctx.tenantId },
+      select: { headerSticky: true, homeShowSections: true, homeSectionIds: true, homeShowContacts: true },
+    }),
+    ctx.db.sections.findMany({ where: { parentId: null, isVisible: true }, orderBy: { position: 'asc' } }),
   ]);
+  // Пустой выбор значит «все разделы» — так их и отмечаем.
+  const chosenSections = new Set(
+    layout?.homeSectionIds.length ? layout.homeSectionIds : rootSections.map((section) => section.id),
+  );
 
   if (!ctx.canManageSettings) {
     return (
@@ -199,6 +225,53 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
             <input id="logo" name="logo" type="file" accept="image/*" className="field" />
           </div>
         </section>
+
+        <fieldset className="card space-y-5 p-6">
+          <legend className="font-display text-lg font-bold">{T.layout[locale]}</legend>
+
+          <label className="flex items-start gap-3">
+            <input type="checkbox" name="headerSticky" defaultChecked={layout?.headerSticky ?? true} className="mt-1 h-4 w-4" />
+            <span>
+              <span className="block font-semibold">{T.headerSticky[locale]}</span>
+              <span className="block text-sm text-muted">{T.headerStickyHint[locale]}</span>
+            </span>
+          </label>
+
+          <div>
+            <label className="flex items-start gap-3">
+              <input type="checkbox" name="homeShowSections" defaultChecked={layout?.homeShowSections ?? true} className="mt-1 h-4 w-4" />
+              <span className="font-semibold">{T.homeShowSections[locale]}</span>
+            </label>
+            {rootSections.length > 0 ? (
+              <div className="ml-7 mt-3 rounded-2xl border border-line p-4">
+                <p className="text-sm font-semibold">{T.homeSections[locale]}</p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {rootSections.map((section) => (
+                    <label key={section.id} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        name="homeSectionIds"
+                        value={section.id}
+                        defaultChecked={chosenSections.has(section.id)}
+                        className="h-4 w-4"
+                      />
+                      {pick(locale, section.titleKk, section.titleRu)}
+                    </label>
+                  ))}
+                </div>
+                <p className="field-hint mt-2">{T.homeSectionsHint[locale]}</p>
+              </div>
+            ) : null}
+          </div>
+
+          <label className="flex items-start gap-3">
+            <input type="checkbox" name="homeShowContacts" defaultChecked={layout?.homeShowContacts ?? true} className="mt-1 h-4 w-4" />
+            <span>
+              <span className="block font-semibold">{T.homeShowContacts[locale]}</span>
+              <span className="block text-sm text-muted">{T.homeShowContactsHint[locale]}</span>
+            </span>
+          </label>
+        </fieldset>
 
         <SubmitButton>{T.save[locale]}</SubmitButton>
       </form>

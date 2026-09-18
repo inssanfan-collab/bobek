@@ -5,7 +5,6 @@ import type { AlbumWithCover, PostWithCover } from '@/components/site/blocks';
 /** Один и тот же набор данных получают все шаблоны — различается только вёрстка. */
 export type HomeProps = {
   profile: TenantProfile | null;
-  sections: Section[];
   news: PostWithCover[];
   announcements: PostWithCover[];
   albums: AlbumWithCover[];
@@ -13,4 +12,11 @@ export type HomeProps = {
   coverUrl: string | null;
   /** Готовое значение object-position: какую часть обложки оставить при кадрировании. */
   coverPosition: string;
+  /**
+   * Разделы для блока «Разделы сайта» — уже отобранные садом в «Оформлении».
+   * Пустой список — блока нет (SectionTiles сам ничего не рисует).
+   */
+  sections: Section[];
+  /** Показывать ли блок «Контакты» — выбор сада в «Оформлении». */
+  showContacts: boolean;
 };

@@ -956,8 +956,27 @@ export async function saveAppearance(formData: FormData) {
     logoMediaId = (await saveUpload(logo, ctx.tenantId)).id;
   }
 
+  // Шапка и главная. Разделы для блока принимаем только свои и только
+  // видимые корневые; отмечены все — храним пустой список, тогда и новые
+  // разделы попадут в блок сами.
+  const rootSections = await prisma.section.findMany({
+    where: { tenantId: ctx.tenantId, parentId: null, isVisible: true },
+    select: { id: true },
+  });
+  const rootIds = new Set(rootSections.map((section) => section.id));
+  const picked = formData.getAll('homeSectionIds').map(String).filter((id) => rootIds.has(id));
+  const homeSectionIds = picked.length === rootIds.size ? [] : [...new Set(picked)];
+  const layout = {
+    headerSticky: formData.get('headerSticky') === 'on',
+    // Сняли все галочки — это «блок не нужен», а не «все разделы»:
+    // пустой список в базе значит именно «все».
+    homeShowSections: formData.get('homeShowSections') === 'on' && (picked.length > 0 || rootIds.size === 0),
+    homeSectionIds,
+    homeShowContacts: formData.get('homeShowContacts') === 'on',
+  };
+
   await prisma.$transaction([
-    prisma.tenant.update({ where: { id: ctx.tenantId }, data: { templateCode, palette, pattern } }),
+    prisma.tenant.update({ where: { id: ctx.tenantId }, data: { templateCode, palette, pattern, ...layout } }),
     prisma.tenantProfile.update({
       where: { tenantId: ctx.tenantId },
       data: { coverMediaId, logoMediaId, coverFocus: isCoverFocus(coverFocus) ? coverFocus : 'center' },

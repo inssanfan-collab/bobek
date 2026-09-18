@@ -260,3 +260,19 @@ export function sectionLink(
   }
   return { href: withLang(`/${section.slug}`), external: false };
 }
+
+/**
+ * Разделы для блока «Разделы сайта» на главной — по выбору сада в «Оформлении».
+ * Порядок — как в меню. Пустой выбор значит «все»: так сад, который ничего
+ * не настраивал, видит блок как раньше, а новый раздел сразу попадает в блок.
+ * Выбранный раздел, который потом скрыли или удалили, просто не показывается.
+ */
+export function homeTileSections<T extends { id: string }>(
+  menu: T[],
+  options: { homeShowSections: boolean; homeSectionIds: string[] },
+): T[] {
+  if (!options.homeShowSections) return [];
+  if (options.homeSectionIds.length === 0) return menu;
+  const chosen = new Set(options.homeSectionIds);
+  return menu.filter((section) => chosen.has(section.id));
+}
