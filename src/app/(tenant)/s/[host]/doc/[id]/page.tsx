@@ -73,7 +73,7 @@ export default async function DocumentViewPage({
   return (
     <>
       <UrgentNotice profile={profile} locale={locale} />
-      <ThemedHeader themeCode={context.tenant.themeCode} profile={profile} sections={sections} locale={locale} pathname={`/doc/${id}`} />
+      <ThemedHeader themeCode={context.tenant.themeCode} layout={context.tenant.headerLayout} profile={profile} sections={sections} locale={locale} pathname={`/doc/${id}`} />
       <main id="main" className="container-page py-8">
         {documentsSection && !fromText ? (
           <Link

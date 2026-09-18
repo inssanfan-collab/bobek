@@ -25,7 +25,7 @@ import { geocodeAddress } from '@/server/maps/yandex';
 import { hashPassword, passwordProblem, verifyPassword } from '@/server/auth/password';
 import { destroyAllSessions, getCurrentUser } from '@/server/auth/session';
 import {
-  isCoverFocus, isFontPairCode, isHeaderStyleCode, isPaletteCode, isPatternCode, isShapeCode, isTemplateCode,
+  isCoverFocus, isFontPairCode, isHeaderLayoutCode, isHeaderStyleCode, isPaletteCode, isPatternCode, isShapeCode, isTemplateCode,
 } from '@/lib/templates';
 import { parseHex, toHex } from '@/lib/colors';
 import { env } from '@/lib/env';
@@ -949,7 +949,8 @@ export async function saveAppearance(formData: FormData) {
   const fontPair = str(formData, 'fontPair') || 'soft';
   const shape = str(formData, 'shape') || 'soft';
   const headerStyle = str(formData, 'headerStyle') || 'light';
-  if (!isFontPairCode(fontPair) || !isShapeCode(shape) || !isHeaderStyleCode(headerStyle)) {
+  const headerLayout = str(formData, 'headerLayout') || 'classic';
+  if (!isFontPairCode(fontPair) || !isShapeCode(shape) || !isHeaderStyleCode(headerStyle) || !isHeaderLayoutCode(headerLayout)) {
     throw new ActionError({ kk: 'Қаріп, пішін немесе тақырыпша түсі белгісіз', ru: 'Неизвестный шрифт, форма или цвет шапки' });
   }
   // «Свой цвет» храним всегда, когда он прислан, — чтобы, вернувшись к нему
@@ -994,7 +995,7 @@ export async function saveAppearance(formData: FormData) {
   await prisma.$transaction([
     prisma.tenant.update({
       where: { id: ctx.tenantId },
-      data: { templateCode, palette, pattern, fontPair, shape, headerStyle, ...(brandColor ? { brandColor } : {}), ...layout },
+      data: { templateCode, palette, pattern, fontPair, shape, headerStyle, headerLayout, ...(brandColor ? { brandColor } : {}), ...layout },
     }),
     prisma.tenantProfile.update({
       where: { tenantId: ctx.tenantId },
@@ -1005,6 +1006,83 @@ export async function saveAppearance(formData: FormData) {
   // Палитра и шаблон читаются из кэша резолвера — иначе изменения увидят через минуту.
   await invalidateTenantCacheById(ctx.tenantId);
   revalidatePath('/admin/appearance');
+}
+
+/**
+ * Тексты шапки и первого экрана главной. Всё необязательно; кнопка
+ * сохраняется, только если есть и текст, и ссылка — полкнопки на сайте
+ * хуже, чем никакой.
+ */
+export async function saveHomepage(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    const ctx = await gate(formData);
+    if (!ctx.canManageSettings) {
+      throw new ActionError({ kk: 'Басты бетті тек балабақша әкімшісі өзгерте алады', ru: 'Менять главную может только администратор сада' });
+    }
+
+    const text = (key: string, max: number) => {
+      const value = str(formData, key).replace(/\s+/g, ' ');
+      if (value.length > max) {
+        throw new ActionError({ kk: `Мәтін тым ұзын — ${max} таңбаға дейін`, ru: `Слишком длинный текст — до ${max} символов` });
+      }
+      return value || null;
+    };
+
+    const button = (textKk: string, textRu: string, urlKey: string, label: { kk: string; ru: string }) => {
+      const kk = text(textKk, 40);
+      const ru = text(textRu, 40);
+      const raw = str(formData, urlKey);
+      const url = raw ? normalizeLinkUrl(raw) : null;
+      if (raw && !url) {
+        throw new ActionError({ kk: `${label.kk}: сілтемені тексеріңіз`, ru: `${label.ru}: проверьте ссылку — например /contacts, tel:+7… или https://…` });
+      }
+      if ((kk || ru) && !url) {
+        throw new ActionError({ kk: `${label.kk}: қайда апаратынын көрсетіңіз`, ru: `${label.ru}: укажите, куда ведёт кнопка` });
+      }
+      if (url && !kk && !ru) {
+        throw new ActionError({ kk: `${label.kk}: батырма мәтінін жазыңыз`, ru: `${label.ru}: напишите текст кнопки` });
+      }
+      return { kk, ru, url };
+    };
+
+    const headerCta = button('headerCtaTextKk', 'headerCtaTextRu', 'headerCtaUrl', { kk: 'Тақырыпшадағы батырма', ru: 'Кнопка в шапке' });
+    const cta1 = button('heroCta1TextKk', 'heroCta1TextRu', 'heroCta1Url', { kk: 'Басты батырма', ru: 'Главная кнопка' });
+    const cta2 = button('heroCta2TextKk', 'heroCta2TextRu', 'heroCta2Url', { kk: 'Екінші батырма', ru: 'Вторая кнопка' });
+
+    await prisma.tenantProfile.update({
+      where: { tenantId: ctx.tenantId },
+      data: {
+        headerTaglineKk: text('headerTaglineKk', 60),
+        headerTaglineRu: text('headerTaglineRu', 60),
+        headerShowPhone: formData.get('headerShowPhone') === 'on',
+        headerCtaTextKk: headerCta.kk,
+        headerCtaTextRu: headerCta.ru,
+        headerCtaUrl: headerCta.url,
+        heroEyebrowKk: text('heroEyebrowKk', 60),
+        heroEyebrowRu: text('heroEyebrowRu', 60),
+        heroTitleKk: text('heroTitleKk', 90),
+        heroTitleRu: text('heroTitleRu', 90),
+        heroHighlightKk: text('heroHighlightKk', 60),
+        heroHighlightRu: text('heroHighlightRu', 60),
+        heroLeadKk: text('heroLeadKk', 300),
+        heroLeadRu: text('heroLeadRu', 300),
+        heroCta1TextKk: cta1.kk,
+        heroCta1TextRu: cta1.ru,
+        heroCta1Url: cta1.url,
+        heroCta2TextKk: cta2.kk,
+        heroCta2TextRu: cta2.ru,
+        heroCta2Url: cta2.url,
+      },
+    });
+
+    await audit(ctx.user, 'content.update', { tenantId: ctx.tenantId, entity: 'homepage' });
+    // Паспорт сада читается из кэша резолвера — иначе шапка обновится через минуту.
+    await invalidateTenantCacheById(ctx.tenantId);
+    revalidatePath('/admin/homepage');
+    return { redirectTo: await hostUrl('/admin/homepage?saved=1') };
+  } catch (error) {
+    return toActionError(error, (await getCurrentUser())?.locale);
+  }
 }
 
 export async function saveProfile(formData: FormData) {

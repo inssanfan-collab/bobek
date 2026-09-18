@@ -7,6 +7,7 @@ import { ThemeBoundary } from '@/themes/ThemeBoundary';
 import { activeTheme } from '@/server/tenant/theme';
 import { renderThemePart } from '@/server/themes/render';
 import { withLocale, type Locale } from '@/lib/i18n';
+import { isHeaderLayoutCode } from '@/lib/templates';
 import type { HomeProps } from '@/templates/types';
 import type { MenuSection } from '@/themes/types';
 import type { TenantProfile } from '@prisma/client';
@@ -35,14 +36,16 @@ async function themed(
 
 type HeaderProps = {
   themeCode: string | null;
+  /** Вид стандартной шапки; у индивидуальной темы шапка своя. */
+  layout?: string;
   profile: TenantProfile | null;
   sections: MenuSection[];
   locale: Locale;
   pathname: string;
 };
 
-export async function ThemedHeader({ themeCode, ...props }: HeaderProps) {
-  const standard = <SiteHeader {...props} />;
+export async function ThemedHeader({ themeCode, layout, ...props }: HeaderProps) {
+  const standard = <SiteHeader {...props} layout={layout && isHeaderLayoutCode(layout) ? layout : 'classic'} />;
   const theme = await activeTheme(themeCode);
   if (!theme?.Header) return standard;
 

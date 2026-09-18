@@ -62,7 +62,7 @@ export default async function SearchPage({
   return (
     <>
       <UrgentNotice profile={profile} locale={locale} />
-      <ThemedHeader themeCode={tenant.themeCode} profile={profile} sections={menu} locale={locale} pathname="/search" />
+      <ThemedHeader themeCode={tenant.themeCode} layout={tenant.headerLayout} profile={profile} sections={menu} locale={locale} pathname="/search" />
 
       <main id="main" className="container-page max-w-3xl py-8">
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{T.title[locale]}</h1>

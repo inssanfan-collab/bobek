@@ -1,7 +1,7 @@
-import { pick } from '@/lib/i18n';
 import {
   AnnouncementList, ContactCard, GalleryStrip, NewsCard, PlacesBadge, SectionTiles, T,
 } from '@/components/site/blocks';
+import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import type { HomeProps } from '@/templates/types';
 
 /**
@@ -9,18 +9,17 @@ import type { HomeProps } from '@/templates/types';
  * с наплывом, дальше — новости в две колонки и разделы. Собрана из тех же
  * блоков, что и стандартные шаблоны: своя тут только раскладка.
  */
-export function ObrazecHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
-  const name = pick(locale, profile?.nameKk, profile?.nameRu);
-  const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
+export function ObrazecHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
 
   return (
     <>
       <section className="obrazec-hero">
         <div className="container-page py-12 text-center sm:py-16">
-          <h1 className="mx-auto max-w-3xl font-display text-3xl font-extrabold sm:text-5xl">{name}</h1>
-          {about ? <p className="mx-auto mt-4 max-w-2xl text-lg opacity-90">{about}</p> : null}
-          <div className="mt-5 flex justify-center">
+          <HeroTitle hero={hero} tone="light" className="mx-auto max-w-3xl font-display text-3xl font-extrabold sm:text-5xl" />
+          {hero.lead ? <p className="mx-auto mt-4 max-w-2xl text-lg opacity-90">{hero.lead}</p> : null}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <PlacesBadge profile={profile} locale={locale} />
+            <HeroButtons hero={hero} tone="light" />
           </div>
         </div>
       </section>

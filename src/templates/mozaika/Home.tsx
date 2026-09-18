@@ -5,6 +5,7 @@ import { formatDate } from '@/lib/labels';
 import {
   AnnouncementList, ContactCard, GalleryStrip, mediaUrl, NewsCard, PlacesBadge, SectionTiles, T,
 } from '@/components/site/blocks';
+import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import type { HomeProps } from '../types';
 
 const M = {
@@ -18,9 +19,8 @@ const M = {
  * с названием, цветная — о саде, светлая — телефон и режим, две — свежие
  * новости. Ниже — остальное, как у всех шаблонов.
  */
-export function MozaikaHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
+export function MozaikaHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
   const name = pick(locale, profile?.nameKk, profile?.nameRu);
-  const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
   const [first, second, ...rest] = news;
   const phone = profile?.phone;
 
@@ -36,16 +36,17 @@ export function MozaikaHome({ profile, sections, news, announcements, albums, lo
           )}
           <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/65 via-black/20 to-transparent" aria-hidden />
           <div className="flex h-full min-h-[18rem] flex-col justify-end p-6 text-white sm:p-8">
-            <h1 className="font-display text-3xl font-extrabold drop-shadow sm:text-4xl">{name}</h1>
-            <div className="mt-3">
+            <HeroTitle hero={hero} tone="light" className="font-display text-3xl font-extrabold drop-shadow sm:text-4xl" />
+            <div className="mt-3 flex flex-wrap items-center gap-3">
               <PlacesBadge profile={profile} locale={locale} />
+              <HeroButtons hero={hero} tone="light" />
             </div>
           </div>
         </div>
 
         <div className="flex flex-col justify-between rounded-3xl bg-brand p-6 text-white">
           <p className="text-sm font-semibold uppercase tracking-wider text-white/80">{M.about[locale]}</p>
-          <p className="mt-3 line-clamp-6 text-base leading-relaxed">{about || name}</p>
+          <p className="mt-3 line-clamp-6 text-base leading-relaxed">{hero.lead || name}</p>
         </div>
 
         <div className="flex flex-col justify-between rounded-3xl border border-line bg-brand-soft p-6 text-brand-ink">

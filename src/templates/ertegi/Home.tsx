@@ -1,15 +1,13 @@
 import Link from 'next/link';
-import { pick } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import {
   AnnouncementList, ContactCard, GalleryStrip, NewsCard, PlacesBadge, SectionTiles, T,
 } from '@/components/site/blocks';
+import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import type { HomeProps } from '../types';
 
 /** Ертегі: мягкая волна вместо прямой границы, крупные скругления, тёплый тон. */
-export function ErtegiHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
-  const name = pick(locale, profile?.nameKk, profile?.nameRu);
-  const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
+export function ErtegiHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
 
   return (
     <>
@@ -17,15 +15,17 @@ export function ErtegiHome({ profile, sections, news, announcements, albums, loc
         <div className="decor pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-brand/20 blur-2xl" aria-hidden />
         <div className="container-page relative grid gap-8 py-12 lg:grid-cols-[1.1fr_0.9fr] lg:py-16">
           <div>
-            <h1 className="font-display text-4xl font-extrabold text-brand-ink sm:text-5xl">{name}</h1>
-            {about ? <p className="mt-4 max-w-xl text-lg text-brand-ink/80">{about}</p> : null}
+            <HeroTitle hero={hero} tone="plain" className="font-display text-4xl font-extrabold text-brand-ink sm:text-5xl" />
+            {hero.lead ? <p className="mt-4 max-w-xl text-lg text-brand-ink/80">{hero.lead}</p> : null}
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <PlacesBadge profile={profile} locale={locale} />
-              {profile?.phone ? (
-                <a href={`tel:${profile.phone.replace(/\s/g, '')}`} className="btn-primary">
-                  {profile.phone}
-                </a>
-              ) : null}
+              <HeroButtons hero={hero} tone="plain">
+                {profile?.phone ? (
+                  <a href={`tel:${profile.phone.replace(/\s/g, '')}`} className="btn-primary">
+                    {profile.phone}
+                  </a>
+                ) : null}
+              </HeroButtons>
             </div>
           </div>
           {coverUrl ? (

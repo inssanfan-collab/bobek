@@ -5,6 +5,7 @@ import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { recordVisit } from '@/server/stats';
 import { coverPosition } from '@/lib/templates';
 import { homeTileSections } from '@/lib/sections';
+import { heroContent } from '@/lib/hero';
 import { mediaUrl } from '@/components/site/blocks';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
@@ -52,7 +53,7 @@ export default async function TenantHome({
   return (
     <>
       <UrgentNotice profile={profile} locale={locale} />
-      <ThemedHeader themeCode={tenant.themeCode} profile={profile} sections={sections} locale={locale} pathname="/" />
+      <ThemedHeader themeCode={tenant.themeCode} layout={tenant.headerLayout} profile={profile} sections={sections} locale={locale} pathname="/" />
       <main id="main">
         <ThemedHome
           themeCode={tenant.themeCode}
@@ -60,6 +61,7 @@ export default async function TenantHome({
           profile={profile}
           sections={homeTileSections(sections, tenant)}
           showContacts={tenant.homeShowContacts}
+          hero={heroContent(profile, locale)}
           news={news}
           announcements={announcements}
           albums={albums}

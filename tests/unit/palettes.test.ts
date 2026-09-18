@@ -3,7 +3,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { contrast, derivePalette, MIN_CONTRAST, parseHex } from '@/lib/colors';
 import {
-  FONT_PAIRS, HEADER_STYLES, isFontPairCode, isHeaderStyleCode, isPaletteCode, isPatternCode, isShapeCode,
+  FONT_PAIRS, HEADER_STYLES, isFontPairCode, isHeaderLayoutCode, isHeaderStyleCode, isPaletteCode, isPatternCode, isShapeCode,
   isTemplateCode, PALETTES, PATTERNS, PRESETS, SHAPES,
 } from '@/lib/templates';
 
@@ -89,6 +89,7 @@ describe('варианты описаны и в коде, и в CSS', () => {
       expect(isFontPairCode(preset.fontPair), preset.code).toBe(true);
       expect(isShapeCode(preset.shape), preset.code).toBe(true);
       expect(isHeaderStyleCode(preset.headerStyle), preset.code).toBe(true);
+      expect(isHeaderLayoutCode(preset.headerLayout), preset.code).toBe(true);
     }
   });
 });

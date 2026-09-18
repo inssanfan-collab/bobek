@@ -52,6 +52,8 @@ model Tenant {
   shape            String       @default("soft")
   /// Шапка: light | brand | dark.
   headerStyle      String       @default("light")
+  /// Вид шапки: classic | floating | center.
+  headerLayout     String       @default("classic")
   /// Узор фона: отдельно от палитры, чтобы одна и та же гамма давала разные сайты.
   pattern          String       @default("none")
   /// Тонкая настройка темы поверх шаблона: шрифт, обложка, скругления.
@@ -129,6 +131,32 @@ model TenantProfile {
   youtube   String?
   facebook  String?
   telegram  String?
+
+  /// Шапка сайта: подпись под названием (вместо района) и кнопка действия.
+  headerTaglineKk String?
+  headerTaglineRu String?
+  headerCtaTextKk String?
+  headerCtaTextRu String?
+  headerCtaUrl    String?
+  /// Телефон и часы работы в шапке.
+  headerShowPhone Boolean @default(false)
+
+  /// Первый экран главной: плашка, заголовок с выделенной частью, описание
+  /// и две кнопки. Пусто — как раньше: название сада и текст «О саде».
+  heroEyebrowKk   String?
+  heroEyebrowRu   String?
+  heroTitleKk     String?
+  heroTitleRu     String?
+  heroHighlightKk String?
+  heroHighlightRu String?
+  heroLeadKk      String?
+  heroLeadRu      String?
+  heroCta1TextKk  String?
+  heroCta1TextRu  String?
+  heroCta1Url     String?
+  heroCta2TextKk  String?
+  heroCta2TextRu  String?
+  heroCta2Url     String?
 
   /// Срочное объявление: карантин, изменение режима, отмена занятий.
   /// Показывается полосой на всех страницах сайта, пока не истечёт срок.

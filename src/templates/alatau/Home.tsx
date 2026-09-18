@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { pick } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import {
   AnnouncementList, ContactCard, GalleryStrip, NewsCard, PlacesBadge, SectionTiles, T,
 } from '@/components/site/blocks';
+import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import type { HomeProps } from '../types';
 
 /**
@@ -11,16 +11,19 @@ import type { HomeProps } from '../types';
  * сада, которая едет вместе с прокруткой. Для садов, где родителю нужны
  * телефон и свободные места на любом экране, а не только в самом верху.
  */
-export function AlatauHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
-  const name = pick(locale, profile?.nameKk, profile?.nameRu);
-  const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
+export function AlatauHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
 
   return (
     <div className="container-page grid gap-10 py-10 lg:grid-cols-[1fr_20rem] lg:items-start">
       <div className="space-y-10">
         <section>
-          <h1 className="font-display text-4xl font-extrabold sm:text-5xl">{name}</h1>
-          {about ? <p className="mt-4 max-w-2xl text-lg text-muted">{about}</p> : null}
+          <HeroTitle hero={hero} tone="plain" className="font-display text-4xl font-extrabold sm:text-5xl" />
+          {hero.lead ? <p className="mt-4 max-w-2xl text-lg text-muted">{hero.lead}</p> : null}
+          {hero.buttons.length > 0 ? (
+            <div className="mt-5 flex flex-wrap gap-3">
+              <HeroButtons hero={hero} tone="plain" />
+            </div>
+          ) : null}
           {coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={coverUrl} alt="" style={{ objectPosition: coverPosition }} className="mt-6 h-64 w-full rounded-3xl object-cover shadow-soft sm:h-80" />

@@ -1,15 +1,13 @@
 import Link from 'next/link';
-import { pick } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import {
   AnnouncementList, ContactCard, GalleryStrip, NewsCard, PlacesBadge, SectionTiles, T,
 } from '@/components/site/blocks';
+import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import type { HomeProps } from '../types';
 
 /** Жұлдыз: обложка во весь экран, первая новость крупной карточкой. */
-export function ZhuldyzHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
-  const name = pick(locale, profile?.nameKk, profile?.nameRu);
-  const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
+export function ZhuldyzHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
   const [lead, ...rest] = news;
 
   return (
@@ -24,10 +22,11 @@ export function ZhuldyzHome({ profile, sections, news, announcements, albums, lo
         <div className="absolute inset-0 -z-10 bg-black/45" aria-hidden />
 
         <div className="container-page flex min-h-[22rem] flex-col justify-end py-12 text-white sm:min-h-[28rem]">
-          <h1 className="max-w-3xl font-display text-4xl font-extrabold drop-shadow sm:text-5xl">{name}</h1>
-          {about ? <p className="mt-4 max-w-2xl text-lg text-white/90 drop-shadow">{about}</p> : null}
-          <div className="mt-5 flex flex-wrap gap-2">
+          <HeroTitle hero={hero} tone="light" className="max-w-3xl font-display text-4xl font-extrabold drop-shadow sm:text-5xl" />
+          {hero.lead ? <p className="mt-4 max-w-2xl text-lg text-white/90 drop-shadow">{hero.lead}</p> : null}
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             <PlacesBadge profile={profile} locale={locale} />
+            <HeroButtons hero={hero} tone="light" />
           </div>
         </div>
       </section>

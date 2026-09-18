@@ -85,7 +85,7 @@ export default async function SectionPage({
   return (
     <>
       <UrgentNotice profile={profile} locale={locale} />
-      <ThemedHeader themeCode={context.tenant.themeCode} profile={profile} sections={menu} locale={locale} pathname={basePath} />
+      <ThemedHeader themeCode={context.tenant.themeCode} layout={context.tenant.headerLayout} profile={profile} sections={menu} locale={locale} pathname={basePath} />
       <main id="main" className="container-page py-8">
         {parent ? (
           <Link href={withLocale(`/${parent.slug}`, locale)} className="text-sm font-semibold text-brand">

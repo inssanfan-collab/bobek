@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { pick } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import {
   AnnouncementList, ContactCard, GalleryStrip, NewsCard, PlacesBadge, SectionTiles, T,
 } from '@/components/site/blocks';
+import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import type { HomeProps } from '../types';
 
 /**
@@ -11,21 +11,22 @@ import type { HomeProps } from '../types';
  * Спокойный вариант для садов, которым яркая вёрстка не подходит: узор
  * фона на нём читается лучше всего, потому что ничем не закрыт.
  */
-export function KagazHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
-  const name = pick(locale, profile?.nameKk, profile?.nameRu);
-  const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
+export function KagazHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
 
   return (
     <div className="container-page max-w-5xl space-y-12 py-12">
       <section className="border-b-2 border-ink pb-8">
         <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-brand-ink">
-          {profile?.district ?? T.sections[locale]}
+          {hero.eyebrow || profile?.district || T.sections[locale]}
         </p>
-        <h1 className="mt-3 font-display text-4xl font-extrabold leading-tight sm:text-5xl">{name}</h1>
-        {about ? <p className="mt-5 max-w-3xl text-lg leading-relaxed text-muted">{about}</p> : null}
+        <div className="mt-3">
+          <HeroTitle hero={hero} tone="plain" withEyebrow={false} className="font-display text-4xl font-extrabold leading-tight sm:text-5xl" />
+        </div>
+        {hero.lead ? <p className="mt-5 max-w-3xl text-lg leading-relaxed text-muted">{hero.lead}</p> : null}
 
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <PlacesBadge profile={profile} locale={locale} />
+          <HeroButtons hero={hero} tone="plain">
           {profile?.phone ? (
             <a
               href={`tel:${profile.phone.replace(/\s/g, '')}`}
@@ -34,6 +35,7 @@ export function KagazHome({ profile, sections, news, announcements, albums, loca
               {profile.phone}
             </a>
           ) : null}
+          </HeroButtons>
         </div>
       </section>
 

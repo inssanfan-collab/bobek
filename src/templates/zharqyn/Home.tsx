@@ -6,6 +6,7 @@ import { SectionIcon } from '@/components/site/SectionIcon';
 import {
   AnnouncementList, ContactCard, GalleryStrip, NewsCard, PlacesBadge, T,
 } from '@/components/site/blocks';
+import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import type { HomeProps } from '../types';
 
 /**
@@ -15,9 +16,7 @@ import type { HomeProps } from '../types';
  *
  * Кружки помечены классом decor — в версии для слабовидящих они скрываются.
  */
-export function ZharqynHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
-  const name = pick(locale, profile?.nameKk, profile?.nameRu);
-  const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
+export function ZharqynHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
 
   return (
     <>
@@ -28,10 +27,11 @@ export function ZharqynHome({ profile, sections, news, announcements, albums, lo
 
         <div className="container-page grid items-center gap-8 pb-24 pt-12 lg:grid-cols-[1.2fr_1fr]">
           <div>
-            <h1 className="font-display text-4xl font-extrabold leading-tight sm:text-5xl">{name}</h1>
-            {about ? <p className="mt-4 max-w-xl text-lg text-white/90">{about}</p> : null}
-            <div className="mt-5">
+            <HeroTitle hero={hero} tone="light" className="font-display text-4xl font-extrabold leading-tight sm:text-5xl" />
+            {hero.lead ? <p className="mt-4 max-w-xl text-lg text-white/90">{hero.lead}</p> : null}
+            <div className="mt-5 flex flex-wrap items-center gap-3">
               <PlacesBadge profile={profile} locale={locale} />
+              <HeroButtons hero={hero} tone="light" />
             </div>
           </div>
           {coverUrl ? (

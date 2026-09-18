@@ -28,6 +28,7 @@ export function PresetPicker({ locale }: { locale: Locale }) {
       fontPair: preset.fontPair,
       shape: preset.shape,
       headerStyle: preset.headerStyle,
+      headerLayout: preset.headerLayout,
     };
     for (const [name, value] of Object.entries(values)) {
       const input = form.querySelector<HTMLInputElement>(`input[type="radio"][name="${name}"][value="${value}"]`);

@@ -8,7 +8,7 @@ import { Alert } from '@/components/ui/Alert';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import type { CSSProperties } from 'react';
 import {
-  COVER_FOCUS, CUSTOM_PALETTE, FONT_PAIRS, HEADER_STYLES, PALETTES, PATTERNS, SHAPES, TEMPLATES, type ShapeCode,
+  COVER_FOCUS, CUSTOM_PALETTE, FONT_PAIRS, HEADER_LAYOUTS, HEADER_STYLES, PALETTES, PATTERNS, SHAPES, TEMPLATES, type ShapeCode,
 } from '@/lib/templates';
 import { derivePalette } from '@/lib/colors';
 import { PresetPicker } from './PresetPicker';
@@ -82,6 +82,11 @@ const T = {
   fontSampleText: { kk: 'Әже, ұлым, қызым — бәрі осында.', ru: 'Әже, ұлым, қызым — бәрі осында.' },
   shape: { kk: 'Пішін', ru: 'Форма элементов' },
   headerStyle: { kk: 'Тақырыпша түсі', ru: 'Цвет шапки' },
+  headerLayout: { kk: 'Тақырыпша түрі', ru: 'Вид шапки' },
+  headerTexts: {
+    kk: 'Тақырыпшадағы жазу, батырма мен телефон — «Басты бет» бөлімінде.',
+    ru: 'Подпись, кнопка и телефон в шапке — в разделе «Главная страница».',
+  },
   customTheme: {
     kk: 'Сайтыңыз «%s» жеке дизайнымен көрсетіледі. Төмендегі шаблон мен түстер ол өшірілгенде ғана қолданылады. Логотип пен мұқаба жеке дизайнда да жұмыс істейді.',
     ru: 'Ваш сайт показывается в индивидуальном дизайне «%s». Шаблон и цвета ниже применятся, только если его отключить. Логотип и обложка работают и в индивидуальном дизайне.',
@@ -109,7 +114,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
       where: { id: ctx.tenantId },
       select: {
         headerSticky: true, homeShowSections: true, homeSectionIds: true, homeShowContacts: true,
-        brandColor: true, fontPair: true, shape: true, headerStyle: true,
+        brandColor: true, fontPair: true, shape: true, headerStyle: true, headerLayout: true,
       },
     }),
     ctx.db.sections.findMany({ where: { parentId: null, isVisible: true }, orderBy: { position: 'asc' } }),
@@ -270,6 +275,40 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
                 />
                 <span className="mt-3 block font-semibold">{pick(locale, shape.nameKk, shape.nameRu)}</span>
                 <span className="block text-xs text-muted">{pick(locale, shape.hintKk, shape.hintRu)}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="card p-6">
+          <legend className="font-display text-lg font-bold">{T.headerLayout[locale]}</legend>
+          <p className="mt-1 text-sm text-muted">{T.headerTexts[locale]}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {HEADER_LAYOUTS.map((item) => (
+              <label
+                key={item.code}
+                className="cursor-pointer rounded-2xl border border-line p-4 transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
+              >
+                <input type="radio" name="headerLayout" value={item.code} defaultChecked={(layout?.headerLayout ?? 'classic') === item.code} className="sr-only" />
+                {/* Мини-схема шапки: где название, где меню, где кнопка. */}
+                <span aria-hidden className={`block rounded-xl bg-surface p-2 ${item.code === 'floating' ? 'ring-1 ring-line' : ''}`}>
+                  <span
+                    className={`flex flex-col gap-1.5 p-2 ${
+                      item.code === 'floating' ? 'rounded-lg bg-card shadow-soft' : 'border-b border-line'
+                    } ${item.code === 'center' ? 'items-center' : ''}`}
+                  >
+                    <span className={`flex w-full items-center gap-1.5 ${item.code === 'center' ? 'justify-center' : ''}`}>
+                      <span className="h-3 w-3 rounded-full bg-brand" />
+                      <span className="h-1.5 w-12 rounded-full bg-ink/60" />
+                      {item.code === 'center' ? null : <span className="ml-auto h-2.5 w-8 rounded-full bg-brand/70" />}
+                    </span>
+                    <span className={`flex w-full gap-1 ${item.code === 'center' ? 'justify-center' : ''}`}>
+                      {[1, 2, 3, 4].map((i) => <span key={i} className="h-1 w-5 rounded-full bg-muted/50" />)}
+                    </span>
+                  </span>
+                </span>
+                <span className="mt-2 block font-semibold">{pick(locale, item.nameKk, item.nameRu)}</span>
+                <span className="block text-xs text-muted">{pick(locale, item.hintKk, item.hintRu)}</span>
               </label>
             ))}
           </div>

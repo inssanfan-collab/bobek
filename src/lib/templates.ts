@@ -178,6 +178,19 @@ export function isShapeCode(value: string): value is ShapeCode {
   return SHAPES.some((s) => s.code === value);
 }
 
+/** Вид шапки: раскладка частей (SiteHeader). Цвет — отдельно, HEADER_STYLES. */
+export type HeaderLayoutCode = 'classic' | 'floating' | 'center';
+
+export const HEADER_LAYOUTS: { code: HeaderLayoutCode; nameRu: string; nameKk: string; hintRu: string; hintKk: string }[] = [
+  { code: 'classic', nameRu: 'Классическая', nameKk: 'Классикалық', hintRu: 'Название слева, меню строкой ниже', hintKk: 'Атауы солда, мәзір төменгі жолда' },
+  { code: 'floating', nameRu: 'Плавающая', nameKk: 'Қалқымалы', hintRu: 'Скруглённая плашка с тенью и отступами', hintKk: 'Көлеңкелі, шеттерден шегінген дөңгелек тақта' },
+  { code: 'center', nameRu: 'По центру', nameKk: 'Ортасында', hintRu: 'Логотип и название по центру', hintKk: 'Логотип пен атауы ортасында' },
+];
+
+export function isHeaderLayoutCode(value: string): value is HeaderLayoutCode {
+  return HEADER_LAYOUTS.some((h) => h.code === value);
+}
+
 /** Шапка сайта: светлая, в цвет палитры или тёмная. CSS — [data-header-style]. */
 export type HeaderStyleCode = 'light' | 'brand' | 'dark';
 
@@ -259,15 +272,16 @@ export const PRESETS: {
   fontPair: FontPairCode;
   shape: ShapeCode;
   headerStyle: HeaderStyleCode;
+  headerLayout: HeaderLayoutCode;
 }[] = [
-  { code: 'sunny', nameRu: 'Солнечный', nameKk: 'Шуақты', templateCode: 'zharqyn', palette: 'mandarin', pattern: 'clouds', fontPair: 'friendly', shape: 'round', headerStyle: 'light' },
-  { code: 'fairy', nameRu: 'Сказка', nameKk: 'Ертегі', templateCode: 'ertegi', palette: 'lavender', pattern: 'stars', fontPair: 'hand', shape: 'round', headerStyle: 'brand' },
-  { code: 'state', nameRu: 'Государственный', nameKk: 'Мемлекеттік', templateCode: 'klassik', palette: 'sea', pattern: 'none', fontPair: 'official', shape: 'sharp', headerStyle: 'brand' },
-  { code: 'nauryz', nameRu: 'Наурыз', nameKk: 'Наурыз', templateCode: 'bulaq', palette: 'nauryz', pattern: 'oyu', fontPair: 'classic', shape: 'soft', headerStyle: 'dark' },
-  { code: 'eco', nameRu: 'Эко', nameKk: 'Эко', templateCode: 'alatau', palette: 'sage', pattern: 'leaves', fontPair: 'fresh', shape: 'soft', headerStyle: 'light' },
-  { code: 'book', nameRu: 'Детская книжка', nameKk: 'Балалар кітабы', templateCode: 'mozaika', palette: 'tulip', pattern: 'dots', fontPair: 'round', shape: 'outline', headerStyle: 'light' },
-  { code: 'night', nameRu: 'Ночное небо', nameKk: 'Түнгі аспан', templateCode: 'zhuldyz', palette: 'night', pattern: 'stars', fontPair: 'modern', shape: 'round', headerStyle: 'dark' },
-  { code: 'notebook', nameRu: 'Тетрадка', nameKk: 'Дәптер', templateCode: 'kagaz', palette: 'cocoa', pattern: 'grid', fontPair: 'script', shape: 'sharp', headerStyle: 'light' },
+  { code: 'sunny', nameRu: 'Солнечный', nameKk: 'Шуақты', templateCode: 'zharqyn', palette: 'mandarin', pattern: 'clouds', fontPair: 'friendly', shape: 'round', headerStyle: 'light', headerLayout: 'floating' },
+  { code: 'fairy', nameRu: 'Сказка', nameKk: 'Ертегі', templateCode: 'ertegi', palette: 'lavender', pattern: 'stars', fontPair: 'hand', shape: 'round', headerStyle: 'brand', headerLayout: 'center' },
+  { code: 'state', nameRu: 'Государственный', nameKk: 'Мемлекеттік', templateCode: 'klassik', palette: 'sea', pattern: 'none', fontPair: 'official', shape: 'sharp', headerStyle: 'brand', headerLayout: 'classic' },
+  { code: 'nauryz', nameRu: 'Наурыз', nameKk: 'Наурыз', templateCode: 'bulaq', palette: 'nauryz', pattern: 'oyu', fontPair: 'classic', shape: 'soft', headerStyle: 'dark', headerLayout: 'center' },
+  { code: 'eco', nameRu: 'Эко', nameKk: 'Эко', templateCode: 'alatau', palette: 'sage', pattern: 'leaves', fontPair: 'fresh', shape: 'soft', headerStyle: 'light', headerLayout: 'floating' },
+  { code: 'book', nameRu: 'Детская книжка', nameKk: 'Балалар кітабы', templateCode: 'mozaika', palette: 'tulip', pattern: 'dots', fontPair: 'round', shape: 'outline', headerStyle: 'light', headerLayout: 'floating' },
+  { code: 'night', nameRu: 'Ночное небо', nameKk: 'Түнгі аспан', templateCode: 'zhuldyz', palette: 'night', pattern: 'stars', fontPair: 'modern', shape: 'round', headerStyle: 'dark', headerLayout: 'floating' },
+  { code: 'notebook', nameRu: 'Тетрадка', nameKk: 'Дәптер', templateCode: 'kagaz', palette: 'cocoa', pattern: 'grid', fontPair: 'script', shape: 'sharp', headerStyle: 'light', headerLayout: 'classic' },
 ];
 
 export function isPatternCode(value: string): value is PatternCode {

@@ -424,6 +424,10 @@
   color: rgb(255 255 255);
   border-bottom-color: transparent;
 }
+/* Подпись под названием тёмная по умолчанию — на цветной и тёмной шапке светлая. */
+:root:not([data-a11y='on']):is([data-header-style='brand'], [data-header-style='dark']) .site-header .site-tagline {
+  color: rgb(255 255 255 / 0.85);
+}
 :root:not([data-a11y='on'])[data-header-style='dark'] .site-header {
   --surface: 28 31 38;
   --card: 36 40 49;
@@ -481,6 +485,34 @@
 
 [data-a11y='on'] body::before {
   display: none;
+}
+
+/*
+ * Выделенная часть заголовка первого экрана (src/components/site/Hero.tsx).
+ * На светлом фоне — перелив из основного цвета в дополнительный; конец
+ * перелива притемнён к цвету текста: светлые акценты (золото «Наурыза»)
+ * иначе не читались бы на белом. На фото и цветной полосе — белый текст
+ * с подчёркиванием дополнительным цветом.
+ */
+.hero-highlight {
+  display: inline-block;
+  padding-bottom: 0.08em;
+  background-image: linear-gradient(90deg, rgb(var(--brand)), color-mix(in srgb, rgb(var(--accent)) 70%, rgb(var(--ink))));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-highlight-light {
+  text-decoration-line: underline;
+  text-decoration-color: rgb(var(--accent));
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.16em;
+  text-decoration-skip-ink: none;
+}
+[data-a11y='on'] :is(.hero-highlight, .hero-highlight-light) {
+  background: none;
+  color: inherit;
+  text-decoration: none;
 }
 
 /* В версии для слабовидящих фон обязан быть чистым: узор мешает читать. */

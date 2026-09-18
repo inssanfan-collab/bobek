@@ -1,15 +1,13 @@
 import Link from 'next/link';
-import { pick } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import {
   AnnouncementList, ContactCard, GalleryStrip, NewsCard, PlacesBadge, SectionTiles, T,
 } from '@/components/site/blocks';
+import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import type { HomeProps } from '../types';
 
 /** Классик: строгая шапка-баннер, новости колонкой, плитки разделов. */
-export function KlassikHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts }: HomeProps) {
-  const name = pick(locale, profile?.nameKk, profile?.nameRu);
-  const about = pick(locale, profile?.aboutKk, profile?.aboutRu);
+export function KlassikHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
 
   return (
     <div className="container-page space-y-12 py-8">
@@ -21,13 +19,18 @@ export function KlassikHome({ profile, sections, news, announcements, albums, lo
           <div className="h-56 bg-gradient-to-r from-brand to-accent sm:h-72" aria-hidden />
         )}
         <div className="p-6 sm:p-8">
-          <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{name}</h1>
-          {about ? <p className="mt-3 max-w-3xl text-muted">{about}</p> : null}
+          <HeroTitle hero={hero} tone="plain" className="font-display text-3xl font-extrabold sm:text-4xl" />
+          {hero.lead ? <p className="mt-3 max-w-3xl text-muted">{hero.lead}</p> : null}
           <div className="mt-4 flex flex-wrap gap-2">
             <PlacesBadge profile={profile} locale={locale} />
             {profile?.langKk ? <span className="badge bg-brand-soft text-brand-ink">Қазақша</span> : null}
             {profile?.langRu ? <span className="badge bg-brand-soft text-brand-ink">Русский</span> : null}
           </div>
+          {hero.buttons.length > 0 ? (
+            <div className="mt-5 flex flex-wrap gap-3">
+              <HeroButtons hero={hero} tone="plain" />
+            </div>
+          ) : null}
         </div>
       </section>
 

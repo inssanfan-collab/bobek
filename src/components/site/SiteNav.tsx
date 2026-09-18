@@ -139,7 +139,16 @@ function DesktopItem({ link, locale }: { link: NavLink; locale: Locale }) {
  * идут с отступом под своим: разделов у сада больше десятка, и в горизонтальной
  * прокрутке половина из них просто не находится.
  */
-export function SiteNav({ links, locale }: { links: NavLink[]; locale: Locale }) {
+export function SiteNav({
+  links,
+  locale,
+  align = 'start',
+}: {
+  links: NavLink[];
+  locale: Locale;
+  /** Шапка «по центру» ставит пункты меню по центру. */
+  align?: 'start' | 'center';
+}) {
   const [open, setOpen] = useState(false);
 
   // Открытое меню не должно «переезжать» вместе со страницей.
@@ -155,7 +164,7 @@ export function SiteNav({ links, locale }: { links: NavLink[]; locale: Locale })
   return (
     <>
       <nav className="container-page hidden pb-2 md:block" aria-label={T.menu[locale]}>
-        <ul className="flex flex-wrap gap-1">
+        <ul className={`flex flex-wrap gap-1 ${align === 'center' ? 'justify-center' : ''}`}>
           {links.map((link) => (
             <DesktopItem key={link.href} link={link} locale={locale} />
           ))}

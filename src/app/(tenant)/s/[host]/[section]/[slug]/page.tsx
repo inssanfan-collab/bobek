@@ -87,7 +87,7 @@ export default async function EntryPage({
   return (
     <>
       <UrgentNotice profile={context.profile} locale={locale} />
-      <ThemedHeader themeCode={context.tenant.themeCode} profile={context.profile} sections={menu} locale={locale} pathname={basePath} />
+      <ThemedHeader themeCode={context.tenant.themeCode} layout={context.tenant.headerLayout} profile={context.profile} sections={menu} locale={locale} pathname={basePath} />
 
       <main id="main" className="container-page max-w-3xl py-8">
         <PhotoZoom locale={locale}>
