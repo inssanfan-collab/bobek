@@ -78,12 +78,22 @@ const T = {
   actions: { kk: 'Әрекеттер', ru: 'Действия' },
   primary: { kk: 'негізгі', ru: 'основной' },
   checkDns: { kk: 'DNS тексеру', ru: 'Проверить DNS' },
+  certPending: { kk: 'DNS күтілуде', ru: 'Ждём DNS' },
+  certDnsOk: { kk: 'DNS дұрыс — сертификат шығарылуда', ru: 'DNS в порядке — выпускаем сертификат' },
+  certDnsOkHint: { kk: 'Әдетте 10 минутқа дейін.', ru: 'Обычно до 10 минут.' },
+  certActive: { kk: 'Жұмыс істейді', ru: 'Работает' },
+  certUntil: { kk: 'сертификат мерзімі', ru: 'сертификат до' },
+  certFailed: { kk: 'Қате', ru: 'Ошибка' },
+  domainsLead: {
+    kk: 'Портал субдомені өздігінен берілді. Жеке доменді (.kz немесе edu.kz) балабақша өзі сатып алады — оны осында қосыңыз, қалғанын сервер өзі жасайды. www.<домен> да өздігінен қосылады, егер оның A-жазбасы серверге бағытталса.',
+    ru: 'Поддомен на портале выдан автоматически. Собственный домен (.kz или edu.kz) сад покупает сам — добавьте его здесь, остальное сервер сделает сам. www.<домен> тоже подключится, если у него есть A-запись на сервер.',
+  },
   remove: { kk: 'Жою', ru: 'Удалить' },
   makePrimary: { kk: 'Негізгі ету', ru: 'Сделать основным' },
-  ownDomain: { kk: 'Балабақшаның edu.kz домені', ru: 'Домен сада на EDU.KZ' },
+  ownDomain: { kk: 'Балабақшаның жеке домені (.kz немесе edu.kz)', ru: 'Собственный домен сада (.kz или edu.kz)' },
   ownDomainHint: {
-    kk: 'Толық жазыңыз, http:// және www-сыз. Домен edu.kz аймағында сатып алынады және балабақшаға рәсімделеді. A-жазба сервердің IP-мекенжайын көрсетуі керек: .kz домені Қазақстандағы серверді көрсетуге міндетті.',
-    ru: 'Пишите полностью, без http:// и www — например nursat.edu.kz. Домен покупается в зоне edu.kz и оформляется на сад. A-запись должна указывать на IP сервера: домен .kz обязан указывать на сервер в Казахстане.',
+    kk: 'Мысалы nursat.kz немесе nursat.edu.kz — http:// және www өздігінен алынып тасталады. Тіркеушіде A-жазба %ip% көрсетуі керек. Сертификат пен сайт 10 минут ішінде өздігінен қосылады.',
+    ru: 'Например nursat.kz или nursat.edu.kz — http:// и www уберём сами. У регистратора нужна A-запись на %ip%. Сертификат и сайт подключатся сами в течение 10 минут.',
   },
   addDomain: { kk: 'Домен қосу', ru: 'Добавить домен' },
   users: { kk: 'Балабақша пайдаланушылары', ru: 'Пользователи сада' },
@@ -382,8 +392,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
         <section className="card p-6 lg:col-span-2">
           <h2 className="font-display text-lg font-bold">{T.domains[locale]}</h2>
           <p className="mt-1 text-sm text-muted">
-            Поддомен на портале выдан автоматически. Домен на EDU.KZ сад покупает сам —
-            здесь его нужно добавить и проверить A-запись.
+            {T.domainsLead[locale]}
           </p>
 
           <div className="mt-4 overflow-x-auto">
@@ -409,10 +418,28 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                       {domain.type === 'SUBDOMAIN' ? 'поддомен портала' : 'домен сада'}
                     </td>
                     <td className="py-3 pr-4">
-                      <span className={`badge ${domain.certStatus === 'ACTIVE' || domain.certStatus === 'DNS_OK' ? 'bg-emerald-100 text-emerald-800' : domain.certStatus === 'FAILED' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}`}>
-                        {domain.certStatus}
+                      <span className={`badge ${
+                        domain.certStatus === 'ACTIVE'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : domain.certStatus === 'FAILED'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {domain.certStatus === 'ACTIVE'
+                          ? T.certActive[locale]
+                          : domain.certStatus === 'DNS_OK'
+                            ? T.certDnsOk[locale]
+                            : domain.certStatus === 'FAILED'
+                              ? T.certFailed[locale]
+                              : T.certPending[locale]}
                       </span>
-                      {domain.lastError ? <p className="mt-1 text-xs text-muted">{domain.lastError}</p> : null}
+                      {domain.certStatus === 'ACTIVE' && domain.certExpiresAt ? (
+                        <p className="mt-1 text-xs text-muted">{T.certUntil[locale]} {formatDate(domain.certExpiresAt, locale)}</p>
+                      ) : null}
+                      {domain.certStatus === 'DNS_OK' && !domain.lastError ? (
+                        <p className="mt-1 text-xs text-muted">{T.certDnsOkHint[locale]}</p>
+                      ) : null}
+                      {domain.lastError ? <p className="mt-1 max-w-md break-words text-xs text-muted">{domain.lastError}</p> : null}
                     </td>
                     <td className="py-3">
                       <div className="flex flex-wrap gap-2">
@@ -430,7 +457,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                             </form>
                           </>
                         ) : null}
-                        {!domain.isPrimary ? (
+                        {!domain.isPrimary && domain.certStatus === 'ACTIVE' ? (
                           <form action={setPrimaryDomain}>
                             <input type="hidden" name={CSRF_FIELD} value={csrf} />
                             <input type="hidden" name="domainId" value={domain.id} />
@@ -450,9 +477,9 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             <input type="hidden" name="tenantId" value={tenant.id} />
             <div className="min-w-64 flex-1">
               <label className="field-label" htmlFor="host">{T.ownDomain[locale]}</label>
-              <input id="host" name="host" className="field" placeholder="nursat.edu.kz" />
+              <input id="host" name="host" className="field" placeholder="nursat.kz" />
               <p className="field-hint">
-                {T.ownDomainHint[locale]}
+                {T.ownDomainHint[locale].replace('%ip%', process.env.SERVER_IPV4?.trim() || 'IP сервера')}
               </p>
             </div>
             <button type="submit" className="btn-secondary">{T.addDomain[locale]}</button>

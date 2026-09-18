@@ -133,23 +133,25 @@ enum DomainType {
 }
 
 enum CertStatus {
-  PENDING
-  DNS_OK // A-запись указывает на наш IP, Caddy может выпускать сертификат
-  ACTIVE
-  FAILED
+  PENDING // A-запись ещё не указывает на наш сервер
+  DNS_OK // A-запись указывает на нас, сертификат выпустит vsesad-certs (раз в 10 минут)
+  ACTIVE // сертификат выпущен, сайт открывается по https
+  FAILED // Let's Encrypt отказал — причина в lastError
 }
 
 model Domain {
-  id         String     @id @default(cuid())
-  host       String     @unique
-  tenantId   String
-  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  type       DomainType @default(SUBDOMAIN)
-  isPrimary  Boolean    @default(false) // канонический адрес, остальные редиректят на него
-  verifiedAt DateTime?
-  certStatus CertStatus @default(PENDING)
-  lastError  String?
-  createdAt  DateTime   @default(now())
+  id            String     @id @default(cuid())
+  host          String     @unique
+  tenantId      String
+  tenant        Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  type          DomainType @default(SUBDOMAIN)
+  isPrimary     Boolean    @default(false) // канонический адрес, остальные редиректят на него
+  verifiedAt    DateTime?
+  certStatus    CertStatus @default(PENDING)
+  /// До какого дня действует сертификат. Пишет серверный скрипт vsesad-certs.
+  certExpiresAt DateTime?
+  lastError     String?
+  createdAt     DateTime   @default(now())
 
   @@index([tenantId])
 }
@@ -408,18 +410,18 @@ model DocumentFolder {
 }
 
 model Document {
-  id          String   @id @default(cuid())
+  id          String          @id @default(cuid())
   tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant      Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   titleKk     String
   titleRu     String
   /// Без папки документ тоже живёт — показывается общим списком над папками.
   folderId    String?
   folder      DocumentFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
   mediaId     String
-  media       Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  publishedAt DateTime @default(now())
-  position    Int      @default(0)
+  media       Media           @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  publishedAt DateTime        @default(now())
+  position    Int             @default(0)
 
   /// Полнотекстовый индекс: считает сама база, см. миграцию fulltext_search.
   searchVector Unsupported("tsvector")? @default(dbgenerated())
@@ -694,24 +696,24 @@ model PortalSettings {
 /// Договор с садом. Хранится ради номера и дат: пересчитывать номер
 /// при каждой печати нельзя — у сада в бухгалтерии останется первый.
 model Contract {
-  id           String    @id @default(cuid())
-  tenantId     String
-  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   /// Человеческий номер вида EDU-2026-0007.
-  number       String    @unique
-  issuedAt     DateTime  @default(now())
-  periodStart  DateTime
-  periodEnd    DateTime
-  amount       Int
+  number      String    @unique
+  issuedAt    DateTime  @default(now())
+  periodStart DateTime
+  periodEnd   DateTime
+  amount      Int
   /// Тариф определяет предмет договора и наименование услуги в счёте и акте.
-  plan         String    @default("BASIC")
+  plan        String    @default("BASIC")
   /// Когда подписанный экземпляр вернулся от сада.
-  signedAt     DateTime?
+  signedAt    DateTime?
   /// Когда подписан акт оказанных услуг.
-  actSignedAt  DateTime?
-  note         String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  actSignedAt DateTime?
+  note        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([tenantId, issuedAt])
 }

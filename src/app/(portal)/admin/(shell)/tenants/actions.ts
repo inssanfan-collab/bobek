@@ -394,18 +394,19 @@ export async function addDomain(formData: FormData) {
 
   const tenantId = String(formData.get('tenantId'));
   // Адрес чаще копируют из строки браузера целиком, чем набирают руками,
-  // поэтому схему и путь снимаем сами. www не трогаем: это отдельное имя,
-  // и его добавляют второй записью, чтобы выпустить на него сертификат.
+  // поэтому схему, путь и www снимаем сами. www подключает серверный скрипт
+  // vsesad-certs: если у www есть A-запись на нас, он ведёт на основной адрес.
   const typed = String(formData.get('host') ?? '')
     .trim()
     .replace(/^[a-z]+:\/\//i, '')
-    .replace(/[/?#].*$/, '');
+    .replace(/[/?#].*$/, '')
+    .replace(/^www\./i, '');
   const host = normalizeHost(typed);
 
   if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(host)) {
     throw new ActionError({
-      kk: 'Домен атауы дұрыс емес. Толық жазыңыз: nursat.edu.kz',
-      ru: 'Некорректное доменное имя. Напишите полностью, без http:// и www — например nursat.edu.kz',
+      kk: 'Домен атауы дұрыс емес. Толық жазыңыз: nursat.kz немесе nursat.edu.kz',
+      ru: 'Некорректное доменное имя. Напишите полностью — например nursat.kz или nursat.edu.kz',
     });
   }
   if (host.endsWith(`.${env.portalDomain}`) || host === env.portalDomain) {
@@ -422,8 +423,13 @@ export async function addDomain(formData: FormData) {
 }
 
 /**
- * Проверка A-записи. Сертификат выпустит Caddy сам, когда домен окажется в списке
- * разрешённых, — здесь мы только подтверждаем, что DNS уже указывает на нас.
+ * Проверка A-записи прямо сейчас, не дожидаясь серверного скрипта.
+ *
+ * Сертификат и сайт в nginx подключает vsesad-certs (deploy/vsesad-certs.sh)
+ * раз в 10 минут от root: у приложения таких прав нет и не должно быть.
+ * Скрипт сам пишет в карточку ACTIVE, FAILED и дату окончания сертификата.
+ * Здесь мы только подтверждаем DNS — и не трогаем уже подключённый домен,
+ * иначе нажатие кнопки откатило бы «работает» назад в «DNS в порядке».
  */
 export async function verifyDomain(formData: FormData) {
   const admin = await requireSuperadmin();
@@ -451,9 +457,16 @@ export async function verifyDomain(formData: FormData) {
     lastError = `DNS не отвечает: ${(error as Error).message}`;
   }
 
+  const connected = domain.certStatus === 'ACTIVE';
   await prisma.domain.update({
     where: { id: domainId },
-    data: { certStatus, lastError, verifiedAt: certStatus === 'DNS_OK' ? new Date() : null },
+    data: connected
+      ? { lastError: certStatus === 'DNS_OK' ? null : lastError }
+      : {
+          certStatus: certStatus === 'DNS_OK' ? 'DNS_OK' : 'PENDING',
+          lastError,
+          verifiedAt: certStatus === 'DNS_OK' ? new Date() : null,
+        },
   });
   await invalidateTenantCacheById(domain.tenantId);
   await audit(admin, 'domain.verify', {
@@ -473,6 +486,14 @@ export async function setPrimaryDomain(formData: FormData) {
   const domainId = String(formData.get('domainId'));
   const domain = await prisma.domain.findUnique({ where: { id: domainId } });
   if (!domain) throw new ActionError({ kk: 'Домен табылмады', ru: 'Домен не найден' });
+  // Основной адрес попадает в sitemap, canonical и ссылки на файлы:
+  // без сертификата все они вели бы на страницу с ошибкой.
+  if (domain.certStatus !== 'ACTIVE') {
+    throw new ActionError({
+      kk: 'Алдымен домен қосылуы керек — сертификат шығарылғанша күтіңіз',
+      ru: 'Сначала домен должен заработать — дождитесь выпуска сертификата',
+    });
+  }
 
   await prisma.$transaction([
     prisma.domain.updateMany({ where: { tenantId: domain.tenantId }, data: { isPrimary: false } }),
