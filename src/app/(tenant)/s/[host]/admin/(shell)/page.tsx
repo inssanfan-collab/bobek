@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { greetingName } from '@/lib/person-name';
 import { prisma } from '@/server/db';
 import { tenantAdmin } from '@/server/tenant/admin-context';
 import { PageHeader, StatCard } from '@/components/admin/AdminShell';
@@ -88,7 +89,7 @@ export default async function TenantAdminHome({ params }: { params: Promise<{ ho
   return (
     <>
       <PageHeader
-        title={T.greeting[locale].replace('%s', ctx.user.fullName.split(' ')[0] ?? '')}
+        title={T.greeting[locale].replace('%s', greetingName(ctx.user.fullName))}
         description={T.lead[locale]}
       />
 
