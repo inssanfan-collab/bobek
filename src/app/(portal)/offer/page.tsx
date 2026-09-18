@@ -4,7 +4,6 @@ import { formatMoney, formatDate } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam } from '@/lib/i18n';
 import { OFFER, OFFER_REVISION } from '@/lib/offer';
-import { portalSettings } from '@/server/docs/contract';
 
 export async function generateMetadata({
   searchParams,
@@ -24,14 +23,10 @@ const T = {
   title: { kk: 'Жария оферта', ru: 'Публичная оферта' },
   revision: { kk: 'Редакция күні', ru: 'Редакция от' },
   requisites: { kk: 'Орындаушының деректемелері', ru: 'Реквизиты Исполнителя' },
-  notFilled: {
-    kk: 'Деректемелер толтырылу үстінде.',
-    ru: 'Реквизиты заполняются.',
+  requisitesNote: {
+    kk: 'Орындаушының деректемелері Тапсырыс берушіге қосылу кезінде жіберілетін шартта және төлем шотында көрсетіледі.',
+    ru: 'Реквизиты Исполнителя указываются в договоре и счёте на оплату, которые направляются Заказчику при подключении.',
   },
-  bin: { kk: 'ЖСН/БСН', ru: 'ИИН/БИН' },
-  address: { kk: 'Мекенжайы', ru: 'Адрес' },
-  phone: { kk: 'Телефон', ru: 'Телефон' },
-  bank: { kk: 'Банк', ru: 'Банк' },
 } as const;
 
 export default async function OfferPage({
@@ -40,7 +35,6 @@ export default async function OfferPage({
   searchParams: Promise<{ lang?: string }>;
 }) {
   const locale = localeFromParam((await searchParams).lang);
-  const settings = await portalSettings();
 
   // Подстановки делаем здесь: цены живут в настройках приложения,
   // и дублировать их в тексте оферты значило бы однажды разойтись с правдой.
@@ -49,12 +43,6 @@ export default async function OfferPage({
       .replaceAll('%domain%', env.portalDomain)
       .replaceAll('%priceBasic%', formatMoney(env.planPrices.BASIC))
       .replaceAll('%priceManaged%', formatMoney(env.planPrices.MANAGED));
-
-  const company = locale === 'kk' ? settings.companyNameKk : settings.companyNameRu;
-  const owner = locale === 'kk' ? settings.ownerNameKk : settings.ownerNameRu;
-  const address = locale === 'kk' ? settings.addressKk : settings.addressRu;
-  const bank = locale === 'kk' ? settings.bankNameKk : settings.bankNameRu;
-  const taxNote = locale === 'kk' ? settings.taxNoteKk : settings.taxNoteRu;
 
   return (
     <PortalPage locale={locale} pathname="/offer">
@@ -74,21 +62,10 @@ export default async function OfferPage({
             </section>
           ))}
 
+          {/* Реквизиты владельца на открытой странице не публикуем: их видит
+              любой посетитель. Сад получает их в договоре и счёте. */}
           <h2>{T.requisites[locale]}</h2>
-          {company ? (
-            <ul>
-              <li>{company}</li>
-              {owner ? <li>{owner}</li> : null}
-              {settings.taxId ? <li>{T.bin[locale]}: {settings.taxId}</li> : null}
-              {address ? <li>{T.address[locale]}: {address}</li> : null}
-              {settings.phone ? <li>{T.phone[locale]}: {settings.phone}</li> : null}
-              {settings.email ? <li>E-mail: {settings.email}</li> : null}
-              {bank ? <li>{T.bank[locale]}: {bank}{settings.iban ? `, ИИК ${settings.iban}` : ''}{settings.bic ? `, БИК ${settings.bic}` : ''}</li> : null}
-              {taxNote ? <li>{taxNote}</li> : null}
-            </ul>
-          ) : (
-            <p>{T.notFilled[locale]}</p>
-          )}
+          <p>{T.requisitesNote[locale]}</p>
         </div>
       </div>
     </PortalPage>
