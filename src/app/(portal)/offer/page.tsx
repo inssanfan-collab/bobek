@@ -4,6 +4,7 @@ import { formatMoney, formatDate } from '@/lib/labels';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam } from '@/lib/i18n';
 import { OFFER, OFFER_REVISION } from '@/lib/offer';
+import { portalSettings } from '@/server/docs/contract';
 
 export async function generateMetadata({
   searchParams,
@@ -27,6 +28,11 @@ const T = {
     kk: 'Орындаушының деректемелері Тапсырыс берушіге қосылу кезінде жіберілетін шартта және төлем шотында көрсетіледі.',
     ru: 'Реквизиты Исполнителя указываются в договоре и счёте на оплату, которые направляются Заказчику при подключении.',
   },
+  requisitesRest: {
+    kk: 'Толық деректемелер Тапсырыс берушіге қосылу кезінде жіберілетін шартта және төлем шотында көрсетіледі.',
+    ru: 'Полные реквизиты указываются в договоре и счёте на оплату, которые направляются Заказчику при подключении.',
+  },
+  phone: { kk: 'Телефон', ru: 'Телефон' },
 } as const;
 
 export default async function OfferPage({
@@ -35,6 +41,10 @@ export default async function OfferPage({
   searchParams: Promise<{ lang?: string }>;
 }) {
   const locale = localeFromParam((await searchParams).lang);
+
+  const settings = await portalSettings();
+  const company = locale === 'kk' ? settings.companyNameKk : settings.companyNameRu;
+  const owner = locale === 'kk' ? settings.ownerNameKk : settings.ownerNameRu;
 
   // Подстановки делаем здесь: цены живут в настройках приложения,
   // и дублировать их в тексте оферты значило бы однажды разойтись с правдой.
@@ -62,10 +72,26 @@ export default async function OfferPage({
             </section>
           ))}
 
-          {/* Реквизиты владельца на открытой странице не публикуем: их видит
-              любой посетитель. Сад получает их в договоре и счёте. */}
+          {/* На открытой странице — только кто исполнитель и как связаться.
+              ИИН, адрес и счёт видел бы любой посетитель: они уходят саду
+              в договоре и счёте. */}
           <h2>{T.requisites[locale]}</h2>
-          <p>{T.requisitesNote[locale]}</p>
+          {company ? (
+            <>
+              <ul>
+                <li>{company}</li>
+                {owner ? <li>{owner}</li> : null}
+                {settings.phone ? (
+                  <li>
+                    {T.phone[locale]}: <a href={`tel:${settings.phone.replace(/\s/g, '')}`}>{settings.phone}</a>
+                  </li>
+                ) : null}
+              </ul>
+              <p>{T.requisitesRest[locale]}</p>
+            </>
+          ) : (
+            <p>{T.requisitesNote[locale]}</p>
+          )}
         </div>
       </div>
     </PortalPage>
