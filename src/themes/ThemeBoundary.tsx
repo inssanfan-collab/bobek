@@ -1,6 +1,6 @@
 'use client';
 
-import { Component, Suspense, type ReactNode } from 'react';
+import { Component, type ReactNode } from 'react';
 import { reportThemeError } from './actions';
 
 type Props = {
@@ -12,14 +12,14 @@ type Props = {
 };
 
 /**
- * Страховка индивидуальной темы: если её вёрстка упала, посетитель видит
- * стандартную шапку, главную или подвал, а не страницу ошибки, а владельцу
- * портала уходит письмо.
+ * Вторая половина страховки темы — в браузере. Первая на сервере
+ * (renderThemePart): там тема раскрывается заранее, и её ошибка сразу
+ * заменяется стандартной частью. Здесь ловим то, что может упасть уже
+ * у посетителя — при переходах внутри сайта без перезагрузки.
  *
- * Suspense здесь не для загрузки. При рендере на сервере error boundary
- * не срабатывает — сервер, встретив ошибку внутри Suspense, отдаёт его
- * fallback, а браузер повторяет рендер и уже там ловит ошибку этим классом.
- * Без Suspense ошибка темы на сервере уронила бы всю страницу.
+ * Suspense тут намеренно нет: с ним сервер отдавал сначала запасную
+ * версию и потом подменял её темой — стандартный сайт мелькал перед
+ * индивидуальным, а поисковик видел не ту версию.
  */
 export class ThemeBoundary extends Component<Props, { failed: boolean }> {
   state = { failed: false };
@@ -40,8 +40,7 @@ export class ThemeBoundary extends Component<Props, { failed: boolean }> {
   }
 
   render() {
-    const fallback = <div data-theme-fallback={this.props.part}>{this.props.fallback}</div>;
-    if (this.state.failed) return fallback;
-    return <Suspense fallback={fallback}>{this.props.children}</Suspense>;
+    if (this.state.failed) return <div data-theme-fallback={this.props.part}>{this.props.fallback}</div>;
+    return this.props.children;
   }
 }
