@@ -49,12 +49,8 @@ export function ObrazecHome({ profile, sections, news, announcements, albums, lo
           </section>
         ) : null}
 
-        <section>
-          <h2 className="obrazec-heading font-display text-2xl font-extrabold">{T.sections[locale]}</h2>
-          <div className="mt-5">
-            <SectionTiles sections={sections} locale={locale} />
-          </div>
-        </section>
+        {/* Заголовок «Разделы сайта» блок выводит сам. */}
+        <SectionTiles sections={sections} locale={locale} />
 
         <GalleryStrip albums={albums} locale={locale} />
         <ContactCard profile={profile} locale={locale} />
