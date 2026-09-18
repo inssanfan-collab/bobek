@@ -16,6 +16,10 @@ const THEMES = Array.from(css.matchAll(/@import '\.\/([a-z0-9-]+)\/theme\.css';/
 
 const SAD = site('sad12');
 
+// Подпись кнопки меняется («Для слабовидящих» ↔ «Обычная версия»),
+// а подсказка title — нет: по ней и ищем.
+const a11yButton = 'button[title="Версия для слабовидящих"]';
+
 test.describe('Индивидуальные темы', () => {
   for (const code of THEMES) {
     test(`тема «${code}»: обязательное на месте, страховка не сработала`, async ({ page }) => {
@@ -25,7 +29,7 @@ test.describe('Индивидуальные темы', () => {
       await expect(page.locator('[data-theme-fallback]')).toHaveCount(0);
 
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Версия для слабовидящих' })).toBeVisible();
+      await expect(page.locator(a11yButton)).toBeVisible();
       await expect(page.getByRole('group', { name: 'Язык сайта' })).toBeVisible();
       await expect(page.getByRole('link', { name: 'Главная' }).first()).toBeAttached();
       await expect(page.getByRole('contentinfo')).toBeVisible();
@@ -33,18 +37,18 @@ test.describe('Индивидуальные темы', () => {
       // Внутренняя страница — те же шапка и подвал темы.
       await page.goto(`${SAD}/news?theme=${code}`);
       await expect(page.locator('[data-theme-fallback]')).toHaveCount(0);
-      await expect(page.getByRole('button', { name: 'Версия для слабовидящих' })).toBeVisible();
+      await expect(page.locator(a11yButton)).toBeVisible();
     });
 
     test(`тема «${code}» уступает место версии для слабовидящих`, async ({ page }) => {
       await page.goto(`${SAD}/?theme=${code}`);
-      await page.getByRole('button', { name: 'Версия для слабовидящих' }).click();
+      await page.locator(a11yButton).click();
 
       const html = page.locator('html');
       await expect(html).toHaveAttribute('data-a11y', 'on');
       await expect(html).not.toHaveAttribute('data-theme', code);
 
-      await page.getByRole('button', { name: 'Версия для слабовидящих' }).click();
+      await page.locator(a11yButton).click();
       await expect(html).toHaveAttribute('data-theme', code);
     });
   }
