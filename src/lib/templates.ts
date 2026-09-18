@@ -101,12 +101,12 @@ export type PaletteCode =
  * `custom` — «свой цвет»: токены строятся из Tenant.brandColor (src/lib/colors.ts).
  */
 export const PALETTES: { code: PaletteCode; nameRu: string; nameKk: string; swatch: string; accent?: string }[] = [
-  { code: 'mandarin', nameRu: 'Мандарин', nameKk: 'Мандарин', swatch: '#ea7a2a', accent: '#2ea49e' },
-  { code: 'mint', nameRu: 'Мята', nameKk: 'Жалбыз', swatch: '#189e96', accent: '#ee8a3c' },
-  { code: 'berry', nameRu: 'Ягода', nameKk: 'Жидек', swatch: '#c74a76', accent: '#5c8ad6' },
-  { code: 'sky', nameRu: 'Небо', nameKk: 'Аспан', swatch: '#307ad0', accent: '#f0a034' },
-  { code: 'meadow', nameRu: 'Луг', nameKk: 'Шалғын', swatch: '#4c983e', accent: '#e27c3a' },
-  { code: 'sun', nameRu: 'Солнце', nameKk: 'Күн', swatch: '#d69814', accent: '#4692be' },
+  { code: 'mandarin', nameRu: 'Мандарин', nameKk: 'Мандарин', swatch: '#b55f21', accent: '#2ea49e' },
+  { code: 'mint', nameRu: 'Мята', nameKk: 'Жалбыз', swatch: '#14847d', accent: '#ee8a3c' },
+  { code: 'berry', nameRu: 'Ягода', nameKk: 'Жидек', swatch: '#c64a75', accent: '#5c8ad6' },
+  { code: 'sky', nameRu: 'Небо', nameKk: 'Аспан', swatch: '#2f77cb', accent: '#f0a034' },
+  { code: 'meadow', nameRu: 'Луг', nameKk: 'Шалғын', swatch: '#428536', accent: '#e27c3a' },
+  { code: 'sun', nameRu: 'Солнце', nameKk: 'Күн', swatch: '#9b6e0e', accent: '#4692be' },
   { code: 'nauryz', nameRu: 'Наурыз', nameKk: 'Наурыз', swatch: '#0f8386', accent: '#e0a526' },
   { code: 'cherry', nameRu: 'Вишня', nameKk: 'Шие', swatch: '#b8324f', accent: '#2f8f83' },
   { code: 'lavender', nameRu: 'Лаванда', nameKk: 'Лаванда', swatch: '#7456c0', accent: '#e59a3a' },

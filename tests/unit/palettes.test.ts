@@ -22,14 +22,6 @@ function tokens(selector: string): Record<string, [number, number, number]> {
 
 const WHITE: [number, number, number] = [255, 255, 255];
 
-/*
- * Первые шесть палитр. Белый текст на кнопке у них читается хуже нормы 4.5:
- * «Солнце» 2.5, «Мандарин» 2.9, «Мята» 3.3, «Луг» 3.6, «Небо» 4.4,
- * «Ягода» 4.497. Их не меняли, чтобы у садов не поменялся вид без спроса.
- * Новые палитры обязаны проходить норму — список не пополнять.
- */
-const LEGACY_LOW_BUTTON_CONTRAST = new Set(['mandarin', 'sun', 'mint', 'meadow', 'sky', 'berry']);
-
 describe('палитры читаемы', () => {
   for (const palette of PALETTES) {
     it(palette.code, () => {
@@ -39,10 +31,8 @@ describe('палитры читаемы', () => {
       // Тёмный текст на светлой плашке и на фоне страницы — всегда норма.
       expect(contrast(t['brand-ink']!, t['brand-soft']!)).toBeGreaterThanOrEqual(MIN_CONTRAST);
       expect(contrast(t['brand-ink']!, t.surface!)).toBeGreaterThanOrEqual(MIN_CONTRAST);
-      if (!LEGACY_LOW_BUTTON_CONTRAST.has(palette.code)) {
-        // Белый текст на кнопке основного цвета.
-        expect(contrast(WHITE, t.brand!)).toBeGreaterThanOrEqual(MIN_CONTRAST);
-      }
+      // Белый текст на кнопке основного цвета — у всех палитр без исключений.
+      expect(contrast(WHITE, t.brand!)).toBeGreaterThanOrEqual(MIN_CONTRAST);
       // Образец в админке совпадает с настоящим цветом.
       expect(parseHex(palette.swatch)).toEqual(t.brand);
     });

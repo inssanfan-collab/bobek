@@ -31,12 +31,14 @@
   --footer: 255 255 255;
 }
 
-/* Палитры. brand — основной, brand-soft — фон плашек, brand-ink — текст на светлой плашке. */
+/* Палитры. brand — основной, brand-soft — фон плашек, brand-ink — текст на светлой плашке.
+   brand подобран так, чтобы белый текст на кнопке читался (контраст от 4.5):
+   у первых шести в сентябре 2026 основной цвет сгущён до этой нормы. */
 :root,
 [data-palette='mandarin'] {
   --surface: 255 251 246;
   --card: 255 255 255;
-  --brand: 234 122 42;
+  --brand: 181 95 33;
   --brand-soft: 254 240 226;
   --brand-ink: 146 66 12;
   --accent: 46 164 158;
@@ -44,7 +46,7 @@
 [data-palette='mint'] {
   --surface: 245 252 250;
   --card: 255 255 255;
-  --brand: 24 158 150;
+  --brand: 20 132 125;
   --brand-soft: 226 246 244;
   --brand-ink: 13 92 88;
   --accent: 238 138 60;
@@ -52,7 +54,7 @@
 [data-palette='berry'] {
   --surface: 255 249 251;
   --card: 255 255 255;
-  --brand: 199 74 118;
+  --brand: 198 74 117;
   --brand-soft: 252 232 240;
   --brand-ink: 124 34 68;
   --accent: 92 138 214;
@@ -60,7 +62,7 @@
 [data-palette='sky'] {
   --surface: 247 250 255;
   --card: 255 255 255;
-  --brand: 48 122 208;
+  --brand: 47 119 203;
   --brand-soft: 228 240 253;
   --brand-ink: 24 71 126;
   --accent: 240 160 52;
@@ -68,7 +70,7 @@
 [data-palette='meadow'] {
   --surface: 248 252 245;
   --card: 255 255 255;
-  --brand: 76 152 62;
+  --brand: 66 133 54;
   --brand-soft: 233 246 228;
   --brand-ink: 42 90 34;
   --accent: 226 124 58;
@@ -76,7 +78,7 @@
 [data-palette='sun'] {
   --surface: 255 252 243;
   --card: 255 255 255;
-  --brand: 214 152 20;
+  --brand: 155 110 14;
   --brand-soft: 253 245 219;
   --brand-ink: 128 88 6;
   --accent: 70 146 190;
