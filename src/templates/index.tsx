@@ -4,6 +4,8 @@ import { ErtegiHome } from './ertegi/Home';
 import { BulaqHome } from './bulaq/Home';
 import { AlatauHome } from './alatau/Home';
 import { KagazHome } from './kagaz/Home';
+import { MozaikaHome } from './mozaika/Home';
+import { ZharqynHome } from './zharqyn/Home';
 import type { HomeProps } from './types';
 
 const HOMES = {
@@ -13,6 +15,8 @@ const HOMES = {
   bulaq: BulaqHome,
   alatau: AlatauHome,
   kagaz: KagazHome,
+  mozaika: MozaikaHome,
+  zharqyn: ZharqynHome,
 } as const;
 
 /** Неизвестный код шаблона не должен ронять сайт — откатываемся на «Классик». */

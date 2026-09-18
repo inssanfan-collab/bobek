@@ -6,7 +6,12 @@ import { findThemeInfo } from '@/themes/catalog';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Alert } from '@/components/ui/Alert';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
-import { COVER_FOCUS, PALETTES, PATTERNS, TEMPLATES } from '@/lib/templates';
+import type { CSSProperties } from 'react';
+import {
+  COVER_FOCUS, CUSTOM_PALETTE, FONT_PAIRS, HEADER_STYLES, PALETTES, PATTERNS, SHAPES, TEMPLATES, type ShapeCode,
+} from '@/lib/templates';
+import { derivePalette } from '@/lib/colors';
+import { PresetPicker } from './PresetPicker';
 import { pick } from '@/lib/i18n';
 import { saveAppearance } from '../actions';
 
@@ -59,11 +64,37 @@ const T = {
     kk: 'Байланыс бәрібір сайттың төменгі бөлігінде және «Байланыс» бөлімінде қалады.',
     ru: 'Контакты всё равно остаются в подвале сайта и в разделе «Контакты».',
   },
+  presets: { kk: 'Дайын стильдер', ru: 'Готовые стили' },
+  customColor: { kk: 'Өз түсіңіз', ru: 'Свой цвет' },
+  customHint: {
+    kk: 'Мысалы, логотиптегі түс. Батырмадағы мәтін оқылатындай етіп, түсті қажет болса сәл қоюлатамыз.',
+    ru: 'Например, цвет с логотипа. Если на кнопках текст читался бы плохо, мы чуть сгустим цвет — оттенок останется тем же.',
+  },
+  customNow: { kk: 'Сайтта', ru: 'На сайте' },
+  customAdjusted: { kk: '(оқылу үшін сәл қоюлатылды)', ru: '(чуть сгущён ради читаемости)' },
+  fonts: { kk: 'Қаріптер', ru: 'Шрифты' },
+  fontsHint: {
+    kk: 'Барлығы қазақ әріптерімен тексерілген.',
+    ru: 'Все проверены на казахские буквы.',
+  },
+  fontSample: { kk: 'Балабақша «Күншуақ»', ru: 'Детский сад «Күншуақ»' },
+  // Образец нарочно по-казахски в обоих языках: видно, что буквы на месте.
+  fontSampleText: { kk: 'Әже, ұлым, қызым — бәрі осында.', ru: 'Әже, ұлым, қызым — бәрі осында.' },
+  shape: { kk: 'Пішін', ru: 'Форма элементов' },
+  headerStyle: { kk: 'Тақырыпша түсі', ru: 'Цвет шапки' },
   customTheme: {
     kk: 'Сайтыңыз «%s» жеке дизайнымен көрсетіледі. Төмендегі шаблон мен түстер ол өшірілгенде ғана қолданылады. Логотип пен мұқаба жеке дизайнда да жұмыс істейді.',
     ru: 'Ваш сайт показывается в индивидуальном дизайне «%s». Шаблон и цвета ниже применятся, только если его отключить. Логотип и обложка работают и в индивидуальном дизайне.',
   },
 } as const;
+
+/** Мини-образец формы: так же, как её рисуют правила [data-shape] в globals.css. */
+const SHAPE_PREVIEW: Record<ShapeCode, CSSProperties> = {
+  soft: { borderRadius: '1.25rem', boxShadow: '0 8px 24px -12px rgb(15 23 42 / 0.25)' },
+  round: { borderRadius: '2rem', boxShadow: '0 8px 24px -12px rgb(15 23 42 / 0.25)' },
+  sharp: { borderRadius: '0.375rem' },
+  outline: { borderRadius: '1.25rem', border: '2px solid rgb(var(--ink))', boxShadow: '4px 4px 0 rgb(var(--brand))' },
+};
 
 export default async function AppearancePage({ params }: { params: Promise<{ host: string }> }) {
   const { host } = await params;
@@ -76,10 +107,14 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
     csrfToken(),
     prisma.tenant.findUnique({
       where: { id: ctx.tenantId },
-      select: { headerSticky: true, homeShowSections: true, homeSectionIds: true, homeShowContacts: true },
+      select: {
+        headerSticky: true, homeShowSections: true, homeSectionIds: true, homeShowContacts: true,
+        brandColor: true, fontPair: true, shape: true, headerStyle: true,
+      },
     }),
     ctx.db.sections.findMany({ where: { parentId: null, isVisible: true }, orderBy: { position: 'asc' } }),
   ]);
+  const customPreview = layout?.brandColor ? derivePalette(layout.brandColor) : null;
   // Пустой выбор значит «все разделы» — так их и отмечаем.
   const chosenSections = new Set(
     layout?.homeSectionIds.length ? layout.homeSectionIds : rootSections.map((section) => section.id),
@@ -112,6 +147,13 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
         <input type="hidden" name="host" value={host} />
         <input type="hidden" name="coverMediaId" defaultValue={profile?.coverMediaId ?? ''} />
         <input type="hidden" name="logoMediaId" defaultValue={profile?.logoMediaId ?? ''} />
+
+        <section className="card p-6">
+          <h2 className="font-display text-lg font-bold">{T.presets[locale]}</h2>
+          <div className="mt-2">
+            <PresetPicker locale={locale} />
+          </div>
+        </section>
 
         <fieldset className="card p-6">
           <legend className="font-display text-lg font-bold">{T.template[locale]}</legend>
@@ -150,8 +192,108 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
                   defaultChecked={ctx.palette === palette.code}
                   className="sr-only"
                 />
-                <span className="h-5 w-5 rounded-full" style={{ background: palette.swatch }} aria-hidden />
+                <span className="flex -space-x-1.5" aria-hidden>
+                  <span className="h-5 w-5 rounded-full ring-2 ring-card" style={{ background: palette.swatch }} />
+                  <span className="h-5 w-5 rounded-full ring-2 ring-card" style={{ background: palette.accent }} />
+                </span>
                 {pick(locale, palette.nameKk, palette.nameRu)}
+              </label>
+            ))}
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-dashed border-line p-4">
+            <label className="flex cursor-pointer items-center gap-2 font-semibold">
+              <input type="radio" name="palette" value="custom" defaultChecked={ctx.palette === 'custom'} className="h-4 w-4" />
+              {pick(locale, CUSTOM_PALETTE.nameKk, CUSTOM_PALETTE.nameRu)}
+            </label>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <input
+                type="color"
+                name="brandColor"
+                defaultValue={layout?.brandColor ?? '#2a7de1'}
+                aria-label={T.customColor[locale]}
+                className="h-11 w-16 cursor-pointer rounded-xl border border-line bg-card p-1"
+              />
+              <p className="max-w-xl text-sm text-muted">{T.customHint[locale]}</p>
+            </div>
+            {customPreview ? (
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-muted">{T.customNow[locale]}:</span>
+                {[customPreview.brand, customPreview.brandSoft, customPreview.brandInk, customPreview.accent].map((color) => (
+                  <span key={color} className="h-6 w-6 rounded-full ring-1 ring-line" style={{ background: color }} aria-hidden />
+                ))}
+                {customPreview.adjusted ? <span className="text-muted">{T.customAdjusted[locale]}</span> : null}
+              </div>
+            ) : null}
+          </div>
+        </fieldset>
+
+        <fieldset className="card p-6">
+          <legend className="font-display text-lg font-bold">{T.fonts[locale]}</legend>
+          <p className="mt-1 text-sm text-muted">{T.fontsHint[locale]}</p>
+          {/* Все пары — только здесь, чтобы образцы были в своих шрифтах. На сайт грузится одна. */}
+          <link rel="stylesheet" precedence="default" href={`https://fonts.googleapis.com/css2?${FONT_PAIRS.map((f) => f.google).join('&')}&display=swap`} />
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {FONT_PAIRS.map((pair) => (
+              <label
+                key={pair.code}
+                className="cursor-pointer rounded-2xl border border-line p-4 transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
+              >
+                <input type="radio" name="fontPair" value={pair.code} defaultChecked={(layout?.fontPair ?? 'soft') === pair.code} className="sr-only" />
+                <span className="block text-xl font-bold" style={{ fontFamily: `'${pair.display}', system-ui` }}>
+                  {T.fontSample[locale]}
+                </span>
+                <span className="mt-1 block text-sm" style={{ fontFamily: `'${pair.text}', system-ui` }}>
+                  {T.fontSampleText[locale]}
+                </span>
+                <span className="mt-2 block text-xs font-semibold text-muted">
+                  {pick(locale, pair.nameKk, pair.nameRu)} · {pair.display}{pair.display === pair.text ? '' : ` + ${pair.text}`}
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="card p-6">
+          <legend className="font-display text-lg font-bold">{T.shape[locale]}</legend>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {SHAPES.map((shape) => (
+              <label
+                key={shape.code}
+                className="cursor-pointer rounded-2xl border border-line p-4 transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
+              >
+                <input type="radio" name="shape" value={shape.code} defaultChecked={(layout?.shape ?? 'soft') === shape.code} className="sr-only" />
+                <span
+                  aria-hidden
+                  className="block h-14 border bg-card"
+                  style={SHAPE_PREVIEW[shape.code]}
+                />
+                <span className="mt-3 block font-semibold">{pick(locale, shape.nameKk, shape.nameRu)}</span>
+                <span className="block text-xs text-muted">{pick(locale, shape.hintKk, shape.hintRu)}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="card p-6">
+          <legend className="font-display text-lg font-bold">{T.headerStyle[locale]}</legend>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {HEADER_STYLES.map((style) => (
+              <label
+                key={style.code}
+                className="cursor-pointer rounded-2xl border border-line p-4 transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
+              >
+                <input type="radio" name="headerStyle" value={style.code} defaultChecked={(layout?.headerStyle ?? 'light') === style.code} className="sr-only" />
+                <span
+                  aria-hidden
+                  className={`flex h-10 items-center gap-2 rounded-lg px-3 ${
+                    style.code === 'brand' ? 'bg-brand text-white' : style.code === 'dark' ? 'bg-[#1c1f26] text-white' : 'border border-line bg-surface'
+                  }`}
+                >
+                  <span className="h-4 w-4 rounded-full bg-current opacity-60" />
+                  <span className="h-2 w-16 rounded-full bg-current opacity-40" />
+                </span>
+                <span className="mt-2 block font-semibold">{pick(locale, style.nameKk, style.nameRu)}</span>
               </label>
             ))}
           </div>

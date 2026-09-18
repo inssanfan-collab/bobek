@@ -1,0 +1,4 @@
+ALTER TABLE "Tenant" ADD COLUMN "brandColor" TEXT;
+ALTER TABLE "Tenant" ADD COLUMN "fontPair" TEXT NOT NULL DEFAULT 'soft';
+ALTER TABLE "Tenant" ADD COLUMN "shape" TEXT NOT NULL DEFAULT 'soft';
+ALTER TABLE "Tenant" ADD COLUMN "headerStyle" TEXT NOT NULL DEFAULT 'light';

@@ -82,6 +82,112 @@
   --accent: 70 146 190;
 }
 
+/* Палитры второго набора. Контраст каждой проверяет tests/unit/palettes.test.ts. */
+[data-palette='nauryz'] {
+  --surface: 246 251 250;
+  --card: 255 255 255;
+  --brand: 15 131 134;
+  --brand-soft: 220 242 241;
+  --brand-ink: 10 85 87;
+  --accent: 224 165 38;
+}
+[data-palette='cherry'] {
+  --surface: 255 248 249;
+  --card: 255 255 255;
+  --brand: 184 50 79;
+  --brand-soft: 251 230 234;
+  --brand-ink: 122 26 48;
+  --accent: 47 143 131;
+}
+[data-palette='lavender'] {
+  --surface: 250 248 255;
+  --card: 255 255 255;
+  --brand: 116 86 192;
+  --brand-soft: 238 232 250;
+  --brand-ink: 70 48 127;
+  --accent: 229 154 58;
+}
+[data-palette='sea'] {
+  --surface: 246 249 252;
+  --card: 255 255 255;
+  --brand: 31 90 150;
+  --brand-soft: 225 236 247;
+  --brand-ink: 20 60 102;
+  --accent: 239 111 92;
+}
+[data-palette='steppe'] {
+  --surface: 253 248 243;
+  --card: 255 255 255;
+  --brand: 181 86 31;
+  --brand-soft: 248 231 218;
+  --brand-ink: 114 52 17;
+  --accent: 61 139 138;
+}
+[data-palette='sage'] {
+  --surface: 247 250 247;
+  --card: 255 255 255;
+  --brand: 79 125 94;
+  --brand-soft: 228 239 231;
+  --brand-ink: 47 79 57;
+  --accent: 208 134 74;
+}
+[data-palette='tulip'] {
+  --surface: 255 248 247;
+  --card: 255 255 255;
+  --brand: 204 52 52;
+  --brand-soft: 251 228 226;
+  --brand-ink: 134 29 29;
+  --accent: 58 123 213;
+}
+[data-palette='night'] {
+  --surface: 247 248 254;
+  --card: 255 255 255;
+  --brand: 59 76 184;
+  --brand-soft: 230 233 250;
+  --brand-ink: 38 47 122;
+  --accent: 242 183 5;
+}
+[data-palette='cocoa'] {
+  --surface: 251 248 245;
+  --card: 255 255 255;
+  --brand: 134 87 58;
+  --brand-soft: 241 230 222;
+  --brand-ink: 85 53 32;
+  --accent: 79 154 142;
+}
+[data-palette='lime'] {
+  --surface: 250 253 245;
+  --card: 255 255 255;
+  --brand: 74 133 25;
+  --brand-soft: 234 245 220;
+  --brand-ink: 45 86 11;
+  --accent: 138 79 208;
+}
+[data-palette='lagoon'] {
+  --surface: 245 251 253;
+  --card: 255 255 255;
+  --brand: 7 128 159;
+  --brand-soft: 220 242 249;
+  --brand-ink: 5 84 104;
+  --accent: 242 139 48;
+}
+[data-palette='plum'] {
+  --surface: 253 248 252;
+  --card: 255 255 255;
+  --brand: 142 58 128;
+  --brand-soft: 245 228 242;
+  --brand-ink: 92 33 82;
+  --accent: 232 163 59;
+}
+[data-palette='graphite'] {
+  --surface: 248 249 250;
+  --card: 255 255 255;
+  --brand: 63 74 90;
+  --brand-soft: 232 235 239;
+  --brand-ink: 37 44 54;
+  --accent: 226 114 59;
+}
+
 /*
  * Скин портала — «небо и золото». Портал одевается иначе, чем сайты садов:
  * у него своя нейтральная база (тёплая бумага вместо почти-белого, тёплый
@@ -209,6 +315,170 @@
    у стандартной шапки и обязан быть у шапки любой индивидуальной темы. */
 [data-header='static'] .site-header {
   position: static;
+}
+
+/*
+ * Шрифты. Пара выбирается в «Оформлении», layout грузит только её
+ * (FONT_PAIRS в src/lib/templates.ts). «Мягкий» — значения по умолчанию в :root.
+ */
+
+[data-font='friendly'] {
+  --font-display: 'Nunito', 'Nunito', system-ui;
+  --font-sans: 'Nunito', system-ui;
+}
+
+[data-font='hand'] {
+  --font-display: 'Balsamiq Sans', 'Nunito', system-ui;
+  --font-sans: 'Nunito', system-ui;
+}
+
+[data-font='script'] {
+  --font-display: 'Caveat', 'Golos Text', system-ui;
+  --font-sans: 'Golos Text', system-ui;
+}
+
+[data-font='modern'] {
+  --font-display: 'Montserrat', 'Inter', system-ui;
+  --font-sans: 'Inter', system-ui;
+}
+
+[data-font='round'] {
+  --font-display: 'Rubik', 'Rubik', system-ui;
+  --font-sans: 'Rubik', system-ui;
+}
+
+[data-font='classic'] {
+  --font-display: 'Literata', 'Golos Text', system-ui;
+  --font-sans: 'Golos Text', system-ui;
+}
+
+[data-font='elegant'] {
+  --font-display: 'Lora', 'Mulish', system-ui;
+  --font-sans: 'Mulish', system-ui;
+}
+
+[data-font='official'] {
+  --font-display: 'PT Sans', 'PT Sans', system-ui;
+  --font-sans: 'PT Sans', system-ui;
+}
+
+[data-font='fresh'] {
+  --font-display: 'Geologica', 'Golos Text', system-ui;
+  --font-sans: 'Golos Text', system-ui;
+}
+
+/*
+ * Форма элементов. Скругления — токенами (их читают классы rounded-xl…3xl),
+ * тени и рамки — правилами для .card и кнопок. Блок стоит перед режимом
+ * для слабовидящих: тот обязан перебивать форму.
+ */
+[data-shape='round'] {
+  --radius-md: 1.25rem;
+  --radius-lg: 2rem;
+  --radius-xl: 2.75rem;
+}
+[data-shape='round'] .btn {
+  border-radius: 9999px;
+}
+[data-shape='sharp'] {
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
+}
+[data-shape='sharp'] .card {
+  box-shadow: none;
+}
+[data-shape='outline'] .card {
+  border: 2px solid rgb(var(--ink));
+  box-shadow: 4px 4px 0 rgb(var(--brand));
+}
+[data-shape='outline'] :is(.btn-primary, .btn-secondary) {
+  border: 2px solid rgb(var(--ink));
+  box-shadow: 3px 3px 0 rgb(var(--ink));
+}
+[data-shape='outline'] :is(.btn-primary, .btn-secondary):active {
+  box-shadow: none;
+  transform: translate(3px, 3px);
+}
+
+/*
+ * Стиль шапки. Меняем не классы шапки, а токены внутри неё: так же
+ * перекрашиваются и кнопки, и меню, и шапки индивидуальных тем (класс
+ * site-header). Исходный цвет палитры запоминаем на body (--header-bg) —
+ * внутри .site-header --brand уже переопределён. В версии для
+ * слабовидящих не действует.
+ */
+:root:not([data-a11y='on'])[data-header-style='brand'] body {
+  --header-bg: var(--brand);
+}
+:root:not([data-a11y='on'])[data-header-style='brand'] .site-header {
+  --surface: var(--header-bg);
+  --card: var(--header-bg);
+  --ink: 255 255 255;
+  --muted: 255 255 255;
+  --line: var(--brand-ink);
+  --brand: var(--brand-ink);
+  --brand-soft: 255 255 255;
+  color: rgb(255 255 255);
+  border-bottom-color: transparent;
+}
+:root:not([data-a11y='on'])[data-header-style='dark'] .site-header {
+  --surface: 28 31 38;
+  --card: 36 40 49;
+  --ink: 255 255 255;
+  --muted: 214 219 228;
+  --line: 60 66 78;
+  --brand-soft: 255 255 255;
+  color: rgb(255 255 255);
+  border-bottom-color: transparent;
+}
+
+/*
+ * Узоры-картинки: звёзды, облака, листья, сердечки. Нарисованы SVG-маской
+ * на отдельном слое, а не фоном — так они красятся цветом палитры
+ * (в data-URI переменные CSS не работают, у «Ою» цвет поэтому фиксирован).
+ */
+:is([data-pattern='stars'], [data-pattern='clouds'], [data-pattern='leaves'], [data-pattern='hearts']) body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: rgb(var(--brand) / 0.13);
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+}
+
+[data-pattern='stars'] body::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2790%27%20height=%2790%27%20viewBox=%270%200%2090%2090%27%3E%3Cpath%20d=%27M22%208l3.5%207.6%208.3.9-6.2%205.6%201.8%208.2L22%2026.1l-7.4%204.2%201.8-8.2-6.2-5.6%208.3-.9z%27/%3E%3Cpath%20d=%27M68%2052l2.3%205%205.4.6-4%203.7%201.1%205.3-4.8-2.8-4.8%202.8%201.1-5.3-4-3.7%205.4-.6z%27/%3E%3Ccircle%20cx=%2766%27%20cy=%2718%27%20r=%272%27/%3E%3Ccircle%20cx=%2720%27%20cy=%2766%27%20r=%272.5%27/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2790%27%20height=%2790%27%20viewBox=%270%200%2090%2090%27%3E%3Cpath%20d=%27M22%208l3.5%207.6%208.3.9-6.2%205.6%201.8%208.2L22%2026.1l-7.4%204.2%201.8-8.2-6.2-5.6%208.3-.9z%27/%3E%3Cpath%20d=%27M68%2052l2.3%205%205.4.6-4%203.7%201.1%205.3-4.8-2.8-4.8%202.8%201.1-5.3-4-3.7%205.4-.6z%27/%3E%3Ccircle%20cx=%2766%27%20cy=%2718%27%20r=%272%27/%3E%3Ccircle%20cx=%2720%27%20cy=%2766%27%20r=%272.5%27/%3E%3C/svg%3E");
+  -webkit-mask-size: 90px 90px;
+  mask-size: 90px 90px;
+}
+
+[data-pattern='clouds'] body::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27160%27%20height=%27110%27%20viewBox=%270%200%20160%20110%27%3E%3Cpath%20d=%27M30%2044a12%2012%200%200%201%2023-5%2010%2010%200%200%201%2017%208%208%208%200%200%201-1%2016H30a10%2010%200%200%201%200-19z%27/%3E%3Cpath%20d=%27M100%2086a9%209%200%200%201%2017-4%207.5%207.5%200%200%201%2013%206%206%206%200%200%201-1%2012h-29a7%207%200%200%201%200-14z%27/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27160%27%20height=%27110%27%20viewBox=%270%200%20160%20110%27%3E%3Cpath%20d=%27M30%2044a12%2012%200%200%201%2023-5%2010%2010%200%200%201%2017%208%208%208%200%200%201-1%2016H30a10%2010%200%200%201%200-19z%27/%3E%3Cpath%20d=%27M100%2086a9%209%200%200%201%2017-4%207.5%207.5%200%200%201%2013%206%206%206%200%200%201-1%2012h-29a7%207%200%200%201%200-14z%27/%3E%3C/svg%3E");
+  -webkit-mask-size: 160px 110px;
+  mask-size: 160px 110px;
+}
+
+[data-pattern='leaves'] body::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27100%27%20height=%27100%27%20viewBox=%270%200%20100%20100%27%3E%3Cpath%20d=%27M20%2042C20%2024%2032%2012%2050%2010c0%2018-10%2032-30%2032%27/%3E%3Cpath%20d=%27M78%2088c-15%200-24-10-24-24%2014%200%2025%209%2024%2024z%27/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27100%27%20height=%27100%27%20viewBox=%270%200%20100%20100%27%3E%3Cpath%20d=%27M20%2042C20%2024%2032%2012%2050%2010c0%2018-10%2032-30%2032%27/%3E%3Cpath%20d=%27M78%2088c-15%200-24-10-24-24%2014%200%2025%209%2024%2024z%27/%3E%3C/svg%3E");
+  -webkit-mask-size: 100px 100px;
+  mask-size: 100px 100px;
+}
+
+[data-pattern='hearts'] body::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2784%27%20height=%2784%27%20viewBox=%270%200%2084%2084%27%3E%3Cpath%20d=%27M20%2030c-5-6-14-2-12%206%201%205%2012%2012%2012%2012s11-7%2012-12c2-8-7-12-12-6z%27/%3E%3Cpath%20d=%27M62%2068c-3.5-4-10-1.5-8.5%204%20.8%203.5%208.5%208.5%208.5%208.5s7.7-5%208.5-8.5c1.5-5.5-5-8-8.5-4z%27/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2784%27%20height=%2784%27%20viewBox=%270%200%2084%2084%27%3E%3Cpath%20d=%27M20%2030c-5-6-14-2-12%206%201%205%2012%2012%2012%2012s11-7%2012-12c2-8-7-12-12-6z%27/%3E%3Cpath%20d=%27M62%2068c-3.5-4-10-1.5-8.5%204%20.8%203.5%208.5%208.5%208.5%208.5s7.7-5%208.5-8.5c1.5-5.5-5-8-8.5-4z%27/%3E%3C/svg%3E");
+  -webkit-mask-size: 84px 84px;
+  mask-size: 84px 84px;
+}
+
+[data-a11y='on'] body::before {
+  display: none;
 }
 
 /* В версии для слабовидящих фон обязан быть чистым: узор мешает читать. */

@@ -5,7 +5,8 @@ import '@/themes/themes.css';
 import { siteContext } from '@/server/tenant/context';
 import { pick } from '@/lib/i18n';
 import { env } from '@/lib/env';
-import { isPaletteCode, isPatternCode } from '@/lib/templates';
+import { fontPair, isHeaderStyleCode, isPaletteCode, isPatternCode, isShapeCode } from '@/lib/templates';
+import { cssTriplet, derivePalette } from '@/lib/colors';
 import { activeTheme } from '@/server/tenant/theme';
 
 export const dynamic = 'force-dynamic';
@@ -57,8 +58,13 @@ export default async function TenantLayout({
   params: Promise<{ host: string }>;
 }) {
   const { tenant, profile } = await siteContext((await params).host);
-  const palette = isPaletteCode(tenant.palette) ? tenant.palette : 'mandarin';
+  // «Свой цвет» без самого цвета — откатываемся на стандартную палитру.
+  const custom = tenant.palette === 'custom' && tenant.brandColor ? derivePalette(tenant.brandColor) : null;
+  const palette = custom ? 'custom' : isPaletteCode(tenant.palette) && tenant.palette !== 'custom' ? tenant.palette : 'mandarin';
   const pattern = isPatternCode(tenant.pattern) ? tenant.pattern : 'none';
+  const fonts = fontPair(tenant.fontPair);
+  const shape = isShapeCode(tenant.shape) ? tenant.shape : 'soft';
+  const headerStyle = isHeaderStyleCode(tenant.headerStyle) ? tenant.headerStyle : 'light';
   // Индивидуальная тема: её CSS действует только при этом атрибуте.
   const theme = await activeTheme(tenant.themeCode);
 
@@ -71,15 +77,26 @@ export default async function TenantLayout({
       // Шапка не закреплена — одно CSS-правило в globals.css. Атрибутом, а не
       // пропом шапки: так настройка работает и в шаблонах, и в темах.
       data-header={tenant.headerSticky ? undefined : 'static'}
+      data-header-style={headerStyle === 'light' ? undefined : headerStyle}
+      data-font={fonts.code === 'soft' ? undefined : fonts.code}
+      data-shape={shape === 'soft' ? undefined : shape}
       data-a11y="off"
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap"
-          rel="stylesheet"
-        />
+        {/* Только выбранная садом пара шрифтов — остальные посетителю не нужны. */}
+        <link href={`https://fonts.googleapis.com/css2?${fonts.google}&display=swap`} rel="stylesheet" />
+        {custom ? (
+          // «Свой цвет»: токены палитры из одного цвета сада. Правило, а не
+          // style на <html>: встроенный стиль перебил бы версию для
+          // слабовидящих, а так она по-прежнему сильнее.
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `:root[data-palette='custom']:not([data-a11y='on']){--surface:${cssTriplet(custom.surface)};--card:255 255 255;--brand:${cssTriplet(custom.brand)};--brand-soft:${cssTriplet(custom.brandSoft)};--brand-ink:${cssTriplet(custom.brandInk)};--accent:${cssTriplet(custom.accent)};}`,
+            }}
+          />
+        ) : null}
         <script
           type="application/ld+json"
           // Микроразметка нужна, чтобы сад корректно показывался в поиске и на картах.

@@ -24,7 +24,10 @@ import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { geocodeAddress } from '@/server/maps/yandex';
 import { hashPassword, passwordProblem, verifyPassword } from '@/server/auth/password';
 import { destroyAllSessions, getCurrentUser } from '@/server/auth/session';
-import { isCoverFocus, isPaletteCode, isPatternCode, isTemplateCode } from '@/lib/templates';
+import {
+  isCoverFocus, isFontPairCode, isHeaderStyleCode, isPaletteCode, isPatternCode, isShapeCode, isTemplateCode,
+} from '@/lib/templates';
+import { parseHex, toHex } from '@/lib/colors';
 import { env } from '@/lib/env';
 
 /**
@@ -943,6 +946,19 @@ export async function saveAppearance(formData: FormData) {
   if (!isTemplateCode(templateCode) || !isPaletteCode(palette) || !isPatternCode(pattern)) {
     throw new ActionError({ kk: 'Үлгі, палитра немесе өрнек белгісіз', ru: 'Неизвестный шаблон, палитра или узор' });
   }
+  const fontPair = str(formData, 'fontPair') || 'soft';
+  const shape = str(formData, 'shape') || 'soft';
+  const headerStyle = str(formData, 'headerStyle') || 'light';
+  if (!isFontPairCode(fontPair) || !isShapeCode(shape) || !isHeaderStyleCode(headerStyle)) {
+    throw new ActionError({ kk: 'Қаріп, пішін немесе тақырыпша түсі белгісіз', ru: 'Неизвестный шрифт, форма или цвет шапки' });
+  }
+  // «Свой цвет» храним всегда, когда он прислан, — чтобы, вернувшись к нему
+  // с готовой палитры, сад нашёл свой цвет на месте.
+  const pickedColor = parseHex(str(formData, 'brandColor'));
+  const brandColor = pickedColor ? toHex(pickedColor) : null;
+  if (palette === 'custom' && !brandColor) {
+    throw new ActionError({ kk: 'Өз түсіңізді таңдаңыз', ru: 'Выберите свой цвет' });
+  }
 
   let coverMediaId = optionalStr(formData, 'coverMediaId');
   const cover = formData.get('cover');
@@ -976,7 +992,10 @@ export async function saveAppearance(formData: FormData) {
   };
 
   await prisma.$transaction([
-    prisma.tenant.update({ where: { id: ctx.tenantId }, data: { templateCode, palette, pattern, ...layout } }),
+    prisma.tenant.update({
+      where: { id: ctx.tenantId },
+      data: { templateCode, palette, pattern, fontPair, shape, headerStyle, ...(brandColor ? { brandColor } : {}), ...layout },
+    }),
     prisma.tenantProfile.update({
       where: { tenantId: ctx.tenantId },
       data: { coverMediaId, logoMediaId, coverFocus: isCoverFocus(coverFocus) ? coverFocus : 'center' },

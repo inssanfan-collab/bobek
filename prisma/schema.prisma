@@ -44,6 +44,14 @@ model Tenant {
   /// Блок «Контакты» на главной.
   homeShowContacts Boolean      @default(true)
   palette          String       @default("mandarin")
+  /// «Свой цвет» (#rrggbb) — для палитры custom; остальное строит src/lib/colors.ts.
+  brandColor       String?
+  /// Пара шрифтов (FONT_PAIRS в src/lib/templates.ts).
+  fontPair         String       @default("soft")
+  /// Форма элементов: soft | round | sharp | outline.
+  shape            String       @default("soft")
+  /// Шапка: light | brand | dark.
+  headerStyle      String       @default("light")
   /// Узор фона: отдельно от палитры, чтобы одна и та же гамма давала разные сайты.
   pattern          String       @default("none")
   /// Тонкая настройка темы поверх шаблона: шрифт, обложка, скругления.
