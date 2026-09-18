@@ -3,8 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
-import { SiteHeader } from '@/components/site/SiteHeader';
-import { SiteFooter } from '@/components/site/SiteFooter';
+import { ThemedFooter, ThemedHeader } from '@/components/site/ThemedChrome';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { recordVisit } from '@/server/stats';
@@ -86,7 +85,7 @@ export default async function SectionPage({
   return (
     <>
       <UrgentNotice profile={profile} locale={locale} />
-      <SiteHeader profile={profile} sections={menu} locale={locale} pathname={basePath} />
+      <ThemedHeader themeCode={context.tenant.themeCode} profile={profile} sections={menu} locale={locale} pathname={basePath} />
       <main id="main" className="container-page py-8">
         {parent ? (
           <Link href={withLocale(`/${parent.slug}`, locale)} className="text-sm font-semibold text-brand">
@@ -138,7 +137,7 @@ export default async function SectionPage({
           </div>
         </PhotoZoom>
       </main>
-      <SiteFooter profile={profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
+      <ThemedFooter themeCode={context.tenant.themeCode} profile={profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
     </>
   );
 }

@@ -1,0 +1,63 @@
+/*
+ * Тема «Образец». Каждое правило начинается с [data-theme='obrazec']:
+ * так стили действуют только на сайт сада с этой темой. Это проверяет
+ * tests/unit/themes.test.ts — правило без префикса не пройдёт сборку.
+ *
+ * В режиме для слабовидящих атрибут data-theme снимается (A11yToggle),
+ * и весь этот файл перестаёт действовать сам.
+ *
+ * Цвета — через токены (--brand, --ink…), а не жёсткими значениями:
+ * тогда контрастная версия и палитра сада продолжают работать.
+ */
+
+/* Токены темы: свои цвета и скругления поверх палитры сада. */
+[data-theme='obrazec'] {
+  --surface: 247 245 240;
+  --card: 255 255 255;
+  --brand: 38 70 83;
+  --brand-soft: 226 236 239;
+  --brand-ink: 24 48 58;
+  --accent: 231 111 81;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+}
+
+[data-theme='obrazec'] body {
+  background-image: none;
+}
+
+[data-theme='obrazec'] .obrazec-header {
+  background: rgb(var(--surface) / 0.97);
+  border-bottom: 3px solid rgb(var(--accent));
+}
+
+[data-theme='obrazec'] .obrazec-topbar {
+  background: rgb(var(--brand-ink));
+  color: rgb(255 255 255);
+}
+
+[data-theme='obrazec'] .obrazec-topbar button,
+[data-theme='obrazec'] .obrazec-topbar a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='obrazec'] .obrazec-hero {
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+}
+
+[data-theme='obrazec'] .obrazec-cover {
+  border-radius: var(--radius-xl);
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.45);
+}
+
+[data-theme='obrazec'] .obrazec-heading {
+  border-left: 6px solid rgb(var(--accent));
+  padding-left: 0.75rem;
+}
+
+[data-theme='obrazec'] .obrazec-footer {
+  background: rgb(var(--brand-ink));
+  color: rgb(255 255 255 / 0.9);
+}

@@ -12,6 +12,7 @@ export type AuditAction =
   | 'tenant.anketa_import'
   | 'tenant.update'
   | 'tenant.status_change'
+  | 'tenant.theme'
   | 'tenant.impersonate'
   | 'tenant.impersonate_end'
   | 'domain.add'

@@ -1,10 +1,8 @@
 import { publicSiteContext, localeFrom } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
-import { SiteHeader } from '@/components/site/SiteHeader';
-import { SiteFooter } from '@/components/site/SiteFooter';
+import { ThemedFooter, ThemedHeader, ThemedHome } from '@/components/site/ThemedChrome';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { recordVisit } from '@/server/stats';
-import { TemplateHome } from '@/templates';
 import { coverPosition } from '@/lib/templates';
 import { mediaUrl } from '@/components/site/blocks';
 import { prisma } from '@/server/db';
@@ -53,10 +51,11 @@ export default async function TenantHome({
   return (
     <>
       <UrgentNotice profile={profile} locale={locale} />
-      <SiteHeader profile={profile} sections={sections} locale={locale} pathname="/" />
+      <ThemedHeader themeCode={tenant.themeCode} profile={profile} sections={sections} locale={locale} pathname="/" />
       <main id="main">
-        <TemplateHome
-          code={tenant.templateCode}
+        <ThemedHome
+          themeCode={tenant.themeCode}
+          templateCode={tenant.templateCode}
           profile={profile}
           sections={sections}
           news={news}
@@ -67,7 +66,7 @@ export default async function TenantHome({
           coverPosition={coverPosition(profile?.coverFocus)}
         />
       </main>
-      <SiteFooter profile={profile} sections={sections} locale={locale} portalDomain={env.portalDomain} />
+      <ThemedFooter themeCode={tenant.themeCode} profile={profile} sections={sections} locale={locale} portalDomain={env.portalDomain} />
     </>
   );
 }

@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 import '../../../globals.css';
+// После globals: токены темы должны перекрывать палитру сада.
+import '@/themes/themes.css';
 import { siteContext } from '@/server/tenant/context';
 import { pick } from '@/lib/i18n';
 import { env } from '@/lib/env';
 import { isPaletteCode, isPatternCode } from '@/lib/templates';
+import { activeTheme } from '@/server/tenant/theme';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,9 +59,11 @@ export default async function TenantLayout({
   const { tenant, profile } = await siteContext((await params).host);
   const palette = isPaletteCode(tenant.palette) ? tenant.palette : 'mandarin';
   const pattern = isPatternCode(tenant.pattern) ? tenant.pattern : 'none';
+  // Индивидуальная тема: её CSS действует только при этом атрибуте.
+  const theme = await activeTheme(tenant.themeCode);
 
   return (
-    <html lang="ru" data-palette={palette} data-pattern={pattern} data-a11y="off">
+    <html lang="ru" data-palette={palette} data-pattern={pattern} data-theme={theme?.code} data-a11y="off">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

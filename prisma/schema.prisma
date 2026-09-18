@@ -32,6 +32,9 @@ model Tenant {
   slug         String       @unique // он же метка поддомена: sad12 -> sad12.bobegim.kz
   status       TenantStatus @default(DRAFT)
   templateCode String       @default("klassik")
+  /// Индивидуальная тема (src/themes). Назначает только владелец портала;
+  /// пока задана, она перекрывает шаблон. null — обычный шаблон.
+  themeCode    String?
   palette      String       @default("mandarin")
   /// Узор фона: отдельно от палитры, чтобы одна и та же гамма давала разные сайты.
   pattern      String       @default("none")

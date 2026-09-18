@@ -28,7 +28,17 @@ export function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   url.pathname = `/s/${encodeURIComponent(siteHost)}${request.nextUrl.pathname}`;
 
-  const response = NextResponse.rewrite(url);
+  // Предпросмотр индивидуальной темы: ?theme=код (или none). Заголовок от
+  // посетителя всегда сбрасываем и ставим сами — и только при THEME_PREVIEW=1,
+  // то есть в разработке и сквозных тестах. Сервер проверяет это ещё раз.
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.delete('x-edusad-theme-preview');
+  const preview = request.nextUrl.searchParams.get('theme');
+  if (process.env.THEME_PREVIEW === '1' && preview && /^[a-z0-9-]{1,40}$/.test(preview)) {
+    requestHeaders.set('x-edusad-theme-preview', preview);
+  }
+
+  const response = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
   response.headers.set('x-site-host', siteHost);
   return response;
 }

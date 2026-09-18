@@ -15,6 +15,34 @@ const T = {
   search: { kk: 'Іздеу', ru: 'Поиск' },
 } as const;
 
+type MenuSection = Section & { children?: Section[] };
+
+/**
+ * Пункты меню сайта: главная, разделы с подменю, поиск. Общие для стандартной
+ * шапки и шапок индивидуальных тем — меню у сайта одно, как его ни оформляй.
+ */
+export function siteNavLinks(sections: MenuSection[], locale: Locale) {
+  const toLink = (section: Section) => {
+    const { href, external } = sectionLink(section, (path) => withLocale(path, locale));
+    return { href, external, label: pick(locale, section.titleKk, section.titleRu) };
+  };
+  return [
+    { href: withLocale('/', locale), label: T.home[locale] },
+    ...sections.map((section) => ({ ...toLink(section), children: section.children?.map(toLink) })),
+    { href: withLocale('/search', locale), label: T.search[locale] },
+  ];
+}
+
+/** Кнопка версии для слабовидящих и переключатель языка — обязательны в любой шапке. */
+export function HeaderTools({ locale, pathname }: { locale: Locale; pathname: string }) {
+  return (
+    <>
+      <A11yToggle />
+      <LocaleSwitch locale={locale} pathname={pathname} />
+    </>
+  );
+}
+
 export function SiteHeader({
   profile,
   sections,
@@ -24,16 +52,11 @@ export function SiteHeader({
 }: {
   profile: TenantProfile | null;
   /** Разделы верхнего уровня; вложенные — в children (см. siteMenu). */
-  sections: (Section & { children?: Section[] })[];
+  sections: MenuSection[];
   locale: Locale;
   pathname: string;
   compact?: boolean;
 }) {
-  const toLink = (section: Section) => {
-    const { href, external } = sectionLink(section, (path) => withLocale(path, locale));
-    return { href, external, label: pick(locale, section.titleKk, section.titleRu) };
-  };
-
   const name = pick(locale, profile?.shortNameKk ?? profile?.nameKk, profile?.shortNameRu ?? profile?.nameRu);
 
   return (
@@ -78,22 +101,11 @@ export function SiteHeader({
         </Link>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          <A11yToggle />
-          <LocaleSwitch locale={locale} pathname={pathname} />
+          <HeaderTools locale={locale} pathname={pathname} />
         </div>
       </div>
 
-      <SiteNav
-        locale={locale}
-        links={[
-          { href: withLocale('/', locale), label: T.home[locale] },
-          ...sections.map((section) => ({
-            ...toLink(section),
-            children: section.children?.map(toLink),
-          })),
-          { href: withLocale('/search', locale), label: T.search[locale] },
-        ]}
-      />
+      <SiteNav locale={locale} links={siteNavLinks(sections, locale)} />
     </header>
   );
 }

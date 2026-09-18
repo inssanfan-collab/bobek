@@ -2,8 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
-import { SiteHeader } from '@/components/site/SiteHeader';
-import { SiteFooter } from '@/components/site/SiteFooter';
+import { ThemedFooter, ThemedHeader } from '@/components/site/ThemedChrome';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { pick } from '@/lib/i18n';
@@ -43,7 +42,7 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string; lang?: string }>;
 }) {
   const [{ host }, search] = await Promise.all([params, searchParams]);
-  const { db, profile } = await publicSiteContext(host);
+  const { db, profile, tenant } = await publicSiteContext(host);
   const locale = localeFrom(search.lang);
   const query = (search.q ?? '').trim();
 
@@ -63,7 +62,7 @@ export default async function SearchPage({
   return (
     <>
       <UrgentNotice profile={profile} locale={locale} />
-      <SiteHeader profile={profile} sections={menu} locale={locale} pathname="/search" />
+      <ThemedHeader themeCode={tenant.themeCode} profile={profile} sections={menu} locale={locale} pathname="/search" />
 
       <main id="main" className="container-page max-w-3xl py-8">
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{T.title[locale]}</h1>
@@ -145,7 +144,7 @@ export default async function SearchPage({
         ) : null}
       </main>
 
-      <SiteFooter profile={profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
+      <ThemedFooter themeCode={tenant.themeCode} profile={profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
     </>
   );
 }

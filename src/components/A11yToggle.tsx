@@ -6,6 +6,23 @@ import { UiIcon } from '@/components/site/UiIcon';
 const KEY = 'edusad:a11y';
 
 /**
+ * Включить или выключить режим. Индивидуальная тема на время режима
+ * снимается: её CSS действует только при data-theme, и контрастная версия
+ * не должна зависеть от того, как тема раскрасила сайт.
+ */
+function apply(on: boolean) {
+  const root = document.documentElement;
+  root.dataset.a11y = on ? 'on' : 'off';
+  if (on && root.dataset.theme) {
+    root.dataset.themeOff = root.dataset.theme;
+    delete root.dataset.theme;
+  } else if (!on && root.dataset.themeOff) {
+    root.dataset.theme = root.dataset.themeOff;
+    delete root.dataset.themeOff;
+  }
+}
+
+/**
  * Версия для слабовидящих. Состояние держим в localStorage самого сайта сада —
  * у каждого сада свой домен, значит и своя настройка, что как раз правильно.
  */
@@ -16,7 +33,7 @@ export function A11yToggle() {
     try {
       const stored = localStorage.getItem(KEY) === '1';
       setOn(stored);
-      document.documentElement.dataset.a11y = stored ? 'on' : 'off';
+      apply(stored);
     } catch {
       /* приватный режим браузера — просто работаем без сохранения */
     }
@@ -25,7 +42,7 @@ export function A11yToggle() {
   function toggle() {
     const next = !on;
     setOn(next);
-    document.documentElement.dataset.a11y = next ? 'on' : 'off';
+    apply(next);
     try {
       localStorage.setItem(KEY, next ? '1' : '0');
     } catch {

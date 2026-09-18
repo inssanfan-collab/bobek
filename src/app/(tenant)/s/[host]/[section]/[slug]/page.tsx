@@ -3,8 +3,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
-import { SiteHeader } from '@/components/site/SiteHeader';
-import { SiteFooter } from '@/components/site/SiteFooter';
+import { ThemedFooter, ThemedHeader } from '@/components/site/ThemedChrome';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { VideoEmbed } from '@/components/site/VideoEmbed';
@@ -88,7 +87,7 @@ export default async function EntryPage({
   return (
     <>
       <UrgentNotice profile={context.profile} locale={locale} />
-      <SiteHeader profile={context.profile} sections={menu} locale={locale} pathname={basePath} />
+      <ThemedHeader themeCode={context.tenant.themeCode} profile={context.profile} sections={menu} locale={locale} pathname={basePath} />
 
       <main id="main" className="container-page max-w-3xl py-8">
         <PhotoZoom locale={locale}>
@@ -150,7 +149,7 @@ export default async function EntryPage({
         </PhotoZoom>
       </main>
 
-      <SiteFooter profile={context.profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
+      <ThemedFooter themeCode={context.tenant.themeCode} profile={context.profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
     </>
   );
 }

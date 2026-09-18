@@ -31,6 +31,8 @@ export default defineConfig({
       COOKIE_SECURE: 'false',
       PORTAL_DOMAIN: 'bobegim.local',
       NEXT_PUBLIC_PORTAL_DOMAIN: 'bobegim.local',
+      // Примерка индивидуальных тем через ?theme=код (tests/e2e/themes.spec.ts).
+      THEME_PREVIEW: '1',
     },
     url: 'http://127.0.0.1:3000/api/health',
     reuseExistingServer: true,

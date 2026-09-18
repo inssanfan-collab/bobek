@@ -8,6 +8,8 @@ export type TenantAdminContext = TenantSession & {
   primaryHost: string;
   tenantSlug: string;
   templateCode: string;
+  /** Индивидуальная тема, если владелец портала её назначил. */
+  themeCode: string | null;
   palette: string;
   pattern: string;
 };
@@ -37,6 +39,7 @@ export const tenantAdmin = cache(async (hostParam: string): Promise<TenantAdminC
     primaryHost: site.primaryHost,
     tenantSlug: site.tenant.slug,
     templateCode: site.tenant.templateCode,
+    themeCode: site.tenant.themeCode,
     palette: site.tenant.palette,
     pattern: site.tenant.pattern,
   };

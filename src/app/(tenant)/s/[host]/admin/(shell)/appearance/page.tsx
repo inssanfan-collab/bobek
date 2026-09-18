@@ -2,6 +2,7 @@ import { prisma } from '@/server/db';
 import { tenantAdmin } from '@/server/tenant/admin-context';
 import { csrfToken } from '@/server/auth/csrf';
 import { PageHeader } from '@/components/admin/AdminShell';
+import { findThemeInfo } from '@/themes/catalog';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Alert } from '@/components/ui/Alert';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
@@ -41,12 +42,17 @@ const T = {
   },
   logo: { kk: 'Логотип', ru: 'Логотип' },
   save: { kk: 'Сыртқы көріністі сақтау', ru: 'Сохранить внешний вид' },
+  customTheme: {
+    kk: 'Сайтыңыз «%s» жеке дизайнымен көрсетіледі. Төмендегі шаблон мен түстер ол өшірілгенде ғана қолданылады. Логотип пен мұқаба жеке дизайнда да жұмыс істейді.',
+    ru: 'Ваш сайт показывается в индивидуальном дизайне «%s». Шаблон и цвета ниже применятся, только если его отключить. Логотип и обложка работают и в индивидуальном дизайне.',
+  },
 } as const;
 
 export default async function AppearancePage({ params }: { params: Promise<{ host: string }> }) {
   const { host } = await params;
   const ctx = await tenantAdmin(host);
   const locale = ctx.user.locale;
+  const theme = findThemeInfo(ctx.themeCode);
 
   const [profile, csrf] = await Promise.all([
     prisma.tenantProfile.findUnique({ where: { tenantId: ctx.tenantId } }),
@@ -68,6 +74,12 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
         title={T.title[locale]}
         description={T.lead[locale]}
       />
+
+      {theme ? (
+        <div className="mb-5">
+          <Alert tone="info">{T.customTheme[locale].replace('%s', pick(locale, theme.nameKk, theme.nameRu))}</Alert>
+        </div>
+      ) : null}
 
       <form action={saveAppearance} className="space-y-5">
         <input type="hidden" name={CSRF_FIELD} value={csrf} />

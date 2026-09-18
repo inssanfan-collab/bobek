@@ -14,8 +14,9 @@ import {
 import { pick } from '@/lib/i18n';
 import {
   addDomain, createContractAction, deleteDomain, impersonate, markContractSigned,
-  recordPayment, resetUserPassword, setPrimaryDomain, setTenantStatus, verifyDomain,
+  recordPayment, resetUserPassword, setPrimaryDomain, setTenantStatus, setTenantTheme, verifyDomain,
 } from '../actions';
+import { findThemeInfo, THEME_CATALOG } from '@/themes/catalog';
 import { suggestedPeriod, portalSettings } from '@/server/docs/contract';
 import { isPlanCode, PLAN_CODES, PLAN_INFO } from '@/lib/plans';
 
@@ -78,6 +79,18 @@ const T = {
   actions: { kk: 'Әрекеттер', ru: 'Действия' },
   primary: { kk: 'негізгі', ru: 'основной' },
   checkDns: { kk: 'DNS тексеру', ru: 'Проверить DNS' },
+  theme: { kk: 'Жеке дизайн', ru: 'Индивидуальный дизайн' },
+  themeLead: {
+    kk: 'Осы балабақша үшін жасалған тақырып. Ол шаблонды алмастырады; өшірсеңіз — балабақша таңдаған шаблон қайтады, деректер өзгермейді.',
+    ru: 'Тема, сделанная под этот сад. Она заменяет шаблон; если выключить — вернётся шаблон, который выбрал сад, данные не меняются.',
+  },
+  themeNone: { kk: 'Жоқ — балабақша шаблоны', ru: 'Нет — шаблон сада' },
+  themeCurrent: { kk: 'Қазір', ru: 'Сейчас' },
+  themeSave: { kk: 'Қолдану', ru: 'Применить' },
+  themeHowTo: {
+    kk: 'Жаңа тақырып қалай жасалады — src/themes/README.md.',
+    ru: 'Как сделать новую тему — src/themes/README.md.',
+  },
   certPending: { kk: 'DNS күтілуде', ru: 'Ждём DNS' },
   certDnsOk: { kk: 'DNS дұрыс — сертификат шығарылуда', ru: 'DNS в порядке — выпускаем сертификат' },
   certDnsOkHint: { kk: 'Әдетте 10 минутқа дейін.', ru: 'Обычно до 10 минут.' },
@@ -135,6 +148,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
   if (!tenant) notFound();
 
   const subscription = await subscriptionState(tenant.id);
+  const currentTheme = findThemeInfo(tenant.themeCode);
   const primary = tenant.domains.find((d) => d.isPrimary) ?? tenant.domains[0];
 
   const [contracts, period, settings] = await Promise.all([
@@ -484,6 +498,32 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             </div>
             <button type="submit" className="btn-secondary">{T.addDomain[locale]}</button>
           </form>
+        </section>
+
+        <section className="card p-6 lg:col-span-2">
+          <h2 className="font-display text-lg font-bold">{T.theme[locale]}</h2>
+          <p className="mt-1 text-sm text-muted">{T.themeLead[locale]}</p>
+          <p className="mt-3 text-sm">
+            {T.themeCurrent[locale]}:{' '}
+            <strong>{currentTheme ? pick(locale, currentTheme.nameKk, currentTheme.nameRu) : T.themeNone[locale]}</strong>
+          </p>
+          <form action={setTenantTheme} className="mt-4 flex flex-wrap items-end gap-3">
+            <input type="hidden" name={CSRF_FIELD} value={csrf} />
+            <input type="hidden" name="tenantId" value={tenant.id} />
+            <div className="min-w-64 flex-1">
+              <label className="field-label" htmlFor="themeCode">{T.theme[locale]}</label>
+              <select id="themeCode" name="themeCode" defaultValue={tenant.themeCode ?? ''} className="field">
+                <option value="">{T.themeNone[locale]}</option>
+                {THEME_CATALOG.map((theme) => (
+                  <option key={theme.code} value={theme.code}>
+                    {pick(locale, theme.nameKk, theme.nameRu)} — {theme.noteRu}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" className="btn-secondary">{T.themeSave[locale]}</button>
+          </form>
+          <p className="field-hint mt-2">{T.themeHowTo[locale]}</p>
         </section>
 
         <section className="card p-6 lg:col-span-2">

@@ -4,8 +4,7 @@ import Link from 'next/link';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
 import { sectionSettings } from '@/lib/sections';
-import { SiteHeader } from '@/components/site/SiteHeader';
-import { SiteFooter } from '@/components/site/SiteFooter';
+import { ThemedFooter, ThemedHeader } from '@/components/site/ThemedChrome';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { isOfficeDoc } from '@/lib/media-kind';
 import { pick } from '@/lib/i18n';
@@ -74,7 +73,7 @@ export default async function DocumentViewPage({
   return (
     <>
       <UrgentNotice profile={profile} locale={locale} />
-      <SiteHeader profile={profile} sections={sections} locale={locale} pathname={`/doc/${id}`} />
+      <ThemedHeader themeCode={context.tenant.themeCode} profile={profile} sections={sections} locale={locale} pathname={`/doc/${id}`} />
       <main id="main" className="container-page py-8">
         {documentsSection && !fromText ? (
           <Link
@@ -109,7 +108,7 @@ export default async function DocumentViewPage({
 
         <p className="mt-3 text-sm text-muted">{T.hint[locale]}</p>
       </main>
-      <SiteFooter profile={profile} sections={sections} locale={locale} portalDomain={env.portalDomain} />
+      <ThemedFooter themeCode={context.tenant.themeCode} profile={profile} sections={sections} locale={locale} portalDomain={env.portalDomain} />
     </>
   );
 }

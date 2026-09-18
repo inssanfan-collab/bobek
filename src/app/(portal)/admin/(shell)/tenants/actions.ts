@@ -23,6 +23,7 @@ import { promises as dns } from 'node:dns';
 import { headers } from 'next/headers';
 import type { TenantKind, TenantStatus } from '@prisma/client';
 import { ActionError } from '@/lib/action-state';
+import { findThemeInfo } from '@/themes/catalog';
 
 const createSchema = z.object({
   nameRu: z.string().trim().min(2, 'Укажите название по-русски').max(200),
@@ -635,4 +636,28 @@ export async function markContractSigned(formData: FormData) {
   });
 
   revalidatePath(`/admin/tenants/${contract.tenantId}`);
+}
+
+/**
+ * Индивидуальная тема сада. Назначает только владелец портала: тема
+ * сделана под конкретный сад, и в выборе шаблонов у садов её нет.
+ * Пустое значение возвращает обычный шаблон — данные сада не трогаются.
+ */
+export async function setTenantTheme(formData: FormData) {
+  const admin = await requireSuperadmin();
+  await assertCsrf(formData);
+
+  const tenantId = String(formData.get('tenantId'));
+  const raw = String(formData.get('themeCode') ?? '');
+  const themeCode = raw ? findThemeInfo(raw)?.code ?? null : null;
+  if (raw && !themeCode) throw new ActionError({ kk: 'Мұндай тақырып жоқ', ru: 'Такой темы нет' });
+
+  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { themeCode: true } });
+  if (!tenant) throw new ActionError({ kk: 'Балабақша табылмады', ru: 'Сад не найден' });
+
+  await prisma.tenant.update({ where: { id: tenantId }, data: { themeCode } });
+  await invalidateTenantCacheById(tenantId);
+  await audit(admin, 'tenant.theme', { tenantId, meta: { from: tenant.themeCode, to: themeCode } });
+
+  revalidatePath(`/admin/tenants/${tenantId}`);
 }
