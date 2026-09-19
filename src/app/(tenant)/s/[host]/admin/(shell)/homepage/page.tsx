@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { tenantAdmin } from '@/server/tenant/admin-context';
 import { csrfToken } from '@/server/auth/csrf';
@@ -23,9 +24,10 @@ const T = {
     ru: 'Менять тексты главной может администратор сада.',
   },
   designHint: {
-    kk: 'Тақырыпшаның түрі мен түсі — «Сыртқы көрінісі» бөлімінде.',
-    ru: 'Вид и цвет шапки выбираются в разделе «Внешний вид».',
+    kk: 'Тақырыпшаның түрі, түсі және бекітілуі —',
+    ru: 'Вид, цвет и закрепление шапки —',
   },
+  designLink: { kk: '«Сыртқы көрінісі» бөлімінде', ru: 'в разделе «Внешний вид» →' },
   header: { kk: 'Сайт тақырыпшасы', ru: 'Шапка сайта' },
   tagline: { kk: 'Атаудың астындағы жазу', ru: 'Подпись под названием' },
   taglineHint: { kk: 'Мысалы: «Эко-балабақша». Бос болса — аудан көрсетіледі.', ru: 'Например: «Детский эко-сад». Пусто — показываем район.' },
@@ -135,7 +137,12 @@ export default async function HomepageSettings({
         <section className="card space-y-5 p-6">
           <div>
             <h2 className="font-display text-lg font-bold">{T.header[locale]}</h2>
-            <p className="mt-1 text-sm text-muted">{T.designHint[locale]}</p>
+            <p className="mt-1 text-sm text-muted">
+              {T.designHint[locale]}{' '}
+              <Link href="/admin/appearance#header" className="font-semibold text-brand-ink underline">
+                {T.designLink[locale]}
+              </Link>
+            </p>
           </div>
 
           <BilingualField

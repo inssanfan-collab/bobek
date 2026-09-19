@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { tenantAdmin } from '@/server/tenant/admin-context';
 import { csrfToken } from '@/server/auth/csrf';
@@ -47,7 +48,7 @@ const T = {
   },
   logo: { kk: 'Логотип', ru: 'Логотип' },
   save: { kk: 'Сыртқы көріністі сақтау', ru: 'Сохранить внешний вид' },
-  layout: { kk: 'Тақырыпша мен басты бет', ru: 'Шапка и главная страница' },
+  layout: { kk: 'Басты беттегі блоктар', ru: 'Блоки на главной' },
   headerSticky: { kk: 'Айналдырғанда тақырыпшаны жоғарыда бекіту', ru: 'Закреплять шапку при прокрутке' },
   headerStickyHint: {
     kk: 'Қосулы болса, мәзір мен байланыс батырмалары әрдайым көрінеді. Өшірулі болса, тақырыпша бетпен бірге жоғары кетеді — кішкентай экранда мәтінге көбірек орын қалады.',
@@ -81,12 +82,14 @@ const T = {
   // Образец нарочно по-казахски в обоих языках: видно, что буквы на месте.
   fontSampleText: { kk: 'Әже, ұлым, қызым — бәрі осында.', ru: 'Әже, ұлым, қызым — бәрі осында.' },
   shape: { kk: 'Пішін', ru: 'Форма элементов' },
-  headerStyle: { kk: 'Тақырыпша түсі', ru: 'Цвет шапки' },
-  headerLayout: { kk: 'Тақырыпша түрі', ru: 'Вид шапки' },
-  headerTexts: {
-    kk: 'Тақырыпшадағы жазу, батырма мен телефон — «Басты бет» бөлімінде.',
-    ru: 'Подпись, кнопка и телефон в шапке — в разделе «Главная страница».',
+  headerStyle: { kk: 'Түсі', ru: 'Цвет' },
+  headerLayout: { kk: 'Түрі', ru: 'Вид' },
+  headerBlock: { kk: 'Сайт тақырыпшасы', ru: 'Шапка сайта' },
+  headerBlockHint: {
+    kk: 'Түрі, түсі және бекітілуі. Атау астындағы жазу, телефон мен батырма — «Басты бет» бөлімінде.',
+    ru: 'Вид, цвет и закрепление. Подпись под названием, телефон и кнопка — на странице «Главная страница».',
   },
+  headerTextsLink: { kk: 'Тақырыпша мәтіндері →', ru: 'Тексты и кнопка шапки →' },
   customTheme: {
     kk: 'Сайтыңыз «%s» жеке дизайнымен көрсетіледі. Төмендегі шаблон мен түстер ол өшірілгенде ғана қолданылады. Логотип пен мұқаба жеке дизайнда да жұмыс істейді.',
     ru: 'Ваш сайт показывается в индивидуальном дизайне «%s». Шаблон и цвета ниже применятся, только если его отключить. Логотип и обложка работают и в индивидуальном дизайне.',
@@ -158,6 +161,83 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
           <div className="mt-2">
             <PresetPicker locale={locale} />
           </div>
+        </section>
+
+        {/* Всё про шапку — в одном месте: вид, цвет, закрепление. Тексты шапки
+            (подпись, телефон, кнопка) — на странице «Главная страница». */}
+        <section id="header" className="card scroll-mt-6 space-y-6 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="font-display text-lg font-bold">{T.headerBlock[locale]}</h2>
+              <p className="mt-1 text-sm text-muted">{T.headerBlockHint[locale]}</p>
+            </div>
+            <Link href="/admin/homepage" className="btn-secondary text-sm">{T.headerTextsLink[locale]}</Link>
+          </div>
+
+          <fieldset>
+            <legend className="font-semibold">{T.headerLayout[locale]}</legend>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {HEADER_LAYOUTS.map((item) => (
+                <label
+                  key={item.code}
+                  className="cursor-pointer rounded-2xl border border-line p-4 transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
+                >
+                  <input type="radio" name="headerLayout" value={item.code} defaultChecked={(layout?.headerLayout ?? 'classic') === item.code} className="sr-only" />
+                  {/* Мини-схема шапки: где название, где меню, где кнопка. */}
+                  <span aria-hidden className={`block rounded-xl bg-surface p-2 ${item.code === 'floating' ? 'ring-1 ring-line' : ''}`}>
+                    <span
+                      className={`flex flex-col gap-1.5 p-2 ${
+                        item.code === 'floating' ? 'rounded-lg bg-card shadow-soft' : 'border-b border-line'
+                      } ${item.code === 'center' ? 'items-center' : ''}`}
+                    >
+                      <span className={`flex w-full items-center gap-1.5 ${item.code === 'center' ? 'justify-center' : ''}`}>
+                        <span className="h-3 w-3 rounded-full bg-brand" />
+                        <span className="h-1.5 w-12 rounded-full bg-ink/60" />
+                        {item.code === 'center' ? null : <span className="ml-auto h-2.5 w-8 rounded-full bg-brand/70" />}
+                      </span>
+                      <span className={`flex w-full gap-1 ${item.code === 'center' ? 'justify-center' : ''}`}>
+                        {[1, 2, 3, 4].map((i) => <span key={i} className="h-1 w-5 rounded-full bg-muted/50" />)}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="mt-2 block font-semibold">{pick(locale, item.nameKk, item.nameRu)}</span>
+                  <span className="block text-xs text-muted">{pick(locale, item.hintKk, item.hintRu)}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend className="font-semibold">{T.headerStyle[locale]}</legend>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              {HEADER_STYLES.map((style) => (
+                <label
+                  key={style.code}
+                  className="cursor-pointer rounded-2xl border border-line p-4 transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
+                >
+                  <input type="radio" name="headerStyle" value={style.code} defaultChecked={(layout?.headerStyle ?? 'light') === style.code} className="sr-only" />
+                  <span
+                    aria-hidden
+                    className={`flex h-10 items-center gap-2 rounded-lg px-3 ${
+                      style.code === 'brand' ? 'bg-brand text-white' : style.code === 'dark' ? 'bg-[#1c1f26] text-white' : 'border border-line bg-surface'
+                    }`}
+                  >
+                    <span className="h-4 w-4 rounded-full bg-current opacity-60" />
+                    <span className="h-2 w-16 rounded-full bg-current opacity-40" />
+                  </span>
+                  <span className="mt-2 block font-semibold">{pick(locale, style.nameKk, style.nameRu)}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <label className="flex items-start gap-3">
+            <input type="checkbox" name="headerSticky" defaultChecked={layout?.headerSticky ?? true} className="mt-1 h-4 w-4" />
+            <span>
+              <span className="block font-semibold">{T.headerSticky[locale]}</span>
+              <span className="block text-sm text-muted">{T.headerStickyHint[locale]}</span>
+            </span>
+          </label>
         </section>
 
         <fieldset className="card p-6">
@@ -281,64 +361,6 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
         </fieldset>
 
         <fieldset className="card p-6">
-          <legend className="font-display text-lg font-bold">{T.headerLayout[locale]}</legend>
-          <p className="mt-1 text-sm text-muted">{T.headerTexts[locale]}</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            {HEADER_LAYOUTS.map((item) => (
-              <label
-                key={item.code}
-                className="cursor-pointer rounded-2xl border border-line p-4 transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
-              >
-                <input type="radio" name="headerLayout" value={item.code} defaultChecked={(layout?.headerLayout ?? 'classic') === item.code} className="sr-only" />
-                {/* Мини-схема шапки: где название, где меню, где кнопка. */}
-                <span aria-hidden className={`block rounded-xl bg-surface p-2 ${item.code === 'floating' ? 'ring-1 ring-line' : ''}`}>
-                  <span
-                    className={`flex flex-col gap-1.5 p-2 ${
-                      item.code === 'floating' ? 'rounded-lg bg-card shadow-soft' : 'border-b border-line'
-                    } ${item.code === 'center' ? 'items-center' : ''}`}
-                  >
-                    <span className={`flex w-full items-center gap-1.5 ${item.code === 'center' ? 'justify-center' : ''}`}>
-                      <span className="h-3 w-3 rounded-full bg-brand" />
-                      <span className="h-1.5 w-12 rounded-full bg-ink/60" />
-                      {item.code === 'center' ? null : <span className="ml-auto h-2.5 w-8 rounded-full bg-brand/70" />}
-                    </span>
-                    <span className={`flex w-full gap-1 ${item.code === 'center' ? 'justify-center' : ''}`}>
-                      {[1, 2, 3, 4].map((i) => <span key={i} className="h-1 w-5 rounded-full bg-muted/50" />)}
-                    </span>
-                  </span>
-                </span>
-                <span className="mt-2 block font-semibold">{pick(locale, item.nameKk, item.nameRu)}</span>
-                <span className="block text-xs text-muted">{pick(locale, item.hintKk, item.hintRu)}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="card p-6">
-          <legend className="font-display text-lg font-bold">{T.headerStyle[locale]}</legend>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            {HEADER_STYLES.map((style) => (
-              <label
-                key={style.code}
-                className="cursor-pointer rounded-2xl border border-line p-4 transition has-[:checked]:border-brand has-[:checked]:ring-2 has-[:checked]:ring-brand/30"
-              >
-                <input type="radio" name="headerStyle" value={style.code} defaultChecked={(layout?.headerStyle ?? 'light') === style.code} className="sr-only" />
-                <span
-                  aria-hidden
-                  className={`flex h-10 items-center gap-2 rounded-lg px-3 ${
-                    style.code === 'brand' ? 'bg-brand text-white' : style.code === 'dark' ? 'bg-[#1c1f26] text-white' : 'border border-line bg-surface'
-                  }`}
-                >
-                  <span className="h-4 w-4 rounded-full bg-current opacity-60" />
-                  <span className="h-2 w-16 rounded-full bg-current opacity-40" />
-                </span>
-                <span className="mt-2 block font-semibold">{pick(locale, style.nameKk, style.nameRu)}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="card p-6">
           <legend className="font-display text-lg font-bold">{T.pattern[locale]}</legend>
           <p className="mt-1 text-sm text-muted">{T.patternHint[locale]}</p>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -409,14 +431,6 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
 
         <fieldset className="card space-y-5 p-6">
           <legend className="font-display text-lg font-bold">{T.layout[locale]}</legend>
-
-          <label className="flex items-start gap-3">
-            <input type="checkbox" name="headerSticky" defaultChecked={layout?.headerSticky ?? true} className="mt-1 h-4 w-4" />
-            <span>
-              <span className="block font-semibold">{T.headerSticky[locale]}</span>
-              <span className="block text-sm text-muted">{T.headerStickyHint[locale]}</span>
-            </span>
-          </label>
 
           <div>
             <label className="flex items-start gap-3">
