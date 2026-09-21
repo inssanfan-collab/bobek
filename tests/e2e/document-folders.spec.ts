@@ -11,6 +11,15 @@ const pdf = (name: string) => ({
   buffer: Buffer.from(`%PDF-1.4\n% ${name} ${Date.now()}\n%%EOF\n`),
 });
 
+/** 12 МБ — больше предела middleware по умолчанию (10 МБ). */
+const bigPdf = (name: string) => {
+  const buffer = Buffer.alloc(12 * 1024 * 1024, 0x20);
+  buffer.write(`%PDF-1.4
+% ${name} ${Date.now()}
+`);
+  return { name, mimeType: 'application/pdf', buffer };
+};
+
 async function createFolder(page: Page, title: string) {
   await page.locator('#folderRu').fill(title);
   await page.getByRole('button', { name: 'Добавить папку' }).click();
@@ -37,11 +46,13 @@ test.describe('Документы — вложенные папки, как в �
     await page.waitForURL(/folder=/);
 
     try {
-      // Два файла разом — названия берутся из имён файлов.
-      await page.locator('#file').setInputFiles([pdf('Жарғы  e2e.pdf'), pdf('Штаттық кесте e2e.pdf')]);
+      // Три файла разом — названия берутся из имён файлов. Один больше 10 МБ:
+      // у middleware свой предел тела, и сверх него форма молча обрезалась.
+      await page.locator('#file').setInputFiles([pdf('Жарғы  e2e.pdf'), pdf('Штаттық кесте e2e.pdf'), bigPdf('Үлкен e2e.pdf')]);
       await page.getByRole('button', { name: 'Загрузить' }).click();
       await expect(page.getByText('Жарғы e2e', { exact: true })).toBeVisible();
       await expect(page.getByText('Штаттық кесте e2e', { exact: true })).toBeVisible();
+      await expect(page.getByText('Үлкен e2e', { exact: true })).toBeVisible();
 
       // Сайт: папка → вложенная → файлы, и путь назад.
       await page.goto(`${SAD}/documents`);
@@ -78,7 +89,7 @@ test.describe('Документы — вложенные папки, как в �
 
       await page.getByRole('link', { name: new RegExp(YEAR) }).click();
       await page.waitForURL(/folder=/);
-      for (const title of ['Жарғы e2e', 'Штаттық кесте e2e']) {
+      for (const title of ['Жарғы e2e', 'Штаттық кесте e2e', 'Үлкен e2e']) {
         const row = page.locator('div.px-5', { has: page.getByText(title, { exact: true }) });
         await row.getByRole('button', { name: 'Удалить' }).first().click();
         await expect(page.getByText(title, { exact: true })).toHaveCount(0);
