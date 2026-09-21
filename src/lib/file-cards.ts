@@ -45,13 +45,18 @@ function kindOf(mime: string | undefined, name: string): Kind | null {
   return 'file';
 }
 
-function formatSize(bytes: number, locale: Locale): string {
+export function formatSize(bytes: number, locale: Locale): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} ${T.kb[locale]}`;
   return `${(bytes / 1024 / 1024).toFixed(1).replace('.', locale === 'ru' ? ',' : '.')} ${T.mb[locale]}`;
 }
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
+}
+
+/** «PDF», «Word», «Excel» — подпись вида файла по его типу. */
+export function fileKindLabel(mime: string): string {
+  return LABEL[kindOf(mime, '') ?? 'file'];
 }
 
 /** id всех файлов, на которые ссылается текст, — чтобы одним запросом достать их размеры. */

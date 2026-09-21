@@ -46,6 +46,13 @@ const PATHS = {
     </>
   ),
   chevron: <path d="m6.5 9.5 5.5 5 5.5-5" />,
+  download: (
+    <>
+      <path d="M12 4v11" />
+      <path d="m7.5 10.5 4.5 4.5 4.5-4.5" />
+      <path d="M5 19.5h14" />
+    </>
+  ),
   chat: (
     <>
       <path d="M4 5h16v10a2 2 0 0 1-2 2H9l-5 4z" />

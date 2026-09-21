@@ -7,6 +7,7 @@ import { mediaUrl, type AlbumWithCover, type PostWithCover } from '@/components/
 import { EmptyState } from '@/components/ui/EmptyState';
 import { UiIcon } from '@/components/site/UiIcon';
 import { isOfficeDoc } from '@/lib/media-kind';
+import { fileKindLabel, formatSize } from '@/lib/file-cards';
 import type {
   Club, Document, DocumentFolder, FaqItem, Group, Media, MenuDay, StaffMember, TenantProfile,
 } from '@prisma/client';
@@ -18,7 +19,6 @@ const T = {
     ru: 'Раздел пока заполняется. Загляните позже.',
   },
   download: { kk: 'Жүктеу', ru: 'Скачать' },
-  openDoc: { kk: 'Ашу', ru: 'Открыть' },
   free: { kk: 'Бос орын', ru: 'Свободно мест' },
   total: { kk: 'Барлық орын', ru: 'Всего мест' },
   teachers: { kk: 'Тәрбиешілер', ru: 'Воспитатели' },
@@ -181,50 +181,62 @@ export function GroupList({ groups, locale }: { groups: Group[]; locale: Locale 
 
 type DocWithMedia = Document & { media: Media };
 
+/**
+ * Список файлов как в проводнике: вся строка — это «открыть». Отдельная
+ * кнопка «Открыть» рядом с кликабельной строкой была бы лишней и на телефоне
+ * отнимала место у длинных названий. Скачать — значком справа.
+ *
+ * Строка кликабельна через растянутую ссылку (after:inset-0 на названии),
+ * а не через <a> вокруг всего: ссылка «скачать» внутри другой ссылки —
+ * недопустимая разметка, и читалка экрана озвучила бы всю строку разом.
+ * Дату не показываем: это дата загрузки на сайт, а не документа —
+ * у перенесённой разом папки она у всех одинаковая и сбивает с толку.
+ */
 function DocRows({ items, locale }: { items: DocWithMedia[]; locale: Locale }) {
   return (
     <ul className="divide-y divide-line">
-      {items.map((doc) => (
-        <li key={doc.id} className="flex flex-wrap items-center gap-3 px-4 py-3 sm:px-5">
-          <UiIcon name="file" className="h-6 w-6 shrink-0 text-brand-ink" />
-          <span className="min-w-0 flex-1">
-            <span className="block font-semibold">{pick(locale, doc.titleKk, doc.titleRu)}</span>
-            <span className="block text-sm text-muted">
-              {formatDate(doc.publishedAt, locale)} · {Math.max(1, Math.round(doc.media.size / 1024))} КБ
+      {items.map((doc) => {
+        const title = pick(locale, doc.titleKk, doc.titleRu);
+        // PDF браузер открывает сам. Word и Excel он не умеет, поэтому они
+        // ведут на нашу страницу с просмотрщиком — посетитель остаётся
+        // на сайте сада, а не уходит на чужой домен.
+        const stretch = 'after:absolute after:inset-0 focus-visible:outline-none';
+        return (
+          <li
+            key={doc.id}
+            className="relative flex items-center gap-3 px-4 py-3 transition hover:bg-brand-soft/40 focus-within:bg-brand-soft/40 sm:px-5"
+          >
+            <UiIcon name="file" className="h-6 w-6 shrink-0 text-brand-ink" />
+            <span className="min-w-0 flex-1">
+              {isOfficeDoc(doc.media.mime) ? (
+                <Link href={withLocale(`/doc/${doc.id}`, locale)} className={`block font-semibold ${stretch}`}>
+                  {title}
+                </Link>
+              ) : (
+                <a
+                  href={`/api/media/${doc.mediaId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`block font-semibold ${stretch}`}
+                >
+                  {title}
+                </a>
+              )}
+              <span className="block text-sm text-muted">
+                {fileKindLabel(doc.media.mime)} · {formatSize(doc.media.size, locale)}
+              </span>
             </span>
-          </span>
-          {/* Сначала открыть, а не скачать: родитель обычно хочет прочитать
-              правила приёма, а не завести их в папке «Загрузки». PDF браузер
-              покажет сам; Word и Excel он открыть не умеет и всё равно
-              скачает — поэтому отдельная кнопка «Скачать» остаётся. */}
-          {/* PDF браузер открывает сам. Word и Excel он не умеет, поэтому они
-              ведут на нашу страницу с просмотрщиком — посетитель остаётся
-              на сайте сада, а не уходит на чужой домен. */}
-          <span className="flex shrink-0 gap-2">
-            {isOfficeDoc(doc.media.mime) ? (
-              <Link href={withLocale(`/doc/${doc.id}`, locale)} className="btn-secondary text-sm">
-                {T.openDoc[locale]}
-              </Link>
-            ) : (
-              <a
-                href={`/api/media/${doc.mediaId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary text-sm"
-              >
-                {T.openDoc[locale]}
-              </a>
-            )}
             <a
               href={`/api/media/${doc.mediaId}?download=1`}
-              className="btn-ghost text-sm"
-              aria-label={`${T.download[locale]}: ${pick(locale, doc.titleKk, doc.titleRu)}`}
+              className="relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-xl text-brand-ink transition hover:bg-brand-soft"
+              title={T.download[locale]}
+              aria-label={`${T.download[locale]}: ${title}`}
             >
-              {T.download[locale]}
+              <UiIcon name="download" className="h-5 w-5" />
             </a>
-          </span>
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ul>
   );
 }
