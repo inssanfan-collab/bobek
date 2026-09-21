@@ -18,7 +18,8 @@ import {
   canDeleteSection, CUSTOM_KINDS, isCustomKind, isValidSectionSlug, normalizeLinkUrl,
   RESERVED_SECTION_SLUGS, sectionSettings,
 } from '@/lib/sections';
-import type { SectionType } from '@prisma/client';
+import type { Prisma, SectionType } from '@prisma/client';
+import { canMoveFolder, titleFromFileName } from '@/lib/doc-tree';
 import { saveUpload, deleteMedia, UploadError } from '@/server/media';
 import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { geocodeAddress } from '@/server/maps/yandex';
@@ -611,68 +612,114 @@ export async function deleteMediaAction(formData: FormData) {
  * Папка документа проверяется отдельно: без этого сад мог бы подставить чужой
  * folderId и увести файл на соседний сайт.
  */
-async function folderIdFrom(formData: FormData, tenantId: string): Promise<string | null> {
-  const folderId = str(formData, 'folderId');
+async function folderIdFrom(formData: FormData, tenantId: string, field = 'folderId'): Promise<string | null> {
+  const folderId = str(formData, field);
   if (!folderId) return null;
   await assertOwned('documentFolder', folderId, tenantId);
   return folderId;
 }
 
-export async function createDocFolder(formData: FormData) {
-  const ctx = await gate(formData);
-  const titleRu = str(formData, 'titleRu');
-  if (titleRu.length < 2) throw new ActionError({ kk: 'Бөлім атауын көрсетіңіз', ru: 'Укажите название раздела' });
-
+/** Следующая позиция среди соседей: новая папка встаёт в конец своего уровня. */
+async function nextFolderPosition(tenantId: string, parentId: string | null): Promise<number> {
   const last = await prisma.documentFolder.findFirst({
-    where: { tenantId: ctx.tenantId },
+    where: { tenantId, parentId },
     orderBy: { position: 'desc' },
     select: { position: true },
   });
+  return (last?.position ?? -1) + 1;
+}
+
+export async function createDocFolder(formData: FormData) {
+  const ctx = await gate(formData);
+  const titleRu = str(formData, 'titleRu');
+  if (titleRu.length < 2) throw new ActionError({ kk: 'Бума атауын көрсетіңіз', ru: 'Укажите название папки' });
+  const parentId = await folderIdFrom(formData, ctx.tenantId, 'parentId');
 
   await prisma.documentFolder.create({
     data: {
       tenantId: ctx.tenantId,
       titleRu,
       titleKk: str(formData, 'titleKk') || titleRu,
-      position: (last?.position ?? -1) + 1,
+      parentId,
+      position: await nextFolderPosition(ctx.tenantId, parentId),
     },
   });
 
   revalidatePath('/admin/documents');
 }
 
+/** Переименование и перенос в другую папку — одной формой. */
 export async function renameDocFolder(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   const titleRu = str(formData, 'titleRu');
-  if (titleRu.length < 2) throw new ActionError({ kk: 'Бөлім атауын көрсетіңіз', ru: 'Укажите название раздела' });
-
+  if (titleRu.length < 2) throw new ActionError({ kk: 'Бума атауын көрсетіңіз', ru: 'Укажите название папки' });
   await assertOwned('documentFolder', id, ctx.tenantId);
-  await prisma.documentFolder.update({
-    where: { id },
-    data: { titleRu, titleKk: str(formData, 'titleKk') || titleRu },
-  });
 
+  const data: Prisma.DocumentFolderUncheckedUpdateInput = { titleRu, titleKk: str(formData, 'titleKk') || titleRu };
+
+  // Поля «где лежит» в форме может не быть — тогда папка остаётся на месте.
+  if (formData.has('parentId')) {
+    const parentId = await folderIdFrom(formData, ctx.tenantId, 'parentId');
+    const folders = await ctx.db.docFolders.findMany({ select: { id: true, parentId: true, position: true } });
+    const current = folders.find((f) => f.id === id);
+    if (current && current.parentId !== parentId) {
+      if (!canMoveFolder(folders, id, parentId)) {
+        throw new ActionError({
+          kk: 'Буманы өзінің ішіне салуға болмайды',
+          ru: 'Папку нельзя положить внутрь неё самой',
+        });
+      }
+      data.parentId = parentId;
+      data.position = await nextFolderPosition(ctx.tenantId, parentId);
+    }
+  }
+
+  await prisma.documentFolder.update({ where: { id }, data });
   revalidatePath('/admin/documents');
 }
 
-/** Папка удаляется вместе с порядком, но не с файлами: они уходят в общий список. */
+/**
+ * Папка удаляется, содержимое — нет: вложенные папки и файлы поднимаются
+ * на уровень выше, туда, где лежала сама папка. Случайное удаление
+ * «IV. Учебно-методическая работа» не должно уносить с собой сотню файлов.
+ */
 export async function deleteDocFolder(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   await assertOwned('documentFolder', id, ctx.tenantId);
-  await prisma.documentFolder.delete({ where: { id } });
+  const folder = await prisma.documentFolder.findUniqueOrThrow({ where: { id }, select: { parentId: true } });
+
+  const [children, start] = await Promise.all([
+    prisma.documentFolder.findMany({
+      where: { tenantId: ctx.tenantId, parentId: id },
+      orderBy: { position: 'asc' },
+      select: { id: true },
+    }),
+    nextFolderPosition(ctx.tenantId, folder.parentId),
+  ]);
+
+  await prisma.$transaction([
+    ...children.map((child, index) =>
+      prisma.documentFolder.update({ where: { id: child.id }, data: { parentId: folder.parentId, position: start + index } }),
+    ),
+    prisma.document.updateMany({ where: { tenantId: ctx.tenantId, folderId: id }, data: { folderId: folder.parentId } }),
+    prisma.documentFolder.delete({ where: { id } }),
+  ]);
+
   revalidatePath('/admin/documents');
 }
 
+/** Выше/ниже — среди соседей по уровню, а не среди всех папок сада. */
 export async function moveDocFolder(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   const up = str(formData, 'direction') === 'up';
   await assertOwned('documentFolder', id, ctx.tenantId);
+  const { parentId } = await prisma.documentFolder.findUniqueOrThrow({ where: { id }, select: { parentId: true } });
 
   const folders = await prisma.documentFolder.findMany({
-    where: { tenantId: ctx.tenantId },
+    where: { tenantId: ctx.tenantId, parentId },
     orderBy: { position: 'asc' },
     select: { id: true },
   });
@@ -689,34 +736,57 @@ export async function moveDocFolder(formData: FormData) {
   revalidatePath('/admin/documents');
 }
 
+/**
+ * Добавление и правка документа. Файлов можно выбрать сразу несколько —
+ * материалы самооценки приходят пачками по два десятка, и загружать их
+ * по одному — полчаса на папку. У пачки названия берутся из имён файлов.
+ */
 export async function saveDocument(formData: FormData) {
   const ctx = await gate(formData);
-  const titleRu = str(formData, 'titleRu');
-  if (titleRu.length < 2) throw new ActionError({ kk: 'Құжат атауын көрсетіңіз', ru: 'Укажите название документа' });
-
-  const file = formData.get('file');
   const existingId = str(formData, 'id');
-
-  let mediaId = str(formData, 'mediaId');
-  if (file instanceof File && file.size > 0) {
-    const media = await saveUpload(file, ctx.tenantId);
-    mediaId = media.id;
-  }
-  if (!mediaId) throw new ActionError({ kk: 'Құжат файлын тіркеңіз', ru: 'Прикрепите файл документа' });
-  await assertOwned('media', mediaId, ctx.tenantId);
-
-  const data = {
-    titleRu,
-    titleKk: str(formData, 'titleKk') || titleRu,
-    folderId: await folderIdFrom(formData, ctx.tenantId),
-    mediaId,
-  };
+  const folderId = await folderIdFrom(formData, ctx.tenantId);
+  const files = formData.getAll('file').filter((f): f is File => f instanceof File && f.size > 0);
 
   if (existingId) {
+    const titleRu = str(formData, 'titleRu');
+    if (titleRu.length < 2) throw new ActionError({ kk: 'Құжат атауын көрсетіңіз', ru: 'Укажите название документа' });
     await assertOwned('document', existingId, ctx.tenantId);
-    await prisma.document.update({ where: { id: existingId }, data });
-  } else {
-    await prisma.document.create({ data: { ...data, tenantId: ctx.tenantId } });
+    const mediaId = files[0] ? (await saveUpload(files[0], ctx.tenantId)).id : undefined;
+    await prisma.document.update({
+      where: { id: existingId },
+      data: { titleRu, titleKk: str(formData, 'titleKk') || titleRu, folderId, ...(mediaId ? { mediaId } : {}) },
+    });
+    revalidatePath('/admin/documents');
+    return;
+  }
+
+  if (files.length === 0) throw new ActionError({ kk: 'Құжат файлын тіркеңіз', ru: 'Прикрепите файл документа' });
+
+  const last = await prisma.document.findFirst({
+    where: { tenantId: ctx.tenantId, folderId },
+    orderBy: { position: 'desc' },
+    select: { position: true },
+  });
+  let position = (last?.position ?? -1) + 1;
+
+  // Название из формы — только для одиночного файла: одно название на двадцать
+  // файлов дало бы двадцать одинаковых строк.
+  const single = files.length === 1;
+  const formRu = single ? str(formData, 'titleRu') : '';
+  const formKk = single ? str(formData, 'titleKk') : '';
+  for (const file of files) {
+    const media = await saveUpload(file, ctx.tenantId);
+    const fromName = titleFromFileName(file.name) || file.name;
+    await prisma.document.create({
+      data: {
+        tenantId: ctx.tenantId,
+        titleRu: formRu || fromName,
+        titleKk: formKk || formRu || fromName,
+        folderId,
+        mediaId: media.id,
+        position: position++,
+      },
+    });
   }
 
   revalidatePath('/admin/documents');

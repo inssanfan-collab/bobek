@@ -26,7 +26,8 @@
     "guide:pdf": "tsx scripts/make-guide-pdf.ts",
     "template:example": "tsx scripts/make-anketa-example.ts",
     "og:image": "tsx scripts/make-og-image.ts",
-    "posts:import": "node --conditions=react-server --import tsx scripts/import-video-posts.ts"
+    "posts:import": "node --conditions=react-server --import tsx scripts/import-video-posts.ts",
+    "docs:import": "node --conditions=react-server --import tsx scripts/import-doc-tree.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.0.2",

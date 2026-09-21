@@ -450,10 +450,16 @@ model DocumentFolder {
   titleRu   String
   position  Int      @default(0)
   createdAt DateTime @default(now())
+  /// Вложенность как в проводнике: «IV. Учебно-методическая работа» →
+  /// «2024 - 2025». Пусто — папка верхнего уровня.
+  parentId  String?
+  parent    DocumentFolder?  @relation("DocFolderTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  DocumentFolder[] @relation("DocFolderTree")
 
   documents Document[]
 
   @@index([tenantId, position])
+  @@index([tenantId, parentId, position])
 }
 
 model Document {

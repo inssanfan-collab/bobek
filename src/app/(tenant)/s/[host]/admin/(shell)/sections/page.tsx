@@ -1,4 +1,5 @@
 import { tenantAdmin } from '@/server/tenant/admin-context';
+import { flattenTree, indentLabel } from '@/lib/doc-tree';
 import { csrfToken } from '@/server/auth/csrf';
 import { PageHeader } from '@/components/admin/AdminShell';
 import { ActionForm } from '@/components/ActionForm';
@@ -100,7 +101,11 @@ export default async function SectionsPage({ params }: { params: Promise<{ host:
   const parentOptions = rows
     .filter((row) => !row.parentId && row.type !== 'LINK')
     .map((row) => ({ id: row.id, label: pick(locale, row.titleKk, row.titleRu) }));
-  const folderOptions = folders.map((folder) => ({ id: folder.id, label: pick(locale, folder.titleKk, folder.titleRu) }));
+  // Папки вложенные — в списке они идут деревом, с отступом по глубине.
+  const folderOptions = flattenTree(folders).map(({ folder, depth }) => ({
+    id: folder.id,
+    label: indentLabel(pick(locale, folder.titleKk, folder.titleRu), depth),
+  }));
 
   const siteBase = `https://${ctx.primaryHost}`;
 

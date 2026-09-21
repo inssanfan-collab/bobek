@@ -36,7 +36,7 @@ async function load(host: string, id: string) {
   // названием служит имя файла.
   const media = await context.db.media.findFirst({ where: { id } });
   if (!media || !isOfficeDoc(media.mime)) notFound();
-  const doc = { mediaId: media.id, titleRu: media.origName, titleKk: media.origName };
+  const doc = { mediaId: media.id, titleRu: media.origName, titleKk: media.origName, folderId: null };
   return { context, doc, fromText: true };
 }
 
@@ -77,7 +77,10 @@ export default async function DocumentViewPage({
       <main id="main" className="container-page py-8">
         {documentsSection && !fromText ? (
           <Link
-            href={withLocale(`/${documentsSection.slug}`, locale)}
+            href={withLocale(
+              doc.folderId ? `/${documentsSection.slug}?folder=${doc.folderId}` : `/${documentsSection.slug}`,
+              locale,
+            )}
             className="text-sm font-semibold text-brand-ink"
           >
             ← {T.back[locale]}

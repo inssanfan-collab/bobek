@@ -68,6 +68,17 @@ export function formatDocCount(count: number, locale: Locale = DEFAULT_LOCALE): 
   return `${count} документов`;
 }
 
+/** «1 папка», «3 папки», «5 папок». По-казахски — «3 бума». */
+export function formatFolderCount(count: number, locale: Locale = DEFAULT_LOCALE): string {
+  if (locale === 'kk') return `${count} бума`;
+
+  const tail = count % 10;
+  const hundreds = count % 100;
+  if (tail === 1 && hundreds !== 11) return `${count} папка`;
+  if (tail >= 2 && tail <= 4 && (hundreds < 12 || hundreds > 14)) return `${count} папки`;
+  return `${count} папок`;
+}
+
 /**
  * «1 сад», «2 сада», «5 садов» — то же правило, что у документов.
  * По-казахски счётное слово после числительного не изменяется.

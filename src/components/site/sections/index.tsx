@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
-import { formatAgeRange, formatDate, formatDocCount } from '@/lib/labels';
+import { formatAgeRange, formatDate, formatDocCount, formatFolderCount } from '@/lib/labels';
+import { childrenByParent, deepDocCounts, folderPath, subtreeIds } from '@/lib/doc-tree';
 import { mediaUrl, type AlbumWithCover, type PostWithCover } from '@/components/site/blocks';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { UiIcon } from '@/components/site/UiIcon';
@@ -32,6 +33,9 @@ const T = {
   teacher: { kk: 'Жетекші', ru: 'Ведёт' },
   schedule: { kk: 'Кесте', ru: 'Расписание' },
   age: { kk: 'Жасы', ru: 'Возраст' },
+  path: { kk: 'Бумаға апаратын жол', ru: 'Путь к папке' },
+  up: { kk: 'Бір деңгей жоғары', ru: 'На уровень выше' },
+  folderEmpty: { kk: 'Бұл бумада әзірге құжат жоқ.', ru: 'В этой папке пока нет документов.' },
 } as const;
 
 export function Empty({ locale }: { locale: Locale }) {
@@ -226,63 +230,132 @@ function DocRows({ items, locale }: { items: DocWithMedia[]; locale: Locale }) {
 }
 
 /**
- * Документы разложены по папкам сада и свёрнуты: у иных садов их полторы сотни,
- * и сплошной список читать невозможно. Сворачивание сделано на <details> —
- * работает без JavaScript, открывается с клавиатуры, а браузерный поиск
- * по странице сам раскрывает нужную папку.
+ * Документы — как папки в проводнике: открыл папку, внутри вложенные папки
+ * и файлы, сверху путь назад. У иных садов полторы сотни файлов, разложенных
+ * по восьми разделам самооценки и по учебным годам, и сплошной список (или
+ * гармошка в три уровня) читать невозможно.
+ *
+ * Папка — отдельный адрес (`?folder=`), а не раскрывашка на JavaScript:
+ * ссылку на «VII. Оценка знаний / 2024 - 2025» можно переслать, кнопка
+ * «Назад» в браузере работает, поисковик видит каждую папку.
  */
 export function DocumentList({
   folders,
   documents,
   locale,
+  basePath,
+  rootTitle,
+  rootId = null,
+  currentId = null,
 }: {
   folders: DocumentFolder[];
   documents: DocWithMedia[];
   locale: Locale;
+  /** Адрес раздела: к нему дописывается `?folder=`. */
+  basePath: string;
+  /** Первое звено пути — название раздела сада. */
+  rootTitle: string;
+  /** «Документы из папки» показывают одну папку — она и есть корень. */
+  rootId?: string | null;
+  currentId?: string | null;
 }) {
-  if (documents.length === 0) return <Empty locale={locale} />;
+  const counts = deepDocCounts(folders, documents);
+  const children = childrenByParent(folders);
+  // Пустые папки родителю не показываем: «зайди — там ничего нет» раздражает.
+  const visible = (id: string) => (counts.get(id) ?? 0) > 0;
 
-  const byFolder = new Map<string, DocWithMedia[]>();
-  const loose: DocWithMedia[] = [];
-  for (const doc of documents) {
-    if (!doc.folderId) {
-      loose.push(doc);
-      continue;
-    }
-    const list = byFolder.get(doc.folderId) ?? [];
-    list.push(doc);
-    byFolder.set(doc.folderId, list);
-  }
+  // Открыть можно только папку внутри корня раздела: иначе через
+  // «документы из папки» по подобранному адресу смотрели бы соседние.
+  const allowed = rootId ? subtreeIds(folders, rootId) : null;
+  const openId = currentId && (!allowed || allowed.has(currentId)) && folders.some((f) => f.id === currentId)
+    ? currentId
+    : rootId;
 
-  const filled = folders.filter((folder) => (byFolder.get(folder.id)?.length ?? 0) > 0);
-  // Единственную папку прятать незачем — раскрываем сразу.
-  const openByDefault = filled.length === 1;
+  const fullPath = folderPath(folders, openId);
+  const rootIndex = rootId ? fullPath.findIndex((f) => f.id === rootId) : -1;
+  const trail = fullPath.slice(rootIndex + 1);
+
+  const subfolders = (children.get(openId) ?? []).filter((f) => visible(f.id));
+  const files = documents.filter((doc) => (doc.folderId ?? null) === openId);
+
+  const href = (id: string | null) =>
+    withLocale(id && id !== rootId ? `${basePath}?folder=${id}` : basePath, locale);
+
+  if (subfolders.length === 0 && files.length === 0 && trail.length === 0) return <Empty locale={locale} />;
 
   return (
-    <div className="space-y-3">
-      {filled.map((folder) => {
-        const items = byFolder.get(folder.id) ?? [];
-        return (
-          <details key={folder.id} id={`doc-${folder.id}`} className="card group overflow-hidden" open={openByDefault}>
-            <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 font-display text-lg font-bold sm:px-5">
-              <UiIcon name="folder" className="h-6 w-6 shrink-0 text-brand-ink" />
-              <span className="min-w-0 flex-1">{pick(locale, folder.titleKk, folder.titleRu)}</span>
-              <span className="hidden text-sm font-normal text-muted sm:inline">
-                {formatDocCount(items.length, locale)}
+    <div className="space-y-4">
+      {trail.length > 0 ? (
+        <nav aria-label={T.path[locale]} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+          <Link href={href(rootId)} className="font-semibold text-brand-ink hover:underline">
+            {rootTitle}
+          </Link>
+          {trail.map((folder, index) => {
+            const last = index === trail.length - 1;
+            const label = pick(locale, folder.titleKk, folder.titleRu);
+            return (
+              <span key={folder.id} className="flex items-center gap-2">
+                <span aria-hidden className="text-muted">/</span>
+                {last ? (
+                  <span aria-current="page" className="font-semibold">{label}</span>
+                ) : (
+                  <Link href={href(folder.id)} className="font-semibold text-brand-ink hover:underline">{label}</Link>
+                )}
               </span>
-              <UiIcon name="chevron" className="h-5 w-5 shrink-0 text-muted transition-transform group-open:rotate-180" />
-            </summary>
-            <div className="border-t border-line">
-              <DocRows items={items} locale={locale} />
-            </div>
-          </details>
-        );
-      })}
+            );
+          })}
+        </nav>
+      ) : null}
 
-      {loose.length > 0 ? (
+      {trail.length > 0 ? (
+        <h2 className="flex items-center gap-3 font-display text-2xl font-bold">
+          <UiIcon name="folder" className="h-7 w-7 shrink-0 text-brand-ink" />
+          {pick(locale, trail[trail.length - 1]!.titleKk, trail[trail.length - 1]!.titleRu)}
+        </h2>
+      ) : null}
+
+      {subfolders.length > 0 ? (
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {subfolders.map((folder) => {
+            const inner = (children.get(folder.id) ?? []).filter((f) => visible(f.id)).length;
+            return (
+              <li key={folder.id}>
+                <Link
+                  href={href(folder.id)}
+                  className="card flex h-full items-center gap-3 p-4 transition hover:shadow-lift sm:p-5"
+                >
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-soft text-brand-ink">
+                    <UiIcon name="folder" className="h-6 w-6" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-display font-bold leading-snug">
+                      {pick(locale, folder.titleKk, folder.titleRu)}
+                    </span>
+                    <span className="mt-0.5 block text-sm text-muted">
+                      {inner > 0 ? `${formatFolderCount(inner, locale)} · ` : ''}
+                      {formatDocCount(counts.get(folder.id) ?? 0, locale)}
+                    </span>
+                  </span>
+                  <UiIcon name="chevron" className="h-5 w-5 shrink-0 -rotate-90 text-muted" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+
+      {files.length > 0 ? (
         <div className="card overflow-hidden">
-          <DocRows items={loose} locale={locale} />
+          <DocRows items={files} locale={locale} />
         </div>
+      ) : subfolders.length === 0 ? (
+        <p className="text-muted">{T.folderEmpty[locale]}</p>
+      ) : null}
+
+      {trail.length > 0 ? (
+        <Link href={href(trail.length > 1 ? trail[trail.length - 2]!.id : rootId)} className="btn-ghost text-sm">
+          ← {T.up[locale]}
+        </Link>
       ) : null}
     </div>
   );

@@ -62,7 +62,7 @@ export default async function SectionPage({
   searchParams,
 }: {
   params: Promise<Params>;
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; folder?: string }>;
 }) {
   const [{ host, section: slug }, search] = await Promise.all([params, searchParams]);
   const { context, section } = await loadSection(host, slug);
@@ -129,6 +129,8 @@ export default async function SectionPage({
               type={section.type}
               sectionId={section.id}
               folderId={sectionSettings(section.settings).folderId}
+              openFolderId={typeof search.folder === 'string' ? search.folder : null}
+              title={title}
               hasChildren={children.length > 0}
               basePath={basePath}
               context={context}
@@ -146,6 +148,8 @@ async function SectionBody({
   type,
   sectionId,
   folderId,
+  openFolderId,
+  title,
   hasChildren,
   basePath,
   context,
@@ -155,6 +159,9 @@ async function SectionBody({
   sectionId: string;
   /** «Документы из папки»: показать только эту папку. */
   folderId: string | null;
+  /** Открытая папка из адреса (`?folder=`). */
+  openFolderId: string | null;
+  title: string;
   /** У раздела есть вложенные — пустую страницу тогда не показываем. */
   hasChildren: boolean;
   basePath: string;
@@ -188,19 +195,27 @@ async function SectionBody({
     }
 
     case 'DOCUMENTS': {
-      // Свой раздел «документы из папки» показывает одну папку; общий — все.
+      // Свой раздел «документы из папки» показывает одну папку с вложенными,
+      // общий — все. Дерево строится по всем папкам сада: их десятки.
       const [folders, documents] = await Promise.all([
-        db.docFolders.findMany({
-          where: folderId ? { id: folderId } : undefined,
-          orderBy: { position: 'asc' },
-        }),
+        db.docFolders.findMany({ orderBy: { position: 'asc' } }),
         db.documents.findMany({
-          where: folderId ? { folderId } : undefined,
           orderBy: [{ position: 'asc' }, { publishedAt: 'desc' }],
           include: { media: true },
         }),
       ]);
-      return <DocumentList folders={folders} documents={documents} locale={locale} />;
+      if (folderId && !folders.some((f) => f.id === folderId)) return <Empty locale={locale} />;
+      return (
+        <DocumentList
+          folders={folders}
+          documents={documents}
+          locale={locale}
+          basePath={basePath}
+          rootTitle={title}
+          rootId={folderId}
+          currentId={openFolderId}
+        />
+      );
     }
 
     case 'STAFF': {
