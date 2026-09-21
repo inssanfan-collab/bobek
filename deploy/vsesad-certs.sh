@@ -102,7 +102,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
     add_header Strict-Transport-Security "max-age=31536000" always;
 
-    client_max_body_size 110m;
+    client_max_body_size 55m;
 
     location / {
         proxy_pass http://127.0.0.1:3100;
