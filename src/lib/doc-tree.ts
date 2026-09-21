@@ -123,3 +123,46 @@ export function titleFromFileName(name: string): string {
     .trim()
     .slice(0, 200);
 }
+
+export type ArchiveDoc = DocNode & { titleKk: string; titleRu: string; ext: string };
+
+/**
+ * Что и под каким именем кладётся в архив «Скачать все документы»: папки
+ * сайта становятся папками архива, файл называется так же, как на сайте.
+ * `rootId` — папка, с которой начинается архив (null — все документы);
+ * одинаковые названия в одной папке получают « (2)», « (3)».
+ */
+export function archivePlan<F extends FolderNode & { titleKk: string; titleRu: string }, D extends ArchiveDoc>(
+  folders: F[],
+  docs: D[],
+  rootId: string | null,
+  locale: 'kk' | 'ru',
+  clean: (name: string) => string,
+): { path: string; doc: D }[] {
+  const children = childrenByParent(folders);
+  const title = (item: { titleKk: string; titleRu: string }) =>
+    clean((locale === 'kk' ? item.titleKk || item.titleRu : item.titleRu || item.titleKk).trim());
+  const result: { path: string; doc: D }[] = [];
+  const seen = new Set<string>();
+
+  const walk = (folderId: string | null, prefix: string) => {
+    const used = new Map<string, number>();
+    const unique = (name: string, ext: string) => {
+      const key = `${name}${ext}`.toLowerCase();
+      const n = (used.get(key) ?? 0) + 1;
+      used.set(key, n);
+      return n === 1 ? `${name}${ext}` : `${name} (${n})${ext}`;
+    };
+    for (const folder of children.get(folderId) ?? []) {
+      if (seen.has(folder.id)) continue;
+      seen.add(folder.id);
+      walk(folder.id, `${prefix}${unique(title(folder), '')}/`);
+    }
+    for (const doc of docs) {
+      if ((doc.folderId ?? null) !== folderId) continue;
+      result.push({ path: prefix + unique(title(doc), doc.ext ? `.${doc.ext}` : ''), doc });
+    }
+  };
+  walk(rootId, '');
+  return result;
+}

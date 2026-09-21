@@ -49,6 +49,21 @@ test.describe('Документы — вложенные папки, как в �
       await expect(page.getByRole('heading', { name: TOP })).toBeVisible();
       await page.getByRole('link', { name: new RegExp(YEAR) }).click();
       await expect(page.getByText('Жарғы e2e', { exact: true })).toBeVisible();
+      // Строка целиком — ссылка на файл, рядом текстовая «Скачать».
+      await expect(page.getByRole('link', { name: 'Жарғы e2e', exact: true })).toHaveAttribute('href', /\/api\/media\//);
+      await expect(page.getByRole('link', { name: 'Скачать: Жарғы e2e' })).toHaveAttribute('href', /download=1/);
+      await expect(page.getByRole('link', { name: /Скачать всю папку/ })).toBeVisible();
+
+      // Архив всех документов: настоящий ZIP, длина совпадает с заявленной,
+      // папки сайта — папками архива.
+      const zip = await page.request.get(`${SAD}/docs-archive`);
+      expect(zip.status()).toBe(200);
+      expect(zip.headers()['content-type']).toBe('application/zip');
+      const body = await zip.body();
+      expect(body.subarray(0, 4).toString('hex')).toBe('504b0304');
+      expect(body.length).toBe(Number(zip.headers()['content-length']));
+      expect(body.includes(Buffer.from(`${TOP}/${YEAR}/Жарғы e2e.pdf`))).toBe(true);
+
       const path = page.getByRole('navigation', { name: 'Путь к папке' });
       await expect(path).toContainText(TOP);
       await path.getByRole('link', { name: 'Документы' }).click();

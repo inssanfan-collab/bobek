@@ -19,6 +19,8 @@ const T = {
     ru: 'Раздел пока заполняется. Загляните позже.',
   },
   download: { kk: 'Жүктеу', ru: 'Скачать' },
+  downloadAll: { kk: 'Барлық құжаттарды жүктеу', ru: 'Скачать все документы' },
+  downloadFolder: { kk: 'Буманы толығымен жүктеу', ru: 'Скачать всю папку' },
   free: { kk: 'Бос орын', ru: 'Свободно мест' },
   total: { kk: 'Барлық орын', ru: 'Всего мест' },
   teachers: { kk: 'Тәрбиешілер', ru: 'Воспитатели' },
@@ -184,7 +186,7 @@ type DocWithMedia = Document & { media: Media };
 /**
  * Список файлов как в проводнике: вся строка — это «открыть». Отдельная
  * кнопка «Открыть» рядом с кликабельной строкой была бы лишней и на телефоне
- * отнимала место у длинных названий. Скачать — значком справа.
+ * отнимала место у длинных названий. Скачать — отдельной кнопкой справа.
  *
  * Строка кликабельна через растянутую ссылку (after:inset-0 на названии),
  * а не через <a> вокруг всего: ссылка «скачать» внутри другой ссылки —
@@ -228,11 +230,10 @@ function DocRows({ items, locale }: { items: DocWithMedia[]; locale: Locale }) {
             </span>
             <a
               href={`/api/media/${doc.mediaId}?download=1`}
-              className="relative z-10 grid h-10 w-10 shrink-0 place-items-center rounded-xl text-brand-ink transition hover:bg-brand-soft"
-              title={T.download[locale]}
+              className="btn-ghost relative z-10 shrink-0 text-sm"
               aria-label={`${T.download[locale]}: ${title}`}
             >
-              <UiIcon name="download" className="h-5 w-5" />
+              {T.download[locale]}
             </a>
           </li>
         );
@@ -295,6 +296,22 @@ export function DocumentList({
 
   if (subfolders.length === 0 && files.length === 0 && trail.length === 0) return <Empty locale={locale} />;
 
+  // Архив открытой папки со всеми вложенными; на верхнем уровне — всех документов.
+  const inArchive = openId ? subtreeIds(folders, openId) : null;
+  const archiveDocs = documents.filter((doc) => !inArchive || (doc.folderId !== null && inArchive.has(doc.folderId)));
+  const archiveBytes = archiveDocs.reduce((sum, doc) => sum + doc.media.size, 0);
+  const archive = archiveDocs.length > 1 ? (
+    <a
+      href={withLocale(openId ? `/docs-archive?folder=${openId}` : '/docs-archive', locale)}
+      download
+      className="btn-secondary shrink-0 text-sm"
+    >
+      <UiIcon name="download" className="h-4 w-4" />
+      {openId ? T.downloadFolder[locale] : T.downloadAll[locale]}
+      <span className="font-normal text-muted">ZIP · {formatSize(archiveBytes, locale)}</span>
+    </a>
+  ) : null;
+
   return (
     <div className="space-y-4">
       {trail.length > 0 ? (
@@ -320,10 +337,15 @@ export function DocumentList({
       ) : null}
 
       {trail.length > 0 ? (
-        <h2 className="flex items-center gap-3 font-display text-2xl font-bold">
-          <UiIcon name="folder" className="h-7 w-7 shrink-0 text-brand-ink" />
-          {pick(locale, trail[trail.length - 1]!.titleKk, trail[trail.length - 1]!.titleRu)}
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-3 font-display text-2xl font-bold">
+            <UiIcon name="folder" className="h-7 w-7 shrink-0 text-brand-ink" />
+            {pick(locale, trail[trail.length - 1]!.titleKk, trail[trail.length - 1]!.titleRu)}
+          </h2>
+          {archive}
+        </div>
+      ) : archive ? (
+        <div className="flex justify-end">{archive}</div>
       ) : null}
 
       {subfolders.length > 0 ? (

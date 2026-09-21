@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  canMoveFolder, childrenByParent, deepDocCounts, flattenTree, folderPath, subtreeIds, titleFromFileName,
+  archivePlan, canMoveFolder, childrenByParent, deepDocCounts, flattenTree, folderPath, subtreeIds, titleFromFileName,
 } from '@/lib/doc-tree';
 
 // I
@@ -78,5 +78,33 @@ describe('название документа из имени файла', () =>
     expect(titleFromFileName('Айша. Бағалау  парағы.pdf')).toBe('Айша. Бағалау парағы');
     expect(titleFromFileName('2023 - 2024. № 2 қосымша.PDF')).toBe('2023 - 2024. № 2 қосымша');
     expect(titleFromFileName('Отчёт_за_год.docx')).toBe('Отчёт за год');
+  });
+});
+
+describe('архив «скачать все документы»', () => {
+  const tree = [
+    { id: 'IV', parentId: null, position: 0, titleKk: 'IV. Оқу-әдістемелік жұмыс', titleRu: 'IV. Учебно-методическая работа' },
+    { id: 'y', parentId: 'IV', position: 0, titleKk: '2024 - 2025', titleRu: '2024 - 2025' },
+  ];
+  const doc = (folderId: string | null, kk: string, ru: string) => ({ folderId, titleKk: kk, titleRu: ru, ext: 'pdf' });
+  const docs = [
+    doc('y', 'Күн тәртібі', 'Режим дня'),
+    doc('y', 'Күн тәртібі', 'Режим дня'),
+    doc(null, 'Жарғы', 'Устав'),
+  ];
+
+  it('папки сайта становятся папками архива, одинаковые имена нумеруются', () => {
+    expect(archivePlan(tree, docs, null, 'kk', (s) => s).map((e) => e.path)).toEqual([
+      'IV. Оқу-әдістемелік жұмыс/2024 - 2025/Күн тәртібі.pdf',
+      'IV. Оқу-әдістемелік жұмыс/2024 - 2025/Күн тәртібі (2).pdf',
+      'Жарғы.pdf',
+    ]);
+  });
+
+  it('архив одной папки начинается с неё', () => {
+    expect(archivePlan(tree, docs, 'IV', 'ru', (s) => s).map((e) => e.path)).toEqual([
+      '2024 - 2025/Режим дня.pdf',
+      '2024 - 2025/Режим дня (2).pdf',
+    ]);
   });
 });
