@@ -56,6 +56,7 @@ test.describe('Документы — вложенные папки, как в �
 
       // Архив всех документов: настоящий ZIP, длина совпадает с заявленной,
       // папки сайта — папками архива.
+      // Без ?lang= — на основном языке сада (у демо-сада русский).
       const zip = await page.request.get(`${SAD}/docs-archive`);
       expect(zip.status()).toBe(200);
       expect(zip.headers()['content-type']).toBe('application/zip');

@@ -1,10 +1,10 @@
 import { promises as fs } from 'node:fs';
 import { NextResponse } from 'next/server';
-import { publicSiteContext, localeFrom } from '@/server/tenant/context';
+import { publicSiteContext } from '@/server/tenant/context';
 import { sectionTitle } from '@/server/tenant/section-title';
 import { storagePathFor } from '@/server/media';
 import { archivePlan } from '@/lib/doc-tree';
-import { pick } from '@/lib/i18n';
+import { localeFromParam, pick } from '@/lib/i18n';
 import {
   ZIP_LIMIT, centralHeader, crc32, endOfCentralDirectory, localHeader, safeZipName, zipSize,
   type ZipEntryMeta,
@@ -33,7 +33,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ host
   const { host } = await params;
   const context = await publicSiteContext(host);
   const url = new URL(request.url);
-  const locale = localeFrom(url.searchParams.get('lang') ?? undefined);
+  // Язык сада — явно: cache(), на котором держится localeFrom, живёт только
+  // при отрисовке страниц, а в обработчике адреса вернул бы русский.
+  const siteDefault = context.tenant.defaultLocale === 'ru' ? 'ru' : 'kk';
+  const locale = localeFromParam(url.searchParams.get('lang') ?? undefined, siteDefault);
 
   const [folders, documents] = await Promise.all([
     context.db.docFolders.findMany({ orderBy: { position: 'asc' } }),

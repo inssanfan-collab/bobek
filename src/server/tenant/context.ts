@@ -36,7 +36,8 @@ export const publicSiteContext = cache(async (hostParam: string): Promise<SiteCo
  * (cache), чтобы его не пришлось протаскивать пропом через шапку, подвал,
  * шаблоны и темы: полсотни мест строят ссылки через withLocale.
  * Заполняется в siteContext — его вызывает и layout, и каждая страница.
- * Вне запроса (тесты) остаётся русский, как у портала.
+ * Вне запроса (тесты) остаётся русский, как у портала. В обработчиках адресов
+ * (route.ts) cache() не действует — там язык брать из tenant.defaultLocale.
  */
 const siteLocale = cache((): { value: Locale } => ({ value: 'ru' }));
 
