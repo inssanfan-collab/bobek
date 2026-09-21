@@ -85,6 +85,13 @@ const T = {
   headerStyle: { kk: 'Түсі', ru: 'Цвет' },
   headerLayout: { kk: 'Түрі', ru: 'Вид' },
   headerBlock: { kk: 'Сайт тақырыпшасы', ru: 'Шапка сайта' },
+  siteLocale: { kk: 'Сайттың негізгі тілі', ru: 'Основной язык сайта' },
+  siteLocaleHint: {
+    kk: 'Сайт осы тілде ашылады. Келуші екінші тілге тақырыпшадағы ҚАЗ / РУС батырмасымен ауыса алады.',
+    ru: 'На этом языке сайт открывается. Посетитель переключается на второй язык кнопкой ҚАЗ / РУС в шапке.',
+  },
+  localeKk: { kk: 'Қазақша', ru: 'Казахский' },
+  localeRu: { kk: 'Орысша', ru: 'Русский' },
   headerBlockHint: {
     kk: 'Түрі, түсі және бекітілуі. Атау астындағы жазу, телефон мен батырма — «Басты бет» бөлімінде.',
     ru: 'Вид, цвет и закрепление. Подпись под названием, телефон и кнопка — на странице «Главная страница».',
@@ -118,6 +125,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
       select: {
         headerSticky: true, homeShowSections: true, homeSectionIds: true, homeShowContacts: true,
         brandColor: true, fontPair: true, shape: true, headerStyle: true, headerLayout: true,
+        defaultLocale: true,
       },
     }),
     ctx.db.sections.findMany({ where: { parentId: null, isVisible: true }, orderBy: { position: 'asc' } }),
@@ -239,6 +247,27 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
             </span>
           </label>
         </section>
+
+        <fieldset id="language" className="card scroll-mt-6 p-6">
+          <legend className="font-display text-lg font-bold">{T.siteLocale[locale]}</legend>
+          <p className="mt-1 text-sm text-muted">{T.siteLocaleHint[locale]}</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {([['kk', T.localeKk, 'ҚАЗ'], ['ru', T.localeRu, 'РУС']] as const).map(([code, name, badge]) => (
+              <label
+                key={code}
+                className="flex cursor-pointer items-center gap-3 rounded-2xl border border-line p-4 has-[:checked]:border-brand has-[:checked]:bg-brand-soft/40"
+              >
+                <input
+                  type="radio" name="defaultLocale" value={code}
+                  defaultChecked={(layout?.defaultLocale === 'ru' ? 'ru' : 'kk') === code}
+                  className="h-4 w-4"
+                />
+                <span className="rounded-lg bg-brand px-2 py-0.5 text-sm font-bold text-white">{badge}</span>
+                <span className="font-semibold">{name[locale]}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
 
         <fieldset className="card p-6">
           <legend className="font-display text-lg font-bold">{T.template[locale]}</legend>

@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { cache } from 'react';
 import { resolveTenantByHost, isPubliclyVisible, type ResolvedTenant } from './resolve';
 import { scoped, type TenantScope } from '@/server/db/scope';
-import { localeFromParam, withLocale } from '@/lib/i18n';
+import { isLocale, localeFromParam, withLocale as withLocaleFor, type Locale } from '@/lib/i18n';
 
 export type SiteContext = ResolvedTenant & { db: TenantScope };
 
@@ -14,6 +14,7 @@ export type SiteContext = ResolvedTenant & { db: TenantScope };
 export const siteContext = cache(async (hostParam: string): Promise<SiteContext> => {
   const resolved = await resolveTenantByHost(decodeURIComponent(hostParam));
   if (!resolved) notFound();
+  siteLocale().value = isLocale(resolved.tenant.defaultLocale) ? resolved.tenant.defaultLocale : 'kk';
   return { ...resolved, db: scoped(resolved.tenant.id) };
 });
 
@@ -30,6 +31,25 @@ export const publicSiteContext = cache(async (hostParam: string): Promise<SiteCo
   return context;
 });
 
-export const localeFrom = localeFromParam;
+/**
+ * Язык сайта по умолчанию — свой у каждого сада. Хранится на время запроса
+ * (cache), чтобы его не пришлось протаскивать пропом через шапку, подвал,
+ * шаблоны и темы: полсотни мест строят ссылки через withLocale.
+ * Заполняется в siteContext — его вызывает и layout, и каждая страница.
+ * Вне запроса (тесты) остаётся русский, как у портала.
+ */
+const siteLocale = cache((): { value: Locale } => ({ value: 'ru' }));
 
-export { withLocale };
+export function siteDefaultLocale(): Locale {
+  return siteLocale().value;
+}
+
+/** Язык страницы: из ?lang=, а без него — язык, выбранный садом. */
+export function localeFrom(value: string | string[] | undefined): Locale {
+  return localeFromParam(value, siteDefaultLocale());
+}
+
+/** Ссылка внутри сайта сада: параметр языка — только если он не основной. */
+export function withLocale(href: string, locale: Locale): string {
+  return withLocaleFor(href, locale, siteDefaultLocale());
+}

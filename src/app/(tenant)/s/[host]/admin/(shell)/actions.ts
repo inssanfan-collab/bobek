@@ -1060,6 +1060,8 @@ export async function saveAppearance(formData: FormData) {
     homeShowSections: formData.get('homeShowSections') === 'on' && (picked.length > 0 || rootIds.size === 0),
     homeSectionIds,
     homeShowContacts: formData.get('homeShowContacts') === 'on',
+    // Поля нет в форме — язык не трогаем; прислан мусор — казахский.
+    ...(formData.has('defaultLocale') ? { defaultLocale: str(formData, 'defaultLocale') === 'ru' ? 'ru' : 'kk' } : {}),
   };
 
   await prisma.$transaction([

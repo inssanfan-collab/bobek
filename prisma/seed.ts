@@ -134,6 +134,8 @@ async function main() {
         status: 'ACTIVE',
         templateCode: garden.template,
         palette: garden.palette,
+        // Сквозные тесты написаны на русской версии демо-садов.
+        defaultLocale: 'ru',
         profile: {
           create: {
             nameRu: garden.nameRu,

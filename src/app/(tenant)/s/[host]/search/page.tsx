@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
+import { publicSiteContext, localeFrom, siteDefaultLocale, withLocale } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
 import { ThemedFooter, ThemedHeader } from '@/components/site/ThemedChrome';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
@@ -68,7 +68,7 @@ export default async function SearchPage({
         <h1 className="font-display text-3xl font-extrabold sm:text-4xl">{T.title[locale]}</h1>
 
         <form className="card mt-6 flex flex-wrap gap-3 p-4" role="search">
-          {locale !== 'ru' ? <input type="hidden" name="lang" value={locale} /> : null}
+          {locale !== siteDefaultLocale() ? <input type="hidden" name="lang" value={locale} /> : null}
           <input
             name="q"
             defaultValue={query}

@@ -54,8 +54,8 @@ export default async function DocumentViewPage({
   searchParams: Promise<{ lang?: string }>;
 }) {
   const [{ host, id }, search] = await Promise.all([params, searchParams]);
-  const locale = localeFrom(search.lang);
   const { context, doc, fromText } = await load(host, id);
+  const locale = localeFrom(search.lang);
   const { profile, primaryHost } = context;
 
   const sections = await siteMenu(context.db);

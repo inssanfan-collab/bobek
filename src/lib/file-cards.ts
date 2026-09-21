@@ -79,7 +79,7 @@ export function renderFileCards(html: string, locale: Locale, files: Map<string,
 
     // Расширение не повторяем: вид файла и так написан под названием.
     const name = (text || escapeHtml(info?.origName ?? '')).replace(/\.(pdf|docx?|xlsx?)$/i, '') || text;
-    const lang = locale === 'kk' ? '?lang=kk' : '';
+    const lang = `?lang=${locale}`;
     const openHref = kind === 'word' || kind === 'excel' ? `/doc/${id}${lang}` : `/api/media/${id}`;
     const meta = info ? `${LABEL[kind]} · ${formatSize(info.size, locale)}` : LABEL[kind];
 

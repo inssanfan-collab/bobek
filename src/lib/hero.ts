@@ -1,5 +1,6 @@
 import type { TenantProfile } from '@prisma/client';
-import { pick, withLocale, type Locale } from '@/lib/i18n';
+import { pick, type Locale } from '@/lib/i18n';
+import { withLocale } from '@/server/tenant/context';
 
 /**
  * Тексты шапки и первого экрана главной, которые сад пишет сам.

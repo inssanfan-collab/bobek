@@ -9,7 +9,9 @@ export async function GET(
   { params }: { params: Promise<{ host: string }> },
 ) {
   const { host } = await params;
-  const { db, primaryHost } = await publicSiteContext(host);
+  const { db, primaryHost, tenant } = await publicSiteContext(host);
+  const main = tenant.defaultLocale === 'ru' ? 'ru' : 'kk';
+  const other = main === 'ru' ? 'kk' : 'ru';
   const base = `https://${primaryHost}`;
 
   const [sections, posts, albums] = await Promise.all([
@@ -41,8 +43,8 @@ ${urls
   .map(
     ({ loc, lastmod }) => `  <url>
     <loc>${loc}</loc>${lastmod ? `\n    <lastmod>${lastmod.toISOString().slice(0, 10)}</lastmod>` : ''}
-    <xhtml:link rel="alternate" hreflang="ru" href="${loc}"/>
-    <xhtml:link rel="alternate" hreflang="kk" href="${loc}${loc.includes('?') ? '&amp;' : '?'}lang=kk"/>
+    <xhtml:link rel="alternate" hreflang="${main}" href="${loc}"/>
+    <xhtml:link rel="alternate" hreflang="${other}" href="${loc}${loc.includes('?') ? '&amp;' : '?'}lang=${other}"/>
   </url>`,
   )
   .join('\n')}

@@ -70,7 +70,7 @@ export default async function TenantLayout({
 
   return (
     <html
-      lang="ru"
+      lang={tenant.defaultLocale === 'ru' ? 'ru' : 'kk'}
       data-palette={palette}
       data-pattern={pattern}
       data-theme={theme?.code}

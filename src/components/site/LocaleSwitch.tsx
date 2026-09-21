@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { LOCALES, LOCALE_LABEL, type Locale } from '@/lib/i18n';
+import { withLocale } from '@/server/tenant/context';
 
 /**
  * Переключатель языка через параметр адреса. Так у казахской и русской версии
@@ -9,7 +10,8 @@ export function LocaleSwitch({ locale, pathname }: { locale: Locale; pathname: s
   return (
     <div className="flex items-center rounded-xl border border-line p-0.5" role="group" aria-label="Язык сайта">
       {LOCALES.map((code) => {
-        const href = code === 'ru' ? pathname : `${pathname}?lang=${code}`;
+        // Основной язык сада — без параметра, второй — с ?lang=.
+        const href = withLocale(pathname, code);
         const active = code === locale;
         return (
           <Link
