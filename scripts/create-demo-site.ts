@@ -143,8 +143,8 @@ const PROFILE = {
   heroCta2TextKk: 'Біздің топтар',
   heroCta2TextRu: 'Наши группы',
   heroCta2Url: '/groups',
-  noticeKk: 'Бұл — EduSad демо-сайты: бөбекжай мен барлық деректер ойдан шығарылған. Өз сайтыңызды edusad.kz сайтында қосыңыз.',
-  noticeRu: 'Это демонстрационный сайт EduSad: ясли-сад и все данные вымышлены. Подключить такой сайт своему саду — на edusad.kz.',
+  noticeKk: 'EduSad демо-сайты: бөбекжай мен деректер ойдан шығарылған.',
+  noticeRu: 'Демо-сайт EduSad: ясли-сад и данные вымышлены.',
 };
 
 const ABOUT_RU = `
@@ -394,6 +394,7 @@ const DOC_TREE = [
   ] },
   { kk: 'Оқу-әдістемелік жұмыс', ru: 'Учебно-методическая работа', docs: [['godovoy-plan', 'Жылдық жоспар 2025–2026', 'Годовой план 2025–2026'], ['uchebny-plan', 'Оқу жоспары', 'Учебный план']] },
   { kk: 'Өзін-өзі бағалау', ru: 'Самооценка', docs: [['samoocenka', 'Өзін-өзі бағалау есебі, 2025', 'Отчёт по самооценке, 2025']] },
+  { kk: 'Сабақ кестесі', ru: 'Расписание занятий', docs: [['raspisanie', 'ҰОҚ кестесі 2025–2026', 'Расписание учебной деятельности 2025–2026']] },
   { kk: 'Тамақтану', ru: 'Питание', docs: [['menu-10', '10 күндік мәзір', 'Перспективное меню на 10 дней']] },
   { kk: 'Ата-аналарға', ru: 'Родителям', docs: [['pravila', 'Ішкі тәртіп ережесі', 'Правила внутреннего распорядка'], ['dogovor', 'Ата-анамен шарт (үлгі)', 'Договор с родителями (образец)']] },
   { kk: 'Сыбайлас жемқорлыққа қарсы іс-қимыл', ru: 'Противодействие коррупции', docs: [['anticorruption', 'Сыбайлас жемқорлыққа қарсы саясат', 'Антикоррупционная политика']] },
@@ -497,6 +498,19 @@ async function main() {
   const sections = await prisma.section.findMany({ where: { tenantId } });
   const sectionId = (slug: string) => sections.find((s) => s.slug === slug)!.id;
 
+  // Семнадцать пунктов в строку шапки не влезают: остальные — выпадающими
+  // подменю под «О саде», «Новостями» и «Родителям».
+  const NESTED: Record<string, string[]> = {
+    about: ['staff', 'groups', 'daily-routine', 'trustee', 'anticorruption'],
+    news: ['announcements'],
+    parents: ['menu', 'clubs', 'vacancies', 'faq'],
+  };
+  for (const [parent, children] of Object.entries(NESTED)) {
+    for (const [position, slug] of children.entries()) {
+      await prisma.section.update({ where: { id: sectionId(slug) }, data: { parentId: sectionId(parent), position } });
+    }
+  }
+
   // Текстовые страницы
   const PAGES: Record<string, [string, string]> = {
     about: [ABOUT_KK, ABOUT_RU],
@@ -573,14 +587,14 @@ async function main() {
     data: FAQ.map(([questionKk, questionRu, answerKk, answerRu], position) => ({ tenantId, questionKk, questionRu, answerKk, answerRu, position })),
   });
 
-  // Меню: эта и следующая рабочие недели
+  // Меню: прошлая и текущая рабочие недели — сверху страницы сегодняшний день
   const monday = new Date();
   monday.setUTCHours(0, 0, 0, 0);
   monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7));
   for (let week = 0; week < 2; week++) {
     for (let d = 0; d < 5; d++) {
       const m = MENU[(d + week * 2) % MENU.length]!;
-      const date = new Date(monday.getTime() + (week * 7 + d) * DAY);
+      const date = new Date(monday.getTime() + ((week - 1) * 7 + d) * DAY);
       await prisma.menuDay.create({
         data: {
           tenantId, date,

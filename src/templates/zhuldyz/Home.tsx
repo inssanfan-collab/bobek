@@ -8,7 +8,10 @@ import type { HomeProps } from '../types';
 
 /** Жұлдыз: обложка во весь экран, первая новость крупной карточкой. */
 export function ZhuldyzHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
-  const [lead, ...rest] = news;
+  // Крупная первая новость занимает две колонки из трёх: с ней ровно
+  // заполняют ряды 1 + 4 карточки, шестая оставалась бы в ряду одна.
+  const [lead, ...others] = news;
+  const rest = others.slice(0, 4);
 
   return (
     <>
