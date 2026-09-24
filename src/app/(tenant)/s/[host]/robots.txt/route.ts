@@ -12,7 +12,8 @@ export async function GET(
   const { tenant, primaryHost } = await siteContext(host);
 
   // Черновик сада индексировать нельзя: сайт ещё пустой и испортит выдачу.
-  const body = isPubliclyVisible(tenant.status)
+  // Демо-сад тоже: его данные выдуманы, и родитель не должен найти его в поиске.
+  const body = isPubliclyVisible(tenant.status) && !tenant.isDemo
     ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://${primaryHost}/sitemap.xml\n`
     : 'User-agent: *\nDisallow: /\n';
 

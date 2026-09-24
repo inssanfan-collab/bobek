@@ -202,16 +202,16 @@ export default async function PortalHome({
 
   const [gardens, gardensTotal, freeTotal, districts, news] = await Promise.all([
     prisma.tenant.findMany({
-      where: { status: 'ACTIVE' },
+      where: { status: 'ACTIVE', isDemo: false },
       include: { profile: true, domains: { where: { isPrimary: true }, take: 1 } },
       // Родитель ищет место — сады, где оно есть, показываем первыми.
       orderBy: [{ profile: { placesFree: 'desc' } }, { createdAt: 'desc' }],
       take: 6,
     }),
-    prisma.tenant.count({ where: { status: 'ACTIVE' } }),
-    prisma.tenant.count({ where: { status: 'ACTIVE', profile: { placesFree: { gt: 0 } } } }),
+    prisma.tenant.count({ where: { status: 'ACTIVE', isDemo: false } }),
+    prisma.tenant.count({ where: { status: 'ACTIVE', isDemo: false, profile: { placesFree: { gt: 0 } } } }),
     prisma.tenantProfile.findMany({
-      where: { district: { not: null }, tenant: { status: 'ACTIVE' } },
+      where: { district: { not: null }, tenant: { status: 'ACTIVE', isDemo: false } },
       select: { district: true },
       distinct: ['district'],
       orderBy: { district: 'asc' },
@@ -222,7 +222,7 @@ export default async function PortalHome({
       where: {
         status: 'PUBLISHED',
         publishedAt: { lte: new Date() },
-        tenant: { status: 'ACTIVE' },
+        tenant: { status: 'ACTIVE', isDemo: false },
         section: { isVisible: true, type: { in: ['NEWS', 'ANNOUNCEMENT'] } },
       },
       include: {

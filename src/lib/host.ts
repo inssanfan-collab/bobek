@@ -14,11 +14,14 @@ export function normalizeHost(rawHost: string | null | undefined): string {
   return withoutPort.trim().toLowerCase().replace(/\.$/, '');
 }
 
-/** Метки, которые не могут быть садом: их занимает сам портал и инфраструктура. */
+/**
+ * Метки, которые не могут быть садом: их занимает сам портал и инфраструктура.
+ * `demo` здесь нет намеренно: demo.edusad.kz — демонстрационный сад (Tenant.isDemo).
+ */
 export const RESERVED_SLUGS = new Set([
   'www', 'admin', 'api', 'mail', 'smtp', 'imap', 'ftp', 'ns', 'ns1', 'ns2',
   'static', 'cdn', 'assets', 'media', 'files', 'portal', 'app', 'test',
-  'staging', 'dev', 'demo', 'help', 'support', 'blog', 'shop', 'my', 'go',
+  'staging', 'dev', 'help', 'support', 'blog', 'shop', 'my', 'go',
 ]);
 
 // Ровно то, что обещает подсказка в форме: 3–32 символа, начинается и кончается
