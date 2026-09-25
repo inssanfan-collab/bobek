@@ -1,177 +1,205 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
-import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
-import { formatDate, formatGardenCount, formatMoney, KIND } from '@/lib/labels';
-import { PortalPage } from '@/components/portal/PortalChrome';
-import { localeFromParam, pick, withLocale, type Locale } from '@/lib/i18n';
+import { formatMoney } from '@/lib/labels';
+import { localeFromParam, withLocale, type Locale } from '@/lib/i18n';
+import { PLAN_CODES, PLAN_INFO } from '@/lib/plans';
+import { csrfToken } from '@/server/auth/csrf';
+import { SalesLive } from '@/components/portal/sales/SalesLive';
+import { SalesApplyForm } from '@/components/portal/sales/SalesApplyForm';
+import './home.css';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Главная портала — для родителей.
+ * Главная портала — продаёт сайты детским садам.
  *
- * Раньше она продавала сайты садам, а родитель, пришедший найти сад,
- * упирался в цену подписки и шаги подключения. Родителей на портале
- * в сотни раз больше, чем заведующих, поэтому первым экраном теперь
- * поиск сада, а всё для садов — на отдельной странице `/connect`,
- * куда ведут кнопки «Подключить сад».
+ * С 23.09.2026 назначение главной сменилось: она для заведующих, а не для
+ * родителей. Каталог садов (/catalog) и страницы для родителей остались,
+ * но в шапку и подвал главной не выведены — «пока садов не станет много».
+ *
+ * Разметка и стили — перенос образца «В+, живой» (bobegim-design,
+ * C2-prodazha.html). Весь текст отдаёт сервер: страница читается без
+ * скриптов и видна поисковикам. Движение и макеты добавляет SalesLive.
+ * Цены и описание тарифов — только из plans.ts и env.planPrices.
  */
 
 const T = {
-  eyebrow: { kk: 'Ақтөбе балабақшалары', ru: 'Детские сады Актобе' },
-  heroTitle: {
-    kk: 'Балабақшаны табыңыз және ол туралы бәрін біліңіз',
-    ru: 'Найдите детский сад и узнайте о нём всё',
-  },
-  heroLead: {
-    kk: 'Балабақшалардың ресми сайттары бір жерде: бос орындар, ас мәзірі, педагогтар, құжаттар мен жаңалықтар — қоңырау шалмай-ақ.',
-    ru: 'Официальные сайты садов в одном месте: свободные места, меню, педагоги, документы и новости — без звонков.',
-  },
-  searchLabel: { kk: 'Атауы немесе мекенжайы', ru: 'Название или адрес' },
-  searchExample: { kk: 'Мысалы: Нұрсат', ru: 'Например: Нурсат' },
-  district: { kk: 'Аудан', ru: 'Район' },
-  allDistricts: { kk: 'Барлық аудан', ru: 'Все районы' },
-  hasPlaces: { kk: 'Тек бос орыны барлар', ru: 'Только со свободными местами' },
-  find: { kk: 'Балабақша табу', ru: 'Найти сад' },
-  howQueue: { kk: 'Балабақшаға кезекке қалай тұру керек →', ru: 'Как встать в очередь в детский сад →' },
-  photoAlt: {
-    kk: 'Тәрбиеші балаларға кітап оқып отыр',
-    ru: 'Воспитатель читает детям книгу',
-  },
-  // Счётное слово склоняется по-русски («1 сад», «2 сада», «5 садов»);
-  // по-казахски после числа не меняется, поэтому казахская подпись целиком здесь.
-  statGardensKk: { kk: 'балабақша порталда', ru: '' },
-  statGardensRu: { kk: '', ru: 'на портале' },
-  statFreeKk: { kk: 'балабақшада бос орын бар', ru: '' },
-  statFreeRu: { kk: '', ru: 'со свободными местами' },
+  skip: { kk: 'Мазмұнға өту', ru: 'К содержанию' },
+  home: { kk: 'EduSad, басты бет', ru: 'EduSad, на главную' },
+  sections: { kk: 'Бөлімдер', ru: 'Разделы' },
+  navFeatures: { kk: 'Мүмкіндіктер', ru: 'Возможности' },
+  navPlans: { kk: 'Тарифтер', ru: 'Тарифы' },
+  navSteps: { kk: 'Қалай қосылуға болады', ru: 'Как подключиться' },
+  navFaq: { kk: 'Сұрақтар', ru: 'Вопросы' },
+  langGroup: { kk: 'Сайт тілі', ru: 'Язык сайта' },
+  apply: { kk: 'Өтінім қалдыру', ru: 'Оставить заявку' },
 
-  gardensTitle: { kk: 'Порталдағы балабақшалар', ru: 'Сады на портале' },
-  gardensLead: {
-    kk: 'Алдымен бос орыны бар балабақшалар. Әрқайсысының өз ресми сайты бар.',
-    ru: 'Сначала — сады со свободными местами. У каждого свой официальный сайт.',
+  h1: { kk: 'Балабақшаңыздың сайты — бір жұмыс күнінде', ru: 'Сайт вашего детского сада — за один рабочий день' },
+  lead: {
+    kk: 'Қазақ және орыс тіліндегі ресми сайт: нашар көретіндерге арналған нұсқасы бар, ал әкімші бөлімін кез келген қызметкер оңай меңгереді.',
+    ru: 'Официальный сайт на казахском и русском, с версией для слабовидящих и админкой, в которой разберётся любой сотрудник.',
   },
-  wholeCatalog: { kk: 'Толық каталог және карта →', ru: 'Весь каталог и карта →' },
-  freePlaces: { kk: 'Бос орын: %s', ru: 'Свободно мест: %s' },
-  noPlaces: { kk: 'Бос орын жоқ', ru: 'Мест нет' },
-  private: { kk: 'Жеке', ru: 'Частный' },
-  state: { kk: 'Мемлекеттік', ru: 'Государственный' },
-  openSite: { kk: 'Сайтты ашу →', ru: 'Открыть сайт →' },
-
-  newsTitle: { kk: 'Балабақшалардың жаңалықтары', ru: 'Новости садов' },
-  newsLead: {
-    kk: 'Ертеңгіліктер, хабарландырулар, топтардың өмірі — барлық балабақшалардың сайттарынан.',
-    ru: 'Утренники, объявления, жизнь групп — со всех сайтов садов.',
+  demo: { kk: 'Сайт үлгісін көру →', ru: 'Посмотреть пример сайта →' },
+  heroAlt: {
+    kk: 'Ақ төбедегі балабақша, аулада тәрбиеші мен балалар ойнап жүр',
+    ru: 'Детский сад на белом холме, воспитатель и дети играют во дворе',
   },
-  video: { kk: 'Бейне', ru: 'Видео' },
 
-  queueEyebrow: { kk: 'Ата-аналарға', ru: 'Родителям' },
-  queueTitle: { kk: 'Балабақшаға қалай түсуге болады', ru: 'Как попасть в детский сад' },
-  queueLead: {
-    kk: 'Кезекті мемлекет жүргізеді — біз оған тек сілтеме береміз. Порталда балабақшаны таңдауға және оның құжаттары мен шарттарын алдын ала білуге болады.',
-    ru: 'Очередь ведёт государство — мы на неё только ссылаемся. На портале можно выбрать сад и заранее узнать его документы и условия.',
+  trustHosting: { kk: 'Қазақстандағы хостинг', ru: 'Хостинг в Казахстане' },
+  trustHostingNote: { kk: 'балалар деректері шетелге кетпейді', ru: 'данные детей не уходят за рубеж' },
+  trustLang: { kk: 'Екі тіл', ru: 'Два языка' },
+  trustLangNote: { kk: '«Тіл туралы» заң талап еткендей', ru: 'как требует закон «О языках»' },
+  trustDocs: { kk: 'Шарт, шот және акт', ru: 'Договор, счёт и акт' },
+  trustDocsNote: { kk: 'шот бойынша төлем', ru: 'оплата по счёту' },
+  trustPrice: { kk: 'Жылына %s бастап', ru: 'От %s в год' },
+  trustPriceNote: { kk: 'хостинг пен қолдау кіреді', ru: 'хостинг и поддержка включены' },
+
+  adminTitle: { kk: 'Сайтты балабақшаның кез келген қызметкері жүргізе алады', ru: 'Вести сайт сможет любой сотрудник сада' },
+  adminLead: {
+    kk: 'Бағдарламашысыз және оқусыз. Міне, ең жиі жасалатын үш іс.',
+    ru: 'Без программиста и без обучения. Вот три дела, которые делаются чаще всего.',
   },
-  queueButton: { kk: 'Darabala.kz-те кезекке тұру', ru: 'Встать в очередь на Darabala.kz' },
-  queueMore: { kk: 'Толығырақ: құжаттар және кезеңдер →', ru: 'Подробнее: документы и этапы →' },
-
-  insideEyebrow: { kk: 'Әр балабақшаның сайтында', ru: 'На сайте каждого сада' },
-  insideTitle: { kk: 'Ата-анаға қажеттінің бәрі', ru: 'Всё, что нужно родителю' },
-
-  gardenBandTitle: { kk: 'Сіз балабақшаның өкілісіз бе?', ru: 'Вы представляете детский сад?' },
-  gardenBandText: {
-    kk: 'Екі тілдегі ресми сайт және қарапайым әкімші бөлімі — жылына %s-ден бастап. Бір жұмыс күнінде іске қосамыз.',
-    ru: 'Официальный сайт на двух языках и простая админка — от %s в год. Запускаем за один рабочий день.',
+  adminAlt: { kk: 'Балабақша қызметкері ноутбукта жаңалық жариялап отыр', ru: 'Сотрудница сада публикует новость на ноутбуке' },
+  tabNews: { kk: 'Фотосы бар жаңалық', ru: 'Новость с фото' },
+  tabMenu: { kk: 'Апталық мәзір', ru: 'Меню на неделю' },
+  tabDocs: { kk: 'Құжаттар', ru: 'Документы' },
+  adminCaption: {
+    kk: 'Екі-үш минут. Екі тілдегі мәтін қатар жазылады, фото өзі сығылады, ал геобелгілер алынып тасталады — балалар суретімен бірге балабақшаның координаттары интернетке кетпейді.',
+    ru: 'Пара минут. Текст на двух языках пишется рядом, фото сжимается само, а геометки с него снимаются — координаты сада с фотографий детей не уйдут в интернет.',
   },
-  gardenBandButton: { kk: 'Балабақшаны қосу', ru: 'Подключить сад' },
+
+  plansTitle: { kk: 'Екі тариф', ru: 'Два тарифа' },
+  plansLead: {
+    kk: 'Екеуінде де сайт бірдей — айырмашылық тек оны кім жүргізетінінде.',
+    ru: 'Сайт в обоих одинаковый — разница только в том, кто его ведёт.',
+  },
+  perYear: { kk: 'жылына', ru: 'в год' },
+  choose: { kk: '«%s» тарифін таңдау', ru: 'Выбрать «%s»' },
+  common: {
+    kk: [
+      '«балабақша.edusad.kz» түріндегі мекенжай',
+      'Дайын платформа: үлгілер мен түс палитралары',
+      'Әкімші бөлімі — жаңалықтар, галерея, құжаттар, педагогтар, мәзір',
+      'Екі тіл: қазақша және орысша',
+      'Нашар көретіндерге арналған нұсқа',
+      'Хостинг, жаңартулар және сақтық көшірмелер',
+      'Қолдау және кіру мүмкіндігін қалпына келтіру',
+      'Құжаттарды Google Дискіден көшіру',
+    ],
+    ru: [
+      'Адрес вида ваш-сад.edusad.kz',
+      'Готовый движок: шаблоны и цветовые палитры',
+      'Админка — новости, галерея, документы, педагоги, меню',
+      'Двуязычие: казахский и русский',
+      'Версия для слабовидящих',
+      'Хостинг, обновления и резервные копии',
+      'Поддержка и восстановление доступа',
+      'Перенос документов с Google Диска',
+    ],
+  },
+  domainNote: {
+    kk: 'Жеке .kz немесе edu.kz доменін өзіңіз сатып аласыз, ал баптауға біз көмектесеміз.',
+    ru: 'Собственный домен .kz или edu.kz — покупаете сами, а мы поможем настроить.',
+  },
+
+  stepsTitle: { kk: 'Өтінімнен сайтқа дейін', ru: 'От заявки до сайта' },
+  stepsLead: {
+    kk: 'Сауалнаманы алған соң бір жұмыс күнінде іске қосамыз.',
+    ru: 'Запускаем за один рабочий день после того, как получим анкету.',
+  },
+  steps: {
+    kk: [
+      ['Бүгін', 'Өтінім', 'Осы бетте немесе телефон арқылы өтінім қалдырасыз.'],
+      ['Сол күні', 'Қоңырау', 'Қайта қоңырау шалып, сұрақтарға жауап береміз және сауалнама жібереміз.'],
+      ['Ыңғайлы кезде', 'Сауалнама', 'Excel кестесін толтырасыз: топтар, педагогтар, байланыс. Деректер сайтқа өзі түседі.'],
+      ['Бір жұмыс күнінде', 'Кіру', 'Сайт мекенжайы мен әкімші бөліміне кіру логинін береміз — толтыра бастауға болады.'],
+      ['10 жұмыс күніне дейін', 'Төлем', 'Шарт, шот және акт бір нөмірмен. Төлемнен кейін сайт барлығына ашық.'],
+    ],
+    ru: [
+      ['Сегодня', 'Заявка', 'Оставляете заявку на этой странице или по телефону.'],
+      ['В тот же день', 'Звонок', 'Перезваниваем, отвечаем на вопросы и присылаем анкету.'],
+      ['Когда удобно', 'Анкета', 'Заполняете Excel: группы, педагоги, контакты. Данные сами встанут на сайт.'],
+      ['За рабочий день', 'Доступ', 'Выдаём адрес сайта и логин в админку — можно наполнять.'],
+      ['До 10 рабочих дней', 'Оплата', 'Договор, счёт и акт под одним номером. После оплаты сайт открыт для всех.'],
+    ],
+  },
+
+  faqTitle: { kk: 'Сұрақтар', ru: 'Вопросы' },
+  faqLead: {
+    kk: 'Жауап таппадыңыз ба — өтінім қалдырыңыз, қайта қоңырау шалып, бәрін түсіндіреміз.',
+    ru: 'Не нашли ответ — оставьте заявку, перезвоним и всё объясним.',
+  },
+
+  applyTitle: { kk: 'Балабақшаңыздың сайтын бір жұмыс күнінде іске қосамыз', ru: 'Запустим сайт вашего сада за один рабочий день' },
+  applyLead: {
+    kk: 'Өтінім қалдырыңыз — сол күні қайта қоңырау шалып, барлық сұраққа жауап береміз.',
+    ru: 'Оставьте заявку — перезвоним в тот же день и ответим на все вопросы.',
+  },
+  applyAlt: { kk: 'Тәрбиеші балабақша есігін ашып тұр, балалар ішке жүгіріп барады', ru: 'Воспитатель открывает двери сада, дети бегут внутрь' },
+
+  footAbout: {
+    kk: 'Балабақшаларға сайт жасаймыз — қазақ және орыс тілдерінде, әкімші бөлімімен және Қазақстандағы хостингпен.',
+    ru: 'Создаём сайты для детских садов — на казахском и русском, с админкой и хостингом в Казахстане.',
+  },
+  guide: { kk: 'Нұсқаулық, PDF', ru: 'Инструкция, PDF' },
+  offer: { kk: 'Жария оферта', ru: 'Публичная оферта' },
 } as const;
 
-const QUEUE_STEPS = [
-  {
-    title: { kk: 'Кезекке тұру', ru: 'Встать в очередь' },
-    text: {
-      kk: 'Darabala.kz порталында, баланың ЖСН-і және ЭЦҚ арқылы. Төрт балабақшаға дейін таңдауға болады.',
-      ru: 'На портале Darabala.kz, по ИИН ребёнка и ЭЦП. Можно выбрать до четырёх садов.',
-    },
-  },
-  {
-    title: { kk: 'Жолдаманы алу', ru: 'Получить направление' },
-    text: {
-      kk: 'Кезек жеткенде хабарлама келеді. Жолдаманы мерзімінде растаңыз, әйтпесе ол келесі балаға өтеді.',
-      ru: 'Когда подойдёт очередь, придёт уведомление. Подтвердите направление в срок, иначе оно уйдёт следующему.',
-    },
-  },
-  {
-    title: { kk: 'Құжаттарды тапсыру', ru: 'Сдать документы' },
-    text: {
-      kk: 'Нақты тізім — балабақшаның сайтында, «Құжаттар» бөлімінде немесе телефон арқылы.',
-      ru: 'Точный список — на сайте сада, в разделе «Документы», или по телефону.',
-    },
-  },
-] as const;
+/** Вопросы. Ответы про тарифы берут названия из plans.ts. */
+function faq(locale: Locale): [string, string][] {
+  const basic = PLAN_INFO.BASIC.name[locale];
+  const managed = PLAN_INFO.MANAGED.name[locale];
+  return locale === 'kk'
+    ? [
+        ['Өз мекенжайымызды қоюға бола ма, мысалы balapan-balabaqshasy.kz?', 'Иә. .kz немесе edu.kz доменін ұйымның атына өзіңіз сатып аласыз, ал баптауға біз көмектесеміз — қауіпсіздік сертификаты өзі шығарылады. edusad.kz-тегі мекенжай да жұмыс істей береді.'],
+        ['Жазылымды ұзартпасақ не болады?', '30, 14 және 3 күн бұрын ескертеміз. Төлем болмаса, сайт мерзім біткен соң келесі күні жабылады, ал төлегеннен кейін бірден ашылады — ондағының бәрі сақталады.'],
+        ['Сайтты кім толтырады?', `«${basic}» тарифінде — балабақша қызметкері әкімші бөлімі арқылы. «${managed}» тарифінде материалдарды бізге жібересіз, ал оларды біз орналастырамыз; әкімші бөлімі сізде де қалады.`],
+        ['Құжаттар Google Дискіде жатыр. Оларды қайта жүктеуге тура келе ме?', 'Жоқ. Бумаларды ішкі бумаларымен бірге толықтай көшіреміз — сайтта олар дискідегідей көрінеді.'],
+        ['Жеке балабақшаға жарай ма?', 'Иә, мемлекеттік және жеке балабақшаларға бірдей.'],
+      ]
+    : [
+        ['Можно ли свой адрес, например balapan-balabaqshasy.kz?', 'Да. Домен .kz или edu.kz вы покупаете сами на организацию, а мы поможем настроить — сертификат безопасности выпустится автоматически. Адрес на edusad.kz продолжит работать.'],
+        ['Что будет, если не продлить подписку?', 'Напомним за 30, 14 и 3 дня. Без оплаты сайт закрывается на следующий день после окончания срока, а после оплаты открывается сразу — всё, что на нём было, сохраняется.'],
+        ['Кто будет наполнять сайт?', `На «${basic}» — сотрудник сада через админку. На тарифе «${managed}» материалы присылаете нам, а размещаем их мы; админка остаётся и у вас.`],
+        ['Документы уже лежат на Google Диске. Их придётся загружать заново?', 'Нет. Перенесём папки целиком, со всей вложенностью, — на сайте они будут выглядеть так же, как у вас на диске.'],
+        ['Подойдёт ли частному саду?', 'Да, государственным и частным садам одинаково.'],
+      ];
+}
 
-/** Что родитель найдёт на сайте любого сада: у всех одинаковый набор разделов. */
-const INSIDE = [
-  {
-    image: '/images/story-time.webp',
-    title: { kk: 'Бос орындар', ru: 'Свободные места' },
-    text: { kk: 'Топтар бойынша, қоңырау шалмай.', ru: 'По группам, без звонка заведующей.' },
-  },
-  {
-    image: '/images/menu-porridge.webp',
-    title: { kk: 'Ас мәзірі', ru: 'Меню питания' },
-    text: { kk: 'Бүгін және апта бойы не береді.', ru: 'Чем кормят сегодня и на неделе.' },
-  },
-  {
-    image: '/images/drawings.webp',
-    title: { kk: 'Жаңалықтар мен хабарландырулар', ru: 'Новости и объявления' },
-    text: { kk: 'Ертеңгіліктер, карантин, режимнің өзгеруі.', ru: 'Утренники, карантин, изменения режима.' },
-  },
-  {
-    image: null,
-    title: { kk: 'Құжаттар', ru: 'Документы' },
-    text: { kk: 'Қабылдау ережелері, лицензия, жарғы.', ru: 'Правила приёма, лицензия, устав.' },
-  },
-  {
-    image: null,
-    title: { kk: 'Педагогтар мен топтар', ru: 'Педагоги и группы' },
-    text: { kk: 'Кім тәрбиелейді, топтың жасы және оқыту тілі.', ru: 'Кто воспитывает, возраст и язык обучения группы.' },
-  },
-  {
-    image: null,
-    title: { kk: 'Меңгерушіге сұрақ', ru: 'Вопрос заведующей' },
-    text: { kk: 'Виртуалды қабылдау бөлмесі арқылы.', ru: 'Через виртуальную приёмную на сайте.' },
-  },
-] as const;
+const ICONS = {
+  shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3Z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  lang: '<path d="M4 5h9M8.5 3v2M6 5c.8 3.5 3 6 6 7.5M11 5c-.8 3.8-3.2 6.8-7 8.5M13 21l4.5-10 4.5 10M14.6 17.5h5.8"/>',
+  doc: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 11h6M9 14h3"/><circle cx="15" cy="16.5" r="2.2"/>',
+  tenge: '<path d="M6 5h12M6 9h12M12 9v11"/>',
+} as const;
 
-function Arrow() {
+function Icon({ name }: { name: keyof typeof ICONS }) {
   return (
-    <svg
-      className="h-[1.1em] w-[1.1em]"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M5 12h14" />
-      <path d="m13 6 6 6-6 6" />
+    <span data-icon={name}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" dangerouslySetInnerHTML={{ __html: ICONS[name] }} />
+    </span>
+  );
+}
+
+/** Знак EduSad — бумажный самолётик. Цвета линий задаёт фон (.lm в home.css). */
+function PlaneLogo() {
+  return (
+    <svg className="lm" width="46" height="46" viewBox="0 0 512 512" aria-hidden="true">
+      <circle cx="296" cy="232" r="178" fill="var(--pl-sun)" />
+      <g stroke="var(--pl-line)" strokeWidth="15" strokeLinejoin="round" strokeLinecap="round">
+        <path d="M96 202L480 74L262 212Z" fill="var(--pl-wing)" />
+        <path d="M96 202L262 212L196 254Z" fill="var(--pl-paper)" />
+        <path d="M196 254L262 212L480 74L252 292Z" fill="var(--pl-paper)" />
+        <path d="M196 254L252 292L226 366Z" fill="var(--pl-shade)" />
+        <path d="M480 74L338 214L366 352Z" fill="var(--pl-wing)" />
+        <path d="M252 292L338 214L366 352Z" fill="var(--pl-paper)" />
+      </g>
+      <path d="M206 384C168 404 118 418 78 396C40 375 40 322 80 306C118 292 150 330 132 372C114 414 66 440 22 440" fill="none" stroke="var(--pl-trail)" strokeWidth="15" strokeLinecap="round" strokeDasharray="26 22" />
     </svg>
   );
 }
 
-/** Адрес сайта сада: собственный домен, если куплен, иначе поддомен портала. */
-function gardenUrl(
-  tenant: { slug: string; domains: { host: string }[] },
-  locale: Locale,
-  path = '/',
-): string {
-  const host = tenant.domains[0]?.host ?? `${tenant.slug}.${env.portalDomain}`;
-  // Сайты садов понимают тот же ?lang=kk, что и портал: язык едет дальше.
-  return `https://${host}${withLocale(path, locale)}`;
-}
+const fill = (template: string, value: string) => template.replace('%s', value);
 
 export async function generateMetadata({
   searchParams,
@@ -179,17 +207,19 @@ export async function generateMetadata({
   searchParams: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
   const locale = localeFromParam((await searchParams).lang);
+  const from = formatMoney(Math.min(...PLAN_CODES.map((code) => env.planPrices[code])));
   return {
     title: {
       absolute:
         locale === 'kk'
-          ? 'EduSad — Ақтөбе балабақшалары: бос орындар, мәзір, жаңалықтар'
-          : 'EduSad — детские сады Актобе: свободные места, меню, новости',
+          ? 'EduSad — балабақшаға арналған сайт бір жұмыс күнінде'
+          : 'EduSad — сайт для детского сада за один рабочий день',
     },
     description:
       locale === 'kk'
-        ? 'Ақтөбе балабақшаларының ресми сайттары бір жерде: бос орындар, ас мәзірі, педагогтар, құжаттар мен жаңалықтар. Балабақшаға кезекке қалай тұру керек.'
-        : 'Официальные сайты детских садов Актобе в одном месте: свободные места, меню, педагоги, документы и новости. Как встать в очередь в детский сад.',
+        ? `Балабақшаның ресми сайты қазақ және орыс тілдерінде: әкімші бөлімі, нашар көретіндерге арналған нұсқа, Қазақстандағы хостинг. Жылына ${from} бастап.`
+        : `Официальный сайт детского сада на казахском и русском: админка, версия для слабовидящих, хостинг в Казахстане. От ${from} в год.`,
+    alternates: { languages: { ru: '/', kk: '/?lang=kk' } },
   };
 }
 
@@ -198,343 +228,212 @@ export default async function PortalHome({
 }: {
   searchParams: Promise<{ lang?: string }>;
 }) {
-  const locale = localeFromParam((await searchParams).lang);
+  const [{ lang }, csrf] = await Promise.all([searchParams, csrfToken()]);
+  const locale = localeFromParam(lang);
+  const minPrice = formatMoney(Math.min(...PLAN_CODES.map((code) => env.planPrices[code])));
+  // Демо-сад открываем на языке страницы: у него основной язык казахский.
+  const demoHref = `https://demo.${env.portalDomain}${locale === 'ru' ? '/?lang=ru' : '/'}`;
+  const year = new Date().getFullYear();
 
-  const [gardens, gardensTotal, freeTotal, districts, news] = await Promise.all([
-    prisma.tenant.findMany({
-      where: { status: 'ACTIVE', isDemo: false },
-      include: { profile: true, domains: { where: { isPrimary: true }, take: 1 } },
-      // Родитель ищет место — сады, где оно есть, показываем первыми.
-      orderBy: [{ profile: { placesFree: 'desc' } }, { createdAt: 'desc' }],
-      take: 6,
-    }),
-    prisma.tenant.count({ where: { status: 'ACTIVE', isDemo: false } }),
-    prisma.tenant.count({ where: { status: 'ACTIVE', isDemo: false, profile: { placesFree: { gt: 0 } } } }),
-    prisma.tenantProfile.findMany({
-      where: { district: { not: null }, tenant: { status: 'ACTIVE', isDemo: false } },
-      select: { district: true },
-      distinct: ['district'],
-      orderBy: { district: 'asc' },
-    }),
-    // Лента новостей со всех садов. Только из видимых разделов работающих
-    // садов: скрытый садом раздел не должен всплывать на портале.
-    prisma.post.findMany({
-      where: {
-        status: 'PUBLISHED',
-        publishedAt: { lte: new Date() },
-        tenant: { status: 'ACTIVE', isDemo: false },
-        section: { isVisible: true, type: { in: ['NEWS', 'ANNOUNCEMENT'] } },
-      },
-      include: {
-        coverMedia: { select: { id: true } },
-        section: { select: { slug: true } },
-        tenant: { include: { profile: true, domains: { where: { isPrimary: true }, take: 1 } } },
-      },
-      orderBy: { publishedAt: 'desc' },
-      take: 6,
-    }),
-  ]);
+  const header = (
+    <header className="wrap top">
+      <a className="logo" href={withLocale('/', locale)} aria-label={T.home[locale]}>
+        <PlaneLogo />
+        <b>EduSad</b>
+      </a>
+      <nav className="nav" aria-label={T.sections[locale]}>
+        <a href="#adminka">{T.navFeatures[locale]}</a>
+        <a href="#tarify">{T.navPlans[locale]}</a>
+        <a href="#podkluchenie">{T.navSteps[locale]}</a>
+        <a href="#voprosy">{T.navFaq[locale]}</a>
+      </nav>
+      <div className="top-right">
+        {/* Язык меняется полной загрузкой, а не переходом Next: сценарий главной
+            (SplitText, WebGL, шапка-капсула) заново стартует на чистой разметке. */}
+        {/* eslint-disable @next/next/no-html-link-for-pages */}
+        <div className="lang" role="group" aria-label={T.langGroup[locale]}>
+          <a href="/?lang=kk" hrefLang="kk" className={locale === 'kk' ? 'on' : undefined} aria-current={locale === 'kk' ? 'true' : undefined}>Қаз</a>
+          <a href="/" hrefLang="ru" className={locale === 'ru' ? 'on' : undefined} aria-current={locale === 'ru' ? 'true' : undefined}>Рус</a>
+        </div>
+        {/* eslint-enable @next/next/no-html-link-for-pages */}
+        <a className="sbtn sbtn-top" href="#zayavka">{T.apply[locale]}</a>
+      </div>
+    </header>
+  );
 
   return (
-    <PortalPage locale={locale} pathname="/">
-      {/* ── первый экран: поиск сада ──────────────────────────────────── */}
-      <section className="relative overflow-hidden">
-        <div
-          className="decor pointer-events-none absolute -left-40 -top-56 h-[38rem] w-[52rem] rounded-full bg-brand/20 blur-3xl"
-          aria-hidden
-        />
-        <div
-          className="decor pointer-events-none absolute -right-48 -top-64 h-[36rem] w-[48rem] rounded-full bg-accent/20 blur-3xl"
-          aria-hidden
-        />
+    <div className="sales live" lang={locale}>
+      <a className="skip" href="#main">{T.skip[locale]}</a>
 
-        <div className="container-page relative grid items-center gap-12 py-14 lg:grid-cols-[1.1fr_0.9fr] lg:py-20">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-brand-ink">
-              {T.eyebrow[locale]}
-            </p>
-            <h1 className="mt-3 font-display text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-              {T.heroTitle[locale]}
-            </h1>
-            <p className="mt-5 max-w-xl text-lg text-muted">{T.heroLead[locale]}</p>
-
-            {/* Поиск сразу уводит в каталог с фильтрами: второй поиск на главной
-                разошёлся бы с каталогом при первой же правке одного из них. */}
-            <form
-              action="/catalog"
-              role="search"
-              className="mt-8 grid gap-3 rounded-3xl border border-line bg-card p-4 shadow-soft sm:grid-cols-[1fr_auto] sm:p-5"
-            >
-              {locale === 'kk' ? <input type="hidden" name="lang" value="kk" /> : null}
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="field-label" htmlFor="home-q">{T.searchLabel[locale]}</label>
-                  <input id="home-q" name="q" className="field" placeholder={T.searchExample[locale]} />
-                </div>
-                <div>
-                  <label className="field-label" htmlFor="home-district">{T.district[locale]}</label>
-                  <select id="home-district" name="district" className="field" defaultValue="">
-                    <option value="">{T.allDistricts[locale]}</option>
-                    {districts.map((d) => (
-                      <option key={d.district} value={d.district ?? ''}>{d.district}</option>
-                    ))}
-                  </select>
-                </div>
-                <label className="flex items-center gap-2 text-sm font-semibold sm:col-span-2">
-                  <input type="checkbox" name="free" value="1" className="h-4 w-4" />
-                  {T.hasPlaces[locale]}
-                </label>
-              </div>
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center gap-2.5 self-end rounded-full bg-ink px-6 py-4 font-bold text-surface transition hover:-translate-y-0.5 hover:shadow-lift"
-              >
-                {T.find[locale]}
-                <Arrow />
-              </button>
-            </form>
-
-            <Link
-              href={withLocale('/parents', locale)}
-              className="mt-5 inline-block font-bold text-brand-ink underline underline-offset-4"
-            >
-              {T.howQueue[locale]}
-            </Link>
-          </div>
-
-          <div className="relative">
-            <Image
-              src="/images/story-time.webp"
-              alt={T.photoAlt[locale]}
-              width={640}
-              height={478}
-              priority
-              className="h-72 w-full rounded-[2rem] object-cover shadow-lift sm:h-96"
-            />
-            {gardensTotal > 0 ? (
-              <div className="absolute -bottom-6 left-4 right-4 grid grid-cols-2 gap-3 sm:left-6 sm:right-auto sm:w-80">
-                <div className="rounded-2xl border border-line bg-card px-4 py-3 shadow-soft">
-                  <p className="font-display text-3xl font-extrabold leading-none">{gardensTotal}</p>
-                  <p className="mt-1 text-xs font-semibold text-muted">
-                    {locale === 'kk'
-                      ? T.statGardensKk.kk
-                      : `${formatGardenCount(gardensTotal, 'ru')} ${T.statGardensRu.ru}`}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-line bg-card px-4 py-3 shadow-soft">
-                  <p className="font-display text-3xl font-extrabold leading-none text-emerald-700">{freeTotal}</p>
-                  <p className="mt-1 text-xs font-semibold text-muted">
-                    {locale === 'kk'
-                      ? T.statFreeKk.kk
-                      : `${formatGardenCount(freeTotal, 'ru')} ${T.statFreeRu.ru}`}
-                  </p>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </section>
-
-      {/* ── сады ──────────────────────────────────────────────────────── */}
-      {gardens.length > 0 ? (
-        <section className="container-page py-16">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-                {T.gardensTitle[locale]}
-              </h2>
-              <p className="mt-2 text-muted">{T.gardensLead[locale]}</p>
-            </div>
-            <Link href={withLocale('/catalog', locale)} className="font-bold text-brand-ink">
-              {T.wholeCatalog[locale]}
-            </Link>
-          </div>
-
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {gardens.map((tenant) => {
-              const p = tenant.profile;
-              const address = pick(locale, p?.addressKk, p?.addressRu);
-              return (
-                <article
-                  key={tenant.id}
-                  className="flex flex-col overflow-hidden rounded-3xl border border-line bg-card shadow-soft"
-                >
-                  {p?.coverMediaId ? (
-                    // Обложка, которую сад загрузил сам; отдаётся приложением по id.
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={`/api/media/${p.coverMediaId}`} alt="" className="h-36 w-full object-cover" />
-                  ) : (
-                    <div className="h-36 bg-gradient-to-br from-brand-soft to-accent-soft" aria-hidden />
-                  )}
-                  <div className="flex flex-1 flex-col p-6">
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      {p?.placesFree ? (
-                        <span className="badge bg-emerald-100 text-emerald-800">
-                          {T.freePlaces[locale].replace('%s', String(p.placesFree))}
-                        </span>
-                      ) : (
-                        <span className="badge bg-slate-100 text-slate-600">{T.noPlaces[locale]}</span>
-                      )}
-                      <span className="badge bg-brand-soft text-brand-ink">
-                        {p?.isPrivate ? T.private[locale] : T.state[locale]}
-                      </span>
-                    </div>
-
-                    <h3 className="mt-3 font-display text-lg font-bold">
-                      {pick(locale, p?.nameKk, p?.nameRu) || tenant.slug}
-                    </h3>
-                    {p?.kind ? <p className="text-sm text-muted">{KIND[p.kind][locale]}</p> : null}
-                    {address ? <p className="mt-2 text-sm">{address}</p> : null}
-                    {p?.phone ? (
-                      <a
-                        href={`tel:${p.phone.replace(/\s/g, '')}`}
-                        className="mt-1 text-sm font-semibold text-brand-ink"
-                      >
-                        {p.phone}
-                      </a>
-                    ) : null}
-
-                    <a
-                      href={gardenUrl(tenant, locale)}
-                      className="mt-auto pt-5 text-sm font-bold text-brand-ink"
-                    >
-                      {T.openSite[locale]}
-                    </a>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
-
-      {/* ── новости садов ─────────────────────────────────────────────── */}
-      {news.length > 0 ? (
-        <section className="container-page pb-16">
-          <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-            {T.newsTitle[locale]}
-          </h2>
-          <p className="mt-2 text-muted">{T.newsLead[locale]}</p>
-
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {news.map((post) => (
-              <a
-                key={post.id}
-                href={gardenUrl(post.tenant, locale, `/${post.section.slug}/${post.slug}`)}
-                className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-card shadow-soft transition hover:-translate-y-1 hover:shadow-lift"
-              >
-                <div className="relative">
-                  {post.coverMedia ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={`/api/media/${post.coverMedia.id}`} alt="" className="h-44 w-full object-cover" />
-                  ) : (
-                    <div className="h-44 bg-gradient-to-br from-brand/60 to-accent/50" aria-hidden />
-                  )}
-                  {post.videoUrl ? (
-                    <span className="absolute left-3 top-3 badge bg-ink/80 text-surface">▶ {T.video[locale]}</span>
-                  ) : null}
-                </div>
-                <div className="flex flex-1 flex-col p-5">
-                  <p className="text-xs font-semibold text-muted">
-                    {pick(locale, post.tenant.profile?.nameKk, post.tenant.profile?.nameRu) || post.tenant.slug}
-                    {' · '}
-                    {formatDate(post.publishedAt, locale)}
-                  </p>
-                  <h3 className="mt-2 font-display text-lg font-bold leading-snug group-hover:text-brand-ink">
-                    {pick(locale, post.titleKk, post.titleRu)}
-                  </h3>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {/* ── как попасть в сад ─────────────────────────────────────────── */}
-      <section className="container-page pb-16">
-        <div className="grid gap-10 rounded-[2.5rem] bg-night p-8 text-surface sm:p-14 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-accent">
-              {T.queueEyebrow[locale]}
-            </p>
-            <h2 className="mt-3.5 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-              {T.queueTitle[locale]}
-            </h2>
-            <p className="mt-3 text-surface/75">{T.queueLead[locale]}</p>
-            <div className="mt-7 flex flex-wrap items-center gap-4">
-              <a
-                href="https://darabala.kz"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 rounded-full bg-accent px-6 py-4 font-bold text-ink transition hover:-translate-y-0.5"
-              >
-                {T.queueButton[locale]}
-                <Arrow />
-              </a>
-              <Link href={withLocale('/parents', locale)} className="font-bold text-surface underline underline-offset-4">
-                {T.queueMore[locale]}
-              </Link>
-            </div>
-          </div>
-
-          <ol className="space-y-3">
-            {QUEUE_STEPS.map((step, index) => (
-              <li key={step.title.ru} className="flex gap-4 rounded-2xl bg-surface/10 px-5 py-4">
-                <span className="font-display text-3xl font-extrabold leading-none text-accent">{index + 1}</span>
-                <div>
-                  <p className="font-bold">{step.title[locale]}</p>
-                  <p className="mt-1 text-sm text-surface/80">{step.text[locale]}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* ── что есть на сайте сада ────────────────────────────────────── */}
-      <section className="container-page pb-16">
-        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-brand-ink">
-          {T.insideEyebrow[locale]}
-        </p>
-        <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
-          {T.insideTitle[locale]}
-        </h2>
-
-        <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {INSIDE.map((item) => (
-            <article key={item.title.ru} className="overflow-hidden rounded-3xl border border-line bg-card shadow-soft">
-              {item.image ? (
-                <Image src={item.image} alt="" width={512} height={382} className="h-36 w-full object-cover" />
-              ) : null}
-              <div className="p-6">
-                <h3 className="font-display text-xl font-bold">{item.title[locale]}</h3>
-                <p className="mt-2 text-sm text-muted">{item.text[locale]}</p>
-              </div>
-            </article>
+      <div className="band band-hero">
+        <canvas className="mesh" aria-hidden="true" />
+        <div className="orbs" aria-hidden="true">
+          {[1.2, 0.7, 1.6, 0.9, 1.3].map((depth, i) => (
+            <i key={i} className={`o o${i + 1}`} data-depth={depth}><b /></i>
           ))}
         </div>
-      </section>
+        {header}
 
-      {/* ── для садов: одна узкая полоса, остальное на /connect ───────── */}
-      <section className="container-page pb-20">
-        <div className="flex flex-wrap items-center justify-between gap-6 rounded-[2rem] border border-brand/30 bg-brand-soft px-8 py-7 sm:px-10">
-          <div>
-            <h2 className="font-display text-xl font-extrabold tracking-tight text-brand-ink sm:text-2xl">
-              {T.gardenBandTitle[locale]}
-            </h2>
-            <p className="mt-1 max-w-2xl text-brand-ink/80">
-              {T.gardenBandText[locale].replace('%s', formatMoney(env.planPrices.BASIC))}
-            </p>
+        <section className="wrap hero" id="main">
+          <div className="hero-copy">
+            <h1>{T.h1[locale]}</h1>
+            <p className="lead">{T.lead[locale]}</p>
+            <div className="cta-row">
+              <a className="sbtn sbtn-primary" href="#zayavka">{T.apply[locale]}</a>
+              <a className="link" href={demoHref} target="_blank" rel="noopener">{T.demo[locale]}</a>
+            </div>
           </div>
-          <Link
-            href={withLocale('/connect', locale)}
-            className="inline-flex items-center gap-2.5 rounded-full bg-ink px-6 py-3.5 font-bold text-surface transition hover:-translate-y-0.5 hover:shadow-lift"
-          >
-            {T.gardenBandButton[locale]}
-            <Arrow />
-          </Link>
+          <div className="scene bleed">
+            <figure className="hero-art">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/sales/hero.webp" alt={T.heroAlt[locale]} width={1200} height={896} fetchPriority="high" />
+            </figure>
+            <div className="phone">
+              {/* Макеты — картинка из разметки, читалке экрана в них делать нечего. */}
+              <div className="screen" id="phone" aria-hidden="true" />
+            </div>
+          </div>
+        </section>
+
+        <ul className="wrap trust">
+          <li><Icon name="shield" /><b>{T.trustHosting[locale]}</b><span>{T.trustHostingNote[locale]}</span></li>
+          <li><Icon name="lang" /><b>{T.trustLang[locale]}</b><span>{T.trustLangNote[locale]}</span></li>
+          <li><Icon name="doc" /><b>{T.trustDocs[locale]}</b><span>{T.trustDocsNote[locale]}</span></li>
+          <li><Icon name="tenge" /><b>{fill(T.trustPrice[locale], minPrice)}</b><span>{T.trustPriceNote[locale]}</span></li>
+        </ul>
+      </div>
+
+      <main>
+        <section className="band band-dark block" id="adminka">
+          <div className="wrap">
+            <div className="head">
+              <h2>{T.adminTitle[locale]}</h2>
+              <p>{T.adminLead[locale]}</p>
+            </div>
+            <div className="admin">
+              <div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="admin-img" src="/images/sales/admin.webp" alt={T.adminAlt[locale]} width={1200} height={896} loading="lazy" />
+                <div className="tabs" id="tabs" role="tablist">
+                  <button type="button" role="tab" data-tab="news" aria-selected="true">{T.tabNews[locale]}</button>
+                  <button type="button" role="tab" data-tab="menu" aria-selected="false">{T.tabMenu[locale]}</button>
+                  <button type="button" role="tab" data-tab="docs" aria-selected="false">{T.tabDocs[locale]}</button>
+                </div>
+                <p className="caption" id="caption">{T.adminCaption[locale]}</p>
+              </div>
+              <div className="window">
+                <div className="screen" id="admin" aria-hidden="true" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="band block" id="tarify">
+          <div className="wrap">
+            <div className="head">
+              <h2>{T.plansTitle[locale]}</h2>
+              <p>{T.plansLead[locale]}</p>
+            </div>
+            <div className="plans">
+              {PLAN_CODES.map((code) => {
+                const info = PLAN_INFO[code];
+                const featured = code === 'MANAGED';
+                return (
+                  <div key={code} className={featured ? 'plan plan-featured' : 'plan'}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="plan-img" src={featured ? '/images/sales/plan-us.webp' : '/images/sales/plan-self.webp'} alt="" width={116} height={116} loading="lazy" />
+                    <h3>{info.name[locale]}</h3>
+                    <div className="price">{formatMoney(env.planPrices[code])}<small>{T.perYear[locale]}</small></div>
+                    <div className="who">{info.tagline[locale]}</div>
+                    <p>{info.whoFills[locale]}</p>
+                    <a className={featured ? 'sbtn sbtn-primary' : 'sbtn sbtn-secondary'} href="#zayavka" data-plan={code}>
+                      {fill(T.choose[locale], info.name[locale])}
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+            <ul className="common">
+              {T.common[locale].map((item) => <li key={item}>{item}</li>)}
+            </ul>
+            <p className="note">{T.domainNote[locale]}</p>
+          </div>
+        </section>
+
+        <section className="band block band-soft" id="podkluchenie">
+          <div className="wrap">
+            <div className="head">
+              <h2>{T.stepsTitle[locale]}</h2>
+              <p>{T.stepsLead[locale]}</p>
+            </div>
+            <ol className="tl" id="timeline">
+              {T.steps[locale].map(([when, title, text], i) => (
+                <li key={title}>
+                  <span className="tl-pic">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/images/sales/tl-${i + 1}.webp`} alt="" width={112} height={112} loading="lazy" />
+                    <b>{i + 1}</b>
+                  </span>
+                  <span className="when">{when}</span>
+                  <h3>{title}</h3>
+                  <p>{text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section className="band block" id="voprosy">
+          <div className="wrap">
+            <div className="head">
+              <h2>{T.faqTitle[locale]}</h2>
+              <p>{T.faqLead[locale]}</p>
+            </div>
+            <div className="faq">
+              {faq(locale).map(([q, a]) => (
+                <details key={q}>
+                  <summary>{q}</summary>
+                  <p>{a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="band band-brand block" id="zayavka">
+          <div className="wrap apply">
+            <div className="side">
+              <h2>{T.applyTitle[locale]}</h2>
+              <p>{T.applyLead[locale]}</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="apply-img" src="/images/sales/apply.webp" alt={T.applyAlt[locale]} width={1200} height={896} loading="lazy" />
+            </div>
+            <SalesApplyForm csrf={csrf} locale={locale} />
+          </div>
+        </section>
+      </main>
+
+      <footer className="band band-dark">
+        <div className="wrap foot">
+          <div>
+            <a className="logo" href={withLocale('/', locale)} aria-label="EduSad">
+              <PlaneLogo />
+              <b>EduSad</b>
+            </a>
+            <p>{T.footAbout[locale]}</p>
+          </div>
+          <nav aria-label={T.sections[locale]}>
+            <b>{T.sections[locale]}</b>
+            <a href="#tarify">{T.navPlans[locale]}</a>
+            <a href="#podkluchenie">{T.navSteps[locale]}</a>
+            <a href="/downloads/edusad-instrukciya.pdf" download>{T.guide[locale]}</a>
+            <a href={withLocale('/offer', locale)}>{T.offer[locale]}</a>
+          </nav>
         </div>
-      </section>
-    </PortalPage>
+        <div className="wrap copy">© {year} EduSad. Кудайбергенов Асет</div>
+      </footer>
+
+      <SalesLive locale={locale} />
+    </div>
   );
 }

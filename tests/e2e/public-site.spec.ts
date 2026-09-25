@@ -2,16 +2,30 @@ import { expect, test } from '@playwright/test';
 import { PORTAL, site } from './helpers';
 
 test.describe('Публичная часть', () => {
-  test('главная для родителей ведёт в каталог, а сады — на свою страницу', async ({ page }) => {
+  test('главная продаёт сайт саду: тарифы из настроек и заявка', async ({ page }) => {
     await page.goto(PORTAL);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Найдите детский сад');
-    await expect(page.getByRole('search')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Сайт вашего детского');
+    // Цены приходят из PLAN_*_PRICE_KZT: расхождение здесь — забытая настройка.
+    await expect(page.locator('#tarify')).toContainText('50 000 ₸');
+    await expect(page.locator('#tarify')).toContainText('120 000 ₸');
+    // Пример сайта — демо-сад, а не настоящий: чужие сады в рекламе не показываем.
+    await expect(page.getByRole('link', { name: /Посмотреть пример сайта/ })).toHaveAttribute('href', /^https:\/\/demo\./);
 
-    await page.getByRole('link', { name: 'Подключить сад' }).last().click();
-    await expect(page).toHaveURL(/\/connect/);
-    // Значение должно совпадать с PLAN_BASIC_PRICE_KZT: цена на страницу
-    // приходит из окружения, и расхождение здесь означает забытую настройку.
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('от 50 000 ₸');
+    // «Выбрать тариф» заранее отмечает его в форме.
+    await page.getByRole('link', { name: 'Выбрать «С наполнением»' }).click();
+    const form = page.locator('#apply');
+    await expect(form.getByRole('radio', { name: 'С наполнением' })).toBeChecked();
+    await form.getByLabel('Название детского сада').fill('Ясли-сад «Проверка» (e2e)');
+    await form.getByLabel('Ваше имя').fill('Проверка');
+    await form.getByLabel('Телефон').fill('+7 700 000 00 00');
+    await form.getByRole('button', { name: 'Отправить заявку' }).click();
+    await expect(page.getByText('Заявка отправлена')).toBeVisible();
+  });
+
+  test('главная по-казахски', async ({ page }) => {
+    await page.goto(`${PORTAL}/?lang=kk`);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Балабақшаңыздың сайты');
+    await expect(page.locator('#tarify')).toContainText('Толтырумен');
   });
 
   test('на странице тарифов оба тарифа с ценами', async ({ page }) => {

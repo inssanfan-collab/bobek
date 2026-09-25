@@ -41,9 +41,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         {/* Шрифты проверены по глифам, а не по unicode-range: Google Fonts
             объявляет подмножество cyrillic-ext и у тех гарнитур, где казахских
             букв нет вовсе. Manrope оказался как раз таким — ә ғ қ ң ұ у него
-            отсутствуют, и браузер подменял их системным шрифтом. */}
+            отсутствуют, и браузер подменял их системным шрифтом. Nunito
+            (заголовки главной) проверен так же: все казахские буквы есть. */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Onest:wght@400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Nunito:wght@800;900&family=Onest:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
       </head>
