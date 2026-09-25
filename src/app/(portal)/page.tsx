@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { env } from '@/lib/env';
 import { formatMoney } from '@/lib/labels';
-import { localeFromParam, withLocale, type Locale } from '@/lib/i18n';
-import { PLAN_CODES, PLAN_INFO } from '@/lib/plans';
+import { localeFromParam, type Locale } from '@/lib/i18n';
+import { EDU_DOMAIN_NOTE, isPlanCode, PLAN_CODES, PLAN_COMMON, PLAN_INFO, STATE_PRICE_NOTE } from '@/lib/plans';
 import { csrfToken } from '@/server/auth/csrf';
 import { SalesLive } from '@/components/portal/sales/SalesLive';
 import { SalesApplyForm } from '@/components/portal/sales/SalesApplyForm';
-import './home.css';
+import { SalesFooter, SalesHeader } from '@/components/portal/sales/SalesChrome';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,13 +25,6 @@ export const dynamic = 'force-dynamic';
 
 const T = {
   skip: { kk: 'Мазмұнға өту', ru: 'К содержанию' },
-  home: { kk: 'EduSad, басты бет', ru: 'EduSad, на главную' },
-  sections: { kk: 'Бөлімдер', ru: 'Разделы' },
-  navFeatures: { kk: 'Мүмкіндіктер', ru: 'Возможности' },
-  navPlans: { kk: 'Тарифтер', ru: 'Тарифы' },
-  navSteps: { kk: 'Қалай қосылуға болады', ru: 'Как подключиться' },
-  navFaq: { kk: 'Сұрақтар', ru: 'Вопросы' },
-  langGroup: { kk: 'Сайт тілі', ru: 'Язык сайта' },
   apply: { kk: 'Өтінім қалдыру', ru: 'Оставить заявку' },
 
   h1: { kk: 'Балабақшаңыздың сайты — бір жұмыс күнінде', ru: 'Сайт вашего детского сада — за один рабочий день' },
@@ -52,7 +45,8 @@ const T = {
   trustDocs: { kk: 'Шарт, шот және акт', ru: 'Договор, счёт и акт' },
   trustDocsNote: { kk: 'шот бойынша төлем', ru: 'оплата по счёту' },
   trustPrice: { kk: 'Жылына %s бастап', ru: 'От %s в год' },
-  trustPriceNote: { kk: 'хостинг пен қолдау кіреді', ru: 'хостинг и поддержка включены' },
+  // Цена — для частных садов: у государственных своя, см. STATE_PRICE_NOTE.
+  trustPriceNote: { kk: 'жеке балабақшаларға, хостинг кіреді', ru: 'для частных садов, хостинг включён' },
 
   adminTitle: { kk: 'Сайтты балабақшаның кез келген қызметкері жүргізе алады', ru: 'Вести сайт сможет любой сотрудник сада' },
   adminLead: {
@@ -75,32 +69,6 @@ const T = {
   },
   perYear: { kk: 'жылына', ru: 'в год' },
   choose: { kk: '«%s» тарифін таңдау', ru: 'Выбрать «%s»' },
-  common: {
-    kk: [
-      '«балабақша.edusad.kz» түріндегі мекенжай',
-      'Дайын платформа: үлгілер мен түс палитралары',
-      'Әкімші бөлімі — жаңалықтар, галерея, құжаттар, педагогтар, мәзір',
-      'Екі тіл: қазақша және орысша',
-      'Нашар көретіндерге арналған нұсқа',
-      'Хостинг, жаңартулар және сақтық көшірмелер',
-      'Қолдау және кіру мүмкіндігін қалпына келтіру',
-      'Құжаттарды Google Дискіден көшіру',
-    ],
-    ru: [
-      'Адрес вида ваш-сад.edusad.kz',
-      'Готовый движок: шаблоны и цветовые палитры',
-      'Админка — новости, галерея, документы, педагоги, меню',
-      'Двуязычие: казахский и русский',
-      'Версия для слабовидящих',
-      'Хостинг, обновления и резервные копии',
-      'Поддержка и восстановление доступа',
-      'Перенос документов с Google Диска',
-    ],
-  },
-  domainNote: {
-    kk: 'Жеке .kz немесе edu.kz доменін өзіңіз сатып аласыз, ал баптауға біз көмектесеміз.',
-    ru: 'Собственный домен .kz или edu.kz — покупаете сами, а мы поможем настроить.',
-  },
 
   stepsTitle: { kk: 'Өтінімнен сайтқа дейін', ru: 'От заявки до сайта' },
   stepsLead: {
@@ -136,13 +104,6 @@ const T = {
     ru: 'Оставьте заявку — перезвоним в тот же день и ответим на все вопросы.',
   },
   applyAlt: { kk: 'Тәрбиеші балабақша есігін ашып тұр, балалар ішке жүгіріп барады', ru: 'Воспитатель открывает двери сада, дети бегут внутрь' },
-
-  footAbout: {
-    kk: 'Балабақшаларға сайт жасаймыз — қазақ және орыс тілдерінде, әкімші бөлімімен және Қазақстандағы хостингпен.',
-    ru: 'Создаём сайты для детских садов — на казахском и русском, с админкой и хостингом в Казахстане.',
-  },
-  guide: { kk: 'Нұсқаулық, PDF', ru: 'Инструкция, PDF' },
-  offer: { kk: 'Жария оферта', ru: 'Публичная оферта' },
 } as const;
 
 /** Вопросы. Ответы про тарифы берут названия из plans.ts. */
@@ -155,14 +116,14 @@ function faq(locale: Locale): [string, string][] {
         ['Жазылымды ұзартпасақ не болады?', '30, 14 және 3 күн бұрын ескертеміз. Төлем болмаса, сайт мерзім біткен соң келесі күні жабылады, ал төлегеннен кейін бірден ашылады — ондағының бәрі сақталады.'],
         ['Сайтты кім толтырады?', `«${basic}» тарифінде — балабақша қызметкері әкімші бөлімі арқылы. «${managed}» тарифінде материалдарды бізге жібересіз, ал оларды біз орналастырамыз; әкімші бөлімі сізде де қалады.`],
         ['Құжаттар Google Дискіде жатыр. Оларды қайта жүктеуге тура келе ме?', 'Жоқ. Бумаларды ішкі бумаларымен бірге толықтай көшіреміз — сайтта олар дискідегідей көрінеді.'],
-        ['Жеке балабақшаға жарай ма?', 'Иә, мемлекеттік және жеке балабақшаларға бірдей.'],
+        ['Мемлекеттік балабақшаға жарай ма?', 'Иә, сайт мемлекеттік және жеке балабақшаларға бірдей. Беттегі бағалар жеке балабақшаларға арналған — мемлекеттік балабақшаға құнын бөлек айтамыз.'],
       ]
     : [
         ['Можно ли свой адрес, например balapan-balabaqshasy.kz?', 'Да. Домен .kz или edu.kz вы покупаете сами на организацию, а мы поможем настроить — сертификат безопасности выпустится автоматически. Адрес на edusad.kz продолжит работать.'],
         ['Что будет, если не продлить подписку?', 'Напомним за 30, 14 и 3 дня. Без оплаты сайт закрывается на следующий день после окончания срока, а после оплаты открывается сразу — всё, что на нём было, сохраняется.'],
         ['Кто будет наполнять сайт?', `На «${basic}» — сотрудник сада через админку. На тарифе «${managed}» материалы присылаете нам, а размещаем их мы; админка остаётся и у вас.`],
         ['Документы уже лежат на Google Диске. Их придётся загружать заново?', 'Нет. Перенесём папки целиком, со всей вложенностью, — на сайте они будут выглядеть так же, как у вас на диске.'],
-        ['Подойдёт ли частному саду?', 'Да, государственным и частным садам одинаково.'],
+        ['Подойдёт ли государственному саду?', 'Да, сайт одинаковый для государственных и частных садов. Цены на странице — для частных; государственному саду назовём стоимость отдельно.'],
       ];
 }
 
@@ -181,23 +142,6 @@ function Icon({ name }: { name: keyof typeof ICONS }) {
   );
 }
 
-/** Знак EduSad — бумажный самолётик. Цвета линий задаёт фон (.lm в home.css). */
-function PlaneLogo() {
-  return (
-    <svg className="lm" width="46" height="46" viewBox="0 0 512 512" aria-hidden="true">
-      <circle cx="296" cy="232" r="178" fill="var(--pl-sun)" />
-      <g stroke="var(--pl-line)" strokeWidth="15" strokeLinejoin="round" strokeLinecap="round">
-        <path d="M96 202L480 74L262 212Z" fill="var(--pl-wing)" />
-        <path d="M96 202L262 212L196 254Z" fill="var(--pl-paper)" />
-        <path d="M196 254L262 212L480 74L252 292Z" fill="var(--pl-paper)" />
-        <path d="M196 254L252 292L226 366Z" fill="var(--pl-shade)" />
-        <path d="M480 74L338 214L366 352Z" fill="var(--pl-wing)" />
-        <path d="M252 292L338 214L366 352Z" fill="var(--pl-paper)" />
-      </g>
-      <path d="M206 384C168 404 118 418 78 396C40 375 40 322 80 306C118 292 150 330 132 372C114 414 66 440 22 440" fill="none" stroke="var(--pl-trail)" strokeWidth="15" strokeLinecap="round" strokeDasharray="26 22" />
-    </svg>
-  );
-}
 
 const fill = (template: string, value: string) => template.replace('%s', value);
 
@@ -226,40 +170,14 @@ export async function generateMetadata({
 export default async function PortalHome({
   searchParams,
 }: {
-  searchParams: Promise<{ lang?: string }>;
+  searchParams: Promise<{ lang?: string; plan?: string }>;
 }) {
-  const [{ lang }, csrf] = await Promise.all([searchParams, csrfToken()]);
+  const [{ lang, plan }, csrf] = await Promise.all([searchParams, csrfToken()]);
   const locale = localeFromParam(lang);
   const minPrice = formatMoney(Math.min(...PLAN_CODES.map((code) => env.planPrices[code])));
   // Демо-сад открываем на языке страницы: у него основной язык казахский.
   const demoHref = `https://demo.${env.portalDomain}${locale === 'ru' ? '/?lang=ru' : '/'}`;
-  const year = new Date().getFullYear();
 
-  const header = (
-    <header className="wrap top">
-      <a className="logo" href={withLocale('/', locale)} aria-label={T.home[locale]}>
-        <PlaneLogo />
-        <b>EduSad</b>
-      </a>
-      <nav className="nav" aria-label={T.sections[locale]}>
-        <a href="#adminka">{T.navFeatures[locale]}</a>
-        <a href="#tarify">{T.navPlans[locale]}</a>
-        <a href="#podkluchenie">{T.navSteps[locale]}</a>
-        <a href="#voprosy">{T.navFaq[locale]}</a>
-      </nav>
-      <div className="top-right">
-        {/* Язык меняется полной загрузкой, а не переходом Next: сценарий главной
-            (SplitText, WebGL, шапка-капсула) заново стартует на чистой разметке. */}
-        {/* eslint-disable @next/next/no-html-link-for-pages */}
-        <div className="lang" role="group" aria-label={T.langGroup[locale]}>
-          <a href="/?lang=kk" hrefLang="kk" className={locale === 'kk' ? 'on' : undefined} aria-current={locale === 'kk' ? 'true' : undefined}>Қаз</a>
-          <a href="/" hrefLang="ru" className={locale === 'ru' ? 'on' : undefined} aria-current={locale === 'ru' ? 'true' : undefined}>Рус</a>
-        </div>
-        {/* eslint-enable @next/next/no-html-link-for-pages */}
-        <a className="sbtn sbtn-top" href="#zayavka">{T.apply[locale]}</a>
-      </div>
-    </header>
-  );
 
   return (
     <div className="sales live" lang={locale}>
@@ -272,7 +190,7 @@ export default async function PortalHome({
             <i key={i} className={`o o${i + 1}`} data-depth={depth}><b /></i>
           ))}
         </div>
-        {header}
+        <SalesHeader locale={locale} pathname="/" onHome />
 
         <section className="wrap hero" id="main">
           <div className="hero-copy">
@@ -354,9 +272,15 @@ export default async function PortalHome({
               })}
             </div>
             <ul className="common">
-              {T.common[locale].map((item) => <li key={item}>{item}</li>)}
+              {PLAN_COMMON.map((item) => <li key={item.ru}>{item[locale].replaceAll('%domain%', env.portalDomain)}</li>)}
             </ul>
-            <p className="note">{T.domainNote[locale]}</p>
+            <p className="state-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" /><path d="M12 11v5" /><path d="M12 8h.01" />
+              </svg>
+              <span><b>{STATE_PRICE_NOTE.title[locale]}</b>{STATE_PRICE_NOTE.text[locale]}</span>
+            </p>
+            <p className="note">{EDU_DOMAIN_NOTE[locale]}.</p>
           </div>
         </section>
 
@@ -408,30 +332,12 @@ export default async function PortalHome({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="apply-img" src="/images/sales/apply.webp" alt={T.applyAlt[locale]} width={1200} height={896} loading="lazy" />
             </div>
-            <SalesApplyForm csrf={csrf} locale={locale} />
+            <SalesApplyForm csrf={csrf} locale={locale} plan={isPlanCode(plan) ? plan : null} />
           </div>
         </section>
       </main>
 
-      <footer className="band band-dark">
-        <div className="wrap foot">
-          <div>
-            <a className="logo" href={withLocale('/', locale)} aria-label="EduSad">
-              <PlaneLogo />
-              <b>EduSad</b>
-            </a>
-            <p>{T.footAbout[locale]}</p>
-          </div>
-          <nav aria-label={T.sections[locale]}>
-            <b>{T.sections[locale]}</b>
-            <a href="#tarify">{T.navPlans[locale]}</a>
-            <a href="#podkluchenie">{T.navSteps[locale]}</a>
-            <a href="/downloads/edusad-instrukciya.pdf" download>{T.guide[locale]}</a>
-            <a href={withLocale('/offer', locale)}>{T.offer[locale]}</a>
-          </nav>
-        </div>
-        <div className="wrap copy">© {year} EduSad. Кудайбергенов Асет</div>
-      </footer>
+      <SalesFooter locale={locale} onHome />
 
       <SalesLive locale={locale} />
     </div>

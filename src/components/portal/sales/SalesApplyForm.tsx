@@ -4,7 +4,7 @@ import { useActionState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import { submitLead, type LeadState } from '@/app/(portal)/apply/actions';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
-import { PLAN_CODES, PLAN_INFO } from '@/lib/plans';
+import { PLAN_CODES, PLAN_INFO, type PlanCode } from '@/lib/plans';
 import type { Locale } from '@/lib/i18n';
 
 const T = {
@@ -42,7 +42,8 @@ function Submit({ locale }: { locale: Locale }) {
  * Заявка с главной. Тот же обработчик, что у страницы /apply (submitLead):
  * CSRF, ограничение частоты, ловушка для ботов и письмо владельцу.
  */
-export function SalesApplyForm({ csrf, locale }: { csrf: string; locale: Locale }) {
+/** `plan` — тариф из адреса (?plan=, туда ведут старые ссылки на /apply): он отмечен заранее. */
+export function SalesApplyForm({ csrf, locale, plan }: { csrf: string; locale: Locale; plan: PlanCode | null }) {
   const [state, action] = useActionState(submitLead, initial);
 
   // Конфетти после отправки — тем же цветом, что шарики первого экрана.
@@ -98,12 +99,12 @@ export function SalesApplyForm({ csrf, locale }: { csrf: string; locale: Locale 
         <legend>{T.plan[locale]}</legend>
         {PLAN_CODES.map((code) => (
           <label key={code} className="opt">
-            <input type="radio" name="plan" value={code} />
+            <input type="radio" name="plan" value={code} defaultChecked={plan === code} />
             <span>{PLAN_INFO[code].name[locale]}</span>
           </label>
         ))}
         <label className="opt">
-          <input type="radio" name="plan" value="" defaultChecked />
+          <input type="radio" name="plan" value="" defaultChecked={!plan} />
           <span>{T.undecided[locale]}</span>
         </label>
       </fieldset>

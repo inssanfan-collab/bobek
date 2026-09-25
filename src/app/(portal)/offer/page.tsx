@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { env } from '@/lib/env';
 import { formatMoney, formatDate } from '@/lib/labels';
-import { PortalPage } from '@/components/portal/PortalChrome';
+import { SalesPage } from '@/components/portal/sales/SalesChrome';
 import { localeFromParam } from '@/lib/i18n';
 import { OFFER, OFFER_REVISION } from '@/lib/offer';
 import { portalSettings } from '@/server/docs/contract';
@@ -55,45 +55,43 @@ export default async function OfferPage({
       .replaceAll('%priceManaged%', formatMoney(env.planPrices.MANAGED));
 
   return (
-    <PortalPage locale={locale} pathname="/offer">
-      <div className="container-page max-w-3xl py-12">
-        <h1 className="font-display text-4xl font-extrabold">{T.title[locale]}</h1>
-        <p className="mt-2 text-sm text-muted">
-          {T.revision[locale]}: {formatDate(new Date(OFFER_REVISION), locale)}
-        </p>
+    <SalesPage
+      locale={locale}
+      pathname="/offer"
+      title={T.title[locale]}
+      lead={`${T.revision[locale]}: ${formatDate(new Date(OFFER_REVISION), locale)}`}
+    >
+      <div className="doc">
+        {OFFER.map((section) => (
+          <section key={section.title.ru}>
+            <h2>{section.title[locale]}</h2>
+            {section.items.map((item) => (
+              <p key={item.ru}>{fill(item[locale])}</p>
+            ))}
+          </section>
+        ))}
 
-        <div className="prose-content mt-8">
-          {OFFER.map((section) => (
-            <section key={section.title.ru}>
-              <h2>{section.title[locale]}</h2>
-              {section.items.map((item) => (
-                <p key={item.ru}>{fill(item[locale])}</p>
-              ))}
-            </section>
-          ))}
-
-          {/* На открытой странице — только кто исполнитель и как связаться.
-              ИИН, адрес и счёт видел бы любой посетитель: они уходят саду
-              в договоре и счёте. */}
-          <h2>{T.requisites[locale]}</h2>
-          {company ? (
-            <>
-              <ul>
-                <li>{company}</li>
-                {owner ? <li>{owner}</li> : null}
-                {settings.phone ? (
-                  <li>
-                    {T.phone[locale]}: <a href={`tel:${settings.phone.replace(/\s/g, '')}`}>{settings.phone}</a>
-                  </li>
-                ) : null}
-              </ul>
-              <p>{T.requisitesRest[locale]}</p>
-            </>
-          ) : (
-            <p>{T.requisitesNote[locale]}</p>
-          )}
-        </div>
+        {/* На открытой странице — только кто исполнитель и как связаться.
+            ИИН, адрес и счёт видел бы любой посетитель: они уходят саду
+            в договоре и счёте. */}
+        <h2>{T.requisites[locale]}</h2>
+        {company ? (
+          <>
+            <ul>
+              <li>{company}</li>
+              {owner ? <li>{owner}</li> : null}
+              {settings.phone ? (
+                <li>
+                  {T.phone[locale]}: <a href={`tel:${settings.phone.replace(/\s/g, '')}`}>{settings.phone}</a>
+                </li>
+              ) : null}
+            </ul>
+            <p>{T.requisitesRest[locale]}</p>
+          </>
+        ) : (
+          <p>{T.requisitesNote[locale]}</p>
+        )}
       </div>
-    </PortalPage>
+    </SalesPage>
   );
 }

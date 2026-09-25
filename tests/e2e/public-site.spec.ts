@@ -28,11 +28,26 @@ test.describe('Публичная часть', () => {
     await expect(page.locator('#tarify')).toContainText('Толтырумен');
   });
 
-  test('на странице тарифов оба тарифа с ценами', async ({ page }) => {
+  test('старые адреса ведут на разделы главной', async ({ page }) => {
+    // /pricing — раздел тарифов, рядом строка про государственные сады.
     await page.goto(`${PORTAL}/pricing`);
-    await expect(page.getByText('Базовый', { exact: true })).toBeVisible();
-    await expect(page.getByText('С наполнением', { exact: true })).toBeVisible();
-    await expect(page.getByText('150 000 ₸')).toBeVisible();
+    await expect(page).toHaveURL(/\/#tarify$/);
+    await expect(page.locator('#tarify')).toContainText('150 000 ₸');
+    await expect(page.locator('#tarify')).toContainText('Для государственных детских садов — своя цена');
+
+    // /apply?plan= — форма заявки, тариф уже отмечен; язык едет дальше.
+    await page.goto(`${PORTAL}/apply?plan=BASIC&lang=kk`);
+    await expect(page).toHaveURL(/plan=BASIC.*lang=kk#zayavka$/);
+    await expect(page.locator('#apply').getByRole('radio', { name: 'Базалық' })).toBeChecked();
+  });
+
+  test('оферта и контакты — в оформлении главной', async ({ page }) => {
+    await page.goto(`${PORTAL}/offer`);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('оферта');
+    await expect(page.locator('.sales')).toContainText('90 000 ₸');
+    await page.goto(`${PORTAL}/contacts`);
+    await expect(page.getByRole('heading', { level: 1, name: 'Контакты' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Оставить заявку' }).last()).toHaveAttribute('href', '/#zayavka');
   });
 
   test('каталог фильтрует сады по названию', async ({ page }) => {

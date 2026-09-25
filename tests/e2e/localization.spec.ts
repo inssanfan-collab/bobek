@@ -91,16 +91,22 @@ test.describe('Двуязычие сайта сада', () => {
 
 test.describe('Двуязычие портала', () => {
   test('портал переключается на казахский и запоминает язык в ссылках', async ({ page }) => {
-    await page.goto(`${PORTAL}/pricing`);
-    await expect(page.getByRole('heading', { name: 'Входит в оба тарифа' })).toBeVisible();
+    await page.goto(`${PORTAL}/catalog`);
+    await expect(page.getByRole('heading', { name: 'Детские сады Актобе' })).toBeVisible();
 
     await page.getByRole('link', { name: 'ҚАЗ' }).click();
     await expect(page).toHaveURL(/lang=kk/);
-    await expect(page.getByRole('heading', { name: 'Екі тарифке де кіреді' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Ақтөбе балабақшалары' })).toBeVisible();
 
     // Язык должен ехать по ссылкам дальше, иначе посетитель вываливается в русский.
-    await page.getByRole('link', { name: 'Балабақшалар каталогы' }).first().click();
-    await expect(page).toHaveURL(/lang=kk/);
-    await expect(page.getByRole('heading', { name: 'Ақтөбе балабақшалары' })).toBeVisible();
+    await page.getByRole('link', { name: 'Жаңалықтар' }).first().click();
+    await expect(page).toHaveURL(/news.*lang=kk/);
+
+    // И на главную, у которой своё оформление.
+    await page.goto(`${PORTAL}/?lang=kk`);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Балабақшаңыздың сайты');
+    await page.getByRole('link', { name: 'Рус' }).first().click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Сайт вашего детского');
   });
+});
 });
