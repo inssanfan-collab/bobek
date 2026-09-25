@@ -109,4 +109,3 @@ test.describe('Двуязычие портала', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Сайт вашего детского');
   });
 });
-});
