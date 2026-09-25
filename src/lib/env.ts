@@ -40,8 +40,8 @@ export const env = {
    * поэтому читаем её, если новая не задана.
    */
   planPrices: {
-    BASIC: int('PLAN_BASIC_PRICE_KZT', int('SUBSCRIPTION_PRICE_KZT', 50000)),
-    MANAGED: int('PLAN_MANAGED_PRICE_KZT', 120000),
+    BASIC: int('PLAN_BASIC_PRICE_KZT', int('SUBSCRIPTION_PRICE_KZT', 90000)),
+    MANAGED: int('PLAN_MANAGED_PRICE_KZT', 150000),
   },
   /**
    * Служебные уведомления владельцу портала: новая заявка и прочее.

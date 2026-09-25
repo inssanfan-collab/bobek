@@ -6,8 +6,8 @@ test.describe('Публичная часть', () => {
     await page.goto(PORTAL);
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Сайт вашего детского');
     // Цены приходят из PLAN_*_PRICE_KZT: расхождение здесь — забытая настройка.
-    await expect(page.locator('#tarify')).toContainText('50 000 ₸');
-    await expect(page.locator('#tarify')).toContainText('120 000 ₸');
+    await expect(page.locator('#tarify')).toContainText('90 000 ₸');
+    await expect(page.locator('#tarify')).toContainText('150 000 ₸');
     // Пример сайта — демо-сад, а не настоящий: чужие сады в рекламе не показываем.
     await expect(page.getByRole('link', { name: /Посмотреть пример сайта/ })).toHaveAttribute('href', /^https:\/\/demo\./);
 
@@ -32,7 +32,7 @@ test.describe('Публичная часть', () => {
     await page.goto(`${PORTAL}/pricing`);
     await expect(page.getByText('Базовый', { exact: true })).toBeVisible();
     await expect(page.getByText('С наполнением', { exact: true })).toBeVisible();
-    await expect(page.getByText('120 000 ₸')).toBeVisible();
+    await expect(page.getByText('150 000 ₸')).toBeVisible();
   });
 
   test('каталог фильтрует сады по названию', async ({ page }) => {
