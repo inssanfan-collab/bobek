@@ -11,8 +11,11 @@
 
 Копии лежат на этом же сервере в /var/backups/vsesad (только root):
 в дампе телефоны из заявок и хеши паролей. Хранятся 30 дней — дамп весит
-десятки килобайт. Каждая копия проверяется чтением оглавления (pg_restore
---list): битый файл хуже, чем никакого, — на него надеются.
+десятки килобайт. Каждая копия проверяется настоящим восстановлением
+во временную базу: битый файл хуже, чем никакого, — на него надеются.
+Одного оглавления (pg_restore --list) мало: 25.09.2026 копия с исправным
+оглавлением не восстанавливалась — функции поиска вызывали друг друга без
+схемы, а pg_restore ставит пустой search_path.
 
 Итог пишется в /var/lib/edusad/backup.json — его показывает админка
 портала, раздел «Сервер». Не получилось — письмо на NOTIFY_EMAIL из .env
@@ -78,6 +81,33 @@ def save_status(status: dict) -> None:
     STATUS.chmod(0o644)
 
 
+CHECK_DB = 'vsesad_backup_check'
+
+
+def restore_check(dump: Path) -> str | None:
+    """None — копия разворачивается целиком и в ней те же сады, что в рабочей базе."""
+    def pg(*args: str, stdin=None):
+        return subprocess.run(['runuser', '-u', 'postgres', '--', *args], stdin=stdin,
+                              capture_output=True, timeout=600)
+    pg('dropdb', '--if-exists', CHECK_DB)
+    try:
+        created = pg('createdb', CHECK_DB)
+        if created.returncode != 0:
+            return created.stderr.decode(errors='replace').strip()
+        with open(dump, 'rb') as source:
+            restored = pg('pg_restore', '--no-owner', '--exit-on-error', '-d', CHECK_DB, stdin=source)
+        if restored.returncode != 0:
+            return restored.stderr.decode(errors='replace').strip()[:400]
+        count = 'select count(*) from "Tenant"'
+        copy = pg('psql', '-d', CHECK_DB, '-tAc', count).stdout.decode().strip()
+        live = pg('psql', '-d', DB, '-tAc', count).stdout.decode().strip()
+        if not copy or copy != live:
+            return f'садов в копии {copy or "?"}, в рабочей базе {live or "?"}'
+        return None
+    finally:
+        pg('dropdb', '--if-exists', CHECK_DB)
+
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec='seconds')
 
@@ -120,6 +150,12 @@ def main() -> int:
     tables = check.stdout.decode(errors='replace').count(' TABLE DATA ')
     if check.returncode != 0 or tables == 0:
         return fail(f'копия не читается: {check.stderr.decode(errors="replace").strip() or "в ней нет таблиц"}')
+
+    # Пробное восстановление: база маленькая, это секунды. Файл открывает
+    # root и отдаёт через стандартный ввод — postgres его прочитать не может.
+    problem = restore_check(tmp)
+    if problem:
+        return fail(f'копия не восстанавливается: {problem}')
     tmp.replace(target)
 
     # Старше 30 дней — удаляем. Копии «перед восстановлением» тоже: к ним

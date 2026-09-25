@@ -178,11 +178,11 @@ const ENTRIES: Entry[] = [
       ru: 'Проверить, что копия восстанавливается (раз в месяц)',
     },
     answer: {
-      kk: 'Жұмыс базасына тимейді: соңғы көшірмені бөлек уақытша базаға қалпына келтіріп, балабақшаларды санайды, содан кейін уақытша базаны жояды.',
-      ru: 'Рабочую базу не трогает: разворачивает последнюю копию во временную базу, считает сады и удаляет временную базу.',
+      kk: 'Түнгі скрипт мұны әр көшірмеде өзі жасайды; бұл — қолмен тексеру. Жұмыс базасына тимейді: соңғы көшірмені уақытша базаға қалпына келтіріп, балабақшаларды санайды және уақытша базаны жояды.',
+      ru: 'Ночной скрипт делает это сам с каждой копией; это — ручная проверка. Рабочую базу не трогает: разворачивает последнюю копию во временную базу, считает сады и удаляет её.',
     },
     commands: [
-      `f=$(ls -1t /var/backups/vsesad/*.dump | head -1); runuser -u postgres -- createdb vsesad_check && runuser -u postgres -- pg_restore --no-owner -d vsesad_check "$f" && runuser -u postgres -- psql -d vsesad_check -tAc 'select count(*) from "Tenant"'; runuser -u postgres -- dropdb vsesad_check`,
+      `f=$(ls -1t /var/backups/vsesad/*.dump | head -1); runuser -u postgres -- createdb vsesad_check && runuser -u postgres -- pg_restore --no-owner --exit-on-error -d vsesad_check < "$f" && runuser -u postgres -- psql -d vsesad_check -tAc 'select count(*) from "Tenant"'; runuser -u postgres -- dropdb vsesad_check`,
     ],
   },
 ];

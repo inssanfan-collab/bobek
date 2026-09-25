@@ -44,5 +44,7 @@ systemctl stop vsesad
 # в одной транзакции прежняя база при ошибке останется как была.
 trap 'systemctl start vsesad' EXIT
 
-runuser -u postgres -- pg_restore --clean --if-exists --single-transaction --exit-on-error -d "$DB" "$FILE"
+# Файл копии доступен только root, поэтому открывает его root и отдаёт
+# через стандартный ввод: сам postgres прочитать его не может.
+runuser -u postgres -- pg_restore --clean --if-exists --single-transaction --exit-on-error -d "$DB" < "$FILE"
 echo "Готово: база восстановлена из $FILE"
