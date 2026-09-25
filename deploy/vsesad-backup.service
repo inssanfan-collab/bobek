@@ -1,0 +1,12 @@
+# Ночная копия базы EduSad. Копировать в /etc/systemd/system/ вместе с .timer,
+# затем: systemctl daemon-reload && systemctl enable --now vsesad-backup.timer
+[Unit]
+Description=Резервная копия базы EduSad (vsesad)
+After=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/vsesad-backup
+# Копия не должна мешать сайтам: ночью, с низким приоритетом диска и процессора.
+Nice=10
+IOSchedulingClass=idle

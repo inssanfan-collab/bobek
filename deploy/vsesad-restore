@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Восстановление базы EduSad из ночной копии (vsesad-backup).
+#
+#   vsesad-restore                              — список копий
+#   vsesad-restore /var/backups/vsesad/vsesad_2026-09-26_0330.dump
+#
+# Что делает: спрашивает подтверждение, снимает копию текущего состояния
+# («..._before-restore.dump» — если восстановили не то, к ней можно
+# вернуться), останавливает сайт, заменяет базу содержимым копии одной
+# транзакцией и запускает сайт обратно. Загруженные файлы не трогает:
+# их копии не делаются (решение 25.09.2026), а на диске они остаются.
+#
+# На сервере: /usr/local/bin/vsesad-restore, запускать под root.
+set -euo pipefail
+
+DB=vsesad
+DIR=/var/backups/vsesad
+
+if [ $# -lt 1 ]; then
+  echo "Копии базы (новые внизу):"
+  ls -1tr "$DIR"/*.dump 2>/dev/null | while read -r f; do
+    printf '  %s  %s\n' "$(date -r "$f" '+%Y-%m-%d %H:%M')" "$f"
+  done
+  echo
+  echo "Восстановить: $0 <файл>"
+  exit 0
+fi
+
+FILE=$1
+[ -f "$FILE" ] || { echo "Нет такого файла: $FILE"; exit 1; }
+pg_restore --list "$FILE" > /dev/null || { echo "Копия не читается — восстанавливать из неё нельзя"; exit 1; }
+
+echo "ВНИМАНИЕ: база $DB будет заменена содержимым копии"
+echo "  $FILE ($(date -r "$FILE" '+%Y-%m-%d %H:%M'))"
+echo "Всё, что изменили на сайтах после этого момента, пропадёт."
+read -r -p "Напишите yes, чтобы продолжить: " answer
+[ "$answer" = "yes" ] || { echo "Отменено"; exit 1; }
+
+echo "Копия текущего состояния — на случай, если восстановили не то…"
+/usr/local/bin/vsesad-backup before-restore
+
+systemctl stop vsesad
+# Сайт поднимаем в любом случае, даже если восстановление упало:
+# в одной транзакции прежняя база при ошибке останется как была.
+trap 'systemctl start vsesad' EXIT
+
+runuser -u postgres -- pg_restore --clean --if-exists --single-transaction --exit-on-error -d "$DB" "$FILE"
+echo "Готово: база восстановлена из $FILE"

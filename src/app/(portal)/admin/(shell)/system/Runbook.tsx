@@ -150,6 +150,41 @@ const ENTRIES: Entry[] = [
     },
     commands: ['fail2ban-client status sshd', 'fail2ban-client set sshd unbanip 1.2.3.4'],
   },
+  {
+    question: {
+      kk: 'Базаның көшірмесін қазір жасау',
+      ru: 'Сделать копию базы прямо сейчас',
+    },
+    answer: {
+      kk: 'Мысалы, қауіпті өзгерістер алдында. Көшірмелер /var/backups/vsesad ішінде, 30 күн сақталады. Жүктелген файлдар көшірілмейді.',
+      ru: 'Например, перед рискованными изменениями. Копии — в /var/backups/vsesad, хранятся 30 дней. Загруженные файлы не копируются.',
+    },
+    commands: ['/usr/local/bin/vsesad-backup', 'ls -lh /var/backups/vsesad'],
+  },
+  {
+    question: {
+      kk: 'Базаны көшірмеден қалпына келтіру',
+      ru: 'Восстановить базу из копии',
+    },
+    answer: {
+      kk: 'Аргументсіз — көшірмелер тізімі. Файлмен — растауды сұрайды, қазіргі күйдің көшірмесін жасайды, сайтты тоқтатып, базаны бір транзакциямен ауыстырады.',
+      ru: 'Без аргумента — список копий. С файлом — спросит подтверждение, снимет копию текущего состояния, остановит сайт и заменит базу одной транзакцией.',
+    },
+    commands: ['vsesad-restore', 'vsesad-restore /var/backups/vsesad/vsesad_ГГГГ-ММ-ДД_0330.dump'],
+  },
+  {
+    question: {
+      kk: 'Көшірменің жарамдылығын тексеру (айына бір рет)',
+      ru: 'Проверить, что копия восстанавливается (раз в месяц)',
+    },
+    answer: {
+      kk: 'Жұмыс базасына тимейді: соңғы көшірмені бөлек уақытша базаға қалпына келтіріп, балабақшаларды санайды, содан кейін уақытша базаны жояды.',
+      ru: 'Рабочую базу не трогает: разворачивает последнюю копию во временную базу, считает сады и удаляет временную базу.',
+    },
+    commands: [
+      `f=$(ls -1t /var/backups/vsesad/*.dump | head -1); runuser -u postgres -- createdb vsesad_check && runuser -u postgres -- pg_restore --no-owner -d vsesad_check "$f" && runuser -u postgres -- psql -d vsesad_check -tAc 'select count(*) from "Tenant"'; runuser -u postgres -- dropdb vsesad_check`,
+    ],
+  },
 ];
 
 export function Runbook({ locale }: { locale: Locale }) {

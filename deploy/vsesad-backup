@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Ночная резервная копия базы EduSad.
+
+На сервере: /usr/local/bin/vsesad-backup, запускает vsesad-backup.timer
+(каждую ночь в 03:30, root). Скрипт в репозитории — после правки его
+копируют на сервер руками, git pull этого не делает (как и vsesad-certs).
+
+Только база: тексты, настройки, структура папок документов, заявки,
+учётные записи. Загруженные файлы (storage) не копируются — так решил
+владелец 25.09.2026: места под них нет, а файлы не меняются после загрузки.
+
+Копии лежат на этом же сервере в /var/backups/vsesad (только root):
+в дампе телефоны из заявок и хеши паролей. Хранятся 30 дней — дамп весит
+десятки килобайт. Каждая копия проверяется чтением оглавления (pg_restore
+--list): битый файл хуже, чем никакого, — на него надеются.
+
+Итог пишется в /var/lib/edusad/backup.json — его показывает админка
+портала, раздел «Сервер». Не получилось — письмо на NOTIFY_EMAIL из .env
+в обход приложения, через sendmail, как у сторожа.
+
+Восстановление — vsesad-restore <файл>.
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+from datetime import datetime, timedelta, timezone
+from email.message import EmailMessage
+from pathlib import Path
+
+DB = 'vsesad'
+DIR = Path('/var/backups/vsesad')
+KEEP_DAYS = 30
+STATUS = Path('/var/lib/edusad/backup.json')
+ENV_FILE = Path('/var/www/vsesad/.env')
+
+
+def env_value(name: str) -> str:
+    try:
+        for line in ENV_FILE.read_text(encoding='utf-8').splitlines():
+            match = re.match(rf'^{name}=(.*)$', line.strip())
+            if match:
+                return match.group(1).strip().strip('"').strip("'")
+    except OSError:
+        pass
+    return ''
+
+
+def send(subject: str, body: str) -> None:
+    to = env_value('NOTIFY_EMAIL')
+    if not to:
+        return
+    sender = env_value('MAIL_FROM') or 'EduSad <edusad@e04.kz>'
+    message = EmailMessage()
+    message['From'] = sender
+    message['To'] = to
+    message['Subject'] = f'EduSad: {subject}'
+    message.set_content(body)
+    envelope = re.search(r'<([^>]+)>', sender)
+    subprocess.run(['/usr/sbin/sendmail', '-f', envelope.group(1) if envelope else sender, to],
+                   input=message.as_bytes(), check=False, timeout=60)
+
+
+def load_status() -> dict:
+    try:
+        return json.loads(STATUS.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return {}
+
+
+def save_status(status: dict) -> None:
+    STATUS.parent.mkdir(parents=True, exist_ok=True)
+    tmp = STATUS.with_suffix('.tmp')
+    tmp.write_text(json.dumps(status, ensure_ascii=False, indent=1), encoding='utf-8')
+    tmp.replace(STATUS)
+    # Приложение читает файл, но не пишет: в нём нет ничего секретного.
+    STATUS.chmod(0o644)
+
+
+def now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec='seconds')
+
+
+def main() -> int:
+    # Необязательная метка в имени: vsesad-restore делает копию «before-restore».
+    label = sys.argv[1] if len(sys.argv) > 1 else ''
+    if label and not re.fullmatch(r'[a-z0-9-]{1,32}', label):
+        print('метка — латиница, цифры и дефис', file=sys.stderr)
+        return 2
+
+    DIR.mkdir(parents=True, exist_ok=True)
+    DIR.chmod(0o700)
+    stamp = datetime.now().strftime('%Y-%m-%d_%H%M')
+    target = DIR / f'{DB}_{stamp}{"_" + label if label else ""}.dump'
+    tmp = target.with_suffix('.part')
+    status = load_status()
+
+    def fail(reason: str) -> int:
+        tmp.unlink(missing_ok=True)
+        status.update({'lastError': reason[:500], 'lastErrorAt': now_iso(), 'keepDays': KEEP_DAYS})
+        save_status(status)
+        print(f'ОШИБКА: {reason}', file=sys.stderr)
+        send('резервная копия базы не сделана', f'Ночная копия базы {DB} не получилась.\n\n{reason}\n\n'
+             f'Прошлая удачная копия: {status.get("lastSuccessAt") or "нет"}.\n'
+             f'Проверить вручную: /usr/local/bin/vsesad-backup; журнал — journalctl -u vsesad-backup.')
+        return 1
+
+    # Сжатый формат pg_dump: восстанавливается выборочно и проверяется
+    # оглавлением. Пишем во временный файл: оборванная копия не должна
+    # выглядеть как настоящая.
+    with open(tmp, 'wb') as out:
+        os.chmod(tmp, 0o600)
+        dump = subprocess.run(['runuser', '-u', 'postgres', '--', 'pg_dump', '-Fc', DB],
+                              stdout=out, stderr=subprocess.PIPE, timeout=1800)
+    if dump.returncode != 0:
+        return fail(f'pg_dump: {dump.stderr.decode(errors="replace").strip() or dump.returncode}')
+
+    check = subprocess.run(['pg_restore', '--list', str(tmp)], capture_output=True, timeout=300)
+    tables = check.stdout.decode(errors='replace').count(' TABLE DATA ')
+    if check.returncode != 0 or tables == 0:
+        return fail(f'копия не читается: {check.stderr.decode(errors="replace").strip() or "в ней нет таблиц"}')
+    tmp.replace(target)
+
+    # Старше 30 дней — удаляем. Копии «перед восстановлением» тоже: к ним
+    # возвращаются в первые часы, а не через месяц.
+    border = datetime.now() - timedelta(days=KEEP_DAYS)
+    for old in DIR.glob(f'{DB}_*.dump'):
+        if datetime.fromtimestamp(old.stat().st_mtime) < border:
+            old.unlink(missing_ok=True)
+    for stale in DIR.glob('*.part'):
+        stale.unlink(missing_ok=True)
+
+    kept = sorted(DIR.glob(f'{DB}_*.dump'))
+    status.update({
+        'lastSuccessAt': now_iso(),
+        'lastFile': target.name,
+        'lastSizeBytes': target.stat().st_size,
+        'tables': tables,
+        'kept': len(kept),
+        'keptBytes': sum(f.stat().st_size for f in kept),
+        'keepDays': KEEP_DAYS,
+        'dir': str(DIR),
+        'lastError': None,
+    })
+    save_status(status)
+    print(f'готово: {target} ({target.stat().st_size // 1024} КБ, таблиц: {tables}, копий: {len(kept)})')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

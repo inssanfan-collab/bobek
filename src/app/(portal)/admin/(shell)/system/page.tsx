@@ -2,7 +2,9 @@ import { PageHeader, StatCard } from '@/components/admin/AdminShell';
 import { Alert } from '@/components/ui/Alert';
 import { requireSuperadmin } from '@/server/auth/guards';
 import { formatDateTime } from '@/lib/labels';
-import { isStale, readSystemReport, reportPath, type CertificateInfo } from '@/server/system/report';
+import {
+  backupProblem, isStale, readBackupStatus, readSystemReport, reportPath, type BackupStatus, type CertificateInfo,
+} from '@/server/system/report';
 import { Runbook } from './Runbook';
 
 export const dynamic = 'force-dynamic';
@@ -65,6 +67,22 @@ const T = {
   freeOf: { kk: '%s ГБ-тан бос', ru: 'свободно из %s ГБ' },
   usedMb: { kk: '%s МБ-тан бос', ru: 'свободно из %s МБ' },
   version: { kk: 'Сайттың нұсқасы', ru: 'Версия сайта' },
+  backup: { kk: 'Базаның сақтық көшірмесі', ru: 'Резервная копия базы' },
+  backupNone: { kk: 'Көшірме әлі жасалмаған', ru: 'Копий ещё не было' },
+  backupHint: {
+    kk: '%n көшірме · %d күн сақталады · тек база, файлдарсыз',
+    ru: 'копий: %n · храним %d дн. · только база, без файлов',
+  },
+  backupStale: { kk: 'Сақтық көшірме ескірген', ru: 'Резервная копия устарела' },
+  backupStaleText: {
+    kk: 'Соңғы сәтті көшірмеден бір жарым тәуліктен астам уақыт өтті — vsesad-backup.timer таймерін тексеріңіз.',
+    ru: 'С последней удачной копии прошло больше полутора суток — проверьте таймер vsesad-backup.timer.',
+  },
+  backupError: { kk: 'Соңғы көшірме жасалмады', ru: 'Последняя копия не сделана' },
+  backupNoneText: {
+    kk: 'Түнгі көшірме әлі орнатылмаған немесе бірде-бір рет жасалмаған. Орнату — docs/DEPLOY.md, 6-бөлім.',
+    ru: 'Ночная копия ещё не установлена или ни разу не сделалась. Установка — docs/DEPLOY.md, раздел 6.',
+  },
   diskWarn: { kk: 'Дискіде орын аз', ru: 'На диске мало места' },
   diskWarnText: {
     kk: 'Орын 15%-дан аз қалды. Жүктелген файлдар мен журналдарды тексеріңіз.',
@@ -74,6 +92,20 @@ const T = {
 
 function fill(template: string, value: string | number): string {
   return template.replace('%s', String(value));
+}
+
+function BackupCard({ backup, locale }: { backup: BackupStatus | null; locale: 'kk' | 'ru' }) {
+  if (!backup?.lastSuccessAt) {
+    return <StatCard label={T.backup[locale]} value="—" hint={T.backupNone[locale]} />;
+  }
+  const size = (bytes: number) => (bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} КБ` : `${(bytes / 1024 / 1024).toFixed(1)} МБ`);
+  return (
+    <StatCard
+      label={T.backup[locale]}
+      value={<span className="text-base">{formatDateTime(new Date(backup.lastSuccessAt), locale)}</span>}
+      hint={`${size(backup.lastSizeBytes ?? 0)} · ${T.backupHint[locale].replace('%n', String(backup.kept ?? 0)).replace('%d', String(backup.keepDays ?? 30))}`}
+    />
+  );
 }
 
 function certTone(cert: CertificateInfo): string {
@@ -86,7 +118,7 @@ function certTone(cert: CertificateInfo): string {
 export default async function SystemPage() {
   const user = await requireSuperadmin();
   const locale = user.locale;
-  const report = await readSystemReport();
+  const [report, backup] = await Promise.all([readSystemReport(), readBackupStatus()]);
 
   if (!report) {
     return (
@@ -102,6 +134,7 @@ export default async function SystemPage() {
   }
 
   const alerts = report.certificates.filter((cert) => cert.alert);
+  const backupIssue = backupProblem(backup);
 
   return (
     <>
@@ -126,13 +159,23 @@ export default async function SystemPage() {
         </Alert>
       ) : null}
 
+      {backupIssue ? (
+        <Alert
+          tone={backupIssue === 'none' ? 'warn' : 'danger'}
+          title={backupIssue === 'error' ? T.backupError[locale] : backupIssue === 'stale' ? T.backupStale[locale] : T.backupNone[locale]}
+          className="mb-5"
+        >
+          {backupIssue === 'error' ? backup?.lastError : backupIssue === 'stale' ? T.backupStaleText[locale] : T.backupNoneText[locale]}
+        </Alert>
+      ) : null}
+
       {report.disk.percent >= 85 ? (
         <Alert tone="warn" title={T.diskWarn[locale]} className="mb-5">
           {T.diskWarnText[locale]}
         </Alert>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label={T.disk[locale]}
           value={`${report.disk.freeGb} ГБ`}
@@ -143,6 +186,7 @@ export default async function SystemPage() {
           value={`${report.memory.freeMb} МБ`}
           hint={fill(T.usedMb[locale], report.memory.totalMb)}
         />
+        <BackupCard backup={backup} locale={locale} />
         <StatCard
           label={T.version[locale]}
           value={<span className="font-mono text-base">{report.app.commit.split(' ')[0]}</span>}
