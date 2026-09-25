@@ -33,7 +33,7 @@ test.describe('Публичная часть', () => {
     await page.goto(`${PORTAL}/pricing`);
     await expect(page).toHaveURL(/\/#tarify$/);
     await expect(page.locator('#tarify')).toContainText('150 000 ₸');
-    await expect(page.locator('#tarify')).toContainText('Для государственных детских садов — своя цена');
+    await expect(page.locator('#tarify')).toContainText('Для государственных детских садов — другая цена');
 
     // /apply?plan= — форма заявки, тариф уже отмечен; язык едет дальше.
     await page.goto(`${PORTAL}/apply?plan=BASIC&lang=kk`);
