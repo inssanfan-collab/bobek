@@ -50,14 +50,21 @@ export default async function SearchPage({
 
   const results = query ? await db.search(query) : null;
 
+  // Раздел может быть вложен в другой («Педагоги» внутри «О саде») — ищем
+  // по всему меню. Раньше смотрели только верхний уровень: педагог
+  // находился и попадал в «Найдено», но списка педагогов не было.
+  const allSections = menu.flatMap((section) => [section, ...(section.children ?? [])]);
+  const staffSlug = allSections.find((s) => s.type === 'STAFF')?.slug;
+  const docsSlug = allSections.find((s) => s.type === 'DOCUMENTS')?.slug;
+
   const posts = results?.posts ?? [];
   const pages = results?.pages ?? [];
-  const documents = results?.documents ?? [];
-  const staff = results?.staff ?? [];
+  // Документы и педагоги ведут на страницу своего раздела — нет раздела
+  // в меню, некуда и вести: такие результаты не показываем и не считаем.
+  const documents = docsSlug ? results?.documents ?? [] : [];
+  const staff = staffSlug ? results?.staff ?? [] : [];
 
   const total = posts.length + pages.length + documents.length + staff.length;
-  const staffSlug = menu.find((s) => s.type === 'STAFF')?.slug;
-  const docsSlug = menu.find((s) => s.type === 'DOCUMENTS')?.slug;
 
   return (
     <>
