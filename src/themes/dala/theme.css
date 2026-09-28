@@ -346,6 +346,19 @@
   color: rgb(var(--dala-sun));
 }
 
+/* Кнопки соцсетей в тёмном подвале — прозрачные с обводкой: обычная светлая
+   кнопка с белым текстом (все ссылки подвала белые) была бы пустой плашкой. */
+[data-theme='dala'] .dala-footer .btn-secondary {
+  background: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.35);
+  color: rgb(255 255 255);
+}
+
+[data-theme='dala'] .dala-footer .btn-secondary:hover {
+  background: rgb(255 255 255 / 0.18);
+  color: rgb(var(--dala-sun));
+}
+
 [data-theme='dala'] .dala-footer-title {
   margin-bottom: 0.5rem;
   font-weight: 700;

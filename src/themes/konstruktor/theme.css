@@ -363,6 +363,20 @@
   color: rgb(var(--accent));
 }
 
+/* Кнопки соцсетей в тёмном подвале — жёлтые с тёмным текстом: обычная
+   белая кнопка с белым текстом (все ссылки подвала белые) была бы пустой. */
+[data-theme='konstruktor'] .kon-footer .btn-secondary {
+  background: rgb(var(--accent));
+  border-color: rgb(255 255 255);
+  box-shadow: 3px 3px 0 rgb(255 255 255 / 0.35);
+  color: rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-footer .btn-secondary:hover {
+  background: rgb(255 214 102);
+  color: rgb(var(--ink));
+}
+
 [data-theme='konstruktor'] .kon-footer-title {
   margin-bottom: 0.5rem;
   font-weight: 800;
