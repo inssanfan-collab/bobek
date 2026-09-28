@@ -12,6 +12,16 @@ export const metadata: Metadata = {
     `Готовый сайт для детского сада Актобе от ${formatMoney(env.planPrices.BASIC)} в год: своя админка, новости, галерея, документы и меню питания. Наполняете сами или доверяете нам. Каталог садов города.`,
   robots: { index: true, follow: true },
   metadataBase: new URL(`https://${env.portalDomain}`),
+  // Значок вкладки — бумажный самолётик из шапки, без пунктирного шлейфа:
+  // в 16–32 пикселях он превращался в шум. Только портал — у сада в шапке
+  // и во вкладке его собственный логотип (layout сайта).
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
   // Карточка превью в WhatsApp и Telegram. Статичный JPEG: WebP там
   // не показывается, а сборщики ссылок ходят за картинкой при каждой
   // пересылке. Пересобрать — pnpm og:image.

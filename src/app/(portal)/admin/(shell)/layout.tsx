@@ -31,10 +31,7 @@ export default async function PortalAdminLayout({ children }: { children: React.
   const user = await requireSuperadmin();
   const locale = user.locale;
 
-  const [newLeads, newFeedback] = await Promise.all([
-    prisma.lead.count({ where: { isHandled: false } }),
-    prisma.feedbackMessage.count({ where: { status: 'NEW' } }),
-  ]);
+  const newLeads = await prisma.lead.count({ where: { isHandled: false } });
 
   const n = T.nav;
   const nav: NavItem[] = [
@@ -45,7 +42,10 @@ export default async function PortalAdminLayout({ children }: { children: React.
     { href: '/admin/subscriptions', label: n.subscriptions[locale], icon: '💳' },
     { href: '/admin/leads', label: n.leads[locale], icon: '📥', badge: newLeads || undefined },
     { href: '/admin/news', label: n.news[locale], icon: '✍️' },
-    { href: '/admin/feed', label: n.feed[locale], icon: '📰', badge: newFeedback || undefined },
+    // Без счётчика: раньше здесь висело число новых обращений родителей,
+    // которых на странице нет, и убрать его отсюда было нельзя. Обращения
+    // разбирает сам сад в своей админке.
+    { href: '/admin/feed', label: n.feed[locale], icon: '📰' },
     { href: '/admin/audit', label: n.audit[locale], icon: '🧾' },
     { href: '/admin/requisites', label: n.requisites[locale], icon: '🏦' },
     { href: '/admin/system', label: n.system[locale], icon: '🖥️' },

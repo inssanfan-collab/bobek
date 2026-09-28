@@ -25,7 +25,7 @@ const T = {
     kk: 'Балабақшаларға сайт жасаймыз — қазақ және орыс тілдерінде, әкімші бөлімімен және Қазақстандағы хостингпен.',
     ru: 'Создаём сайты для детских садов — на казахском и русском, с админкой и хостингом в Казахстане.',
   },
-  guide: { kk: 'Нұсқаулық, PDF', ru: 'Инструкция, PDF' },
+  guide: { kk: 'Балабақшаға нұсқаулық', ru: 'Инструкция для сада' },
   offer: { kk: 'Жария оферта', ru: 'Публичная оферта' },
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
 } as const;
@@ -100,7 +100,7 @@ export async function SalesFooter({ locale, onHome = false }: { locale: Locale; 
           <a href={section(locale, onHome, 'tarify')}>{T.navPlans[locale]}</a>
           <a href={section(locale, onHome, 'podkluchenie')}>{T.navSteps[locale]}</a>
           <a href={withLocale('/contacts', locale)}>{T.contacts[locale]}</a>
-          <a href="/downloads/edusad-instrukciya.pdf" download>{T.guide[locale]}</a>
+          <a href={withLocale('/guide', locale)}>{T.guide[locale]}</a>
           <a href={withLocale('/offer', locale)}>{T.offer[locale]}</a>
         </nav>
       </div>

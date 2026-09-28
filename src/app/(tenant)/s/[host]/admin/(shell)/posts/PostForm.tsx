@@ -24,6 +24,7 @@ const T = {
   },
   body: { kk: 'Мәтін', ru: 'Текст' },
   video: { kk: 'Бейнеге сілтеме', ru: 'Ссылка на видео' },
+  videoPlaceholder: { kk: 'https://www.instagram.com/reel/… немесе https://youtu.be/…', ru: 'https://www.instagram.com/reel/… или https://youtu.be/…' },
   videoHint: {
     kk: 'YouTube немесе Instagram сілтемесі. Бейне сол жерде қалады, біз оны жаңалық бетінде көрсетеміз.',
     ru: 'Ссылка на YouTube или Instagram. Видео остаётся там, мы показываем его на странице новости.',
@@ -102,7 +103,7 @@ export function PostForm({
           defaultValue={post?.videoUrl ?? ''}
           disabled={!canEdit}
           className="field"
-          placeholder="https://www.instagram.com/reel/… или https://youtu.be/…"
+          placeholder={T.videoPlaceholder[locale]}
         />
         <p className="text-sm text-muted">{T.videoHint[locale]}</p>
       </section>

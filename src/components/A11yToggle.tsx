@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { UiIcon } from '@/components/site/UiIcon';
+import type { Locale } from '@/lib/i18n';
 
 const KEY = 'edusad:a11y';
+
+const T = {
+  title: { kk: 'Нашар көретіндерге арналған нұсқа', ru: 'Версия для слабовидящих' },
+  on: { kk: 'Нашар көретіндерге', ru: 'Для слабовидящих' },
+  off: { kk: 'Кәдімгі нұсқа', ru: 'Обычная версия' },
+} as const;
 
 /**
  * Включить или выключить режим. Индивидуальная тема на время режима
@@ -26,7 +33,7 @@ function apply(on: boolean) {
  * Версия для слабовидящих. Состояние держим в localStorage самого сайта сада —
  * у каждого сада свой домен, значит и своя настройка, что как раз правильно.
  */
-export function A11yToggle() {
+export function A11yToggle({ locale }: { locale: Locale }) {
   const [on, setOn] = useState(false);
 
   useEffect(() => {
@@ -56,10 +63,10 @@ export function A11yToggle() {
       onClick={toggle}
       className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-sm font-semibold hover:bg-brand-soft"
       aria-pressed={on}
-      title="Версия для слабовидящих"
+      title={T.title[locale]}
     >
       <UiIcon name="eye" className="h-4 w-4" />
-      <span className="hidden sm:inline">{on ? 'Обычная версия' : 'Для слабовидящих'}</span>
+      <span className="hidden sm:inline">{on ? T.off[locale] : T.on[locale]}</span>
     </button>
   );
 }

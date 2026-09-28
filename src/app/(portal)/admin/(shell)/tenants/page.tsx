@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/admin/AdminShell';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatDate, STATUS, STATUS_TONE, KIND } from '@/lib/labels';
 import { pick } from '@/lib/i18n';
+import { GUIDE_PDF } from '@/lib/guide';
 import { requireSuperadmin } from '@/server/auth/guards';
 import type { Prisma } from '@prisma/client';
 
@@ -30,6 +31,8 @@ const T = {
   handouts: { kk: 'Балабақшаларға арналған материалдар', ru: 'Материалы для садов' },
   anketa: { kk: 'Сауалнама (Excel)', ru: 'Анкета (Excel)' },
   guide: { kk: 'Нұсқаулық (PDF)', ru: 'Инструкция (PDF)' },
+  guideKk: { kk: 'қазақша', ru: 'на казахском' },
+  guideRu: { kk: 'орысша', ru: 'на русском' },
   handoutsHint: {
     kk: 'Қосылуға дейін сауалнаманы, кіру деректерімен бірге нұсқаулықты жіберіңіз.',
     ru: 'Анкету отправляйте до подключения, инструкцию — вместе с доступами.',
@@ -85,8 +88,11 @@ export default async function TenantsPage({
         <a href="/downloads/edusad-anketa.xlsx" className="btn-secondary text-sm" download>
           {T.anketa[locale]}
         </a>
-        <a href="/downloads/edusad-instrukciya.pdf" className="btn-secondary text-sm" download>
-          {T.guide[locale]}
+        <a href={GUIDE_PDF.kk} className="btn-secondary text-sm" download>
+          {T.guide[locale]}, {T.guideKk[locale]}
+        </a>
+        <a href={GUIDE_PDF.ru} className="btn-secondary text-sm" download>
+          {T.guide[locale]}, {T.guideRu[locale]}
         </a>
         <span className="text-sm text-muted">{T.handoutsHint[locale]}</span>
       </div>

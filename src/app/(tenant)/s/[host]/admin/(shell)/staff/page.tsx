@@ -6,6 +6,7 @@ import { SubmitButton } from '@/components/ui/SubmitButton';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { pick } from '@/lib/i18n';
 import { deleteStaff, saveStaff } from '../actions';
+import { FileInput } from '@/components/admin/FileInput';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,7 +86,7 @@ export default async function StaffPage({ params }: { params: Promise<{ host: st
           </div>
           <div>
             <label className="field-label" htmlFor="photo">{T.photo[locale]}</label>
-            <input id="photo" name="photo" type="file" accept="image/*" className="field" />
+            <FileInput id="photo" name="photo" accept="image/*" locale={locale} />
           </div>
           <div className="sm:col-span-2">
             <SubmitButton>{T.add[locale]}</SubmitButton>

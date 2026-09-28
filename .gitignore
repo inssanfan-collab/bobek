@@ -25,3 +25,11 @@ stop-server.sh
 
 # временные файлы агентов
 .agents/
+
+# видеоинструкция и её кадры — собираются pnpm guide:record, на сервер копируются руками
+/public/guide/
+
+# снимки и вёрстка PDF-инструкции — собираются pnpm guide:shots и guide:pdf;
+# в git только готовые PDF в public/downloads
+/docs/guide/shots/
+/docs/guide/guide*.html

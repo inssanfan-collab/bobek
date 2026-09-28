@@ -6,6 +6,7 @@ import { SubmitButton } from '@/components/ui/SubmitButton';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { formatDate } from '@/lib/labels';
 import { deleteMediaAction, uploadMedia } from '../actions';
+import { FileInput } from '@/components/admin/FileInput';
 
 export const dynamic = 'force-dynamic';
 
@@ -84,15 +85,7 @@ export default async function MediaPage({
           <input type="hidden" name={CSRF_FIELD} value={csrf} />
           <input type="hidden" name="host" value={host} />
           <label className="field-label" htmlFor="files">{T.upload[locale]}</label>
-          <input
-            id="files"
-            name="files"
-            type="file"
-            multiple
-            required
-            accept="image/jpeg,image/png,image/webp,.pdf,.doc,.docx,.xls,.xlsx"
-            className="field"
-          />
+          <FileInput id="files" name="files" multiple required accept="image/jpeg,image/png,image/webp,.pdf,.doc,.docx,.xls,.xlsx" locale={locale} />
           <p className="field-hint">
             {T.uploadHint[locale]}
           </p>

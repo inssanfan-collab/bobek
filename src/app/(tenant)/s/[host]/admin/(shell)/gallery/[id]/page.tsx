@@ -8,6 +8,7 @@ import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { ActionForm } from '@/components/ActionForm';
 import { deleteAlbum, removeAlbumItem, saveAlbum, uploadMedia } from '../../actions';
 import { pick } from '@/lib/i18n';
+import { FileInput } from '@/components/admin/FileInput';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,15 +60,7 @@ export default async function AlbumPage({
             <input type="hidden" name="host" value={host} />
             <input type="hidden" name="albumId" value={album.id} />
             <label className="field-label" htmlFor="files">{T.addPhotos[locale]}</label>
-            <input
-              id="files"
-              name="files"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              required
-              className="field"
-            />
+            <FileInput id="files" name="files" accept="image/jpeg,image/png,image/webp" multiple required locale={locale} />
             <p className="field-hint">
               Можно выбрать сразу несколько файлов. Размер уменьшится автоматически,
               данные о месте съёмки будут удалены.

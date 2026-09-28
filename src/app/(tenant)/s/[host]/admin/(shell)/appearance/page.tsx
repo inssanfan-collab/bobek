@@ -15,6 +15,7 @@ import { derivePalette } from '@/lib/colors';
 import { PresetPicker } from './PresetPicker';
 import { pick } from '@/lib/i18n';
 import { saveAppearance } from '../actions';
+import { FileInput } from '@/components/admin/FileInput';
 
 export const dynamic = 'force-dynamic';
 
@@ -444,7 +445,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
               // eslint-disable-next-line @next/next/no-img-element
               <img src={`/api/media/${profile.coverMediaId}`} alt="" className="mb-2 h-32 w-full rounded-2xl object-cover" />
             ) : null}
-            <input id="cover" name="cover" type="file" accept="image/*" className="field" />
+            <FileInput id="cover" name="cover" accept="image/*" locale={locale} />
             <p className="field-hint">{T.coverHint[locale]}</p>
           </div>
 
@@ -454,7 +455,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
               // eslint-disable-next-line @next/next/no-img-element
               <img src={`/api/media/${profile.logoMediaId}`} alt="" className="mb-2 h-20 rounded-2xl object-contain" />
             ) : null}
-            <input id="logo" name="logo" type="file" accept="image/*" className="field" />
+            <FileInput id="logo" name="logo" accept="image/*" locale={locale} />
           </div>
         </section>
 

@@ -40,7 +40,7 @@ export function siteNavLinks(sections: MenuSection[], locale: Locale) {
 export function HeaderTools({ locale, pathname }: { locale: Locale; pathname: string }) {
   return (
     <>
-      <A11yToggle />
+      <A11yToggle locale={locale} />
       <LocaleSwitch locale={locale} pathname={pathname} />
     </>
   );
@@ -191,7 +191,10 @@ export function SiteHeader({
               <Brand profile={profile} locale={locale} tagline={extras.tagline} taglineCustom={extras.taglineCustom} centered={false} />
               {right}
             </div>
-            <div className="border-t border-line/70 pt-2">{nav}</div>
+            {/* Меню уже внутри плашки с отступами — свои поля контейнера ему
+                не нужны: из-за них казахское меню (пункты длиннее) не влезало
+                в строку на 1280 пикселях, и «Іздеу» уезжал вниз. */}
+            <div className="border-t border-line/70 pt-2 [&>nav]:px-2">{nav}</div>
           </div>
         </div>
       </header>

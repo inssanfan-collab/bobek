@@ -11,6 +11,7 @@ import { TEMPLATES, PALETTES } from '@/lib/templates';
 import { KIND } from '@/lib/labels';
 import { DEFAULT_LOCALE, pick, type Locale } from '@/lib/i18n';
 import { slugify } from '@/lib/slug';
+import { FileInput } from '@/components/admin/FileInput';
 
 const T = {
   step1: { kk: 'Балабақша атауы', ru: 'Название сада' },
@@ -310,7 +311,7 @@ function AnketaBox({
         <input type="hidden" name={CSRF_FIELD} value={csrf} />
         <div className="min-w-[16rem] flex-1">
           <label className="field-label" htmlFor="anketa">Файл анкеты (.xlsx)</label>
-          <input id="anketa" name="anketa" type="file" accept=".xlsx" required className="field" />
+          <FileInput id="anketa" name="anketa" accept=".xlsx" required locale="ru" />
         </div>
         <SubmitButton className="btn-secondary" pendingLabel="Читаем…">Загрузить анкету</SubmitButton>
         <a href="/downloads/edusad-anketa.xlsx" className="btn-ghost" download>

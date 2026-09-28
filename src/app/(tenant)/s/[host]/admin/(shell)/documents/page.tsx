@@ -15,6 +15,7 @@ import { env } from '@/lib/env';
 import {
   createDocFolder, deleteDocFolder, deleteDocument, moveDocFolder, renameDocFolder, saveDocument,
 } from '../actions';
+import { FileInput } from '@/components/admin/FileInput';
 
 export const dynamic = 'force-dynamic';
 
@@ -176,7 +177,7 @@ export default async function DocumentsPage({
               </div>
               <div>
                 <label className="field-label" htmlFor={`dfile-${doc.id}`}>{T.replaceFile[locale]}</label>
-                <input id={`dfile-${doc.id}`} name="file" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx" className="field" />
+                <FileInput id={`dfile-${doc.id}`} name="file" accept=".pdf,.doc,.docx,.xls,.xlsx" locale={locale} />
               </div>
               <div className="sm:col-span-2">
                 <SubmitButton className="btn-secondary">{T.save[locale]}</SubmitButton>
@@ -222,7 +223,7 @@ export default async function DocumentsPage({
             <input type="hidden" name="folderId" value={currentId ?? ''} />
             <div>
               <label className="field-label" htmlFor="file">{T.file[locale]} *</label>
-              <input id="file" name="file" type="file" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx" className="field" />
+              <FileInput id="file" name="file" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx" locale={locale} />
               <p className="field-hint">{T.fileHint[locale].replaceAll('%s', String(maxUploadMb))}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">

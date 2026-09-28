@@ -23,6 +23,10 @@ const T = {
   names: { kk: 'Атаулары', ru: 'Названия' },
   fullName: { kk: 'Толық атауы', ru: 'Полное название' },
   shortName: { kk: 'Қысқаша атауы', ru: 'Короткое название' },
+  shortNameHint: {
+    kk: 'Толық атауы тым ұзын болса, сайт тақырыпшасында осы көрсетіледі.',
+    ru: 'Показывается в шапке сайта, если полное слишком длинное.',
+  },
   contacts: { kk: 'Байланыс және мекенжай', ru: 'Контакты и адрес' },
   address: { kk: 'Мекенжайы', ru: 'Адрес' },
   district: { kk: 'Қала ауданы', ru: 'Район города' },
@@ -52,6 +56,10 @@ const T = {
   instagram: { kk: 'Instagram (сілтеме)', ru: 'Instagram (ссылка)' },
   about: { kk: 'Балабақша туралы', ru: 'О саде' },
   aboutShort: { kk: 'Қысқаша сипаттама', ru: 'Краткое описание' },
+  aboutShortHint: {
+    kk: 'Басты бетте атаудың астында көрсетіледі. Екі-үш сөйлем.',
+    ru: 'Показывается на главной странице под названием. Два-три предложения.',
+  },
   save: { kk: 'Төлқұжатты сақтау', ru: 'Сохранить паспорт' },
   inRu: { kk: '(орыс.)', ru: '(рус.)' },
   inKk: { kk: '(қаз.)', ru: '(каз.)' },
@@ -96,7 +104,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ host: 
           />
           <BilingualField
             label={T.shortName[locale]}
-            hint="Показывается в шапке сайта, если полное слишком длинное."
+            hint={T.shortNameHint[locale]}
             ru={<input name="shortNameRu" defaultValue={profile?.shortNameRu ?? ''} className="field" placeholder="Ясли-сад №12" />}
             kk={<input name="shortNameKk" defaultValue={profile?.shortNameKk ?? ''} className="field" />}
           />
@@ -219,7 +227,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ host: 
           <h2 className="mb-4 font-display text-lg font-bold">{T.about[locale]}</h2>
           <BilingualField
             label={T.aboutShort[locale]}
-            hint="Показывается на главной странице под названием. Два-три предложения."
+            hint={T.aboutShortHint[locale]}
             ru={<textarea name="aboutRu" rows={4} defaultValue={profile?.aboutRu ?? ''} className="field" placeholder="Наш сад работает с 1985 года…" />}
             kk={<textarea name="aboutKk" rows={4} defaultValue={profile?.aboutKk ?? ''} className="field" placeholder="Балабақшамыз 1985 жылдан бері жұмыс істейді…" />}
           />

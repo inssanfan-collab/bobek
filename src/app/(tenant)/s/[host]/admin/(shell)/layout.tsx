@@ -8,6 +8,7 @@ import { Alert } from '@/components/ui/Alert';
 import { formatDate } from '@/lib/labels';
 import { sectionSettings } from '@/lib/sections';
 import { pick } from '@/lib/i18n';
+import { env } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Админка сада', robots: { index: false } };
@@ -15,6 +16,7 @@ export const metadata: Metadata = { title: 'Админка сада', robots: { 
 const T = {
   navLabel: { kk: 'Әкімші бөлімдері', ru: 'Разделы админки' },
   mySite: { kk: 'Сайтым', ru: 'Мой сайт' },
+  guide: { kk: 'Нұсқаулық', ru: 'Инструкция' },
   logout: { kk: 'Шығу', ru: 'Выйти' },
   impersonated: {
     kk: 'Сіз портал әкімшісі ретінде кірдіңіз. Барлық әрекеттер журналға жазылады.',
@@ -155,6 +157,15 @@ export default async function TenantAdminLayout({
       headerRight={
         <>
           <a href="/" target="_blank" rel="noreferrer" className="btn-secondary text-sm">{T.mySite[locale]}</a>
+          {/* Видеоинструкции живут на портале — у сада может быть свой домен. */}
+          <a
+            href={`https://${env.portalDomain}/guide${locale === 'kk' ? '?lang=kk' : ''}`}
+            target="_blank"
+            rel="noopener"
+            className="btn-ghost hidden px-3 text-sm sm:inline-flex"
+          >
+            {T.guide[locale]}
+          </a>
           <AdminLocaleSwitch locale={locale} />
           <LogoutButton label={T.logout[locale]} />
         </>

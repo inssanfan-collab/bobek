@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Locale } from '@/lib/i18n';
+import { FileInput } from '@/components/admin/FileInput';
 
 export type PickableMedia = { id: string; origName: string };
 
@@ -72,13 +73,12 @@ export function CoverPicker({
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-56 flex-1">
           <label className="field-hint mb-1 block" htmlFor={fileName}>{T.upload[locale]}</label>
-          <input
+          <FileInput
             id={fileName}
             name={fileName}
-            type="file"
             accept="image/jpeg,image/png,image/webp"
             disabled={disabled}
-            className="field"
+            locale={locale}
             onChange={(event) => {
               const file = event.target.files?.[0];
               if (!file) return setPreview(null);

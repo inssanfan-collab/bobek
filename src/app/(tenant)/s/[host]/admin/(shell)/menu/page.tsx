@@ -7,6 +7,7 @@ import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { formatDate } from '@/lib/labels';
 import { pick } from '@/lib/i18n';
 import { deleteMenuDay, saveMenuDay } from '../actions';
+import { FileInput } from '@/components/admin/FileInput';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,7 +64,7 @@ export default async function MenuPage({ params }: { params: Promise<{ host: str
           </div>
           <div>
             <label className="field-label" htmlFor="scan">{T.scan[locale]}</label>
-            <input id="scan" name="scan" type="file" accept="image/*,.pdf" className="field" />
+            <FileInput id="scan" name="scan" accept="image/*,.pdf" locale={locale} />
           </div>
           <div>
             <label className="field-label" htmlFor="breakfastRu">Завтрак</label>

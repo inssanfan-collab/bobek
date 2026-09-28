@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic';
 
 /** Страницы, которые есть всегда. Заявка и оферта — тоже точки входа из поиска. */
 // /connect, /pricing и /apply ведут на главную — в карте сайта им не место.
-const STATIC_PATHS = ['', '/catalog', '/parents', '/news', '/contacts', '/offer'];
+const STATIC_PATHS = ['', '/guide', '/catalog', '/parents', '/news', '/contacts', '/offer'];
 
 export async function GET() {
   const base = `https://${env.portalDomain}`;
