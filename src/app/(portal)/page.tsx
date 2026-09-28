@@ -32,7 +32,7 @@ const T = {
     kk: 'Қазақ және орыс тіліндегі ресми сайт: нашар көретіндерге арналған нұсқасы бар, ал әкімші бөлімін кез келген қызметкер оңай меңгереді.',
     ru: 'Официальный сайт на казахском и русском, с версией для слабовидящих и админкой, в которой разберётся любой сотрудник.',
   },
-  demo: { kk: 'Сайт үлгісін көру →', ru: 'Посмотреть пример сайта →' },
+  demo: { kk: 'Сайт үлгісін көру', ru: 'Посмотреть пример сайта' },
   heroAlt: {
     kk: 'Ақ төбедегі балабақша, аулада тәрбиеші мен балалар ойнап жүр',
     ru: 'Детский сад на белом холме, воспитатель и дети играют во дворе',
@@ -198,7 +198,10 @@ export default async function PortalHome({
             <p className="lead">{T.lead[locale]}</p>
             <div className="cta-row">
               <a className="sbtn sbtn-primary" href="#zayavka">{T.apply[locale]}</a>
-              <a className="link" href={demoHref} target="_blank" rel="noopener">{T.demo[locale]}</a>
+              <a className="sbtn sbtn-ghost" href={demoHref} target="_blank" rel="noopener">
+                {T.demo[locale]}
+                <span aria-hidden="true">↗</span>
+              </a>
             </div>
           </div>
           <div className="scene bleed">

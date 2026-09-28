@@ -26,6 +26,7 @@ const T = {
     ru: 'Создаём сайты для детских садов — на казахском и русском, с админкой и хостингом в Казахстане.',
   },
   guide: { kk: 'Балабақшаға нұсқаулық', ru: 'Инструкция для сада' },
+  navGuide: { kk: 'Нұсқаулық', ru: 'Инструкция' },
   offer: { kk: 'Жария оферта', ru: 'Публичная оферта' },
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
 } as const;
@@ -70,6 +71,11 @@ export function SalesHeader({ locale, pathname, onHome = false }: { locale: Loca
         <a href={section(locale, onHome, 'voprosy')}>{T.navFaq[locale]}</a>
       </nav>
       <div className="top-right">
+        {/* Отдельной страницей, а не разделом главной, поэтому не в меню слева:
+            меню на узком экране прячется, а инструкция нужна и там. */}
+        <a className="top-link" href={withLocale('/guide', locale)} aria-current={pathname === '/guide' ? 'page' : undefined}>
+          {T.navGuide[locale]}
+        </a>
         <div className="lang" role="group" aria-label={T.langGroup[locale]}>
           <a href={kk} hrefLang="kk" className={locale === 'kk' ? 'on' : undefined} aria-current={locale === 'kk' ? 'true' : undefined}>Қаз</a>
           <a href={pathname} hrefLang="ru" className={locale === 'ru' ? 'on' : undefined} aria-current={locale === 'ru' ? 'true' : undefined}>Рус</a>
