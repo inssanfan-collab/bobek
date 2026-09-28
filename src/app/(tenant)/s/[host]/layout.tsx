@@ -67,27 +67,32 @@ export default async function TenantLayout({
   const headerStyle = isHeaderStyleCode(tenant.headerStyle) ? tenant.headerStyle : 'light';
   // Индивидуальная тема: её CSS действует только при этом атрибуте.
   const theme = await activeTheme(tenant.themeCode);
+  // Тема задаёт вид целиком. Стиль шапки, узор, форма элементов и «свой
+  // цвет» из «Внешнего вида» сада при ней не применяются: их правила
+  // сильнее правил темы и перебили бы её. Шрифты — темы, если она их задала.
+  const own = !theme;
+  const fontsQuery = theme?.fonts ?? fonts.google;
 
   return (
     <html
       lang={tenant.defaultLocale === 'ru' ? 'ru' : 'kk'}
       data-palette={palette}
-      data-pattern={pattern}
+      data-pattern={own ? pattern : 'none'}
       data-theme={theme?.code}
       // Шапка не закреплена — одно CSS-правило в globals.css. Атрибутом, а не
       // пропом шапки: так настройка работает и в шаблонах, и в темах.
       data-header={tenant.headerSticky ? undefined : 'static'}
-      data-header-style={headerStyle === 'light' ? undefined : headerStyle}
-      data-font={fonts.code === 'soft' ? undefined : fonts.code}
-      data-shape={shape === 'soft' ? undefined : shape}
+      data-header-style={own && headerStyle !== 'light' ? headerStyle : undefined}
+      data-font={theme?.fonts || fonts.code === 'soft' ? undefined : fonts.code}
+      data-shape={own && shape !== 'soft' ? shape : undefined}
       data-a11y="off"
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* Только выбранная садом пара шрифтов — остальные посетителю не нужны. */}
-        <link href={`https://fonts.googleapis.com/css2?${fonts.google}&display=swap`} rel="stylesheet" />
-        {custom ? (
+        {/* Только нужная пара шрифтов (сада или темы) — остальные посетителю не нужны. */}
+        <link href={`https://fonts.googleapis.com/css2?${fontsQuery}&display=swap`} rel="stylesheet" />
+        {custom && own ? (
           // «Свой цвет»: токены палитры из одного цвета сада. Правило, а не
           // style на <html>: встроенный стиль перебил бы версию для
           // слабовидящих, а так она по-прежнему сильнее.

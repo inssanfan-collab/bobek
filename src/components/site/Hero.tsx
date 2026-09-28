@@ -59,6 +59,22 @@ export function HeroTitle({
   );
 }
 
+/**
+ * Ссылка из текстов сада (кнопка первого экрана или шапки): внешняя —
+ * в новой вкладке, адрес сайта — через Link, tel: и mailto: — обычной ссылкой.
+ * Экспортирована для индивидуальных тем: у них своя кнопка в шапке.
+ */
+export function LinkButton({ link, className, children }: { link: HeroLink; className: string; children?: ReactNode }) {
+  const inner = children ?? link.text;
+  return link.external ? (
+    <a href={link.href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>
+  ) : link.href.startsWith('/') ? (
+    <Link href={link.href} className={className}>{inner}</Link>
+  ) : (
+    <a href={link.href} className={className}>{inner}</a>
+  );
+}
+
 function HeroButton({ link, primary, tone }: { link: HeroLink; primary: boolean; tone: Tone }) {
   const className =
     tone === 'light'
@@ -68,19 +84,15 @@ function HeroButton({ link, primary, tone }: { link: HeroLink; primary: boolean;
       : primary
         ? 'btn-primary shadow-soft'
         : 'btn-secondary';
-  const inner = (
-    <>
-      {link.text}
-      {primary ? <span aria-hidden>→</span> : null}
-    </>
-  );
-  return link.external ? (
-    <a href={link.href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>
-  ) : link.href.startsWith('/') ? (
-    <Link href={link.href} className={className}>{inner}</Link>
-  ) : (
-    // tel: и mailto: — обычной ссылкой.
-    <a href={link.href} className={className}>{inner}</a>
+  return (
+    // Одним фрагментом: LinkButton кладёт children внутрь ссылки выражением,
+    // и два отдельных ребёнка стали бы для React списком без ключей.
+    <LinkButton link={link} className={className}>
+      <>
+        {link.text}
+        {primary ? <span aria-hidden>→</span> : null}
+      </>
+    </LinkButton>
   );
 }
 

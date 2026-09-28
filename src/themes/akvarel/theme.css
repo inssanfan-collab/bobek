@@ -1,0 +1,361 @@
+/*
+ * Тема «Акварель». Каждое правило — под [data-theme='akvarel'] (tests/unit/themes.test.ts).
+ * В версии для слабовидящих атрибут снимается, рисунки (класс decor) прячутся.
+ *
+ * Пастель — только в фоне и украшениях. Текст и кнопки — тёплые тёмные тона:
+ * персиковый #E9765A из макета с белым текстом даёт контраст 2,9, поэтому
+ * основной цвет — гуще (#C4502F, 4,6).
+ */
+
+[data-theme='akvarel'] {
+  --surface: 255 248 241;
+  --card: 255 255 255;
+  --ink: 59 42 36;
+  --muted: 112 94 86;
+  --line: 244 223 208;
+  --brand: 196 80 47;
+  --brand-soft: 253 229 218;
+  --brand-ink: 140 52 28;
+  --accent: 93 184 150;
+  --accent-soft: 222 244 235;
+  --accent-ink: 28 106 78;
+  --akv-peach: 255 225 210;
+  --akv-mint: 214 242 230;
+  --akv-lilac: 233 227 250;
+  --akv-butter: 255 243 199;
+  --radius-md: 1.25rem;
+  --radius-lg: 1.75rem;
+  --radius-xl: 2.25rem;
+  --font-display: 'Nunito', 'Nunito Sans', system-ui;
+  --font-sans: 'Nunito Sans', system-ui;
+}
+
+[data-theme='akvarel'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+[data-theme='akvarel'] .btn-primary,
+[data-theme='akvarel'] .btn-secondary,
+[data-theme='akvarel'] .akvarel-cta {
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+[data-theme='akvarel'] .btn-secondary {
+  border: 2px solid rgb(var(--accent));
+}
+
+/* ── Шапка ── */
+
+[data-theme='akvarel'] .akvarel-header {
+  background: rgb(255 255 255 / 0.94);
+  border-bottom: 2px dashed rgb(var(--brand) / 0.22);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+[data-theme='akvarel'] .akvarel-contacts {
+  color: rgb(var(--muted));
+}
+
+[data-theme='akvarel'] .akvarel-logo {
+  border-radius: 999px;
+  background: rgb(var(--akv-butter));
+  box-shadow: 0 0 0 4px rgb(255 255 255), 0 0 0 6px rgb(var(--akv-peach));
+}
+
+[data-theme='akvarel'] .akvarel-name {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.2rem;
+  line-height: 1.12;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='akvarel'] .akvarel-tagline {
+  margin-top: 0.1rem;
+  font-size: 0.82rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='akvarel'] .akvarel-cta {
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  box-shadow: 0 10px 22px -12px rgb(var(--brand) / 0.9);
+}
+
+[data-theme='akvarel'] .akvarel-nav nav a {
+  color: rgb(var(--ink));
+  border-radius: 999px;
+}
+
+/* ── Первый экран на акварели ── */
+
+[data-theme='akvarel'] .akvarel-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(30rem 20rem at 10% 18%, rgb(var(--akv-peach) / 0.95), transparent 70%),
+    radial-gradient(26rem 18rem at 88% 12%, rgb(var(--akv-lilac) / 0.95), transparent 70%),
+    radial-gradient(28rem 20rem at 72% 92%, rgb(var(--akv-mint) / 0.95), transparent 70%),
+    radial-gradient(22rem 14rem at 28% 96%, rgb(var(--akv-butter) / 0.95), transparent 70%),
+    rgb(var(--surface));
+}
+
+[data-theme='akvarel'] .akvarel-h1 {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: rgb(var(--ink));
+  text-wrap: balance;
+}
+
+/* Выделенная часть — цветом темы, с «нарисованной» кистью линией снизу. */
+[data-theme='akvarel'] .akvarel-hero .hero-highlight {
+  background-image: linear-gradient(rgb(var(--brand)), rgb(var(--brand)));
+  position: relative;
+}
+
+[data-theme='akvarel'] .akvarel-hero .hero-highlight::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.12em;
+  height: 0.28em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M3 9c28-7 62-8 98-3s68 5 96-2' fill='none' stroke='%23F2A68B' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+[data-theme='akvarel'] .akvarel-doodle {
+  position: absolute;
+  pointer-events: none;
+}
+
+[data-theme='akvarel'] .akvarel-cloud {
+  left: 36%;
+  top: 1.2rem;
+  width: 6.5rem;
+}
+
+[data-theme='akvarel'] .akvarel-sun {
+  right: 4%;
+  top: 1rem;
+  width: 4.2rem;
+}
+
+[data-theme='akvarel'] .akvarel-star {
+  left: 47%;
+  bottom: 4rem;
+  width: 2.3rem;
+}
+
+/* Обложка в мягкой «капле», за ней — мятная клякса. */
+[data-theme='akvarel'] .akvarel-blob-wrap {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+[data-theme='akvarel'] .akvarel-blob-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgb(var(--akv-mint));
+  border-radius: 46% 54% 42% 58% / 55% 44% 56% 45%;
+  transform: rotate(-7deg) scale(1.04);
+}
+
+[data-theme='akvarel'] .akvarel-blob {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 0.92;
+  object-fit: cover;
+  border-radius: 58% 42% 55% 45% / 48% 45% 55% 52%;
+  border: 8px solid rgb(255 255 255);
+  box-shadow: 0 30px 60px -32px rgb(var(--brand) / 0.55);
+}
+
+[data-theme='akvarel'] .akvarel-blob-empty {
+  background:
+    radial-gradient(circle at 70% 30%, rgb(255 214 107) 0 12%, transparent 13%),
+    linear-gradient(160deg, rgb(var(--akv-lilac)), rgb(var(--akv-peach)));
+}
+
+[data-theme='akvarel'] .akvarel-boat {
+  right: -0.8rem;
+  bottom: -1.2rem;
+  width: 5.5rem;
+}
+
+[data-theme='akvarel'] .akvarel-wave {
+  display: block;
+  width: 100%;
+  height: 3rem;
+  margin-top: -2.9rem;
+  position: relative;
+  color: rgb(var(--surface));
+}
+
+/* ── Объявления, разделы, новости ── */
+
+[data-theme='akvarel'] .akvarel-notice {
+  border: 2px dashed rgb(142 124 208 / 0.55);
+  background: rgb(var(--akv-lilac) / 0.6);
+  border-radius: 2rem;
+  padding: 1.25rem 1.5rem;
+  color: rgb(var(--ink));
+}
+
+[data-theme='akvarel'] .akvarel-notice-label {
+  display: inline-block;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  padding: 0.2rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgb(88 70 160);
+}
+
+[data-theme='akvarel'] .akvarel-home h2,
+[data-theme='akvarel'] .akvarel-heading {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 2rem;
+  color: rgb(var(--ink));
+}
+
+[data-theme='akvarel'] .akvarel-more {
+  font-weight: 800;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='akvarel'] .akvarel-tiles .card {
+  border: 2px dashed rgb(var(--brand) / 0.35);
+  background: rgb(var(--akv-peach) / 0.45);
+  border-radius: 1.75rem;
+  box-shadow: none;
+  padding: 1.1rem 1.2rem;
+  transition: transform 0.15s;
+}
+
+[data-theme='akvarel'] .akvarel-tiles .card:nth-child(4n + 2) {
+  border-color: rgb(var(--accent) / 0.55);
+  background: rgb(var(--akv-mint) / 0.6);
+}
+
+[data-theme='akvarel'] .akvarel-tiles .card:nth-child(4n + 3) {
+  border-color: rgb(142 124 208 / 0.55);
+  background: rgb(var(--akv-lilac) / 0.7);
+}
+
+[data-theme='akvarel'] .akvarel-tiles .card:nth-child(4n + 4) {
+  border-color: rgb(224 164 59 / 0.6);
+  background: rgb(var(--akv-butter) / 0.8);
+}
+
+[data-theme='akvarel'] .akvarel-tiles .card:hover {
+  transform: translateY(-2px) rotate(-0.6deg);
+}
+
+[data-theme='akvarel'] .akvarel-tiles .card > span:first-child {
+  border-radius: 999px;
+  background: rgb(255 255 255);
+}
+
+[data-theme='akvarel'] .akvarel-home article.card,
+[data-theme='akvarel'] .akvarel-gallery a.card {
+  border-radius: 2rem;
+  border: 0;
+  box-shadow: 0 18px 40px -26px rgb(var(--brand-ink) / 0.45);
+}
+
+[data-theme='akvarel'] .akvarel-gallery a.card:nth-child(odd) {
+  transform: rotate(-0.8deg);
+}
+
+[data-theme='akvarel'] .akvarel-gallery a.card:nth-child(even) {
+  transform: rotate(0.8deg);
+}
+
+[data-theme='akvarel'] .akvarel-gallery a.card:hover {
+  transform: none;
+}
+
+[data-theme='akvarel'] .akvarel-contacts .card {
+  border: 2px dashed rgb(var(--accent) / 0.6);
+  background: rgb(var(--akv-mint) / 0.55);
+  border-radius: 2rem;
+  box-shadow: none;
+}
+
+[data-theme='akvarel'] .akvarel-contacts a {
+  color: rgb(var(--accent-ink));
+}
+
+/* ── Подвал ── */
+
+[data-theme='akvarel'] .akvarel-footer-wave {
+  display: block;
+  width: 100%;
+  height: 3rem;
+  color: rgb(var(--akv-peach));
+}
+
+[data-theme='akvarel'] .akvarel-footer-body {
+  position: relative;
+  margin-top: -1px;
+  background: rgb(var(--akv-peach));
+  color: rgb(var(--ink));
+}
+
+[data-theme='akvarel'] .akvarel-footer-cloud {
+  right: 6%;
+  top: 0.5rem;
+  width: 7rem;
+}
+
+[data-theme='akvarel'] .akvarel-footer a:hover {
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='akvarel'] .akvarel-footer-title {
+  margin-bottom: 0.5rem;
+  font-weight: 900;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='akvarel'] .akvarel-footer-bottom {
+  border-top: 2px dashed rgb(var(--brand) / 0.2);
+  color: rgb(var(--muted));
+}
+
+@media (max-width: 639px) {
+  [data-theme='akvarel'] .akvarel-cloud,
+  [data-theme='akvarel'] .akvarel-star,
+  [data-theme='akvarel'] .akvarel-sun {
+    display: none;
+  }
+}
+
+/* Разделы на телефоне — в два столбца, значок над названием: в один
+   столбец семь плиток растягивали главную на два экрана. */
+@media (max-width: 639px) {
+  [data-theme='akvarel'] .akvarel-tiles .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-theme='akvarel'] .akvarel-tiles .card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+}

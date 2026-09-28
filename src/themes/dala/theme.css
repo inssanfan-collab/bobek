@@ -1,0 +1,387 @@
+/*
+ * Тема «Дала». Каждое правило — под [data-theme='dala']: действует только
+ * на сайт сада с этой темой (tests/unit/themes.test.ts). В версии для
+ * слабовидящих атрибут снимается, и файл перестаёт действовать целиком.
+ *
+ * Палитра: бирюза неба над степью, шафран солнца, терракота — на тёплом
+ * кремовом. Шафран в тексте — тёмная охра (--accent): яркий шафран на
+ * креме не набирает контраста даже для крупного заголовка, он только
+ * в украшениях (--dala-sun).
+ */
+
+[data-theme='dala'] {
+  --surface: 251 246 236;
+  --card: 255 255 255;
+  --ink: 31 41 51;
+  --muted: 92 100 110;
+  --line: 232 221 201;
+  --brand: 14 124 134;
+  --brand-soft: 221 240 239;
+  --brand-ink: 8 83 90;
+  --accent: 166 108 22;
+  --accent-soft: 251 236 208;
+  --accent-ink: 120 76 10;
+  --dala-sun: 224 164 59;
+  --dala-clay: 200 85 61;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+  --font-display: 'Montserrat', 'Open Sans', system-ui;
+  --font-sans: 'Open Sans', system-ui;
+}
+
+[data-theme='dala'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+/* ── Шапка ── */
+
+[data-theme='dala'] .dala-header {
+  background: rgb(var(--surface) / 0.96);
+  border-bottom: 1px solid rgb(var(--line));
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+[data-theme='dala'] .dala-topbar {
+  background: rgb(var(--brand-ink));
+  color: rgb(255 255 255 / 0.92);
+}
+
+[data-theme='dala'] .dala-topbar button,
+[data-theme='dala'] .dala-topbar a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='dala'] .dala-topbar button:hover,
+[data-theme='dala'] .dala-topbar a:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+
+[data-theme='dala'] .dala-mark {
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(var(--dala-sun));
+  padding: 0.55rem;
+}
+
+[data-theme='dala'] .dala-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  line-height: 1.15;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='dala'] .dala-tagline {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='dala'] .dala-cta {
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  border-radius: 999px;
+  box-shadow: 0 10px 22px -12px rgb(var(--brand-ink) / 0.9);
+}
+
+[data-theme='dala'] .dala-cta:hover {
+  background: rgb(var(--brand-ink));
+}
+
+[data-theme='dala'] .dala-nav nav a {
+  color: rgb(var(--ink));
+}
+
+[data-theme='dala'] .dala-nav nav a:hover {
+  color: rgb(var(--brand-ink));
+}
+
+/* ── Первый экран ── */
+
+[data-theme='dala'] .dala-notice {
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
+  border-bottom: 1px solid rgb(var(--dala-sun) / 0.35);
+}
+
+[data-theme='dala'] .dala-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(36rem 26rem at 88% 18%, rgb(var(--dala-sun) / 0.16), transparent 70%),
+    radial-gradient(30rem 22rem at 0% 100%, rgb(var(--brand) / 0.08), transparent 70%);
+}
+
+[data-theme='dala'] .dala-h1 {
+  font-size: clamp(2.1rem, 5vw, 3.9rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  color: rgb(var(--ink));
+  text-wrap: balance;
+}
+
+/* Выделенная часть — сплошной охрой вместо общего градиента, с мазком
+   шафрана снизу. */
+[data-theme='dala'] .dala-hero .hero-highlight {
+  background-image:
+    linear-gradient(rgb(var(--accent)), rgb(var(--accent)));
+  position: relative;
+}
+
+[data-theme='dala'] .dala-hero .hero-highlight::after {
+  content: '';
+  position: absolute;
+  left: 0.05em;
+  right: 0.1em;
+  bottom: -0.02em;
+  height: 0.12em;
+  border-radius: 999px;
+  background: rgb(var(--dala-sun) / 0.55);
+}
+
+[data-theme='dala'] .dala-hero .btn-primary {
+  border-radius: 999px;
+  padding-inline: 1.5rem;
+}
+
+[data-theme='dala'] .dala-hero .btn-secondary {
+  border-radius: 999px;
+  padding-inline: 1.5rem;
+  border-color: rgb(var(--brand) / 0.35);
+}
+
+/* Обложка в арке — как дверной проём юрты. Сзади — шафрановый контур
+   со сдвигом, сверху — завиток орнамента. */
+[data-theme='dala'] .dala-arch-wrap {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
+[data-theme='dala'] .dala-arch-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: translate(14px, -14px);
+  border: 2px solid rgb(var(--dala-sun));
+  border-radius: 999px 999px 1.75rem 1.75rem;
+}
+
+[data-theme='dala'] .dala-arch {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 4.6;
+  object-fit: cover;
+  border-radius: 999px 999px 1.75rem 1.75rem;
+  border: 6px solid rgb(var(--card));
+  box-shadow: 0 34px 60px -34px rgb(var(--brand-ink) / 0.65);
+}
+
+[data-theme='dala'] .dala-arch-empty {
+  background:
+    radial-gradient(circle at 50% 38%, rgb(var(--dala-sun)) 0 18%, transparent 19%),
+    linear-gradient(rgb(var(--brand-soft)) 60%, rgb(var(--accent-soft)) 60%);
+}
+
+[data-theme='dala'] .dala-corner {
+  position: absolute;
+  right: -1.4rem;
+  top: -1.9rem;
+  width: 4.2rem;
+  height: 4.2rem;
+  color: rgb(var(--dala-clay));
+  z-index: 1;
+}
+
+/* ── Орнамент между секциями ── */
+
+[data-theme='dala'] .dala-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  color: rgb(var(--brand));
+}
+
+[data-theme='dala'] .dala-divider span {
+  flex: 0 1 16rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--line)) 20%, rgb(var(--line)) 80%, transparent);
+}
+
+[data-theme='dala'] .dala-divider svg {
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: none;
+}
+
+/* ── Разделы, новости, альбомы ── */
+
+[data-theme='dala'] .dala-home h2 {
+  letter-spacing: -0.01em;
+  color: rgb(var(--ink));
+}
+
+[data-theme='dala'] .dala-home .card {
+  border-color: rgb(var(--line));
+  box-shadow: 0 1px 0 rgb(var(--line));
+}
+
+[data-theme='dala'] .dala-tiles .card {
+  padding: 1.1rem 1.2rem;
+  border-radius: 1.25rem;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+[data-theme='dala'] .dala-tiles .card:hover {
+  transform: translateY(-2px);
+  border-color: rgb(var(--brand) / 0.45);
+  box-shadow: 0 16px 30px -22px rgb(var(--brand-ink) / 0.7);
+}
+
+[data-theme='dala'] .dala-tiles .card > span:first-child {
+  border-radius: 999px;
+}
+
+[data-theme='dala'] .dala-tiles .card:nth-child(3n + 2) > span:first-child {
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='dala'] .dala-tiles .card:nth-child(3n + 3) > span:first-child {
+  background: rgb(var(--dala-clay) / 0.14);
+  color: rgb(146 56 36);
+}
+
+[data-theme='dala'] .dala-more {
+  font-weight: 700;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='dala'] .dala-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+[data-theme='dala'] .dala-home article.card {
+  border-radius: 1.5rem;
+}
+
+/* Альбомы — в тех же арках, что и обложка. */
+[data-theme='dala'] .dala-gallery a.card {
+  border-radius: 999px 999px 1.25rem 1.25rem;
+}
+
+[data-theme='dala'] .dala-gallery a.card img,
+[data-theme='dala'] .dala-gallery a.card > div:first-child {
+  height: 17rem;
+}
+
+/* ── Контакты: тёмная бирюзовая карточка ── */
+
+[data-theme='dala'] .dala-contacts {
+  position: relative;
+}
+
+[data-theme='dala'] .dala-contacts .card {
+  background: rgb(var(--brand-ink));
+  border: 0;
+  color: rgb(255 255 255 / 0.95);
+  padding: 2rem;
+  border-radius: 1.75rem;
+}
+
+[data-theme='dala'] .dala-contacts h2 {
+  color: rgb(255 255 255);
+}
+
+[data-theme='dala'] .dala-contacts dt {
+  color: rgb(255 255 255 / 0.7);
+}
+
+[data-theme='dala'] .dala-contacts a {
+  color: rgb(var(--dala-sun));
+}
+
+[data-theme='dala'] .dala-contacts-corner {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.25rem;
+  width: 6rem;
+  height: 6rem;
+  color: rgb(var(--dala-sun) / 0.35);
+  pointer-events: none;
+}
+
+/* ── Подвал ── */
+
+[data-theme='dala'] .dala-footer {
+  background: rgb(var(--brand-ink));
+  color: rgb(255 255 255 / 0.86);
+}
+
+[data-theme='dala'] .dala-footer .dala-divider {
+  color: rgb(var(--dala-sun));
+  padding-top: 1.5rem;
+}
+
+[data-theme='dala'] .dala-footer .dala-divider span {
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.25) 20%, rgb(255 255 255 / 0.25) 80%, transparent);
+}
+
+[data-theme='dala'] .dala-footer a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='dala'] .dala-footer a:hover {
+  color: rgb(var(--dala-sun));
+}
+
+[data-theme='dala'] .dala-footer-title {
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: rgb(var(--dala-sun));
+}
+
+[data-theme='dala'] .dala-footer-bottom {
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+  color: rgb(255 255 255 / 0.7);
+}
+
+@media (max-width: 1023px) {
+  [data-theme='dala'] .dala-arch {
+    aspect-ratio: 4 / 3.6;
+  }
+
+  [data-theme='dala'] .dala-corner {
+    right: -0.4rem;
+    top: -1.6rem;
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+}
+
+/* Разделы на телефоне — в два столбца, значок над названием: в один
+   столбец семь плиток растягивали главную на два экрана. */
+@media (max-width: 639px) {
+  [data-theme='dala'] .dala-tiles .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-theme='dala'] .dala-tiles .card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+}

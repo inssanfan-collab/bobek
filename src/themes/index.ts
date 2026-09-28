@@ -1,4 +1,13 @@
 import { findThemeInfo } from './catalog';
+import { AkvarelFooter } from './akvarel/Footer';
+import { AkvarelHeader } from './akvarel/Header';
+import { AkvarelHome } from './akvarel/Home';
+import { DalaFooter } from './dala/Footer';
+import { DalaHeader } from './dala/Header';
+import { DalaHome } from './dala/Home';
+import { KonstruktorFooter } from './konstruktor/Footer';
+import { KonstruktorHeader } from './konstruktor/Header';
+import { KonstruktorHome } from './konstruktor/Home';
 import { ObrazecFooter } from './obrazec/Footer';
 import { ObrazecHeader } from './obrazec/Header';
 import { ObrazecHome } from './obrazec/Home';
@@ -13,6 +22,9 @@ import type { SiteTheme, ThemeParts } from './types';
  */
 const PARTS: Record<string, ThemeParts> = {
   obrazec: { Home: ObrazecHome, Header: ObrazecHeader, Footer: ObrazecFooter },
+  dala: { Home: DalaHome, Header: DalaHeader, Footer: DalaFooter },
+  akvarel: { Home: AkvarelHome, Header: AkvarelHeader, Footer: AkvarelFooter },
+  konstruktor: { Home: KonstruktorHome, Header: KonstruktorHeader, Footer: KonstruktorFooter },
 };
 
 export function findTheme(code: string | null | undefined): SiteTheme | null {

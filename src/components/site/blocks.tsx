@@ -229,3 +229,59 @@ export function PlacesBadge({ profile, locale }: { profile: TenantProfile | null
     </p>
   );
 }
+
+/**
+ * Ссылка на страницу сайта сада с учётом языка. Для индивидуальных тем:
+ * им нельзя импортировать withLocale (он из @/server), а без него ссылка
+ * с казахского сайта уводила бы на основной язык.
+ */
+export function SiteLink({
+  href,
+  locale,
+  className,
+  children,
+}: {
+  href: string;
+  locale: Locale;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link href={withLocale(href, locale)} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+/** Разделы сайта списком ссылок — для подвалов тем. Внешние открываются в новой вкладке. */
+export function SectionLinkList({
+  sections,
+  locale,
+  className,
+  linkClassName,
+  limit = 8,
+}: {
+  sections: Section[];
+  locale: Locale;
+  className?: string;
+  linkClassName?: string;
+  limit?: number;
+}) {
+  return (
+    <ul className={className}>
+      {sections.slice(0, limit).map((section) => {
+        const link = sectionLink(section, (path) => withLocale(path, locale));
+        const title = pick(locale, section.titleKk, section.titleRu);
+        return (
+          <li key={section.id}>
+            {link.external ? (
+              <a href={link.href} target="_blank" rel="noopener noreferrer" className={linkClassName}>{title} ↗</a>
+            ) : (
+              <Link href={link.href} className={linkClassName}>{title}</Link>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}

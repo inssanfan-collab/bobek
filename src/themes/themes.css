@@ -1,2 +1,5 @@
 /* Стили всех индивидуальных тем. Каждая действует только при своём data-theme. */
 @import './obrazec/theme.css';
+@import './dala/theme.css';
+@import './akvarel/theme.css';
+@import './konstruktor/theme.css';

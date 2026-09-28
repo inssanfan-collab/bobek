@@ -38,10 +38,24 @@ async function expand(node: ReactNode): Promise<ReactNode> {
   const next: Record<string, unknown> = {};
   let changed = false;
   for (const [name, value] of Object.entries(props ?? {})) {
-    if (name === 'children' || isValidElement(value) || Array.isArray(value)) {
+    if (name === 'children') continue;
+    if (isValidElement(value) || Array.isArray(value)) {
       next[name] = await expand(value as ReactNode);
       changed = true;
     }
+  }
+  const children = props?.children as ReactNode;
+  if (Array.isArray(children)) {
+    // Несколько детей из JSX — отдельными аргументами, а не массивом:
+    // массив в props.children React считает списком и требует ключей
+    // («Each child in a list should have a unique key»). Списки из .map
+    // остаются вложенными массивами со своими ключами.
+    const kids = await Promise.all(children.map(expand));
+    return cloneElement(element, next, ...kids);
+  }
+  if (children !== undefined) {
+    next.children = await expand(children);
+    changed = true;
   }
   return changed ? cloneElement(element, next) : element;
 }

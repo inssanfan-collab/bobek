@@ -1,0 +1,407 @@
+/*
+ * Тема «Конструктор». Каждое правило — под [data-theme='konstruktor'] (tests/unit/themes.test.ts).
+ * В версии для слабовидящих атрибут снимается, украшения (decor) прячутся.
+ *
+ * Язык темы — деревянные кубики: жирная тёмная обводка и тень со сдвигом
+ * без размытия. Цвета блоков подобраны под контраст текста: белый — на
+ * синем, красном, фиолетовом и бирюзовом; тёмный — на жёлтом и зелёном.
+ */
+
+[data-theme='konstruktor'] {
+  --surface: 255 252 243;
+  --card: 255 255 255;
+  --ink: 20 20 43;
+  --muted: 78 82 110;
+  --line: 222 222 232;
+  --brand: 47 91 234;
+  --brand-soft: 225 232 253;
+  --brand-ink: 24 50 150;
+  --accent: 255 197 61;
+  --accent-soft: 255 243 205;
+  --accent-ink: 120 80 0;
+  --kon-red: 210 58 34;
+  --kon-green: 43 196 138;
+  --kon-purple: 124 77 255;
+  --kon-teal: 11 122 115;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --font-display: 'Rubik', system-ui;
+  --font-sans: 'Rubik', system-ui;
+}
+
+[data-theme='konstruktor'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+/* Весь сайт — в той же манере: карточки и кнопки с обводкой и тенью. */
+[data-theme='konstruktor'] .card {
+  border: 2px solid rgb(var(--ink));
+  box-shadow: 4px 4px 0 rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .btn-primary,
+[data-theme='konstruktor'] .btn-secondary,
+[data-theme='konstruktor'] .kon-cta {
+  border: 2.5px solid rgb(var(--ink));
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 rgb(var(--ink));
+  font-weight: 700;
+}
+
+[data-theme='konstruktor'] .btn-primary:active,
+[data-theme='konstruktor'] .btn-secondary:active,
+[data-theme='konstruktor'] .kon-cta:active {
+  box-shadow: none;
+  transform: translate(3px, 3px);
+}
+
+/* ── Шапка ── */
+
+[data-theme='konstruktor'] .kon-header {
+  background: rgb(255 255 255);
+  border-bottom: 4px solid rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-topbar {
+  background: rgb(var(--ink));
+  color: rgb(255 255 255 / 0.9);
+}
+
+[data-theme='konstruktor'] .kon-topbar button,
+[data-theme='konstruktor'] .kon-topbar a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='konstruktor'] .kon-topbar button:hover,
+[data-theme='konstruktor'] .kon-topbar a:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+
+[data-theme='konstruktor'] .kon-logo {
+  border-radius: 1rem;
+  border: 3px solid rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  line-height: 1.12;
+  color: rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-tagline {
+  margin-top: 0.1rem;
+  font-size: 0.8rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='konstruktor'] .kon-cta {
+  background: rgb(var(--accent));
+  color: rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-nav nav a {
+  color: rgb(var(--ink));
+  font-weight: 600;
+}
+
+[data-theme='konstruktor'] .kon-nav nav a:hover {
+  background: rgb(var(--accent-soft));
+}
+
+/* ── Объявления ── */
+
+[data-theme='konstruktor'] .kon-notice {
+  background: rgb(var(--kon-red));
+  color: rgb(255 255 255);
+  border-bottom: 3px solid rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-notice-label {
+  display: inline-block;
+  border: 2px solid rgb(var(--ink));
+  border-radius: 0.5rem;
+  background: rgb(var(--accent));
+  color: rgb(var(--ink));
+  padding: 0.1rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Первый экран ── */
+
+[data-theme='konstruktor'] .kon-hero {
+  position: relative;
+  overflow: hidden;
+  background-image: radial-gradient(rgb(var(--ink) / 0.08) 1.5px, transparent 1.7px);
+  background-size: 22px 22px;
+  border-bottom: 3px solid rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-h1 {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: rgb(var(--ink));
+}
+
+/* Выделенная часть — на жёлтом кубике с обводкой. */
+[data-theme='konstruktor'] .kon-hero .hero-highlight {
+  margin-top: 0.1em;
+  padding: 0 0.28em 0.04em;
+  background: rgb(var(--accent));
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: rgb(var(--ink));
+  border: 3px solid rgb(var(--ink));
+  border-radius: 0.35em;
+  box-shadow: 4px 4px 0 rgb(var(--ink));
+  transform: rotate(-1.5deg);
+}
+
+[data-theme='konstruktor'] .kon-dot {
+  position: absolute;
+  border-radius: 999px;
+  border: 3px solid rgb(var(--ink));
+  pointer-events: none;
+}
+
+[data-theme='konstruktor'] .kon-dot-a {
+  left: -2.5rem;
+  top: 2.5rem;
+  width: 6rem;
+  height: 6rem;
+  background: rgb(var(--brand-soft));
+}
+
+[data-theme='konstruktor'] .kon-dot-b {
+  left: 42%;
+  bottom: 1.5rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  background: rgb(var(--kon-red));
+}
+
+/* Обложка в толстой рамке; за ней — синяя арка и жёлтый круг. */
+[data-theme='konstruktor'] .kon-frame-wrap {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+[data-theme='konstruktor'] .kon-frame-wrap::before {
+  content: '';
+  position: absolute;
+  left: -1.3rem;
+  top: -1.3rem;
+  width: 42%;
+  height: 58%;
+  z-index: -1;
+  background: rgb(var(--brand));
+  border: 3px solid rgb(var(--ink));
+  border-radius: 999px 999px 0.6rem 0.6rem;
+}
+
+[data-theme='konstruktor'] .kon-frame-wrap::after {
+  content: '';
+  position: absolute;
+  right: -1.6rem;
+  bottom: -1.9rem;
+  width: 7rem;
+  height: 7rem;
+  z-index: -1;
+  background: rgb(var(--accent));
+  border: 3px solid rgb(var(--ink));
+  border-radius: 999px;
+}
+
+[data-theme='konstruktor'] .kon-frame {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3.4;
+  object-fit: cover;
+  background: rgb(255 255 255);
+  border: 4px solid rgb(var(--ink));
+  border-radius: 2rem;
+  box-shadow: 8px 8px 0 rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-frame-empty {
+  background:
+    radial-gradient(circle at 72% 30%, rgb(var(--accent)) 0 13%, transparent 14%),
+    linear-gradient(rgb(var(--brand-soft)) 62%, rgb(var(--kon-green) / 0.55) 62%);
+}
+
+/* ── Заголовки и разделы ── */
+
+[data-theme='konstruktor'] .kon-home h2,
+[data-theme='konstruktor'] .kon-heading {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 2.1rem;
+  color: rgb(var(--ink));
+  background: linear-gradient(transparent 64%, rgb(var(--accent)) 64%, rgb(var(--accent)) 92%, transparent 92%);
+}
+
+[data-theme='konstruktor'] .kon-more {
+  font-weight: 700;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='konstruktor'] .kon-more:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+[data-theme='konstruktor'] .kon-tiles .card {
+  border: 3px solid rgb(var(--ink));
+  border-radius: 1.4rem;
+  box-shadow: 5px 5px 0 rgb(var(--ink));
+  padding: 1.1rem 1.2rem;
+  font-weight: 700;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+[data-theme='konstruktor'] .kon-tiles .card:nth-child(6n + 2) {
+  background: rgb(var(--accent));
+  color: rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-tiles .card:nth-child(6n + 3) {
+  background: rgb(var(--kon-green));
+  color: rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-tiles .card:nth-child(6n + 4) {
+  background: rgb(var(--kon-red));
+}
+
+[data-theme='konstruktor'] .kon-tiles .card:nth-child(6n + 5) {
+  background: rgb(var(--kon-purple));
+}
+
+[data-theme='konstruktor'] .kon-tiles .card:nth-child(6n + 6) {
+  background: rgb(var(--kon-teal));
+}
+
+[data-theme='konstruktor'] .kon-tiles .card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-tiles .card > span:first-child {
+  border-radius: 999px;
+  border: 2.5px solid rgb(var(--ink));
+  background: rgb(255 255 255);
+  color: rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-home article.card,
+[data-theme='konstruktor'] .kon-gallery a.card {
+  border: 3px solid rgb(var(--ink));
+  border-radius: 1.6rem;
+  box-shadow: 6px 6px 0 rgb(var(--ink));
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+[data-theme='konstruktor'] .kon-home article.card:hover,
+[data-theme='konstruktor'] .kon-gallery a.card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-home article.card img,
+[data-theme='konstruktor'] .kon-home article.card a > div:first-child,
+[data-theme='konstruktor'] .kon-gallery a.card img,
+[data-theme='konstruktor'] .kon-gallery a.card > div:first-child {
+  border-bottom: 3px solid rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-contacts .card {
+  background: rgb(var(--accent));
+  border: 3px solid rgb(var(--ink));
+  border-radius: 1.8rem;
+  box-shadow: 6px 6px 0 rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-contacts h2 {
+  background: none;
+}
+
+[data-theme='konstruktor'] .kon-contacts dt {
+  color: rgb(var(--ink) / 0.72);
+}
+
+[data-theme='konstruktor'] .kon-contacts a {
+  color: rgb(var(--brand-ink));
+}
+
+/* ── Подвал ── */
+
+[data-theme='konstruktor'] .kon-footer {
+  background: rgb(var(--ink));
+  color: rgb(255 255 255 / 0.86);
+  border-top: 4px solid rgb(var(--ink));
+}
+
+[data-theme='konstruktor'] .kon-footer a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='konstruktor'] .kon-footer a:hover {
+  color: rgb(var(--accent));
+}
+
+[data-theme='konstruktor'] .kon-footer-title {
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+  color: rgb(var(--accent));
+}
+
+[data-theme='konstruktor'] .kon-footer-bottom {
+  border-top: 1px solid rgb(255 255 255 / 0.14);
+  color: rgb(255 255 255 / 0.7);
+}
+
+@media (max-width: 639px) {
+  [data-theme='konstruktor'] .kon-frame {
+    box-shadow: 5px 5px 0 rgb(var(--ink));
+  }
+
+  [data-theme='konstruktor'] .kon-frame-wrap::after {
+    width: 4.5rem;
+    height: 4.5rem;
+    right: -0.6rem;
+  }
+
+  [data-theme='konstruktor'] .kon-dot-a {
+    display: none;
+  }
+}
+
+/* Разделы на телефоне — в два столбца, значок над названием: в один
+   столбец семь плиток растягивали главную на два экрана. */
+@media (max-width: 639px) {
+  [data-theme='konstruktor'] .kon-tiles .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-theme='konstruktor'] .kon-tiles .card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+}
