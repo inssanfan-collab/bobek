@@ -407,7 +407,8 @@
 /* Разделы на телефоне — в два столбца, значок над названием: в один
    столбец семь плиток растягивали главную на два экрана. */
 @media (max-width: 639px) {
-  [data-theme='konstruktor'] .kon-tiles .grid {
+  /* Только сетка плиток: класс grid есть и у кружка иконки внутри плитки. */
+  [data-theme='konstruktor'] .kon-tiles section > .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
