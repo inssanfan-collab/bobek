@@ -5,6 +5,7 @@ import { SalesPage } from '@/components/portal/sales/SalesChrome';
 import { localeFromParam } from '@/lib/i18n';
 import { OFFER, OFFER_REVISION } from '@/lib/offer';
 import { portalSettings } from '@/server/docs/contract';
+import { portalAlternates } from '@/lib/seo';
 
 export async function generateMetadata({
   searchParams,
@@ -13,6 +14,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = localeFromParam((await searchParams).lang);
   return {
+    alternates: portalAlternates('/offer', locale),
     title: locale === 'kk' ? 'Жария оферта' : 'Публичная оферта',
     description: locale === 'kk'
       ? 'Мектепке дейінгі ұйымдарға сайт жүргізу қызметін ұсыну шарттары.'

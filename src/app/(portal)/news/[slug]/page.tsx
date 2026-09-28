@@ -7,6 +7,7 @@ import { toPlainText } from '@/lib/sanitize';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
+import { portalAlternates } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,14 +24,19 @@ async function load(slug: string) {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
-  const post = await load((await params).slug);
-  if (!post) return { title: T.notFound.ru };
+  const [{ slug }, search] = await Promise.all([params, searchParams]);
+  const locale = localeFromParam(search.lang);
+  const post = await load(slug);
+  if (!post) return { title: T.notFound[locale] };
   return {
-    title: post.titleRu,
-    description: post.excerptRu ?? toPlainText(post.bodyRu, 160),
+    title: pick(locale, post.titleKk, post.titleRu),
+    description: pick(locale, post.excerptKk, post.excerptRu) || toPlainText(pick(locale, post.bodyKk, post.bodyRu), 160),
+    alternates: portalAlternates(`/news/${slug}`, locale),
   };
 }
 

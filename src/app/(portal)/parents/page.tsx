@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, withLocale } from '@/lib/i18n';
+import { portalAlternates } from '@/lib/seo';
 
 export async function generateMetadata({
   searchParams,
@@ -10,6 +11,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = localeFromParam((await searchParams).lang);
   return {
+    alternates: portalAlternates('/parents', locale),
     title: locale === 'kk' ? 'Ата-аналарға' : 'Родителям',
     description: locale === 'kk' ? 'Ақтөбеде Darabala.kz арқылы балабақшаға кезекке қалай тұру керек, қандай құжаттар қажет және балабақшаны қалай таңдау керек.' : 'Как встать в очередь в детский сад в Актобе через Darabala.kz, какие документы нужны и как выбрать сад.',
   };

@@ -8,6 +8,7 @@ import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, pick } from '@/lib/i18n';
 import { KIND } from '@/lib/labels';
 import type { Prisma } from '@prisma/client';
+import { portalAlternates } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = localeFromParam((await searchParams).lang);
   return {
+    alternates: portalAlternates('/catalog', locale),
     title: locale === 'kk' ? 'Ақтөбе балабақшаларының каталогы' : 'Каталог детских садов Актобе',
     description: locale === 'kk' ? 'Ақтөбенің балабақшалары мен шағын орталықтары: мекенжайлары, телефондары, оқыту тілі, бос орындар және ресми сайттарға сілтемелер.' : 'Детские сады и мини-центры Актобе: адреса, телефоны, язык обучения, свободные места и ссылки на официальные сайты.',
   };

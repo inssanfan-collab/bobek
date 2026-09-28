@@ -6,6 +6,7 @@ import { SalesPage } from '@/components/portal/sales/SalesChrome';
 import { GuideTask } from '@/components/portal/sales/GuideTask';
 import type { GuideStep } from '@/components/portal/sales/StepPlayer';
 import { GUIDE_PDF } from '@/lib/guide';
+import { portalAlternates } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +54,7 @@ async function readManifest(): Promise<Manifest | null> {
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
   const locale = localeFromParam((await searchParams).lang);
-  return { title: T.title[locale], description: T.lead[locale] };
+  return { title: T.title[locale], description: T.lead[locale], alternates: portalAlternates('/guide', locale) };
 }
 
 export default async function GuidePage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {

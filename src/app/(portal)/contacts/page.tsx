@@ -3,6 +3,7 @@ import { env } from '@/lib/env';
 import { localeFromParam, withLocale } from '@/lib/i18n';
 import { SalesPage } from '@/components/portal/sales/SalesChrome';
 import { portalSettings } from '@/server/docs/contract';
+import { portalAlternates } from '@/lib/seo';
 
 export async function generateMetadata({
   searchParams,
@@ -11,6 +12,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = localeFromParam((await searchParams).lang);
   return {
+    alternates: portalAlternates('/contacts', locale),
     title: locale === 'kk' ? 'Байланыс' : 'Контакты',
   };
 }

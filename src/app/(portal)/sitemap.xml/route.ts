@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/server/db';
-import { env } from '@/lib/env';
+import { portalUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,11 +12,12 @@ export const dynamic = 'force-dynamic';
 
 /** Страницы, которые есть всегда. Заявка и оферта — тоже точки входа из поиска. */
 // /connect, /pricing и /apply ведут на главную — в карте сайта им не место.
-const STATIC_PATHS = ['', '/guide', '/catalog', '/parents', '/news', '/contacts', '/offer'];
+const STATIC_PATHS = ['/', '/guide', '/catalog', '/parents', '/news', '/contacts', '/offer'];
+
+/** & в адресе — сущностью: иначе XML карты не разберётся. */
+const xml = (url: string) => url.replace(/&/g, '&amp;');
 
 export async function GET() {
-  const base = `https://${env.portalDomain}`;
-
   const [posts, lastGarden] = await Promise.all([
     prisma.portalPost.findMany({
       where: { status: 'PUBLISHED', publishedAt: { lte: new Date() } },
@@ -31,27 +32,39 @@ export async function GET() {
     }),
   ]);
 
-  const urls: { loc: string; lastmod: Date | null }[] = [
+  const pages: { path: string; lastmod: Date | null }[] = [
     ...STATIC_PATHS.map((path) => ({
-      loc: `${base}${path}`,
+      path,
       lastmod: path === '/catalog' ? lastGarden?.updatedAt ?? null : null,
     })),
-    ...posts.map((post) => ({ loc: `${base}/news/${post.slug}`, lastmod: post.updatedAt })),
+    ...posts.map((post) => ({ path: `/news/${post.slug}`, lastmod: post.updatedAt })),
   ];
 
-  // Без hreflang, в отличие от карты сайта сада: портал существует только
-  // по-русски, и объявлять казахскую версию значило бы обещать поисковику
-  // страницу, которой нет.
-  const body = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    ({ loc, lastmod }) => `  <url>
-    <loc>${loc}</loc>${lastmod ? `\n    <lastmod>${lastmod.toISOString().slice(0, 10)}</lastmod>` : ''}
-  </url>`,
-  )
-  .join('\n')}
-</urlset>`;
+  // Каждая страница — на двух языках (казахская — ?lang=kk), и у каждой версии
+  // ссылки на обе: так поисковик показывает казахскую тем, кто ищет по-казахски,
+  // и не считает её копией русской.
+  const entries = pages.flatMap(({ path, lastmod }) =>
+    (['ru', 'kk'] as const).map((locale) =>
+      [
+        '  <url>',
+        `    <loc>${xml(portalUrl(path, locale))}</loc>`,
+        lastmod ? `    <lastmod>${lastmod.toISOString().slice(0, 10)}</lastmod>` : null,
+        `    <xhtml:link rel="alternate" hreflang="ru" href="${xml(portalUrl(path, 'ru'))}"/>`,
+        `    <xhtml:link rel="alternate" hreflang="kk" href="${xml(portalUrl(path, 'kk'))}"/>`,
+        `    <xhtml:link rel="alternate" hreflang="x-default" href="${xml(portalUrl(path, 'ru'))}"/>`,
+        '  </url>',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    ),
+  );
+
+  const body = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+    ...entries,
+    '</urlset>',
+  ].join('\n');
 
   return new NextResponse(body, {
     headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },

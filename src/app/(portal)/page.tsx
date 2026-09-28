@@ -7,6 +7,7 @@ import { csrfToken } from '@/server/auth/csrf';
 import { SalesLive } from '@/components/portal/sales/SalesLive';
 import { SalesApplyForm } from '@/components/portal/sales/SalesApplyForm';
 import { SalesFooter, SalesHeader } from '@/components/portal/sales/SalesChrome';
+import { portalAlternateLinks } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -163,7 +164,6 @@ export async function generateMetadata({
       locale === 'kk'
         ? `Балабақшаның ресми сайты қазақ және орыс тілдерінде: әкімші бөлімі, нашар көретіндерге арналған нұсқа, Қазақстандағы хостинг. Жылына ${from} бастап.`
         : `Официальный сайт детского сада на казахском и русском: админка, версия для слабовидящих, хостинг в Казахстане. От ${from} в год.`,
-    alternates: { languages: { ru: '/', kk: '/?lang=kk' } },
   };
 }
 
@@ -181,6 +181,11 @@ export default async function PortalHome({
 
   return (
     <div className="sales live" lang={locale}>
+      {/* canonical и hreflang — тегами, а не через metadata: у главной Next
+          терял ?lang=kk (см. src/lib/seo.ts). React переносит их в <head>. */}
+      {portalAlternateLinks('/', locale).map((link) => (
+        <link key={link.hrefLang ?? link.rel} rel={link.rel} hrefLang={link.hrefLang} href={link.href} />
+      ))}
       <a className="skip" href="#main">{T.skip[locale]}</a>
 
       <div className="band band-hero">

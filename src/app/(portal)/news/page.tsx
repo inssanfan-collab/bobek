@@ -5,6 +5,7 @@ import { formatDate } from '@/lib/labels';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PortalPage } from '@/components/portal/PortalChrome';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
+import { portalAlternates } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 export async function generateMetadata({
@@ -14,6 +15,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = localeFromParam((await searchParams).lang);
   return {
+    alternates: portalAlternates('/news', locale),
     title: locale === 'kk' ? 'Портал жаңалықтары' : 'Новости портала',
   };
 }
