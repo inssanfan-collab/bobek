@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
 import { localeFromParam, withLocale, type Locale } from '@/lib/i18n';
 import { SalesPage } from '@/components/portal/sales/SalesChrome';
 import { GuideTask } from '@/components/portal/sales/GuideTask';
-import type { GuideStep } from '@/components/portal/sales/StepPlayer';
+import { readGuideManifest } from '@/server/guide/manifest';
 import { GUIDE_PDF } from '@/lib/guide';
 import { portalAlternates } from '@/lib/seo';
 
@@ -30,28 +28,6 @@ const T = {
   otherLang: { kk: 'Бұл бейне әзірге орысша ғана.', ru: 'Это видео пока только на казахском.' },
 } as const;
 
-type Manifest = {
-  tasks: Record<string, {
-    title: Record<Locale, string>;
-    sub: Record<Locale, string>;
-    video: Partial<Record<Locale, string>>;
-    steps: Partial<Record<Locale, GuideStep[]>>;
-  }>;
-};
-
-/**
- * Файлы инструкции (ролики, кадры, manifest.json) собирает pnpm guide:record
- * и кладёт в public/guide. В git они не входят — на сервер копируются
- * отдельно, поэтому страница спокойно переживает их отсутствие.
- */
-async function readManifest(): Promise<Manifest | null> {
-  try {
-    return JSON.parse(await fs.readFile(path.join(process.cwd(), 'public', 'guide', 'manifest.json'), 'utf8')) as Manifest;
-  } catch {
-    return null;
-  }
-}
-
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ lang?: string }> }): Promise<Metadata> {
   const locale = localeFromParam((await searchParams).lang);
   return { title: T.title[locale], description: T.lead[locale], alternates: portalAlternates('/guide', locale) };
@@ -59,7 +35,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
 
 export default async function GuidePage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   const locale = localeFromParam((await searchParams).lang);
-  const manifest = await readManifest();
+  const manifest = await readGuideManifest();
   const other: Locale = locale === 'kk' ? 'ru' : 'kk';
   const tasks = Object.entries(manifest?.tasks ?? {});
 

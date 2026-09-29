@@ -8,6 +8,8 @@ import { csrfToken } from '@/server/auth/csrf';
 import { portalSettings } from '@/server/docs/contract';
 import { SalesTabs } from '@/components/portal/sales/SalesTabs';
 import { SalesMotion } from '@/components/portal/sales/SalesMotion';
+import { AdminDemo, type DemoTask } from '@/components/portal/sales/AdminDemo';
+import { readGuideManifest } from '@/server/guide/manifest';
 import { SalesApplyForm } from '@/components/portal/sales/SalesApplyForm';
 import { SalesFooter, SalesHeader } from '@/components/portal/sales/SalesChrome';
 import { portalAlternateLinks } from '@/lib/seo';
@@ -285,7 +287,7 @@ export default async function PortalHome({
 }: {
   searchParams: Promise<{ lang?: string; plan?: string }>;
 }) {
-  const [{ lang, plan }, csrf, settings] = await Promise.all([searchParams, csrfToken(), portalSettings()]);
+  const [{ lang, plan }, csrf, settings, manifest] = await Promise.all([searchParams, csrfToken(), portalSettings(), readGuideManifest()]);
   const locale = localeFromParam(lang);
   const minPrice = formatMoney(Math.min(...PLAN_CODES.map((code) => env.planPrices[code])));
   // Демо-сад открываем на языке страницы: у него основной язык казахский.
@@ -305,11 +307,23 @@ export default async function PortalHome({
     return { ...look, name, own: Boolean(theme) };
   });
 
-  const tasks = [
-    { id: 'news', color: 'var(--peach)', title: T.tabNews, time: T.tabNewsTime, text: T.tabNewsText, alt: T.adminNewsAlt, path: '/admin' },
-    { id: 'menu', color: 'var(--mint)', title: T.tabMenu, time: null, text: T.tabMenuText, alt: T.adminMenuAlt, path: '/admin/menu' },
-    { id: 'docs', color: 'var(--butter)', title: T.tabDocs, time: null, text: T.tabDocsText, alt: T.adminDocsAlt, path: '/admin/documents' },
-  ];
+  // Живая админка: кадры инструкции (дело «documents» у инструкции — «docs» у снимков).
+  const demoTasks: DemoTask[] = [
+    { id: 'news', guide: 'news', color: 'var(--peach)', title: T.tabNews, time: T.tabNewsTime, text: T.tabNewsText, alt: T.adminNewsAlt, path: '/admin/posts' },
+    { id: 'menu', guide: 'menu', color: 'var(--mint)', title: T.tabMenu, time: null, text: T.tabMenuText, alt: T.adminMenuAlt, path: '/admin/menu' },
+    { id: 'docs', guide: 'documents', color: 'var(--butter)', title: T.tabDocs, time: null, text: T.tabDocsText, alt: T.adminDocsAlt, path: '/admin/documents' },
+  ].map((task) => ({
+    id: task.id,
+    title: task.title[locale],
+    time: task.time ? task.time[locale] : null,
+    text: task.text[locale],
+    color: task.color,
+    alt: task.alt[locale],
+    path: task.path,
+    still: img(`admin-${task.id}`, locale),
+    steps: manifest?.tasks[task.guide]?.steps[locale] ?? null,
+    base: `/guide/steps/${locale}/${task.guide}/`,
+  }));
 
   return (
     <div className="sales" lang={locale} style={cssVars({ '--foot-from': '#EEE6FF' })}>
@@ -319,6 +333,9 @@ export default async function PortalHome({
         <link key={link.hrefLang ?? link.rel} rel={link.rel} hrefLang={link.hrefLang} href={link.href} />
       ))}
       <a className="skip" href="#main">{T.skip[locale]}</a>
+      {/* Прячет первый экран до вступления (SalesMotion) ещё до отрисовки,
+          чтобы он не мигнул. Сценарий не дошёл — через 3 с всё видно само. */}
+      <script dangerouslySetInnerHTML={{ __html: "if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('sales-intro')" }} />
       <SalesHeader locale={locale} pathname="/" onHome />
 
       <main id="main">
@@ -428,43 +445,12 @@ export default async function PortalHome({
               <div><span className="kicker">{T.adminKicker[locale]}</span><h2>{T.adminTitle[locale]}</h2></div>
               <p>{T.adminLead[locale]}</p>
             </div>
-            <div className="admin">
-              <div>
-                <div className="tasks" role="tablist" aria-label={T.adminTabs[locale]}>
-                  {tasks.map((task, i) => (
-                    <button
-                      key={task.id}
-                      className="task"
-                      type="button"
-                      role="tab"
-                      id={`task-tab-${task.id}`}
-                      aria-controls={`task-${task.id}`}
-                      aria-selected={i === 0}
-                      tabIndex={i === 0 ? 0 : -1}
-                    >
-                      <span className="n" style={cssVars({ '--nc': task.color })}>{i + 1}</span>
-                      <b>{task.title[locale]}{task.time ? <small>{task.time[locale]}</small> : null}</b>
-                      <span>{task.text[locale]}</span>
-                    </button>
-                  ))}
-                </div>
-                <a className="guide-link" href={withLocale('/guide', locale)}>
-                  {T.guideLink[locale]}
-                  <Icon name="right" width={2.4} />
-                </a>
-              </div>
-              <div className="stage">
-                {tasks.map((task, i) => (
-                  <div key={task.id} className="frame" role="tabpanel" id={`task-${task.id}`} aria-labelledby={`task-tab-${task.id}`} data-panel hidden={i > 0}>
-                    <div className="browser">
-                      <div className="bar"><i /><i /><i /><span className="url"><Lock />{host}{task.path}</span></div>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img(`admin-${task.id}`, locale)} width={1280} height={800} alt={task.alt[locale]} loading="lazy" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <AdminDemo tasks={demoTasks} host={host} label={T.adminTabs[locale]}>
+              <a className="guide-link" href={withLocale('/guide', locale)}>
+                {T.guideLink[locale]}
+                <Icon name="right" width={2.4} />
+              </a>
+            </AdminDemo>
           </div>
         </section>
         <div className="scallop" style={cssVars({ '--from': 'var(--lav)' })} aria-hidden="true" />

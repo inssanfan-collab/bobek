@@ -5,7 +5,8 @@ import { useEffect } from 'react';
 /**
  * Вкладки главной (темы сайта и дела в админке) и кнопки «Выбрать тариф».
  * Разметку отдаёт сервер — первая вкладка видна и без сценария, — а здесь
- * только переключение: клик, стрелки, как у обычного tablist.
+ * только переключение: клик, стрелки, как у обычного tablist. Живая админка
+ * (AdminDemo, `data-self`) переключает свои вкладки сама.
  */
 export function SalesTabs() {
   useEffect(() => {
@@ -14,7 +15,7 @@ export function SalesTabs() {
     const abort = new AbortController();
     const { signal } = abort;
 
-    for (const list of root.querySelectorAll<HTMLElement>('[role="tablist"]')) {
+    for (const list of root.querySelectorAll<HTMLElement>('[role="tablist"]:not([data-self])')) {
       const tabs = [...list.querySelectorAll<HTMLElement>('[role="tab"]')];
       const select = (tab: HTMLElement) => {
         for (const t of tabs) {

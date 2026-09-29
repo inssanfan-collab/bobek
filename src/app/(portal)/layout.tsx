@@ -44,7 +44,9 @@ export const metadata: Metadata = {
  */
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" data-palette="mandarin" data-skin="portal" data-a11y="off">
+    // suppressHydrationWarning: главная до гидратации ставит на <html> класс
+    // sales-intro (прячет первый экран до вступления, см. SalesMotion).
+    <html lang="ru" data-palette="mandarin" data-skin="portal" data-a11y="off" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
