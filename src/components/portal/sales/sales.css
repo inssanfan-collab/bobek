@@ -125,6 +125,8 @@
 
 /* ── секции ── */
 .sales section.block { position: relative; padding: 100px 0; overflow-x: clip; }
+/* якорь из меню не уезжает под прилипшую шапку (и без Lenis тоже) */
+.sales [id] { scroll-margin-top: 84px; }
 .sales .head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px 56px; align-items: end; margin-bottom: 48px; }
 .sales .head h2, .sales h2.big { font-size: clamp(1.9rem, 3.3vw, 2.7rem); line-height: 1.18; letter-spacing: -.02em; }
 .sales .head p { font-size: 1.1rem; color: var(--ink-2); max-width: 46ch; }
@@ -421,6 +423,11 @@
   .sales .stepper-controls .sbtn { padding: 0 14px; font-size: 14px; }
   .sales .stepper-count { margin-left: 0; }
 }
+/* плавная прокрутка (Lenis): классы на <html>, живут, пока открыта главная */
+html.lenis, html.lenis body { height: auto; }
+html.lenis { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
 @media (prefers-reduced-motion: reduce) {
   .sales *, .sales *::before, .sales *::after { animation: none !important; transition: none !important; }
 }

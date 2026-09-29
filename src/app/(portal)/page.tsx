@@ -7,6 +7,7 @@ import { findThemeInfo } from '@/themes/catalog';
 import { csrfToken } from '@/server/auth/csrf';
 import { portalSettings } from '@/server/docs/contract';
 import { SalesTabs } from '@/components/portal/sales/SalesTabs';
+import { SalesMotion } from '@/components/portal/sales/SalesMotion';
 import { SalesApplyForm } from '@/components/portal/sales/SalesApplyForm';
 import { SalesFooter, SalesHeader } from '@/components/portal/sales/SalesChrome';
 import { portalAlternateLinks } from '@/lib/seo';
@@ -24,7 +25,8 @@ export const dynamic = 'force-dynamic';
  * когда заметно поменялся сайт сада или админка.
  *
  * Весь текст отдаёт сервер: страница читается без скриптов и видна
- * поисковикам. Сценарий один — переключение вкладок (SalesTabs).
+ * поисковикам. Сценарии — переключение вкладок (SalesTabs) и мягкое
+ * движение при прокрутке (SalesMotion: gsap и Lenis, только на главной).
  * Цены и описание тарифов — только из plans.ts и env.planPrices.
  */
 
@@ -484,7 +486,7 @@ export default async function PortalHome({
                       <h3>{info.name[locale]}</h3>
                       {managed ? <span className="tag">{T.managedTag[locale]}</span> : null}
                     </div>
-                    <div className="price">{formatMoney(env.planPrices[code])}<small>{T.perYear[locale]}</small></div>
+                    <div className="price"><span className="num" data-value={env.planPrices[code]}>{formatMoney(env.planPrices[code])}</span><small>{T.perYear[locale]}</small></div>
                     <div className="who">{info.tagline[locale]}</div>
                     <p>{info.whoFills[locale]}</p>
                     <a className={managed ? 'sbtn sbtn-primary' : 'sbtn sbtn-secondary'} href="#zayavka" data-plan={code}>
@@ -573,6 +575,7 @@ export default async function PortalHome({
 
       <SalesFooter locale={locale} onHome />
       <SalesTabs />
+      <SalesMotion />
     </div>
   );
 }
