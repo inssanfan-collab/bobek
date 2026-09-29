@@ -159,8 +159,6 @@ export function SiteNav({
     };
   }, [open]);
 
-  const count = links.reduce((sum, link) => sum + 1 + (link.children?.length ?? 0), 0);
-
   return (
     <>
       <nav className="container-page hidden pb-2 md:block" aria-label={T.menu[locale]}>
@@ -177,7 +175,7 @@ export function SiteNav({
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
           aria-controls="site-mobile-menu"
-          className="btn-secondary w-full justify-between text-base"
+          className="btn-secondary w-full justify-center text-base"
         >
           <span className="flex items-center gap-2">
             <svg
@@ -193,7 +191,8 @@ export function SiteNav({
             </svg>
             {open ? T.close[locale] : T.menu[locale]}
           </span>
-          <span className="text-sm text-muted">{count}</span>
+          {/* Раньше справа стояло число пунктов меню — родителям оно ничего
+              не говорило и путало. */}
         </button>
 
         {open ? (
