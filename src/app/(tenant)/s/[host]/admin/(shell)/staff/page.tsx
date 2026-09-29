@@ -7,6 +7,8 @@ import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { pick } from '@/lib/i18n';
 import { deleteStaff, saveStaff } from '../actions';
 import { FileInput } from '@/components/admin/FileInput';
+import type { Locale } from '@/lib/i18n';
+import type { StaffMember } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +28,9 @@ const T = {
   add: { kk: 'Қосу', ru: 'Добавить' },
   empty: { kk: 'Қызметкерлер қосылмаған', ru: 'Сотрудники не добавлены' },
   remove: { kk: 'Жою', ru: 'Удалить' },
+  edit: { kk: 'Өзгерту', ru: 'Изменить' },
+  save: { kk: 'Сақтау', ru: 'Сохранить' },
+  photoKeep: { kk: 'Жаңа фото таңдалмаса, бұрынғысы қалады.', ru: 'Если новое фото не выбрано, останется прежнее.' },
   /**
    * Пометка языка у полей контента. Обе версии заполняются независимо от того,
    * на каком языке сама админка, поэтому пометка переводится, а поля остаются.
@@ -56,38 +61,7 @@ export default async function StaffPage({ params }: { params: Promise<{ host: st
           <div className="sm:col-span-2">
             <h2 className="font-display text-lg font-bold">{T.addHeading[locale]}</h2>
           </div>
-          <div>
-            <label className="field-label" htmlFor="fullName">{T.fullName[locale]} *</label>
-            <input id="fullName" name="fullName" required className="field" placeholder="Сериккызы Айгүл" />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="positionRu">{T.position[locale]} {T.inRu[locale]} *</label>
-            <input id="positionRu" name="positionRu" required className="field" placeholder="Воспитатель" />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="positionKk">{T.position[locale]} {T.inKk[locale]}</label>
-            <input id="positionKk" name="positionKk" className="field" placeholder="Тәрбиеші" />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="educationRu">{T.education[locale]} {T.inRu[locale]}</label>
-            <input id="educationRu" name="educationRu" className="field" placeholder="Высшее педагогическое" />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="educationKk">{T.education[locale]} {T.inKk[locale]}</label>
-            <input id="educationKk" name="educationKk" className="field" placeholder="Жоғары педагогикалық" />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="experience">{T.experience[locale]}</label>
-            <input id="experience" name="experience" className="field" placeholder={T.experienceExample[locale]} />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="categoryName">{T.category[locale]}</label>
-            <input id="categoryName" name="categoryName" className="field" placeholder="Педагог-модератор" />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="photo">{T.photo[locale]}</label>
-            <FileInput id="photo" name="photo" accept="image/*" locale={locale} />
-          </div>
+          <StaffFields locale={locale} />
           <div className="sm:col-span-2">
             <SubmitButton>{T.add[locale]}</SubmitButton>
           </div>
@@ -112,7 +86,24 @@ export default async function StaffPage({ params }: { params: Promise<{ host: st
                 <p className="mt-1 text-xs text-muted">{T.experience[locale]}: {member.experience}</p>
               ) : null}
               {ctx.canEdit ? (
-                <form action={deleteStaff} className="mt-3">
+                <details className="group mt-3">
+                  <summary className="flex cursor-pointer list-none items-center justify-center gap-2 [&::-webkit-details-marker]:hidden">
+                    <span className="btn-secondary px-3 py-1 text-xs">{T.edit[locale]}</span>
+                  </summary>
+                  <form action={saveStaff} className="mt-4 grid gap-3 text-left">
+                    <input type="hidden" name={CSRF_FIELD} value={csrf} />
+                    <input type="hidden" name="host" value={host} />
+                    <input type="hidden" name="id" value={member.id} />
+                    <StaffFields locale={locale} member={member} />
+                    <p className="text-xs text-muted sm:col-span-2">{T.photoKeep[locale]}</p>
+                    <div className="sm:col-span-2">
+                      <SubmitButton>{T.save[locale]}</SubmitButton>
+                    </div>
+                  </form>
+                </details>
+              ) : null}
+              {ctx.canEdit ? (
+                <form action={deleteStaff} className="mt-2">
                   <input type="hidden" name={CSRF_FIELD} value={csrf} />
                   <input type="hidden" name="host" value={host} />
                   <input type="hidden" name="id" value={member.id} />
@@ -123,6 +114,51 @@ export default async function StaffPage({ params }: { params: Promise<{ host: st
           ))}
         </div>
       )}
+    </>
+  );
+}
+
+/**
+ * Поля сотрудника — одни и те же для «Добавить» и «Изменить». У формы
+ * изменения id полей с префиксом сотрудника: карточек на странице много,
+ * а подпись должна находить своё поле.
+ */
+function StaffFields({ locale, member }: { locale: Locale; member?: StaffMember }) {
+  const id = (name: string) => (member ? `${member.id}-${name}` : name);
+  return (
+    <>
+      <div>
+        <label className="field-label" htmlFor={id('fullName')}>{T.fullName[locale]} *</label>
+        <input id={id('fullName')} name="fullName" required className="field" placeholder="Сериккызы Айгүл" defaultValue={member?.fullName} />
+      </div>
+      <div>
+        <label className="field-label" htmlFor={id('positionRu')}>{T.position[locale]} {T.inRu[locale]} *</label>
+        <input id={id('positionRu')} name="positionRu" required className="field" placeholder="Воспитатель" defaultValue={member?.positionRu} />
+      </div>
+      <div>
+        <label className="field-label" htmlFor={id('positionKk')}>{T.position[locale]} {T.inKk[locale]}</label>
+        <input id={id('positionKk')} name="positionKk" className="field" placeholder="Тәрбиеші" defaultValue={member?.positionKk ?? ''} />
+      </div>
+      <div>
+        <label className="field-label" htmlFor={id('educationRu')}>{T.education[locale]} {T.inRu[locale]}</label>
+        <input id={id('educationRu')} name="educationRu" className="field" placeholder="Высшее педагогическое" defaultValue={member?.educationRu ?? ''} />
+      </div>
+      <div>
+        <label className="field-label" htmlFor={id('educationKk')}>{T.education[locale]} {T.inKk[locale]}</label>
+        <input id={id('educationKk')} name="educationKk" className="field" placeholder="Жоғары педагогикалық" defaultValue={member?.educationKk ?? ''} />
+      </div>
+      <div>
+        <label className="field-label" htmlFor={id('experience')}>{T.experience[locale]}</label>
+        <input id={id('experience')} name="experience" className="field" placeholder={T.experienceExample[locale]} defaultValue={member?.experience ?? ''} />
+      </div>
+      <div>
+        <label className="field-label" htmlFor={id('categoryName')}>{T.category[locale]}</label>
+        <input id={id('categoryName')} name="categoryName" className="field" placeholder="Педагог-модератор" defaultValue={member?.categoryName ?? ''} />
+      </div>
+      <div>
+        <label className="field-label" htmlFor={id('photo')}>{T.photo[locale]}</label>
+        <FileInput id={id('photo')} name="photo" accept="image/*" locale={locale} />
+      </div>
     </>
   );
 }

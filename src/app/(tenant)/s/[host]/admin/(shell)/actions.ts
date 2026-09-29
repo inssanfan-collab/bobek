@@ -808,7 +808,9 @@ export async function saveStaff(formData: FormData) {
   const fullName = str(formData, 'fullName');
   if (fullName.length < 2) throw new ActionError({ kk: 'Аты-жөнін көрсетіңіз', ru: 'Укажите ФИО' });
 
-  let photoMediaId = optionalStr(formData, 'photoMediaId');
+  // Фото меняется, только если выбрали новое. Раньше при изменении
+  // карточки без нового фото сюда приходил null, и прежнее фото стиралось.
+  let photoMediaId: string | null | undefined = formData.has('photoMediaId') ? optionalStr(formData, 'photoMediaId') : undefined;
   const photo = formData.get('photo');
   if (photo instanceof File && photo.size > 0) {
     photoMediaId = (await saveUpload(photo, ctx.tenantId)).id;
