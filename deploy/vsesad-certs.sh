@@ -92,8 +92,8 @@ write_conf() {
   # имя домена подставляется отдельно.
   cat > "$file.new" <<'CONF'
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name __DOMAIN__;
 
     ssl_certificate     /etc/letsencrypt/live/__DOMAIN__/fullchain.pem;
@@ -135,8 +135,8 @@ CONF
   if [ "$with_www" = "1" ]; then
     cat >> "$file.new" <<'CONF'
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
     server_name www.__DOMAIN__;
 
     ssl_certificate     /etc/letsencrypt/live/__DOMAIN__/fullchain.pem;
