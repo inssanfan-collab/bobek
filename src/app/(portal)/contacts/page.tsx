@@ -4,6 +4,7 @@ import { localeFromParam, withLocale } from '@/lib/i18n';
 import { SalesPage } from '@/components/portal/sales/SalesChrome';
 import { portalSettings } from '@/server/docs/contract';
 import { portalAlternates } from '@/lib/seo';
+import { formatPhone, phoneHref } from '@/lib/labels';
 
 export async function generateMetadata({
   searchParams,
@@ -67,7 +68,7 @@ export default async function ContactsPage({
             {settings.phone ? (
               <>
                 <dt>{T.phone[locale]}</dt>
-                <dd><a href={`tel:${settings.phone.replace(/[^\d+]/g, '')}`}>{settings.phone}</a></dd>
+                <dd><a href={phoneHref(settings.phone)}>{formatPhone(settings.phone)}</a></dd>
               </>
             ) : null}
           </dl>

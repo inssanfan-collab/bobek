@@ -160,3 +160,19 @@ export function formatAgeRange(
 export function formatMoney(amount: number): string {
   return `${amount.toLocaleString('ru-RU')} ₸`;
 }
+
+/**
+ * Казахстанский номер группами: «+7 708 768 57 07». В настройках его хранят
+ * как угодно — слитно, со скобками, с восьмёркой; слитный «+77087685707»
+ * в подвале читался с трудом. Не узнали номер — показываем как ввели.
+ */
+export function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  const match = /^[78](\d{3})(\d{3})(\d{2})(\d{2})$/.exec(digits);
+  return match ? `+7 ${match[1]} ${match[2]} ${match[3]} ${match[4]}` : raw.trim();
+}
+
+/** Ссылка tel: для того же номера — только цифры и плюс. */
+export function phoneHref(raw: string): string {
+  return `tel:${raw.replace(/[^\d+]/g, '')}`;
+}

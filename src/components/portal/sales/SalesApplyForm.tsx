@@ -8,6 +8,7 @@ import { PLAN_CODES, PLAN_INFO, type PlanCode } from '@/lib/plans';
 import type { Locale } from '@/lib/i18n';
 
 const T = {
+  title: { kk: 'Сайтқа өтінім', ru: 'Заявка на сайт' },
   gardenName: { kk: 'Балабақшаның атауы', ru: 'Название детского сада' },
   personName: { kk: 'Сіздің атыңыз', ru: 'Ваше имя' },
   personExample: { kk: 'Аты-жөні', ru: 'Имя Фамилия' },
@@ -46,14 +47,14 @@ function Submit({ locale }: { locale: Locale }) {
 export function SalesApplyForm({ csrf, locale, plan }: { csrf: string; locale: Locale; plan: PlanCode | null }) {
   const [state, action] = useActionState(submitLead, initial);
 
-  // Конфетти после отправки — тем же цветом, что шарики первого экрана.
+  // Конфетти после отправки — пастельное, как шарики шагов.
   useEffect(() => {
     if (!state.ok || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     import('canvas-confetti').then(({ default: confetti }) => {
       const r = document.getElementById('apply')?.getBoundingClientRect();
       if (!r) return;
       const origin = { x: (r.left + r.width / 2) / innerWidth, y: (r.top + r.height * 0.6) / innerHeight };
-      const colors = ['#FFC53D', '#FF8F7E', '#7FDAB6', '#B8B3FF', '#9AD2F6', '#ffffff'];
+      const colors = ['#CBBEFF', '#FFC2AE', '#B6EBD3', '#FFE38F', '#FFC4DA', '#ffffff'];
       confetti({ particleCount: 120, spread: 75, startVelocity: 42, origin, colors, shapes: ['circle'], scalar: 1.3 });
       setTimeout(() => confetti({ particleCount: 80, spread: 110, startVelocity: 30, origin, colors, shapes: ['circle'], scalar: 0.9 }), 250);
     }).catch(() => {});
@@ -79,6 +80,7 @@ export function SalesApplyForm({ csrf, locale, plan }: { csrf: string; locale: L
       <label className="trap" aria-hidden="true">
         Website <input type="text" name="website" tabIndex={-1} autoComplete="off" />
       </label>
+      <h3 className="full">{T.title[locale]}</h3>
       {state.message && !state.ok ? <p className="form-msg" role="alert">{state.message}</p> : null}
       <div className="full">
         <label htmlFor="f-garden">{T.gardenName[locale]}</label>

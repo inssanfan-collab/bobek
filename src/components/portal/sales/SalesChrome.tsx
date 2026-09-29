@@ -1,11 +1,12 @@
 import { withLocale, type Locale } from '@/lib/i18n';
+import { formatPhone, phoneHref } from '@/lib/labels';
 import { portalSettings } from '@/server/docs/contract';
 import './sales.css';
 
 /**
- * Шапка и подвал продающей части портала: главная, оферта, контакты.
- * На главной пункты меню — якоря той же страницы, на остальных — ссылки
- * на разделы главной (`/#tarify`), с языком.
+ * Шапка и подвал продающей части портала: главная, оферта, контакты,
+ * инструкция. На главной пункты меню — якоря той же страницы, на остальных —
+ * ссылки на разделы главной (`/#tarify`), с языком.
  *
  * Страницы для родителей (каталог, новости) пока на прежнем оформлении
  * (PortalChrome): с главной на них не ведут, пока садов немного.
@@ -14,12 +15,14 @@ import './sales.css';
 const T = {
   home: { kk: 'EduSad, басты бет', ru: 'EduSad, на главную' },
   sections: { kk: 'Бөлімдер', ru: 'Разделы' },
-  navFeatures: { kk: 'Мүмкіндіктер', ru: 'Возможности' },
+  navLook: { kk: 'Сыртқы келбеті', ru: 'Как выглядит' },
+  navFeatures: { kk: 'Әкімші бөлімі', ru: 'Админка' },
   navPlans: { kk: 'Тарифтер', ru: 'Тарифы' },
   navSteps: { kk: 'Қалай қосылуға болады', ru: 'Как подключиться' },
   navFaq: { kk: 'Сұрақтар', ru: 'Вопросы' },
   langGroup: { kk: 'Сайт тілі', ru: 'Язык сайта' },
   apply: { kk: 'Өтінім қалдыру', ru: 'Оставить заявку' },
+  applyShort: { kk: 'Өтінім', ru: 'Заявка' },
   skip: { kk: 'Мазмұнға өту', ru: 'К содержанию' },
   footAbout: {
     kk: 'Балабақшаларға сайт жасаймыз — қазақ және орыс тілдерінде, әкімші бөлімімен және Қазақстандағы хостингпен.',
@@ -53,34 +56,41 @@ export function PlaneLogo() {
 const section = (locale: Locale, onHome: boolean, id: string) => (onHome ? `#${id}` : `${withLocale('/', locale)}#${id}`);
 
 /**
- * Шапка. `pathname` нужен переключателю языка: язык меняется полной
- * загрузкой (обычной ссылкой), чтобы сценарий главной стартовал заново.
+ * Шапка — во всю ширину и прилипает при прокрутке. `pathname` нужен
+ * переключателю языка: язык меняется обычной ссылкой.
  */
 export function SalesHeader({ locale, pathname, onHome = false }: { locale: Locale; pathname: string; onHome?: boolean }) {
   const kk = pathname === '/' ? '/?lang=kk' : `${pathname}?lang=kk`;
   return (
-    <header className="wrap top">
-      <a className="logo" href={withLocale('/', locale)} aria-label={T.home[locale]}>
-        <PlaneLogo />
-        <b>EduSad</b>
-      </a>
-      <nav className="nav" aria-label={T.sections[locale]}>
-        <a href={section(locale, onHome, 'adminka')}>{T.navFeatures[locale]}</a>
-        <a href={section(locale, onHome, 'tarify')}>{T.navPlans[locale]}</a>
-        <a href={section(locale, onHome, 'podkluchenie')}>{T.navSteps[locale]}</a>
-        <a href={section(locale, onHome, 'voprosy')}>{T.navFaq[locale]}</a>
-      </nav>
-      <div className="top-right">
-        {/* Отдельной страницей, а не разделом главной, поэтому не в меню слева:
-            меню на узком экране прячется, а инструкция нужна и там. */}
-        <a className="top-link" href={withLocale('/guide', locale)} aria-current={pathname === '/guide' ? 'page' : undefined}>
-          {T.navGuide[locale]}
+    <header className="top">
+      <div className="wrap top-in">
+        <a className="logo" href={withLocale('/', locale)} aria-label={T.home[locale]}>
+          <PlaneLogo />
+          <b>EduSad</b>
         </a>
-        <div className="lang" role="group" aria-label={T.langGroup[locale]}>
-          <a href={kk} hrefLang="kk" className={locale === 'kk' ? 'on' : undefined} aria-current={locale === 'kk' ? 'true' : undefined}>Қаз</a>
-          <a href={pathname} hrefLang="ru" className={locale === 'ru' ? 'on' : undefined} aria-current={locale === 'ru' ? 'true' : undefined}>Рус</a>
+        <nav className="nav" aria-label={T.sections[locale]}>
+          <a href={section(locale, onHome, 'vid')}>{T.navLook[locale]}</a>
+          <a href={section(locale, onHome, 'adminka')}>{T.navFeatures[locale]}</a>
+          <a href={section(locale, onHome, 'tarify')}>{T.navPlans[locale]}</a>
+          {/* «Как подключиться» — только в подвале: по-казахски «Қалай
+              қосылуға болады» не помещался в строку меню. */}
+          <a href={section(locale, onHome, 'voprosy')}>{T.navFaq[locale]}</a>
+        </nav>
+        <div className="top-right">
+          {/* Отдельной страницей, а не разделом главной, поэтому не в меню слева:
+              меню на узком экране прячется, а инструкция нужна и там. */}
+          <a className="top-link" href={withLocale('/guide', locale)} aria-current={pathname === '/guide' ? 'page' : undefined}>
+            {T.navGuide[locale]}
+          </a>
+          <div className="lang" role="group" aria-label={T.langGroup[locale]}>
+            <a href={kk} hrefLang="kk" className={locale === 'kk' ? 'on' : undefined} aria-current={locale === 'kk' ? 'true' : undefined}>Қаз</a>
+            <a href={pathname} hrefLang="ru" className={locale === 'ru' ? 'on' : undefined} aria-current={locale === 'ru' ? 'true' : undefined}>Рус</a>
+          </div>
+          <a className="sbtn sbtn-top" href={section(locale, onHome, 'zayavka')}>
+            <span className="long">{T.apply[locale]}</span>
+            <span className="short">{T.applyShort[locale]}</span>
+          </a>
         </div>
-        <a className="sbtn sbtn-top" href={section(locale, onHome, 'zayavka')}>{T.apply[locale]}</a>
       </div>
     </header>
   );
@@ -89,7 +99,7 @@ export function SalesHeader({ locale, pathname, onHome = false }: { locale: Loca
 export async function SalesFooter({ locale, onHome = false }: { locale: Locale; onHome?: boolean }) {
   const settings = await portalSettings();
   return (
-    <footer className="band band-dark">
+    <footer className="foot-band">
       <div className="wrap foot">
         <div>
           <a className="logo" href={withLocale('/', locale)} aria-label="EduSad">
@@ -97,9 +107,7 @@ export async function SalesFooter({ locale, onHome = false }: { locale: Locale; 
             <b>EduSad</b>
           </a>
           <p>{T.footAbout[locale]}</p>
-          {settings.phone ? (
-            <p><a className="foot-phone" href={`tel:${settings.phone.replace(/[^\d+]/g, '')}`}>{settings.phone}</a></p>
-          ) : null}
+          {settings.phone ? <a className="foot-phone" href={phoneHref(settings.phone)}>{formatPhone(settings.phone)}</a> : null}
         </div>
         <nav aria-label={T.sections[locale]}>
           <b>{T.sections[locale]}</b>
@@ -116,8 +124,8 @@ export async function SalesFooter({ locale, onHome = false }: { locale: Locale; 
 }
 
 /**
- * Обычная страница продающей части (оферта, контакты): цветная полоса
- * с шапкой и заголовком, белое поле с текстом, тёмный подвал.
+ * Обычная страница продающей части (оферта, контакты, инструкция):
+ * заголовок на утреннем небе, молочное поле с текстом, сиреневый подвал.
  */
 export async function SalesPage({
   locale,
@@ -133,15 +141,16 @@ export async function SalesPage({
   children: React.ReactNode;
 }) {
   return (
-    <div className="sales ready page" lang={locale}>
+    <div className="sales page" lang={locale}>
       <a className="skip" href="#main">{T.skip[locale]}</a>
-      <div className="band band-hero page-hero">
-        <SalesHeader locale={locale} pathname={pathname} />
+      <SalesHeader locale={locale} pathname={pathname} />
+      <div className="page-hero">
         <div className="wrap page-head">
           <h1>{title}</h1>
           {lead ? <div className="page-lead">{lead}</div> : null}
         </div>
       </div>
+      <div className="scallop" style={{ '--from': '#FFE7DC' } as React.CSSProperties} aria-hidden="true" />
       <main id="main" className="page-body">
         <div className="wrap">{children}</div>
       </main>
