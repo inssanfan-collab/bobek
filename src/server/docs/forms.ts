@@ -269,7 +269,8 @@ export async function buildStandardAct(data: DocData): Promise<Buffer> {
   field(doc, M + labelW, y, 220, `№ ${contract.number} от ${issuedRu} г.`, bi('нөмірі, күні', 'номер, дата'), { size: 7.5 });
 
   // Номер и дата документа — табличкой справа, как в бланке.
-  const actDate = contract.periodEnd;
+  // Акт датируется днём выставления счёта: сад закрывает расход сразу после оплаты.
+  const actDate = contract.issuedAt;
   const numW = [110, 110];
   const nx = M + W - numW[0]! - numW[1]!;
   let ny = row(doc, nx, y, numW, [
