@@ -16,6 +16,8 @@ const T = {
   places: { kk: 'Орын саны', ru: 'Мест в саду' },
   hours: { kk: 'Жұмыс уақыты', ru: 'Часы работы' },
   lang: { kk: 'Оқыту тілі', ru: 'Язык обучения' },
+  care: { kk: 'Балаға қамқорлық', ru: 'Забота о ребёнке' },
+  careNote: { kk: 'Тәжірибелі педагогтар', ru: 'Опытные педагоги' },
   kk: { kk: 'қазақ', ru: 'казахский' },
   ru: { kk: 'орыс', ru: 'русский' },
   address: { kk: 'Мекенжай', ru: 'Адрес' },
@@ -65,6 +67,8 @@ function facts(profile: Profile, locale: Locale): Fact[] {
   if (profile.placesTotal) list.push({ icon: 'home', label: T.places[locale], value: String(profile.placesTotal) });
   if (profile.workHours) list.push({ icon: 'clock', label: T.hours[locale], value: profile.workHours });
   if (langs) list.push({ icon: 'talk', label: T.lang[locale], value: langs });
+  // Если паспорт заполнен не весь, ряд добирает «Забота о ребёнке» — как в образце.
+  if (list.length < 4) list.unshift({ icon: 'care', label: T.careNote[locale], value: T.care[locale] });
   return list;
 }
 
