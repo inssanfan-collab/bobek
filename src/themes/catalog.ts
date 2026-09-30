@@ -45,6 +45,13 @@ export const THEME_CATALOG: ThemeInfo[] = [
     noteRu: 'Яркие блоки как деревянные игрушки: кобальт, жёлтый и красный, толстые обводки. Самый смелый и запоминающийся.',
     fonts: 'family=Rubik:wght@400;500;600;700;800;900',
   },
+  {
+    code: 'akku',
+    nameRu: 'Аққу',
+    nameKk: 'Аққу',
+    noteRu: 'Лебединое озеро на рассвете: небо, сирень и румяна, лебедь на волнах, пёрышки и облака. Сделана для ясли-сада №24 «Аққу».',
+    fonts: 'family=Comfortaa:wght@500;700&family=Nunito:wght@400;600;700;800',
+  },
 ];
 
 export function findThemeInfo(code: string | null | undefined): ThemeInfo | null {

@@ -1,4 +1,7 @@
 import { findThemeInfo } from './catalog';
+import { AkkuFooter } from './akku/Footer';
+import { AkkuHeader } from './akku/Header';
+import { AkkuHome } from './akku/Home';
 import { AkvarelFooter } from './akvarel/Footer';
 import { AkvarelHeader } from './akvarel/Header';
 import { AkvarelHome } from './akvarel/Home';
@@ -25,6 +28,7 @@ const PARTS: Record<string, ThemeParts> = {
   dala: { Home: DalaHome, Header: DalaHeader, Footer: DalaFooter },
   akvarel: { Home: AkvarelHome, Header: AkvarelHeader, Footer: AkvarelFooter },
   konstruktor: { Home: KonstruktorHome, Header: KonstruktorHeader, Footer: KonstruktorFooter },
+  akku: { Home: AkkuHome, Header: AkkuHeader, Footer: AkkuFooter },
 };
 
 export function findTheme(code: string | null | undefined): SiteTheme | null {
