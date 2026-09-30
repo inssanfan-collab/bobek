@@ -27,13 +27,6 @@ export function CloudEdge({ className }: { className?: string }) {
 }
 
 const ICON = {
-  care: (
-    <>
-      <path d="M12 13.6c-2.7-1.9-5.1-4-5.1-6.6A2.8 2.8 0 0 1 12 5.4 2.8 2.8 0 0 1 17.1 7c0 2.6-2.4 4.7-5.1 6.6Z" fill="currentColor" />
-      <path d="M2.5 10v5.6c0 1 .4 2 1.1 2.7L6.4 21H11v-3.9c0-1-.4-2-1.1-2.7l-2.8-2.8" />
-      <path d="M21.5 10v5.6c0 1-.4 2-1.1 2.7L17.6 21H13v-3.9c0-1 .4-2 1.1-2.7l2.8-2.8" />
-    </>
-  ),
   kids: (
     <>
       <circle cx="8" cy="7" r="3" />
@@ -62,16 +55,38 @@ const ICON = {
   ),
 } as const;
 
-export type FactIconName = keyof typeof ICON;
+/** Сердце в ладонях — «Забота о ребёнке», по значку из образца. Правая ладонь — зеркало левой. */
+function CareIcon({ className }: { className?: string }) {
+  const hand = (
+    <>
+      <path d="M8.5 24c0-4.4 4.8-4.4 4.8-.4" />
+      <path d="M8.5 24c-.6 6.5 1.4 12 6.5 16.3l7.6 6.6c1.5 1.3 2.3 3.2 2.3 5.2V57" />
+      <path d="M13.3 23.6c.4 5 3 9.3 7.4 12.6l8 5.6c2.1 1.6 3.3 4 3.3 6.7V57" />
+      <path d="M9 30.5c1.7.1 3.3.9 4.7 2.2" />
+      <path d="M10.8 36.3c1.7.2 3.2 1 4.6 2.3" />
+    </>
+  );
+  return (
+    <svg className={className} viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M32 39C21.8 32.8 16.5 27.3 16.5 21c0-4.3 3.4-7.7 7.6-7.7 3.3 0 6.2 2 7.9 5 1.7-3 4.6-5 7.9-5 4.2 0 7.6 3.4 7.6 7.7 0 6.3-5.3 11.8-15.5 18Z" />
+      {hand}
+      <g transform="translate(64 0) scale(-1 1)">{hand}</g>
+    </svg>
+  );
+}
 
-export function FactIcon({ name, className }: { name: FactIconName; className?: string }) {
+export type FactIconName = keyof typeof ICON | 'care';
+
+/** stroke — толщина линии: крупным значкам фактов тоньше, мелким в карточке — жирнее. */
+export function FactIcon({ name, className, stroke = 1.35 }: { name: FactIconName; className?: string; stroke?: number }) {
+  if (name === 'care') return <CareIcon className={className} />;
   return (
     <svg
       className={className}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.9"
+      strokeWidth={stroke}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden

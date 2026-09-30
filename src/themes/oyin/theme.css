@@ -124,6 +124,13 @@
   color: rgb(var(--oyin-yellow));
 }
 
+/* Подменю и меню на телефоне — белые карточки: текст в них тёмный,
+   иначе он наследует белый цвет шапки и пропадает. */
+[data-theme='oyin'] .oyin-nav nav li > ul,
+[data-theme='oyin'] .oyin-nav #site-mobile-menu {
+  color: rgb(var(--ink));
+}
+
 /* ── Первый экран: рисунок на всю ширину ── */
 
 [data-theme='oyin'] .oyin-hero {

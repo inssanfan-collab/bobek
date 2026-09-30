@@ -106,13 +106,13 @@ export function OyinHome({ profile, sections, news, announcements, albums, local
             <div className="oyin-hero-card">
               {address ? (
                 <p className="flex items-center gap-3">
-                  <span className="oyin-dot oyin-dot-sm" aria-hidden><FactIcon name="home" className="h-4 w-4" /></span>
+                  <span className="oyin-dot oyin-dot-sm" aria-hidden><FactIcon name="home" className="h-4 w-4" stroke={2} /></span>
                   <span className="text-sm font-semibold">{address}</span>
                 </p>
               ) : null}
               {profile?.workHours ? (
                 <p className="flex items-center gap-3">
-                  <span className="oyin-dot oyin-dot-sm" aria-hidden><FactIcon name="clock" className="h-4 w-4" /></span>
+                  <span className="oyin-dot oyin-dot-sm" aria-hidden><FactIcon name="clock" className="h-4 w-4" stroke={2} /></span>
                   <span className="text-sm font-semibold">{profile.workHours}</span>
                 </p>
               ) : null}
@@ -143,7 +143,7 @@ export function OyinHome({ profile, sections, news, announcements, albums, local
             <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6">
               {list.map((fact) => (
                 <li key={fact.label} className="oyin-fact">
-                  <span className="oyin-fact-icon"><FactIcon name={fact.icon} className="h-9 w-9" /></span>
+                  <span className="oyin-fact-icon"><FactIcon name={fact.icon} className="h-9 w-9 sm:h-11 sm:w-11" /></span>
                   <span className="oyin-fact-value">{fact.value}</span>
                   <span className="oyin-fact-label">{fact.label}</span>
                 </li>
