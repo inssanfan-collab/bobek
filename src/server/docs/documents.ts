@@ -1,6 +1,6 @@
 import 'server-only';
 import { DocBuilder, type Pair } from './pdf';
-import { amountInWords } from '@/lib/amount-words';
+import { buildStandardAct, buildStandardInvoice } from './forms';
 import { formatDate } from '@/lib/labels';
 import { isPlanCode, PLAN_INFO, type PlanCode } from '@/lib/plans';
 import type { Contract, PortalSettings, Tenant, TenantProfile } from '@prisma/client';
@@ -297,156 +297,12 @@ export async function buildContractPdf(data: DocData): Promise<Buffer> {
   return b.finish();
 }
 
-// ───────────────────────────── счёт ─────────────────────────────
-
-export async function buildInvoicePdf(data: DocData): Promise<Buffer> {
-  const { contract, settings } = data;
-  const b = new DocBuilder();
-
-  b.title({ kk: `ТӨЛЕМГЕ АРНАЛҒАН ШОТ № ${contract.number}`, ru: `СЧЁТ НА ОПЛАТУ № ${contract.number}` });
-  b.columns(
-    {
-      kk: `${CITY.kk}                                 ${formatDate(contract.issuedAt, 'kk')}`,
-      ru: `${CITY.ru}                                 ${formatDate(contract.issuedAt, 'ru')}`,
-    },
-    { size: 8.5, spacing: 10 },
-  );
-
-  // Шапка платёжных реквизитов — по ней казначейство сада проводит платёж.
-  b.table(
-    [
-      [
-        settings.bankNameRu || settings.bankNameKk || '—',
-        'ИИК',
-        settings.iban || '—',
-      ],
-      [
-        `${'Бенефициар: '}${settings.companyNameRu || settings.companyNameKk || '—'}`,
-        'БИК',
-        settings.bic || '—',
-      ],
-      [
-        `${'ИИН/БИН: '}${settings.taxId || '—'}`,
-        'Кбе',
-        settings.kbe || '—',
-      ],
-    ],
-    [0.62, 0.1, 0.28],
-    { headerRows: 0 },
-  );
-
-  b.space(8);
-  b.full(`Поставщик / Жеткізуші: ${settings.companyNameRu || settings.companyNameKk}`, { size: 8.5, spacing: 2 });
-  b.full(
-    `Покупатель / Сатып алушы: ${data.tenant.profile?.nameRu ?? data.tenant.slug}` +
-      (data.tenant.profile?.bin ? `, БИН ${data.tenant.profile.bin}` : ''),
-    { size: 8.5, spacing: 2 },
-  );
-  b.full(`Договор / Шарт: № ${contract.number} от ${formatDate(contract.issuedAt, 'ru')}`, { size: 8.5, spacing: 10 });
-
-  const period = `${formatDate(contract.periodStart, 'ru')} — ${formatDate(contract.periodEnd, 'ru')}`;
-  b.table(
-    [
-      ['Наименование услуги / Қызметтің атауы', 'Кол-во', 'Цена', 'Сумма'],
-      [
-        `${PLAN_INFO[planOf(data)].serviceName.ru}, ${period}\n${PLAN_INFO[planOf(data)].serviceName.kk}`,
-        '1',
-        money(contract.amount),
-        money(contract.amount),
-      ],
-      ['Итого / Барлығы', '', '', money(contract.amount)],
-    ],
-    [0.58, 0.1, 0.16, 0.16],
-  );
-
-  b.space(8);
-  b.full(`Всего к оплате: ${amountInWords(contract.amount, 'ru')}`, { font: 'bold', size: 9, spacing: 2 });
-  b.full(`Төлеуге жататын сома: ${amountInWords(contract.amount, 'kk')}`, { font: 'bold', size: 9, spacing: 8 });
-  b.full(settings.taxNoteRu || 'НДС не облагается.', { size: 8.5, spacing: 2 });
-  b.full('Счёт действителен в течение 10 рабочих дней. / Шот 10 жұмыс күні бойы жарамды.', {
-    size: 8.5,
-    spacing: 16,
-  });
-
-  const signer = settings.signerNameRu || settings.ownerNameRu || '';
-  b.full(`Исполнитель / Орындаушы ____________________  ${signer}`, { size: 9, spacing: 4 });
-  b.full('М.П. / М.О.', { size: 8.5 });
-
-  return b.finish();
-}
-
-// ───────────────────────────── акт ──────────────────────────────
-
-export async function buildActPdf(data: DocData): Promise<Buffer> {
-  const { contract, settings } = data;
-  const b = new DocBuilder();
-
-  b.title({
-    kk: `КӨРСЕТІЛГЕН ҚЫЗМЕТТЕР АКТІСІ № ${contract.number}`,
-    ru: `АКТ ОКАЗАННЫХ УСЛУГ № ${contract.number}`,
-  });
-  b.columns(
-    {
-      kk: `${CITY.kk}                                 ${formatDate(contract.periodEnd, 'kk')}`,
-      ru: `${CITY.ru}                                 ${formatDate(contract.periodEnd, 'ru')}`,
-    },
-    { size: 8.5, spacing: 10 },
-  );
-
-  b.full(`Исполнитель / Орындаушы: ${settings.companyNameRu || settings.companyNameKk}`, { size: 8.5, spacing: 2 });
-  b.full(
-    `Заказчик / Тапсырыс беруші: ${data.tenant.profile?.nameRu ?? data.tenant.slug}` +
-      (data.tenant.profile?.bin ? `, БИН ${data.tenant.profile.bin}` : ''),
-    { size: 8.5, spacing: 2 },
-  );
-  b.full(`Основание / Негіздеме: договор № ${contract.number} от ${formatDate(contract.issuedAt, 'ru')}`, {
-    size: 8.5,
-    spacing: 10,
-  });
-
-  const period = `${formatDate(contract.periodStart, 'ru')} — ${formatDate(contract.periodEnd, 'ru')}`;
-  b.table(
-    [
-      ['Наименование услуги / Қызметтің атауы', 'Кол-во', 'Цена', 'Сумма'],
-      [
-        `${PLAN_INFO[planOf(data)].serviceName.ru}, ${period}\n${PLAN_INFO[planOf(data)].serviceName.kk}`,
-        '1',
-        money(contract.amount),
-        money(contract.amount),
-      ],
-      ['Итого / Барлығы', '', '', money(contract.amount)],
-    ],
-    [0.58, 0.1, 0.16, 0.16],
-  );
-
-  b.space(8);
-  b.full(`Всего оказано услуг на сумму: ${amountInWords(contract.amount, 'ru')}`, { font: 'bold', size: 9, spacing: 2 });
-  b.full(`Барлығы көрсетілген қызмет сомасы: ${amountInWords(contract.amount, 'kk')}`, {
-    font: 'bold',
-    size: 9,
-    spacing: 10,
-  });
-
-  b.columns({
-    kk: 'Қызметтер толық көлемде және тиісті сапада көрсетілді. Тараптардың бір-біріне наразылығы жоқ.',
-    ru: 'Услуги оказаны в полном объёме и надлежащего качества. Претензий стороны друг к другу не имеют.',
-  });
-
-  b.space(14).line();
-  b.sideBySide(providerBlock(settings, 'kk'), providerBlock(settings, 'ru'));
-  b.space(4);
-  b.sideBySide(customerBlock(data, 'kk'), customerBlock(data, 'ru'));
-  b.space(10);
-  b.sideBySide(signatureBlock(data, 'kk'), signatureBlock(data, 'ru'));
-
-  return b.finish();
-}
-
 export const DOC_KINDS = ['contract', 'invoice', 'act'] as const;
 export type DocKind = (typeof DOC_KINDS)[number];
 
 export function buildDocument(kind: DocKind, data: DocData): Promise<Buffer> {
-  if (kind === 'invoice') return buildInvoicePdf(data);
-  if (kind === 'act') return buildActPdf(data);
+  // Счёт и акт — в привычных бухгалтерии формах (акт — Р-1), см. forms.ts.
+  if (kind === 'invoice') return buildStandardInvoice(data);
+  if (kind === 'act') return buildStandardAct(data);
   return buildContractPdf(data);
 }
