@@ -1,0 +1,549 @@
+/*
+ * Тема «Ойын алаңы» — яркая детская площадка по образцу владельца портала:
+ * рисунок на весь первый экран, синие полосы с облачным краем, жёлтые
+ * карточки и плашки, красные круги со значками.
+ * Каждое правило — под [data-theme='oyin'] (tests/unit/themes.test.ts).
+ *
+ * Синий и красный образца с белым текстом не дотягивают до 4,5, поэтому
+ * они гуще: синий #2F6FD0 (4,9), красный #D92C47 (4,8). Жёлтый — только
+ * с тёмным текстом. Шрифты — Rubik и Nunito (проверены на казахские буквы).
+ */
+
+[data-theme='oyin'] {
+  --surface: 255 255 255;
+  --card: 255 255 255;
+  --ink: 31 42 68;
+  --muted: 78 90 118;
+  --line: 214 228 248;
+  --brand: 217 44 71;
+  --brand-soft: 255 228 232;
+  --brand-ink: 168 26 50;
+  --accent: 47 111 208;
+  --accent-soft: 221 235 255;
+  --accent-ink: 29 78 160;
+  --oyin-blue: 47 111 208;
+  --oyin-sky: 226 239 255;
+  --oyin-yellow: 255 225 77;
+  --radius-md: 1.25rem;
+  --radius-lg: 1.75rem;
+  --radius-xl: 2.25rem;
+  --font-display: 'Rubik', 'Nunito', system-ui;
+  --font-sans: 'Nunito', system-ui;
+}
+
+[data-theme='oyin'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+[data-theme='oyin'] .btn-primary,
+[data-theme='oyin'] .btn-secondary,
+[data-theme='oyin'] .oyin-cta {
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+[data-theme='oyin'] .btn-primary {
+  box-shadow: 0 10px 20px -10px rgb(var(--brand) / 0.8);
+}
+
+[data-theme='oyin'] .btn-secondary {
+  background: rgb(255 255 255);
+  border: 2px solid rgb(var(--oyin-blue) / 0.35);
+  color: rgb(var(--ink));
+}
+
+[data-theme='oyin'] h1,
+[data-theme='oyin'] h2 {
+  font-weight: 800;
+}
+
+/* ── Шапка: синяя полоса и жёлтая плашка ── */
+
+[data-theme='oyin'] .oyin-header {
+  background: rgb(var(--oyin-blue));
+  color: rgb(255 255 255);
+  box-shadow: 0 6px 20px -12px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='oyin'] .oyin-plate {
+  background: rgb(var(--oyin-yellow));
+  color: rgb(var(--ink));
+  padding: 0.85rem 1.4rem 0.95rem 1.1rem;
+  border-radius: 0 0 2.25rem 1rem;
+  box-shadow: 0 10px 20px -14px rgb(var(--ink) / 0.6);
+}
+
+[data-theme='oyin'] .oyin-logo {
+  border-radius: 999px;
+  background: rgb(255 255 255);
+}
+
+[data-theme='oyin'] .oyin-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+[data-theme='oyin'] .oyin-tagline {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  color: rgb(var(--ink) / 0.75);
+}
+
+[data-theme='oyin'] .oyin-head-phone {
+  color: rgb(255 255 255);
+}
+
+[data-theme='oyin'] .oyin-cta {
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+}
+
+/* Слабовидящие и язык — на белой «таблетке», чтобы не терялись на синем. */
+[data-theme='oyin'] .oyin-tools {
+  background: rgb(255 255 255);
+  border-radius: 999px;
+  padding: 0.2rem;
+  color: rgb(var(--ink));
+}
+
+[data-theme='oyin'] .oyin-nav nav > ul > li > a,
+[data-theme='oyin'] .oyin-nav nav > ul > li > span > a,
+[data-theme='oyin'] .oyin-nav nav > ul > li > span > button {
+  color: rgb(255 255 255);
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+[data-theme='oyin'] .oyin-nav nav > ul > li > a:hover,
+[data-theme='oyin'] .oyin-nav nav > ul > li > span > a:hover,
+[data-theme='oyin'] .oyin-nav nav > ul > li > span > button:hover {
+  background: rgb(255 255 255 / 0.16);
+  color: rgb(var(--oyin-yellow));
+}
+
+/* ── Первый экран: рисунок на всю ширину ── */
+
+[data-theme='oyin'] .oyin-hero {
+  position: relative;
+  overflow: hidden;
+  background: rgb(var(--oyin-blue));
+}
+
+[data-theme='oyin'] .oyin-hero-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+[data-theme='oyin'] .oyin-hero-inner {
+  position: relative;
+  padding-block: 1.75rem 2.25rem;
+  color: rgb(255 255 255);
+}
+
+[data-theme='oyin'] .oyin-h1 {
+  font-size: clamp(2rem, 4.4vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.08;
+  color: rgb(255 255 255);
+  text-wrap: balance;
+  text-shadow: 0 3px 0 rgb(var(--ink) / 0.25);
+}
+
+[data-theme='oyin'] .oyin-hero .hero-highlight {
+  background-image: none;
+  color: rgb(var(--oyin-yellow));
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-theme='oyin'] .oyin-lead {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+[data-theme='oyin'] .oyin-dot {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: rgb(var(--oyin-yellow));
+  color: rgb(var(--ink));
+  transition: transform 0.15s;
+}
+
+[data-theme='oyin'] a.oyin-dot:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+[data-theme='oyin'] .oyin-dot-sm {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+[data-theme='oyin'] .oyin-hero-card {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.75rem;
+  border-radius: 1.75rem;
+  background: rgb(255 255 255);
+  color: rgb(var(--ink));
+  padding: 1.1rem 1.3rem;
+  box-shadow: 0 20px 40px -24px rgb(var(--ink) / 0.6);
+}
+
+/* На широком экране текст стоит поверх рисунка, карточка — внизу справа. */
+@media (min-width: 1024px) {
+  [data-theme='oyin'] .oyin-hero {
+    min-height: min(56vw, 46rem);
+  }
+
+  [data-theme='oyin'] .oyin-hero-art {
+    position: absolute;
+    inset: 0;
+  }
+
+  [data-theme='oyin'] .oyin-hero-art img {
+    height: 100%;
+    object-fit: cover;
+    object-position: center bottom;
+  }
+
+  [data-theme='oyin'] .oyin-hero-inner {
+    display: flex;
+    min-height: min(56vw, 46rem);
+    flex-direction: column;
+    justify-content: space-between;
+    padding-block: 3.5rem 2.5rem;
+  }
+
+  /* Мягкая синяя подложка: белый текст читается и на траве, и на небе. */
+  [data-theme='oyin'] .oyin-hero-text {
+    max-width: 34rem;
+    border-radius: 2rem;
+    background: rgb(var(--oyin-blue) / 0.86);
+    padding: 1.75rem 2rem 2rem;
+    box-shadow: 0 24px 50px -30px rgb(var(--ink) / 0.8);
+  }
+
+  [data-theme='oyin'] .oyin-hero-card {
+    align-self: flex-end;
+    max-width: 24rem;
+    margin-top: 1.5rem;
+    background: rgb(var(--oyin-blue));
+    color: rgb(255 255 255);
+  }
+}
+
+/* ── «О саде» на небе с облаками ── */
+
+[data-theme='oyin'] .oyin-sky {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgb(var(--oyin-sky)), rgb(255 255 255));
+}
+
+[data-theme='oyin'] .oyin-doodle {
+  position: absolute;
+  pointer-events: none;
+}
+
+[data-theme='oyin'] .oyin-sky-cloud-1 {
+  left: 2%;
+  top: 1.5rem;
+  width: 9rem;
+  animation: oyin-drift 16s ease-in-out infinite alternate;
+}
+
+[data-theme='oyin'] .oyin-sky-cloud-2 {
+  right: 6%;
+  bottom: 2rem;
+  width: 7rem;
+  animation: oyin-drift 20s ease-in-out infinite alternate-reverse;
+}
+
+[data-theme='oyin'] .oyin-title,
+[data-theme='oyin'] .oyin-home h2 {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.8rem, 3.4vw, 2.5rem);
+  line-height: 1.15;
+  color: rgb(var(--ink));
+}
+
+[data-theme='oyin'] .oyin-about-text {
+  color: rgb(var(--muted));
+  line-height: 1.7;
+}
+
+[data-theme='oyin'] .oyin-photo {
+  display: block;
+  width: 100%;
+  max-width: 34rem;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 2rem;
+  border: 6px solid rgb(var(--oyin-yellow));
+}
+
+[data-theme='oyin'] .oyin-yellow-btn {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: rgb(var(--oyin-yellow));
+  color: rgb(var(--ink));
+  padding: 0.8rem 1.6rem;
+  font-weight: 800;
+  box-shadow: 0 10px 20px -12px rgb(160 120 0 / 0.8);
+  transition: transform 0.15s;
+}
+
+[data-theme='oyin'] .oyin-yellow-btn:hover {
+  transform: translateY(-2px);
+}
+
+[data-theme='oyin'] .oyin-fact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+}
+
+[data-theme='oyin'] .oyin-fact-icon {
+  display: grid;
+  place-items: center;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 0.4rem;
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  box-shadow: 0 0 0 6px rgb(var(--brand) / 0.15);
+}
+
+[data-theme='oyin'] .oyin-fact-value {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: rgb(var(--ink));
+}
+
+[data-theme='oyin'] .oyin-fact-label {
+  font-size: 0.9rem;
+  color: rgb(var(--muted));
+}
+
+/* ── Синяя полоса с облачным краем: объявления и разделы ── */
+
+[data-theme='oyin'] .oyin-band {
+  position: relative;
+  margin-block: 4.5rem;
+  background: rgb(var(--oyin-blue));
+  color: rgb(255 255 255);
+}
+
+[data-theme='oyin'] .oyin-edge-top,
+[data-theme='oyin'] .oyin-edge-bottom {
+  position: absolute;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 4.5rem;
+  color: rgb(var(--oyin-blue));
+}
+
+[data-theme='oyin'] .oyin-edge-top {
+  bottom: calc(100% - 1px);
+}
+
+[data-theme='oyin'] .oyin-edge-bottom {
+  top: calc(100% - 1px);
+  transform: scaleY(-1);
+}
+
+[data-theme='oyin'] .oyin-band h2 {
+  color: rgb(255 255 255);
+  text-align: center;
+}
+
+[data-theme='oyin'] .oyin-notice {
+  border-radius: 2rem;
+  background: rgb(255 255 255);
+  color: rgb(var(--ink));
+  padding: 1.25rem 1.5rem;
+}
+
+[data-theme='oyin'] .oyin-notice-label {
+  display: inline-block;
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  padding: 0.2rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+[data-theme='oyin'] .oyin-tiles .card {
+  border: 0;
+  border-radius: 1.75rem;
+  background: rgb(var(--oyin-yellow));
+  color: rgb(var(--ink));
+  box-shadow: 0 14px 26px -18px rgb(0 0 0 / 0.55);
+  padding: 1rem 1.15rem;
+  font-weight: 800;
+  transition: transform 0.15s;
+}
+
+[data-theme='oyin'] .oyin-tiles .card:hover {
+  transform: translateY(-3px) rotate(-0.5deg);
+}
+
+[data-theme='oyin'] .oyin-tiles .card > span:first-child {
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+}
+
+/* ── Новости, альбомы, контакты ── */
+
+[data-theme='oyin'] .oyin-more {
+  font-weight: 800;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='oyin'] .oyin-news article.card {
+  border: 0;
+  border-top: 8px solid rgb(var(--oyin-yellow));
+  border-radius: 1.75rem;
+  box-shadow: 0 18px 40px -26px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='oyin'] .oyin-gallery a.card {
+  border: 0;
+  border-radius: 1.75rem;
+  background: rgb(var(--oyin-yellow));
+  color: rgb(var(--ink));
+  box-shadow: 0 18px 40px -26px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='oyin'] .oyin-contacts .card {
+  border: 0;
+  border-radius: 2rem;
+  background: rgb(var(--oyin-yellow));
+  color: rgb(var(--ink));
+}
+
+[data-theme='oyin'] .oyin-contacts a {
+  color: rgb(var(--ink));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Подвал ── */
+
+[data-theme='oyin'] .oyin-footer {
+  position: relative;
+}
+
+[data-theme='oyin'] .oyin-footer-edge {
+  display: block;
+  width: 100%;
+  height: 4.5rem;
+  color: rgb(var(--oyin-blue));
+}
+
+[data-theme='oyin'] .oyin-footer-body {
+  position: relative;
+  margin-top: -1px;
+  background: rgb(var(--oyin-blue));
+  color: rgb(255 255 255);
+}
+
+[data-theme='oyin'] .oyin-footer-cloud {
+  right: 5%;
+  top: -1rem;
+  width: 8rem;
+  opacity: 0.9;
+}
+
+[data-theme='oyin'] .oyin-footer-name {
+  display: inline-block;
+  border-radius: 0 1.5rem 1.5rem 1.5rem;
+  background: rgb(var(--oyin-yellow));
+  color: rgb(var(--ink));
+  padding: 0.6rem 1rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+[data-theme='oyin'] .oyin-footer-body a:hover {
+  color: rgb(var(--oyin-yellow));
+}
+
+[data-theme='oyin'] .oyin-footer-social a:hover {
+  color: rgb(var(--ink));
+}
+
+[data-theme='oyin'] .oyin-footer-title {
+  margin-bottom: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: rgb(var(--oyin-yellow));
+}
+
+[data-theme='oyin'] .oyin-footer-bottom {
+  border-top: 1px solid rgb(255 255 255 / 0.25);
+}
+
+@keyframes oyin-drift {
+  from { translate: 0 0; }
+  to { translate: 3rem 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='oyin'] .oyin-doodle {
+    animation: none;
+  }
+}
+
+@media (max-width: 639px) {
+  [data-theme='oyin'] .oyin-plate {
+    padding: 0.7rem 1rem 0.8rem 0.8rem;
+    border-radius: 0 0 1.5rem 0.75rem;
+  }
+
+  [data-theme='oyin'] .oyin-name {
+    font-size: 0.98rem;
+  }
+
+  [data-theme='oyin'] .oyin-sky-cloud-2 {
+    display: none;
+  }
+
+  [data-theme='oyin'] .oyin-fact-icon {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  /* Разделы на телефоне — в два столбца, значок над названием. */
+  [data-theme='oyin'] .oyin-tiles section > .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  [data-theme='oyin'] .oyin-tiles .card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.9rem;
+    font-size: 0.95rem;
+  }
+}
