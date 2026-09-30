@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
@@ -29,7 +29,9 @@ async function load(host: string, id: string) {
   // Через scoped: документ ищется только внутри своего сада, чужой id не откроется.
   const found = await context.db.documents.findFirst({ where: { id }, include: { media: true } });
   if (found) {
-    if (!isOfficeDoc(found.media.mime)) notFound();
+    // PDF и картинки браузер открывает сам — просмотрщик для них не нужен,
+    // а ссылка /doc/<id> на такой документ не должна вести в 404.
+    if (!isOfficeDoc(found.media.mime)) redirect(`/api/media/${found.mediaId}`);
     return { context, doc: found, fromText: false };
   }
   // Файл, прикреплённый в тексте страницы или новости: документа у него нет,
