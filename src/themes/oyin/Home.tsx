@@ -58,7 +58,7 @@ function SocialDots({ profile }: { profile: Profile }) {
 
 type Fact = { icon: FactIconName; label: string; value: string };
 
-/** Факты о саде из паспорта — только те, что заполнены. */
+/** «Забота о ребёнке» и факты из паспорта — только заполненные. */
 function facts(profile: Profile, locale: Locale): Fact[] {
   if (!profile) return [];
   const langs = [profile.langKk && T.kk[locale], profile.langRu && T.ru[locale]].filter(Boolean).join(', ');
@@ -67,9 +67,9 @@ function facts(profile: Profile, locale: Locale): Fact[] {
   if (profile.placesTotal) list.push({ icon: 'home', label: T.places[locale], value: String(profile.placesTotal) });
   if (profile.workHours) list.push({ icon: 'clock', label: T.hours[locale], value: profile.workHours });
   if (langs) list.push({ icon: 'talk', label: T.lang[locale], value: langs });
-  // Если паспорт заполнен не весь, ряд добирает «Забота о ребёнке» — как в образце.
-  if (list.length < 4) list.unshift({ icon: 'care', label: T.careNote[locale], value: T.care[locale] });
-  return list;
+  // «Забота о ребёнке» стоит первой всегда, как в образце; в ряду — четыре
+  // пункта, поэтому при полном паспорте последний (язык) не помещается.
+  return [{ icon: 'care' as const, label: T.careNote[locale], value: T.care[locale] }, ...list].slice(0, 4);
 }
 
 /**
