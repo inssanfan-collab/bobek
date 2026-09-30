@@ -11,7 +11,12 @@
  *
  * Формат файла:
  *   { "folders": [ { "titleKk", "titleRu", "folders": [...], "files": [...] } ],
- *     "files":   [ { "titleKk", "titleRu", "driveId" | "url", "fileName" } ] }
+ *     "files":   [ { "titleKk", "titleRu", "driveId" | "url" | "yandex" | "path", "fileName" } ] }
+ *
+ * Источник файла: driveId — Google Диск, url — прямая ссылка, yandex —
+ * публичная ссылка Яндекс.Диска (disk.yandex.kz/i/…, /d/…; на ней сады
+ * Актобе держат планы и циклограммы), path — файл на сервере (например,
+ * склеенные в PDF сканы).
  *
  * Перевод скрипт не выдумывает — обе версии приходят в файле.
  * Повторный запуск ничего не портит: папка с таким же названием на том же
@@ -22,7 +27,7 @@ import { promises as fs } from 'node:fs';
 import { prisma } from '../src/server/db';
 import { saveUpload } from '../src/server/media';
 
-type FileEntry = { titleKk: string; titleRu: string; driveId?: string; url?: string; fileName?: string };
+type FileEntry = { titleKk: string; titleRu: string; driveId?: string; url?: string; yandex?: string; path?: string; fileName?: string };
 type FolderEntry = { titleKk: string; titleRu: string; folders?: FolderEntry[]; files?: FileEntry[] };
 
 const MIME: Record<string, string> = {
@@ -40,8 +45,29 @@ const stats = { folders: 0, files: 0, skipped: 0, failed: [] as string[] };
  * проверить на вирусы» вместо содержимого — поэтому адрес с confirm=t,
  * и поэтому же проверяем, что пришёл файл, а не HTML.
  */
+/**
+ * Прямой адрес файла по публичной ссылке Яндекс.Диска. Адрес временный,
+ * поэтому берём его перед самой загрузкой, а не при сборке манифеста.
+ * Ссылка вида /d/ может вести на папку — тогда берём первый файл в ней.
+ */
+async function yandexHref(link: string): Promise<string> {
+  const api = 'https://cloud-api.yandex.net/v1/disk/public/resources';
+  const key = encodeURIComponent(link);
+  const meta = (await (await fetch(`${api}?public_key=${key}&limit=20`)).json()) as {
+    type?: string; _embedded?: { items: { type: string; path: string }[] };
+  };
+  const inner = meta.type === 'dir' ? meta._embedded?.items.find((item) => item.type === 'file')?.path : undefined;
+  if (meta.type === 'dir' && !inner) throw new Error('папка на Яндекс.Диске пустая');
+  const pathParam = inner ? `&path=${encodeURIComponent(inner)}` : '';
+  const answer = (await (await fetch(`${api}/download?public_key=${key}${pathParam}`)).json()) as { href?: string; description?: string };
+  if (!answer.href) throw new Error(`Яндекс.Диск не отдал файл: ${answer.description ?? 'нет ссылки'}`);
+  return answer.href;
+}
+
 async function download(entry: FileEntry): Promise<Buffer> {
+  if (entry.path) return fs.readFile(entry.path);
   const url = entry.url
+    ?? (entry.yandex ? await yandexHref(entry.yandex) : undefined)
     ?? `https://drive.usercontent.google.com/download?id=${entry.driveId}&export=download&confirm=t`;
   for (let attempt = 1; ; attempt++) {
     try {
