@@ -1,0 +1,510 @@
+/*
+ * Тема «Қуаныш» — яркие кляксы (структура дизайна №4). Фиолетовый #6A3DD1
+ * для выделений и подвала (белый текст 6,6:1), кнопки — красно-оранжевый
+ * #C7341A (5,3:1), зелёная полоса #1A7A43; лимонный #FFD84D — украшения.
+ * Шрифты: Rubik (заголовки) и Nunito — проверены на казахские буквы.
+ * Каждое правило — под [data-theme='kuanysh'] (tests/unit/themes.test.ts).
+ */
+
+[data-theme='kuanysh'] {
+  --surface: 255 252 245;
+  --card: 255 255 255;
+  --ink: 33 30 46;
+  --muted: 92 88 108;
+  --line: 238 232 220;
+  --brand: 199 52 26;
+  --brand-soft: 255 232 224;
+  --brand-ink: 150 36 16;
+  --accent: 106 61 209;
+  --accent-soft: 238 232 253;
+  --accent-ink: 84 44 178;
+  --kuanysh-violet: 106 61 209;
+  --kuanysh-lemon: 255 216 77;
+  --kuanysh-green: 26 122 67;
+  --radius-md: 1rem;
+  --radius-lg: 1.75rem;
+  --radius-xl: 2.25rem;
+  --font-display: 'Rubik', 'Nunito', system-ui, sans-serif;
+  --font-sans: 'Nunito', system-ui, sans-serif;
+}
+
+[data-theme='kuanysh'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+[data-theme='kuanysh'] .btn-primary,
+[data-theme='kuanysh'] .kuanysh-cta {
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  font-weight: 700;
+  box-shadow: 0 12px 24px -14px rgb(var(--brand) / 0.9);
+}
+
+[data-theme='kuanysh'] .btn-secondary {
+  border-radius: 999px;
+  border: 2px solid rgb(var(--accent));
+  background: rgb(255 255 255);
+  color: rgb(var(--accent-ink));
+  font-weight: 700;
+}
+
+[data-theme='kuanysh'] .kit-title {
+  font-weight: 800;
+}
+
+[data-theme='kuanysh'] .kit-eyebrow {
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── Шапка ── */
+
+[data-theme='kuanysh'] .kuanysh-topbar {
+  background: rgb(var(--kuanysh-lemon) / 0.35);
+  color: rgb(var(--ink));
+}
+
+[data-theme='kuanysh'] .kuanysh-header {
+  background: rgb(255 255 255 / 0.96);
+  box-shadow: 0 1px 0 rgb(var(--line));
+}
+
+[data-theme='kuanysh'] .kuanysh-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='kuanysh'] .kuanysh-tagline {
+  font-size: 0.8rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='kuanysh'] .kuanysh-nav nav a {
+  border-radius: 999px;
+  color: rgb(var(--ink));
+  font-weight: 700;
+}
+
+/* ── Первый экран ── */
+
+[data-theme='kuanysh'] .kuanysh-hero {
+  background: linear-gradient(180deg, rgb(255 246 214), rgb(var(--surface)));
+}
+
+[data-theme='kuanysh'] .kuanysh-pill {
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--kuanysh-lemon));
+  background: rgb(255 240 180);
+  color: rgb(100 70 0);
+  padding: 0.35rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+[data-theme='kuanysh'] .kuanysh-h1 {
+  font-size: clamp(2.3rem, 5vw, 4rem);
+  font-weight: 900;
+  line-height: 1.06;
+  color: rgb(var(--ink));
+  text-wrap: balance;
+}
+
+/* Выделенная часть — фиолетовым с волнистой линией. */
+[data-theme='kuanysh'] .kuanysh-hero .hero-highlight {
+  background-image: none;
+  color: rgb(var(--kuanysh-violet));
+  -webkit-text-fill-color: currentColor;
+  text-decoration: underline wavy rgb(var(--kuanysh-lemon));
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+[data-theme='kuanysh'] .kuanysh-lead {
+  max-width: 36rem;
+  margin-top: 1.1rem;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: rgb(var(--muted));
+}
+
+[data-theme='kuanysh'] .kuanysh-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgb(var(--line));
+}
+
+[data-theme='kuanysh'] .kuanysh-stats .hb-stat {
+  flex-direction: column;
+  gap: 0;
+}
+
+[data-theme='kuanysh'] .kuanysh-stats .hb-stat:nth-child(1) .hb-stat-value { color: rgb(var(--accent-ink)); }
+[data-theme='kuanysh'] .kuanysh-stats .hb-stat:nth-child(2) .hb-stat-value { color: rgb(var(--kuanysh-green)); }
+[data-theme='kuanysh'] .kuanysh-stats .hb-stat:nth-child(3) .hb-stat-value { color: rgb(var(--brand)); }
+
+/* Фото на жёлто-сиреневой кляксе */
+[data-theme='kuanysh'] .kuanysh-blob-wrap {
+  position: relative;
+  width: min(100%, 32rem);
+  margin-inline: auto;
+}
+
+[data-theme='kuanysh'] .kuanysh-blob-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -6% -4% -4% -6%;
+  border-radius: 58% 42% 50% 50% / 48% 56% 44% 52%;
+  background: linear-gradient(135deg, rgb(var(--kuanysh-lemon)), rgb(var(--accent-soft)));
+}
+
+[data-theme='kuanysh'] .kuanysh-blob {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 0.95;
+  object-fit: cover;
+  border-radius: 46% 54% 42% 58% / 52% 44% 56% 48%;
+  border: 8px solid rgb(255 255 255);
+}
+
+/* ── Секции ── */
+
+[data-theme='kuanysh'] .kuanysh-section {
+  padding-block: 4.5rem;
+}
+
+[data-theme='kuanysh'] .kuanysh-warm {
+  background: rgb(250 246 236);
+}
+
+[data-theme='kuanysh'] .kuanysh-card {
+  border: 2px solid rgb(var(--kuanysh-lemon));
+  border-radius: 2rem 2.5rem 2rem 2.75rem;
+  background: rgb(255 249 220);
+  padding: 2rem 1.8rem;
+}
+
+[data-theme='kuanysh'] .kuanysh-card:nth-child(2) { border-color: rgb(140 220 175); background: rgb(234 249 240); }
+[data-theme='kuanysh'] .kuanysh-card:nth-child(3) { border-color: rgb(200 180 245); background: rgb(var(--accent-soft)); }
+
+[data-theme='kuanysh'] .kuanysh-card-icon {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 999px;
+  background: rgb(var(--kuanysh-lemon));
+  color: rgb(var(--ink));
+  font-size: 1.3rem;
+}
+
+[data-theme='kuanysh'] .kuanysh-card:nth-child(2) .kuanysh-card-icon { background: rgb(var(--kuanysh-green)); color: rgb(255 255 255); }
+[data-theme='kuanysh'] .kuanysh-card:nth-child(3) .kuanysh-card-icon { background: rgb(var(--kuanysh-violet)); color: rgb(255 255 255); }
+
+[data-theme='kuanysh'] .kuanysh-card h3 {
+  margin-top: 1.2rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+[data-theme='kuanysh'] .kuanysh-card p {
+  margin-top: 0.6rem;
+  line-height: 1.6;
+  color: rgb(var(--muted));
+}
+
+[data-theme='kuanysh'] .kuanysh-arc-wrap {
+  position: relative;
+  width: min(100%, 30rem);
+  margin-inline: auto;
+}
+
+[data-theme='kuanysh'] .kuanysh-arc-wrap::before {
+  content: '';
+  position: absolute;
+  left: -1.2rem;
+  top: -1.2rem;
+  width: 70%;
+  height: 70%;
+  border-radius: 999px 0 0 0;
+  border-left: 1.4rem solid rgb(var(--kuanysh-lemon));
+  border-top: 1.4rem solid rgb(var(--kuanysh-lemon));
+}
+
+[data-theme='kuanysh'] .kuanysh-arc-photo {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 52% 48% 46% 54% / 50% 54% 46% 50%;
+}
+
+[data-theme='kuanysh'] .kuanysh-text {
+  line-height: 1.7;
+  color: rgb(var(--muted));
+}
+
+[data-theme='kuanysh'] .kuanysh-hours {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.6rem 1.2rem;
+  margin-top: 1.5rem;
+  border-radius: 1.5rem;
+  background: rgb(255 255 255);
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 14px 30px -24px rgb(var(--ink) / 0.6);
+}
+
+[data-theme='kuanysh'] .kuanysh-hours dt {
+  font-weight: 700;
+  color: rgb(var(--muted));
+}
+
+[data-theme='kuanysh'] .kuanysh-hours dd {
+  font-weight: 700;
+}
+
+[data-theme='kuanysh'] .kuanysh-chip {
+  border-radius: 999px;
+  border: 1px solid rgb(var(--kuanysh-lemon));
+  background: rgb(255 249 220);
+  padding: 0.3rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* Зелёная полоса с фото */
+[data-theme='kuanysh'] .kuanysh-band {
+  display: grid;
+  align-items: center;
+  gap: 2rem;
+  border-radius: 2.5rem;
+  background: rgb(var(--kuanysh-green));
+  color: rgb(255 255 255);
+  padding: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='kuanysh'] .kuanysh-band {
+    grid-template-columns: 1.2fr 0.8fr;
+    padding: 3rem 3.5rem;
+  }
+}
+
+[data-theme='kuanysh'] .kuanysh-band-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+[data-theme='kuanysh'] .kuanysh-band-lead {
+  margin: 0.9rem 0 1.6rem;
+  opacity: 0.95;
+}
+
+[data-theme='kuanysh'] .kuanysh-band-button {
+  display: inline-flex;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  color: rgb(var(--ink));
+  padding: 0.85rem 1.7rem;
+  font-weight: 800;
+}
+
+[data-theme='kuanysh'] .kuanysh-band-photo {
+  display: block;
+  width: min(100%, 20rem);
+  margin-inline: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 8px solid rgb(255 255 255 / 0.25);
+}
+
+[data-theme='kuanysh'] .kuanysh-lesson {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+[data-theme='kuanysh'] .kuanysh-lesson-dot {
+  display: inline-block;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  background: rgb(var(--brand));
+}
+
+[data-theme='kuanysh'] .kuanysh-lesson b {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+[data-theme='kuanysh'] .kuanysh-lesson span:last-child {
+  color: rgb(var(--muted));
+}
+
+@media (min-width: 1024px) {
+  [data-theme='kuanysh'] .lg\:text-right .kuanysh-lesson {
+    align-items: flex-end;
+  }
+}
+
+[data-theme='kuanysh'] .kuanysh-center {
+  display: block;
+  width: min(100%, 22rem);
+  margin-inline: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 10px solid rgb(var(--kuanysh-lemon));
+}
+
+/* Отзыв крупно на жёлтой кляксе + счётчики-пузыри */
+[data-theme='kuanysh'] .kuanysh-quote {
+  border-radius: 46% 54% 42% 58% / 52% 44% 56% 48%;
+  background: rgb(var(--kuanysh-lemon));
+  padding: 3rem 3rem 3.2rem;
+}
+
+[data-theme='kuanysh'] .kuanysh-quote blockquote {
+  margin-top: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+[data-theme='kuanysh'] .kuanysh-quote figcaption {
+  margin-top: 1rem;
+}
+
+[data-theme='kuanysh'] .kuanysh-bubbles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+[data-theme='kuanysh'] .kuanysh-bubbles .hb-stat {
+  display: grid;
+  place-content: center;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  text-align: center;
+  box-shadow: 0 16px 30px -22px rgb(var(--ink) / 0.6);
+}
+
+[data-theme='kuanysh'] .kuanysh-bubbles .hb-stat-value {
+  font-size: 2rem;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='kuanysh'] .kuanysh-small-quote {
+  border-radius: 1.75rem;
+  background: rgb(255 255 255);
+  padding: 1.4rem 1.6rem;
+  box-shadow: 0 16px 30px -24px rgb(var(--ink) / 0.6);
+}
+
+[data-theme='kuanysh'] .kuanysh-small-quote b {
+  display: block;
+  margin-top: 0.7rem;
+}
+
+[data-theme='kuanysh'] .kuanysh-more {
+  font-weight: 800;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='kuanysh'] .kuanysh-news article.card {
+  border: 0;
+  border-radius: 1.75rem;
+  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+}
+
+/* Фиолетовая полоса записи */
+[data-theme='kuanysh'] .kuanysh-cta-band {
+  border-radius: 2.5rem;
+  background: rgb(var(--kuanysh-violet));
+  color: rgb(255 255 255);
+  padding: 3.2rem 1.5rem;
+  text-align: center;
+}
+
+[data-theme='kuanysh'] .kuanysh-cta-band h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+  font-weight: 800;
+}
+
+[data-theme='kuanysh'] .kuanysh-cta-band p {
+  max-width: 36rem;
+  margin: 0.8rem auto 1.6rem;
+  opacity: 0.95;
+}
+
+/* ── Подвал ── */
+
+[data-theme='kuanysh'] .kuanysh-footer-body {
+  background: rgb(var(--accent-ink));
+  color: rgb(232 226 252);
+}
+
+[data-theme='kuanysh'] .kuanysh-footer-name {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: rgb(255 255 255);
+}
+
+[data-theme='kuanysh'] .kuanysh-footer-title {
+  margin-bottom: 0.6rem;
+  font-weight: 800;
+  color: rgb(var(--kuanysh-lemon));
+}
+
+[data-theme='kuanysh'] .kuanysh-footer-body a:hover {
+  color: rgb(255 255 255);
+  text-decoration: underline;
+}
+
+[data-theme='kuanysh'] .kuanysh-footer-social a {
+  color: rgb(var(--ink));
+}
+
+[data-theme='kuanysh'] .kuanysh-footer-bottom {
+  border-top: 1px solid rgb(255 255 255 / 0.18);
+}
+
+@media (max-width: 639px) {
+  [data-theme='kuanysh'] .kuanysh-section {
+    padding-block: 3rem;
+  }
+
+  [data-theme='kuanysh'] .kuanysh-quote {
+    border-radius: 2rem;
+    padding: 2rem 1.5rem;
+  }
+
+  [data-theme='kuanysh'] .kuanysh-band {
+    padding: 2rem 1.5rem;
+  }
+}
