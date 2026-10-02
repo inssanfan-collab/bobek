@@ -23,7 +23,8 @@ export default async function TenantHome({
   const { tenant, profile, db } = await publicSiteContext(host);
   const locale = localeFrom(search.lang);
 
-  const [sections, news, announcements, albums, cover, documents] = await Promise.all([
+  const visible = { where: { isVisible: true }, orderBy: { position: 'asc' as const } };
+  const [sections, news, announcements, albums, cover, documents, staff, groups, clubs, faq, reviews, prices, routine] = await Promise.all([
     siteMenu(db),
     db.posts.findMany({
       where: { status: 'PUBLISHED', publishedAt: { lte: new Date() }, section: { type: 'NEWS' } },
@@ -47,6 +48,13 @@ export default async function TenantHome({
       ? prisma.media.findFirst({ where: { id: profile.coverMediaId, tenantId: tenant.id } })
       : null,
     db.documents.findMany({ orderBy: { publishedAt: 'desc' }, take: 5, include: { media: true } }),
+    db.staff.findMany({ ...visible, include: { photo: true } }),
+    db.groups.findMany(visible),
+    prisma.club.findMany({ where: { tenantId: tenant.id, isVisible: true }, orderBy: { position: 'asc' } }),
+    prisma.faqItem.findMany({ where: { tenantId: tenant.id, isVisible: true }, orderBy: { position: 'asc' } }),
+    db.reviews.findMany(visible),
+    db.pricePlans.findMany(visible),
+    db.routine.findMany({ orderBy: { position: 'asc' } }),
   ]);
 
   await recordVisit(tenant.id);
@@ -71,6 +79,14 @@ export default async function TenantHome({
           coverPosition={coverPosition(profile?.coverFocus)}
           documents={documents}
           menu={sections}
+          staff={staff}
+          groups={groups}
+          clubs={clubs}
+          faq={faq}
+          reviews={reviews}
+          prices={prices}
+          routine={routine}
+          counts={{ staff: staff.length, groups: groups.length }}
         />
       </main>
       <ThemedFooter themeCode={tenant.themeCode} profile={profile} sections={sections} locale={locale} portalDomain={env.portalDomain} />

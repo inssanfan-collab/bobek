@@ -9,6 +9,18 @@ import type { SectionType } from '@prisma/client';
  * стиль на весь набор: сетка 24, штрих 1.7, скруглённые концы.
  */
 const PATHS: Partial<Record<SectionType, React.ReactNode>> = {
+  REVIEWS: (
+    <>
+      <path d="M4 5h16v11H9l-5 4z" />
+      <path d="m12 8 .9 1.8 2 .3-1.4 1.4.3 2-1.8-1-1.8 1 .3-2-1.4-1.4 2-.3z" />
+    </>
+  ),
+  PRICES: (
+    <>
+      <path d="M3 7h18v10H3z" />
+      <path d="M3 11h18M7 15h3" />
+    </>
+  ),
   NEWS: (
     <>
       <path d="M4 5h11v14H5a1 1 0 0 1-1-1z" />

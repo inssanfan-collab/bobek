@@ -1,7 +1,9 @@
-import type { Document, Media, Section, TenantProfile } from '@prisma/client';
+import type { Club, Document, FaqItem, Group, Media, PricePlan, Review, RoutineItem, Section, TenantProfile } from '@prisma/client';
 import type { Locale } from '@/lib/i18n';
 import type { HeroContent } from '@/lib/hero';
 import type { AlbumWithCover, PostWithCover } from '@/components/site/blocks';
+import type { StaffWithPhoto } from '@/components/site/home-blocks';
+import type { HomeCounts } from '@/lib/home-stats';
 
 /** Документ с файлом — для блока «Последние документы». */
 export type DocumentWithMedia = Document & { media: Media };
@@ -32,4 +34,16 @@ export type HomeProps = {
    */
   documents?: DocumentWithMedia[];
   menu?: Section[];
+  /**
+   * Данные для блоков главной (src/components/site/home-blocks.tsx):
+   * только видимые записи, в порядке, заданном садом.
+   */
+  staff?: StaffWithPhoto[];
+  groups?: Group[];
+  clubs?: Club[];
+  faq?: FaqItem[];
+  reviews?: Review[];
+  prices?: PricePlan[];
+  routine?: RoutineItem[];
+  counts?: HomeCounts;
 };

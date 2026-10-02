@@ -9,7 +9,7 @@ import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { recordVisit } from '@/server/stats';
 import { ContactCard } from '@/components/site/blocks';
 import {
-  AlbumGrid, ClubList, DocumentList, Empty, FaqList, GroupList, MenuTable, PostFeed, StaffList,
+  AlbumGrid, ClubList, DocumentList, Empty, FaqList, GroupList, MenuTable, PostFeed, PriceList, ReviewList, StaffList,
   VacanciesBlock,
 } from '@/components/site/sections';
 import { RouteMap } from '@/components/site/RouteMap';
@@ -256,6 +256,16 @@ async function SectionBody({
         orderBy: { position: 'asc' },
       });
       return <FaqList items={items} locale={locale} />;
+    }
+
+    case 'REVIEWS': {
+      const reviews = await db.reviews.findMany({ where: { isVisible: true }, orderBy: { position: 'asc' } });
+      return <ReviewList reviews={reviews} locale={locale} />;
+    }
+
+    case 'PRICES': {
+      const plans = await db.pricePlans.findMany({ where: { isVisible: true }, orderBy: { position: 'asc' } });
+      return <PriceList plans={plans} locale={locale} />;
     }
 
     case 'CONTACTS':

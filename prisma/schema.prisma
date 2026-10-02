@@ -82,6 +82,9 @@ model Tenant {
   menuDays      MenuDay[]
   clubs         Club[]
   faq           FaqItem[]
+  reviews       Review[]
+  pricePlans    PricePlan[]
+  routine       RoutineItem[]
   stats         DailyStat[]
   feedback      FeedbackMessage[]
   contracts     Contract[]
@@ -290,6 +293,10 @@ enum SectionType {
   FAQ
   /// Пункт меню, ведущий на другой адрес: Darabala.kz, Instagram сада и т.п.
   LINK
+  /// Отзывы родителей — только настоящие, вносит сад.
+  REVIEWS
+  /// Стоимость пребывания — для частных садов.
+  PRICES
 }
 
 enum NoticeTone {
@@ -595,6 +602,60 @@ model Club {
 }
 
 /// Часто задаваемые вопросы. Снимает с заведующей повторяющиеся звонки.
+/// Отзыв родителя. Вносит сам сад и только настоящий: придуманные отзывы
+/// на сайте государственной организации — обман родителей.
+model Review {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  authorName   String
+  /// Кто это: «Айлиннің анасы», «папа Тимура».
+  authorNoteKk String?
+  authorNoteRu String?
+  textKk       String
+  textRu       String
+  rating       Int? // 1–5, необязательно
+  position     Int      @default(0)
+  isVisible    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId, position])
+}
+
+/// Тариф пребывания в частном саду: «Полный день — 120 000 ₸ в месяц».
+model PricePlan {
+  id         String  @id @default(cuid())
+  tenantId   String
+  tenant     Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  nameKk     String
+  nameRu     String
+  priceKzt   Int
+  periodKk   String? // «айына»
+  periodRu   String? // «в месяц»
+  /// Что входит — по пункту на строку.
+  featuresKk String?
+  featuresRu String?
+  isFeatured Boolean @default(false)
+  position   Int     @default(0)
+  isVisible  Boolean @default(true)
+
+  @@index([tenantId, position])
+}
+
+/// Пункт распорядка дня для блока на главной: «08:00–08:30 — Таңғы ас».
+/// Подробный режим по группам остаётся страницей «Күн тәртібі».
+model RoutineItem {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  time     String
+  titleKk  String
+  titleRu  String
+  position Int    @default(0)
+
+  @@index([tenantId, position])
+}
+
 model FaqItem {
   id         String  @id @default(cuid())
   tenantId   String

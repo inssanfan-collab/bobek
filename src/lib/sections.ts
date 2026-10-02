@@ -95,6 +95,18 @@ export const SECTION_CATALOG: SectionMeta[] = [
     defaultOn: false, singleton: true, icon: '❓',
   },
   {
+    type: 'REVIEWS', slug: 'reviews', titleKk: 'Ата-аналар пікірлері', titleRu: 'Отзывы родителей',
+    hintRu: 'Настоящие отзывы родителей — с их согласия. Придуманные не публикуйте.',
+    hintKk: 'Ата-аналардың шынайы пікірлері — олардың келісімімен. Ойдан шығарылғанын жарияламаңыз.',
+    defaultOn: false, singleton: true, icon: '💬',
+  },
+  {
+    type: 'PRICES', slug: 'prices', titleKk: 'Бағалар', titleRu: 'Стоимость',
+    hintRu: 'Тарифы пребывания для частного сада: полный день, полдня, кружки.',
+    hintKk: 'Жеке балабақшаға арналған тарифтер: толық күн, жарты күн, үйірмелер.',
+    defaultOn: false, singleton: true, icon: '💳',
+  },
+  {
     type: 'VACANCIES', slug: 'vacancies', titleKk: 'Бос орындар', titleRu: 'Свободные места',
     hintRu: 'Свободные места по группам и вакансии для сотрудников.',
     hintKk: 'Топтар бойынша бос орындар және қызметкерлерге арналған бос жұмыс орындары.',

@@ -75,6 +75,21 @@ export function scoped(tenantId: string) {
         prisma.document.findFirst(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.DocumentGetPayload<T> | null>,
     },
 
+    reviews: {
+      findMany: <T extends Prisma.ReviewFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.ReviewFindManyArgs>) =>
+        prisma.review.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.ReviewGetPayload<T>[]>,
+    },
+
+    pricePlans: {
+      findMany: <T extends Prisma.PricePlanFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.PricePlanFindManyArgs>) =>
+        prisma.pricePlan.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.PricePlanGetPayload<T>[]>,
+    },
+
+    routine: {
+      findMany: <T extends Prisma.RoutineItemFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.RoutineItemFindManyArgs>) =>
+        prisma.routineItem.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.RoutineItemGetPayload<T>[]>,
+    },
+
     docFolders: {
       findMany: <T extends Prisma.DocumentFolderFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.DocumentFolderFindManyArgs>) =>
         prisma.documentFolder.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.DocumentFolderGetPayload<T>[]>,
@@ -121,7 +136,7 @@ export class NotFoundError extends Error {}
 type OwnedModel =
   | 'post' | 'section' | 'media' | 'album' | 'document' | 'documentFolder'
   | 'staffMember' | 'group' | 'menuDay' | 'feedbackMessage' | 'page'
-  | 'club' | 'faqItem';
+  | 'club' | 'faqItem' | 'review' | 'pricePlan' | 'routineItem';
 
 /**
  * Проверка владения перед update/delete: Prisma не умеет составной where по id+tenantId
@@ -134,6 +149,7 @@ export async function assertOwned(model: OwnedModel, id: string, tenantId: strin
     staffMember: prisma.staffMember, group: prisma.group,
     menuDay: prisma.menuDay, feedbackMessage: prisma.feedbackMessage, page: prisma.page,
     club: prisma.club, faqItem: prisma.faqItem,
+    review: prisma.review, pricePlan: prisma.pricePlan, routineItem: prisma.routineItem,
   } as const;
 
   type OwnerLookup = {

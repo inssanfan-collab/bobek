@@ -9,7 +9,7 @@ import { UiIcon } from '@/components/site/UiIcon';
 import { isOfficeDoc } from '@/lib/media-kind';
 import { fileKindLabel, formatSize } from '@/lib/file-cards';
 import type {
-  Club, Document, DocumentFolder, FaqItem, Group, Media, MenuDay, StaffMember, TenantProfile,
+  Club, Document, DocumentFolder, FaqItem, Group, Media, MenuDay, PricePlan, Review, StaffMember, TenantProfile,
 } from '@prisma/client';
 
 const T = {
@@ -38,6 +38,9 @@ const T = {
   path: { kk: 'Бумаға апаратын жол', ru: 'Путь к папке' },
   up: { kk: 'Бір деңгей жоғары', ru: 'На уровень выше' },
   folderEmpty: { kk: 'Бұл бумада әзірге құжат жоқ.', ru: 'В этой папке пока нет документов.' },
+  rating: { kk: 'Бағасы', ru: 'Оценка' },
+  outOf: { kk: '5-тен', ru: 'из 5' },
+  featured: { kk: 'Көп таңдалады', ru: 'Чаще выбирают' },
 } as const;
 
 export function Empty({ locale }: { locale: Locale }) {
@@ -571,6 +574,78 @@ export function FaqList({ items, locale }: { items: FaqItem[]; locale: Locale })
           ) : null}
         </details>
       ))}
+    </div>
+  );
+}
+
+/** Звёзды оценки: текстом для экранного диктора, рисунком — для глаз. */
+export function Stars({ rating, locale }: { rating: number; locale: Locale }) {
+  const value = Math.max(1, Math.min(5, Math.round(rating)));
+  return (
+    <p className="review-stars" aria-label={`${T.rating[locale]}: ${value} ${T.outOf[locale]}`}>
+      <span aria-hidden>{'★'.repeat(value)}{'☆'.repeat(5 - value)}</span>
+    </p>
+  );
+}
+
+/** Отзывы родителей. Карточки одинаковые на странице раздела и на главной. */
+export function ReviewList({ reviews, locale, className }: { reviews: Review[]; locale: Locale; className?: string }) {
+  if (reviews.length === 0) return <Empty locale={locale} />;
+
+  return (
+    <div className={className ?? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3'}>
+      {reviews.map((review) => (
+        <figure key={review.id} className="card review-card flex flex-col p-5">
+          {review.rating ? <Stars rating={review.rating} locale={locale} /> : null}
+          <blockquote className="mt-2 flex-1 whitespace-pre-line leading-relaxed">
+            {pick(locale, review.textKk, review.textRu)}
+          </blockquote>
+          <figcaption className="mt-4 border-t border-line pt-3 text-sm">
+            <span className="block font-bold">{review.authorName}</span>
+            {pick(locale, review.authorNoteKk, review.authorNoteRu) ? (
+              <span className="block text-muted">{pick(locale, review.authorNoteKk, review.authorNoteRu)}</span>
+            ) : null}
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+}
+
+/** Тарифы частного сада. «Чаще выбирают» выделен. */
+export function PriceList({ plans, locale, className }: { plans: PricePlan[]; locale: Locale; className?: string }) {
+  if (plans.length === 0) return <Empty locale={locale} />;
+
+  return (
+    <div className={className ?? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3'}>
+      {plans.map((plan) => {
+        const features = (pick(locale, plan.featuresKk, plan.featuresRu) ?? '')
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean);
+        return (
+          <article key={plan.id} className={`card price-card flex flex-col p-6 ${plan.isFeatured ? 'price-card-featured ring-2 ring-brand' : ''}`}>
+            {plan.isFeatured ? <p className="badge mb-3 self-start bg-brand text-white">{T.featured[locale]}</p> : null}
+            <h3 className="font-display text-xl font-bold">{pick(locale, plan.nameKk, plan.nameRu)}</h3>
+            <p className="mt-3">
+              <span className="price-value font-display text-3xl font-extrabold">{plan.priceKzt.toLocaleString('ru-RU')} ₸</span>
+              {pick(locale, plan.periodKk, plan.periodRu) ? (
+                <span className="ml-1 text-muted">/ {pick(locale, plan.periodKk, plan.periodRu)}</span>
+              ) : null}
+            </p>
+            {features.length > 0 ? (
+              <ul className="mt-4 space-y-2 text-sm">
+                {features.map((feature) => (
+                  <li key={feature} className="flex gap-2">
+                    <span className="text-brand" aria-hidden>✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </article>
+        );
+      })}
     </div>
   );
 }

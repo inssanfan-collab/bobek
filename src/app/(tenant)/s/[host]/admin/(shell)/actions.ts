@@ -1332,6 +1332,107 @@ export async function deleteFaq(formData: FormData) {
   revalidatePath('/admin/faq');
 }
 
+// ─────────────────────────── Отзывы, стоимость, распорядок на главной ───────────────────────────
+
+/** Следующая позиция в конце списка сада. */
+async function nextPosition(find: () => Promise<{ position: number } | null>): Promise<number> {
+  return ((await find())?.position ?? -1) + 1;
+}
+
+export async function saveReview(formData: FormData) {
+  const ctx = await gate(formData);
+  const authorName = str(formData, 'authorName');
+  const textRu = str(formData, 'textRu');
+  const textKk = str(formData, 'textKk');
+  if (authorName.length < 2) throw new ActionError({ kk: 'Пікір авторын көрсетіңіз', ru: 'Укажите автора отзыва' });
+  if ((textRu || textKk).length < 10) throw new ActionError({ kk: 'Пікір мәтіні тым қысқа', ru: 'Текст отзыва слишком короткий' });
+  const ratingRaw = Number(str(formData, 'rating'));
+
+  await prisma.review.create({
+    data: {
+      tenantId: ctx.tenantId,
+      authorName,
+      authorNoteRu: optionalStr(formData, 'authorNoteRu'),
+      authorNoteKk: optionalStr(formData, 'authorNoteKk'),
+      // Отзыв пишут на одном языке; машинный перевод не выдумываем.
+      textRu: textRu || textKk,
+      textKk: textKk || textRu,
+      rating: ratingRaw >= 1 && ratingRaw <= 5 ? Math.round(ratingRaw) : null,
+      position: await nextPosition(() => prisma.review.findFirst({ where: { tenantId: ctx.tenantId }, orderBy: { position: 'desc' } })),
+    },
+  });
+  revalidatePath('/admin/reviews');
+}
+
+export async function deleteReview(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  await assertOwned('review', id, ctx.tenantId);
+  await prisma.review.delete({ where: { id } });
+  revalidatePath('/admin/reviews');
+}
+
+export async function savePricePlan(formData: FormData) {
+  const ctx = await gate(formData);
+  const nameRu = str(formData, 'nameRu');
+  const nameKk = str(formData, 'nameKk');
+  if ((nameRu || nameKk).length < 2) throw new ActionError({ kk: 'Тариф атауын жазыңыз', ru: 'Укажите название тарифа' });
+  const priceKzt = Math.round(Number(str(formData, 'priceKzt').replace(/\s/g, '')));
+  if (!Number.isFinite(priceKzt) || priceKzt <= 0) throw new ActionError({ kk: 'Бағаны теңгемен көрсетіңіз', ru: 'Укажите цену в тенге' });
+
+  await prisma.pricePlan.create({
+    data: {
+      tenantId: ctx.tenantId,
+      nameRu: nameRu || nameKk,
+      nameKk: nameKk || nameRu,
+      priceKzt,
+      periodRu: optionalStr(formData, 'periodRu'),
+      periodKk: optionalStr(formData, 'periodKk'),
+      featuresRu: optionalStr(formData, 'featuresRu'),
+      featuresKk: optionalStr(formData, 'featuresKk'),
+      isFeatured: formData.get('isFeatured') === 'on',
+      position: await nextPosition(() => prisma.pricePlan.findFirst({ where: { tenantId: ctx.tenantId }, orderBy: { position: 'desc' } })),
+    },
+  });
+  revalidatePath('/admin/prices');
+}
+
+export async function deletePricePlan(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  await assertOwned('pricePlan', id, ctx.tenantId);
+  await prisma.pricePlan.delete({ where: { id } });
+  revalidatePath('/admin/prices');
+}
+
+export async function saveRoutineItem(formData: FormData) {
+  const ctx = await gate(formData);
+  const time = str(formData, 'time');
+  const titleRu = str(formData, 'titleRu');
+  const titleKk = str(formData, 'titleKk');
+  if (time.length < 4) throw new ActionError({ kk: 'Уақытын көрсетіңіз, мысалы 08:00–08:30', ru: 'Укажите время, например 08:00–08:30' });
+  if ((titleRu || titleKk).length < 2) throw new ActionError({ kk: 'Не болатынын жазыңыз', ru: 'Напишите, что происходит' });
+
+  await prisma.routineItem.create({
+    data: {
+      tenantId: ctx.tenantId,
+      time,
+      titleRu: titleRu || titleKk,
+      titleKk: titleKk || titleRu,
+      position: await nextPosition(() => prisma.routineItem.findFirst({ where: { tenantId: ctx.tenantId }, orderBy: { position: 'desc' } })),
+    },
+  });
+  revalidatePath('/admin/routine');
+}
+
+export async function deleteRoutineItem(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  await assertOwned('routineItem', id, ctx.tenantId);
+  await prisma.routineItem.delete({ where: { id } });
+  revalidatePath('/admin/routine');
+}
+
 // ─────────────────────────── Срочное объявление ───────────────────────────
 
 export async function saveNotice(formData: FormData) {
