@@ -17,6 +17,9 @@ import { ObrazecHome } from './obrazec/Home';
 import { OyinFooter } from './oyin/Footer';
 import { OyinHeader } from './oyin/Header';
 import { OyinHome } from './oyin/Home';
+import { ResmiFooter } from './resmi/Footer';
+import { ResmiHeader } from './resmi/Header';
+import { ResmiHome } from './resmi/Home';
 import type { SiteTheme, ThemeParts } from './types';
 
 /**
@@ -33,6 +36,7 @@ const PARTS: Record<string, ThemeParts> = {
   konstruktor: { Home: KonstruktorHome, Header: KonstruktorHeader, Footer: KonstruktorFooter },
   akku: { Home: AkkuHome, Header: AkkuHeader, Footer: AkkuFooter },
   oyin: { Home: OyinHome, Header: OyinHeader, Footer: OyinFooter },
+  resmi: { Home: ResmiHome, Header: ResmiHeader, Footer: ResmiFooter },
 };
 
 export function findTheme(code: string | null | undefined): SiteTheme | null {

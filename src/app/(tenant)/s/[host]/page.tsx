@@ -23,7 +23,7 @@ export default async function TenantHome({
   const { tenant, profile, db } = await publicSiteContext(host);
   const locale = localeFrom(search.lang);
 
-  const [sections, news, announcements, albums, cover] = await Promise.all([
+  const [sections, news, announcements, albums, cover, documents] = await Promise.all([
     siteMenu(db),
     db.posts.findMany({
       where: { status: 'PUBLISHED', publishedAt: { lte: new Date() }, section: { type: 'NEWS' } },
@@ -46,6 +46,7 @@ export default async function TenantHome({
     profile?.coverMediaId
       ? prisma.media.findFirst({ where: { id: profile.coverMediaId, tenantId: tenant.id } })
       : null,
+    db.documents.findMany({ orderBy: { publishedAt: 'desc' }, take: 5, include: { media: true } }),
   ]);
 
   await recordVisit(tenant.id);
@@ -68,6 +69,8 @@ export default async function TenantHome({
           locale={locale}
           coverUrl={mediaUrl(cover)}
           coverPosition={coverPosition(profile?.coverFocus)}
+          documents={documents}
+          menu={sections}
         />
       </main>
       <ThemedFooter themeCode={tenant.themeCode} profile={profile} sections={sections} locale={locale} portalDomain={env.portalDomain} />

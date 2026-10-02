@@ -1,7 +1,10 @@
-import type { Section, TenantProfile } from '@prisma/client';
+import type { Document, Media, Section, TenantProfile } from '@prisma/client';
 import type { Locale } from '@/lib/i18n';
 import type { HeroContent } from '@/lib/hero';
 import type { AlbumWithCover, PostWithCover } from '@/components/site/blocks';
+
+/** Документ с файлом — для блока «Последние документы». */
+export type DocumentWithMedia = Document & { media: Media };
 
 /** Один и тот же набор данных получают все шаблоны — различается только вёрстка. */
 export type HomeProps = {
@@ -22,4 +25,11 @@ export type HomeProps = {
   showContacts: boolean;
   /** Тексты первого экрана — заголовок, описание, кнопки (src/lib/hero.ts). */
   hero: HeroContent;
+  /**
+   * Последние документы и все разделы меню — для главных, которые их
+   * показывают (официальная тема: «Последние документы», «Важно»).
+   * Шаблонам не обязательны.
+   */
+  documents?: DocumentWithMedia[];
+  menu?: Section[];
 };

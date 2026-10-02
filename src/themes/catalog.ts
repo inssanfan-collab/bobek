@@ -59,6 +59,13 @@ export const THEME_CATALOG: ThemeInfo[] = [
     noteRu: 'Ярко и весело: рисунок детской площадки на весь первый экран, синие полосы с облаками, жёлтые карточки и красные значки.',
     fonts: 'family=Rubik:wght@500;700;800;900&family=Nunito:wght@400;600;700;800',
   },
+  {
+    code: 'resmi',
+    nameRu: 'Официальная',
+    nameKk: 'Ресми',
+    noteRu: 'Как сайт государственной организации: синее меню, лента новостей, колонка «Важно», последние документы таблицей, навигационная цепочка. Для государственных садов.',
+    fonts: 'family=Onest:wght@400;500;600;700',
+  },
 ];
 
 export function findThemeInfo(code: string | null | undefined): ThemeInfo | null {
