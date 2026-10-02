@@ -1,0 +1,354 @@
+/*
+ * Тема «Гүлдер» — розово-фиолетовая (структура дизайна №8). Малиновый
+ * #B81C6B для кнопок (белый текст 6,2:1), фиолетовый #6A3FC9 (6,6:1),
+ * лавандовые секции; яркий розовый — украшения.
+ * Шрифты: Comfortaa (заголовки) и Nunito — проверены на казахские буквы.
+ * Каждое правило — под [data-theme='gulder'] (tests/unit/themes.test.ts).
+ */
+
+[data-theme='gulder'] {
+  --surface: 255 255 255;
+  --card: 255 255 255;
+  --ink: 40 28 56;
+  --muted: 98 86 116;
+  --line: 240 230 250;
+  --brand: 184 28 107;
+  --brand-soft: 255 228 241;
+  --brand-ink: 150 18 86;
+  --accent: 106 63 201;
+  --accent-soft: 241 235 255;
+  --accent-ink: 86 46 176;
+  --gulder-lavender: 246 241 255;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --font-display: 'Comfortaa', 'Nunito', system-ui, sans-serif;
+  --font-sans: 'Nunito', system-ui, sans-serif;
+}
+
+[data-theme='gulder'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+[data-theme='gulder'] .btn-primary {
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  font-weight: 800;
+  box-shadow: 0 12px 24px -14px rgb(var(--brand) / 0.9);
+}
+
+[data-theme='gulder'] .gulder-cta {
+  border-radius: 999px;
+  background: rgb(var(--accent));
+  color: rgb(255 255 255);
+  font-weight: 800;
+}
+
+[data-theme='gulder'] .btn-secondary {
+  border-radius: 999px;
+  border: 2px solid rgb(var(--accent));
+  background: rgb(255 255 255);
+  color: rgb(var(--accent-ink));
+  font-weight: 800;
+}
+
+[data-theme='gulder'] .kit-title {
+  font-weight: 700;
+}
+
+[data-theme='gulder'] .kit-eyebrow {
+  background: rgb(255 255 255);
+  color: rgb(var(--accent-ink));
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: 0 6px 16px -10px rgb(var(--ink) / 0.5);
+}
+
+/* ── Шапка ── */
+
+[data-theme='gulder'] .gulder-topbar {
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='gulder'] .gulder-header {
+  background: rgb(255 255 255 / 0.96);
+  box-shadow: 0 1px 0 rgb(var(--line));
+}
+
+[data-theme='gulder'] .gulder-logo {
+  border-radius: 999px;
+  background: rgb(var(--brand-soft));
+}
+
+[data-theme='gulder'] .gulder-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='gulder'] .gulder-tagline {
+  font-size: 0.8rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='gulder'] .gulder-nav nav a {
+  border-radius: 999px;
+  color: rgb(var(--ink));
+  font-weight: 700;
+}
+
+/* ── Первый экран ── */
+
+[data-theme='gulder'] .gulder-hero {
+  background:
+    radial-gradient(30rem 20rem at 85% 20%, rgb(var(--accent-soft)), transparent 70%),
+    radial-gradient(26rem 18rem at 10% 90%, rgb(var(--brand-soft)), transparent 70%),
+    rgb(255 255 255);
+}
+
+[data-theme='gulder'] .gulder-pill {
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  border-radius: 999px;
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+  padding: 0.35rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+[data-theme='gulder'] .gulder-h1 {
+  font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+  font-weight: 700;
+  line-height: 1.15;
+  color: rgb(var(--ink));
+  text-wrap: balance;
+}
+
+[data-theme='gulder'] .gulder-hero .hero-highlight {
+  background-image: none;
+  color: rgb(var(--brand));
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-theme='gulder'] .gulder-lead {
+  max-width: 36rem;
+  margin-top: 1.1rem;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: rgb(var(--muted));
+}
+
+/* Два фото и значки-счётчики */
+[data-theme='gulder'] .gulder-photos {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+[data-theme='gulder'] .gulder-photo-main {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 1.75rem;
+  border: 6px solid rgb(255 255 255);
+  box-shadow: 0 24px 50px -30px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='gulder'] .gulder-photo-side {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 1.5rem;
+  border: 6px solid rgb(255 255 255);
+  box-shadow: 0 24px 50px -30px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='gulder'] .gulder-badges {
+  grid-column: 2;
+  display: grid;
+  gap: 0.75rem;
+  margin-top: -40%;
+}
+
+[data-theme='gulder'] .gulder-badges .hb-stat {
+  border-radius: 1.25rem;
+  background: rgb(var(--accent));
+  color: rgb(255 255 255);
+  padding: 0.75rem 1rem;
+  box-shadow: 0 16px 30px -20px rgb(var(--accent) / 0.9);
+}
+
+[data-theme='gulder'] .gulder-badges .hb-stat:nth-child(2) {
+  background: rgb(var(--brand));
+}
+
+[data-theme='gulder'] .gulder-badges .hb-stat:nth-child(3) {
+  background: rgb(255 255 255);
+}
+
+[data-theme='gulder'] .gulder-badges .hb-stat-value {
+  color: inherit;
+}
+
+[data-theme='gulder'] .gulder-badges .hb-stat:nth-child(3) .hb-stat-value {
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='gulder'] .gulder-badges .hb-stat-label {
+  color: inherit;
+  opacity: 0.9;
+}
+
+/* ── Секции ── */
+
+[data-theme='gulder'] .gulder-section {
+  padding-block: 4.5rem;
+}
+
+[data-theme='gulder'] .gulder-lavender {
+  background: rgb(var(--gulder-lavender));
+}
+
+[data-theme='gulder'] .gulder-about-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 2rem;
+}
+
+[data-theme='gulder'] .gulder-subtitle {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+[data-theme='gulder'] .gulder-link {
+  display: flex;
+  justify-content: space-between;
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  padding: 0.85rem 1.4rem;
+  font-weight: 800;
+  transition: transform 0.15s;
+}
+
+[data-theme='gulder'] .gulder-link-1 {
+  background: rgb(var(--accent));
+}
+
+[data-theme='gulder'] .gulder-link:hover {
+  transform: translateX(4px);
+}
+
+/* Градиентные карточки кружков */
+[data-theme='gulder'] .gulder-card {
+  border-radius: 2rem;
+  background: linear-gradient(135deg, rgb(var(--brand)), rgb(214 60 140));
+  color: rgb(255 255 255);
+  padding: 2rem 1.8rem;
+  min-height: 12rem;
+  box-shadow: 0 24px 40px -30px rgb(var(--brand) / 0.9);
+}
+
+[data-theme='gulder'] .gulder-card:nth-child(2) {
+  background: linear-gradient(135deg, rgb(150 30 130), rgb(var(--accent)));
+}
+
+[data-theme='gulder'] .gulder-card:nth-child(3) {
+  background: linear-gradient(135deg, rgb(var(--accent)), rgb(70 40 160));
+}
+
+[data-theme='gulder'] .gulder-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+[data-theme='gulder'] .gulder-card p {
+  margin-top: 0.7rem;
+  line-height: 1.55;
+  opacity: 0.95;
+}
+
+[data-theme='gulder'] .gulder-more {
+  font-weight: 800;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='gulder'] .gulder-news article.card,
+[data-theme='gulder'] .gulder-reviews .card {
+  border: 0;
+  border-radius: 1.75rem;
+  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='gulder'] .gulder-enroll {
+  border: 3px solid rgb(var(--brand-soft));
+  border-radius: 2rem;
+  background: rgb(255 255 255);
+  padding: 2.4rem 2rem;
+}
+
+[data-theme='gulder'] .gulder-enroll h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  font-weight: 700;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='gulder'] .gulder-enroll p {
+  margin-top: 0.7rem;
+  color: rgb(var(--muted));
+}
+
+/* ── Подвал ── */
+
+[data-theme='gulder'] .gulder-footer-body {
+  background: linear-gradient(120deg, rgb(var(--brand-ink)), rgb(var(--accent-ink)));
+  color: rgb(250 232 244);
+}
+
+[data-theme='gulder'] .gulder-footer-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: rgb(255 255 255);
+}
+
+[data-theme='gulder'] .gulder-footer-title {
+  margin-bottom: 0.6rem;
+  font-weight: 900;
+  color: rgb(255 210 232);
+}
+
+[data-theme='gulder'] .gulder-footer-body a:hover {
+  color: rgb(255 255 255);
+  text-decoration: underline;
+}
+
+[data-theme='gulder'] .gulder-footer-social a {
+  color: rgb(var(--ink));
+}
+
+[data-theme='gulder'] .gulder-footer-bottom {
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+}
+
+@media (max-width: 639px) {
+  [data-theme='gulder'] .gulder-section {
+    padding-block: 3rem;
+  }
+
+  [data-theme='gulder'] .gulder-badges {
+    margin-top: 0;
+  }
+}

@@ -1,4 +1,13 @@
 import { findThemeInfo } from './catalog';
+import { GulderFooter } from './gulder/Footer';
+import { GulderHeader } from './gulder/Header';
+import { GulderHome } from './gulder/Home';
+import { NurFooter } from './nur/Footer';
+import { NurHeader } from './nur/Header';
+import { NurHome } from './nur/Home';
+import { KosaqFooter } from './kosaq/Footer';
+import { KosaqHeader } from './kosaq/Header';
+import { KosaqHome } from './kosaq/Home';
 import { KuanyshFooter } from './kuanysh/Footer';
 import { KuanyshHeader } from './kuanysh/Header';
 import { KuanyshHome } from './kuanysh/Home';
@@ -57,6 +66,9 @@ const PARTS: Record<string, ThemeParts> = {
   jasyl: { Home: JasylHome, Header: JasylHeader, Footer: JasylFooter },
   aspan: { Home: AspanHome, Header: AspanHeader, Footer: AspanFooter },
   kuanysh: { Home: KuanyshHome, Header: KuanyshHeader, Footer: KuanyshFooter },
+  kosaq: { Home: KosaqHome, Header: KosaqHeader, Footer: KosaqFooter },
+  nur: { Home: NurHome, Header: NurHeader, Footer: NurFooter },
+  gulder: { Home: GulderHome, Header: GulderHeader, Footer: GulderFooter },
 };
 
 export function findTheme(code: string | null | undefined): SiteTheme | null {

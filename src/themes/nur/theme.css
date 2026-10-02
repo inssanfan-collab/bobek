@@ -1,0 +1,355 @@
+/*
+ * Тема «Нұр» — тёплая, с рукописными заголовками (структура дизайна №7).
+ * Красный #C2342A для кнопок (белый текст 5,5:1) и #B3261E для заголовков,
+ * кремовый фон, золотой #F6B93B — украшения. Заголовки — Caveat,
+ * текст — Nunito (оба проверены на казахские буквы). Рукописный шрифт
+ * только в крупных заголовках: мелким он читается хуже.
+ * Каждое правило — под [data-theme='nur'] (tests/unit/themes.test.ts).
+ */
+
+[data-theme='nur'] {
+  --surface: 255 246 236;
+  --card: 255 255 255;
+  --ink: 59 42 32;
+  --muted: 110 88 76;
+  --line: 244 226 210;
+  --brand: 194 52 42;
+  --brand-soft: 255 232 226;
+  --brand-ink: 179 38 30;
+  --accent: 246 185 59;
+  --accent-soft: 255 242 210;
+  --accent-ink: 120 80 0;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --font-display: 'Caveat', 'Nunito', cursive;
+  --font-sans: 'Nunito', system-ui, sans-serif;
+}
+
+[data-theme='nur'] body {
+  background-color: rgb(var(--surface));
+  background-image: radial-gradient(rgb(var(--brand) / 0.08) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+
+[data-theme='nur'] .btn-primary,
+[data-theme='nur'] .nur-cta {
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  font-weight: 800;
+  box-shadow: 0 12px 24px -14px rgb(var(--brand) / 0.9);
+}
+
+[data-theme='nur'] .btn-secondary {
+  border-radius: 999px;
+  border: 2px solid rgb(var(--brand) / 0.3);
+  background: rgb(255 255 255);
+  color: rgb(var(--brand-ink));
+  font-weight: 800;
+}
+
+[data-theme='nur'] .kit-title {
+  font-size: clamp(2.3rem, 4.6vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='nur'] .kit-eyebrow {
+  background: transparent;
+  padding: 0;
+  color: rgb(var(--brand-ink));
+  letter-spacing: 0.08em;
+}
+
+/* ── Шапка ── */
+
+[data-theme='nur'] .nur-topbar {
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='nur'] .nur-header {
+  background: rgb(255 250 244 / 0.96);
+  box-shadow: 0 1px 0 rgb(var(--line));
+}
+
+[data-theme='nur'] .nur-name {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  line-height: 1;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='nur'] .nur-tagline {
+  font-size: 0.8rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='nur'] .nur-nav nav a {
+  border-radius: 999px;
+  color: rgb(var(--ink));
+  font-weight: 700;
+}
+
+/* ── Первый экран: белая карточка ── */
+
+[data-theme='nur'] .nur-hero {
+  display: grid;
+  align-items: center;
+  gap: 2.5rem;
+  border-radius: 2rem;
+  background: linear-gradient(135deg, rgb(255 255 255), rgb(255 248 236));
+  padding: 2.5rem;
+  box-shadow: 0 30px 60px -44px rgb(var(--ink) / 0.6);
+}
+
+@media (min-width: 1024px) {
+  [data-theme='nur'] .nur-hero {
+    grid-template-columns: 1.05fr 0.95fr;
+    padding: 3.5rem;
+  }
+}
+
+[data-theme='nur'] .nur-pill {
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--accent));
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
+  padding: 0.35rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+[data-theme='nur'] .nur-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6.5vw, 5rem);
+  font-weight: 700;
+  line-height: 0.98;
+  color: rgb(var(--brand-ink));
+  text-wrap: balance;
+}
+
+[data-theme='nur'] .nur-hero .hero-highlight {
+  background-image: none;
+  color: rgb(var(--ink));
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-theme='nur'] .nur-lead {
+  max-width: 36rem;
+  margin-top: 1.2rem;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: rgb(var(--muted));
+}
+
+[data-theme='nur'] .nur-chip {
+  border-radius: 1rem;
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+  padding: 0.45rem 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+[data-theme='nur'] .nur-photo-wrap {
+  position: relative;
+}
+
+[data-theme='nur'] .nur-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  border-radius: 1.75rem;
+  box-shadow: 0 30px 60px -40px rgb(var(--ink) / 0.7);
+}
+
+/* ── Секции ── */
+
+[data-theme='nur'] .nur-section {
+  padding-block: 4.5rem;
+}
+
+[data-theme='nur'] .nur-tint {
+  background: rgb(255 255 255 / 0.6);
+}
+
+[data-theme='nur'] .nur-frame {
+  border: 3px dashed rgb(var(--accent));
+  border-radius: 2rem;
+  padding: 0.8rem;
+}
+
+[data-theme='nur'] .nur-frame img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 1.5rem;
+}
+
+[data-theme='nur'] .nur-text {
+  line-height: 1.7;
+  color: rgb(var(--muted));
+}
+
+[data-theme='nur'] .nur-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 1rem;
+  margin-top: 1.8rem;
+}
+
+[data-theme='nur'] .nur-stats .hb-stat {
+  flex-direction: column;
+  gap: 0;
+  border-radius: 1.25rem;
+  background: rgb(255 255 255);
+  padding: 1rem 1.2rem;
+  box-shadow: 0 14px 28px -24px rgb(var(--ink) / 0.6);
+}
+
+[data-theme='nur'] .nur-stats .hb-stat-value {
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='nur'] .nur-program {
+  overflow: hidden;
+  border-radius: 1.75rem;
+  background: rgb(255 255 255);
+  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.6);
+}
+
+[data-theme='nur'] .nur-program-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+[data-theme='nur'] .nur-program h3 {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.05;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='nur'] .nur-program p {
+  margin-top: 0.5rem;
+  line-height: 1.55;
+  color: rgb(var(--muted));
+}
+
+[data-theme='nur'] .hb-staff-name {
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+[data-theme='nur'] .hb-staff-role {
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='nur'] .nur-more {
+  font-weight: 800;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='nur'] .nur-news article.card,
+[data-theme='nur'] .nur-reviews .card,
+[data-theme='nur'] .nur-contact .card {
+  border: 0;
+  border-radius: 1.75rem;
+  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='nur'] .nur-news h3,
+[data-theme='nur'] .nur-contact h2 {
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+[data-theme='nur'] .nur-cta-card {
+  border-radius: 2rem;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  padding: 2.4rem 2rem;
+}
+
+[data-theme='nur'] .nur-cta-card h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 4.4vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+[data-theme='nur'] .nur-cta-card p {
+  margin: 0.8rem 0 1.4rem;
+  opacity: 0.95;
+}
+
+[data-theme='nur'] .nur-cta-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 1.5rem;
+}
+
+[data-theme='nur'] .nur-cta-card .btn-primary {
+  background: rgb(255 255 255);
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='nur'] .nur-map iframe {
+  border-radius: 1.75rem;
+}
+
+/* ── Подвал ── */
+
+[data-theme='nur'] .nur-footer-body {
+  background: rgb(var(--brand-ink));
+  color: rgb(255 230 224);
+}
+
+[data-theme='nur'] .nur-footer-name {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: rgb(255 255 255);
+}
+
+[data-theme='nur'] .nur-footer-title {
+  margin-bottom: 0.6rem;
+  font-weight: 900;
+  color: rgb(var(--accent));
+}
+
+[data-theme='nur'] .nur-footer-body a:hover {
+  color: rgb(255 255 255);
+  text-decoration: underline;
+}
+
+[data-theme='nur'] .nur-footer-social a {
+  color: rgb(var(--ink));
+}
+
+[data-theme='nur'] .nur-footer-bottom {
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+}
+
+@media (max-width: 639px) {
+  [data-theme='nur'] .nur-hero {
+    padding: 1.6rem 1.3rem;
+  }
+
+  [data-theme='nur'] .nur-section {
+    padding-block: 3rem;
+  }
+}
