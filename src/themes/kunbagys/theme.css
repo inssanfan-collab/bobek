@@ -1,0 +1,319 @@
+/*
+ * Тема «Күнбағыс» — оранжевая и строгая (структура дизайна №10).
+ * Кнопки — тёмно-оранжевый #B04F00 (белый текст 5,3:1), подвал #9A4500
+ * (6,5:1); яркий оранжевый #FF7A00 — только линия шапки и украшения.
+ * Шрифты: Montserrat (заголовки) и Open Sans — проверены на казахские буквы.
+ * Каждое правило — под [data-theme='kunbagys'] (tests/unit/themes.test.ts).
+ */
+
+[data-theme='kunbagys'] {
+  --surface: 255 255 255;
+  --card: 255 255 255;
+  --ink: 34 34 34;
+  --muted: 96 96 96;
+  --line: 236 236 236;
+  --brand: 176 79 0;
+  --brand-soft: 255 237 220;
+  --brand-ink: 140 62 0;
+  --accent: 176 79 0;
+  --accent-soft: 255 237 220;
+  --accent-ink: 140 62 0;
+  --kunbagys-orange: 255 122 0;
+  --kunbagys-deep: 154 69 0;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --font-display: 'Montserrat', 'Open Sans', system-ui, sans-serif;
+  --font-sans: 'Open Sans', system-ui, sans-serif;
+}
+
+[data-theme='kunbagys'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+[data-theme='kunbagys'] .btn-primary,
+[data-theme='kunbagys'] .kunbagys-cta {
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  font-weight: 700;
+}
+
+[data-theme='kunbagys'] .btn-secondary {
+  border-radius: 999px;
+  border: 2px solid rgb(var(--brand));
+  background: rgb(255 255 255);
+  color: rgb(var(--brand-ink));
+  font-weight: 700;
+}
+
+[data-theme='kunbagys'] .kit-title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='kunbagys'] .kit-eyebrow {
+  border: 1px solid rgb(var(--kunbagys-orange) / 0.4);
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+}
+
+/* ── Шапка ── */
+
+[data-theme='kunbagys'] .kunbagys-header {
+  border-top: 4px solid rgb(var(--kunbagys-orange));
+  background: rgb(255 255 255 / 0.97);
+  box-shadow: 0 1px 0 rgb(var(--line));
+}
+
+[data-theme='kunbagys'] .kunbagys-topbar {
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+}
+
+[data-theme='kunbagys'] .kunbagys-topbar a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='kunbagys'] .kunbagys-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgb(var(--ink));
+}
+
+[data-theme='kunbagys'] .kunbagys-tagline {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='kunbagys'] .kunbagys-nav nav a {
+  border-radius: 0.5rem;
+  color: rgb(var(--ink));
+  font-weight: 600;
+}
+
+/* ── Первый экран: фото во всю ширину ── */
+
+[data-theme='kunbagys'] .kunbagys-hero {
+  position: relative;
+  overflow: hidden;
+  background: rgb(var(--ink));
+  color: rgb(255 255 255);
+}
+
+[data-theme='kunbagys'] .kunbagys-hero-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Затемнение слева, чтобы белый текст читался на любом фото. */
+[data-theme='kunbagys'] .kunbagys-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(20 14 8 / 0.85), rgb(20 14 8 / 0.55) 55%, rgb(20 14 8 / 0.15));
+}
+
+[data-theme='kunbagys'] .kunbagys-hero .container-page {
+  z-index: 1;
+}
+
+[data-theme='kunbagys'] .kunbagys-pill {
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  background: rgb(255 255 255 / 0.12);
+  padding: 0.35rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+[data-theme='kunbagys'] .kunbagys-h1 {
+  font-size: clamp(2.3rem, 5vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: rgb(255 255 255);
+  text-wrap: balance;
+}
+
+[data-theme='kunbagys'] .kunbagys-lead {
+  margin-top: 1.2rem;
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: rgb(240 236 232);
+}
+
+[data-theme='kunbagys'] .kunbagys-ghost {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.5);
+  background: rgb(255 255 255 / 0.1);
+  color: rgb(255 255 255);
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+}
+
+[data-theme='kunbagys'] .kunbagys-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.5rem;
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgb(255 255 255 / 0.25);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+[data-theme='kunbagys'] .kunbagys-checks li::before {
+  content: '✓';
+  margin-right: 0.45rem;
+  color: rgb(var(--kunbagys-orange));
+  font-weight: 800;
+}
+
+/* ── Секции ── */
+
+[data-theme='kunbagys'] .kunbagys-section {
+  padding-block: 4.5rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-grey {
+  background: rgb(247 247 247);
+}
+
+[data-theme='kunbagys'] .kunbagys-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 1.25rem;
+  border: 8px solid rgb(var(--brand-soft));
+}
+
+[data-theme='kunbagys'] .kunbagys-subtitle {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+[data-theme='kunbagys'] .kunbagys-why {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  border-left: 4px solid rgb(var(--kunbagys-orange));
+  border-radius: 0.75rem;
+  background: rgb(250 250 250);
+  padding: 0.9rem 1.1rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='kunbagys'] .kunbagys-why b {
+  font-family: var(--font-display);
+  color: rgb(var(--ink));
+}
+
+[data-theme='kunbagys'] .kunbagys-program {
+  border-radius: 1.25rem;
+  background: rgb(255 255 255);
+  padding: 1.8rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 16px 32px -26px rgb(0 0 0 / 0.4);
+  transition: transform 0.2s;
+}
+
+[data-theme='kunbagys'] .kunbagys-program:hover {
+  transform: translateY(-4px);
+}
+
+[data-theme='kunbagys'] .kunbagys-icon {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='kunbagys'] .kunbagys-icon svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-program h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+[data-theme='kunbagys'] .kunbagys-program p {
+  margin-top: 0.5rem;
+  font-size: 0.93rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='kunbagys'] .kunbagys-prices .card,
+[data-theme='kunbagys'] .kunbagys-reviews .card,
+[data-theme='kunbagys'] .kunbagys-news article.card {
+  border: 1px solid rgb(var(--line));
+  border-radius: 1.25rem;
+  box-shadow: 0 16px 32px -28px rgb(0 0 0 / 0.4);
+}
+
+[data-theme='kunbagys'] .kunbagys-more {
+  font-weight: 700;
+  color: rgb(var(--brand-ink));
+}
+
+/* ── Подвал ── */
+
+[data-theme='kunbagys'] .kunbagys-footer-body {
+  background: rgb(var(--kunbagys-deep));
+  color: rgb(255 236 220);
+}
+
+[data-theme='kunbagys'] .kunbagys-footer-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: rgb(255 255 255);
+}
+
+[data-theme='kunbagys'] .kunbagys-footer-title {
+  margin-bottom: 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: rgb(255 210 160);
+}
+
+[data-theme='kunbagys'] .kunbagys-footer-body a:hover {
+  color: rgb(255 255 255);
+  text-decoration: underline;
+}
+
+[data-theme='kunbagys'] .kunbagys-footer-social a {
+  color: rgb(var(--ink));
+}
+
+[data-theme='kunbagys'] .kunbagys-footer-bottom {
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+}
+
+@media (max-width: 639px) {
+  [data-theme='kunbagys'] .kunbagys-section {
+    padding-block: 3rem;
+  }
+}

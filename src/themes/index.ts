@@ -1,4 +1,10 @@
 import { findThemeInfo } from './catalog';
+import { KunbagysFooter } from './kunbagys/Footer';
+import { KunbagysHeader } from './kunbagys/Header';
+import { KunbagysHome } from './kunbagys/Home';
+import { MamyqFooter } from './mamyq/Footer';
+import { MamyqHeader } from './mamyq/Header';
+import { MamyqHome } from './mamyq/Home';
 import { GulderFooter } from './gulder/Footer';
 import { GulderHeader } from './gulder/Header';
 import { GulderHome } from './gulder/Home';
@@ -69,6 +75,8 @@ const PARTS: Record<string, ThemeParts> = {
   kosaq: { Home: KosaqHome, Header: KosaqHeader, Footer: KosaqFooter },
   nur: { Home: NurHome, Header: NurHeader, Footer: NurFooter },
   gulder: { Home: GulderHome, Header: GulderHeader, Footer: GulderFooter },
+  mamyq: { Home: MamyqHome, Header: MamyqHeader, Footer: MamyqFooter },
+  kunbagys: { Home: KunbagysHome, Header: KunbagysHeader, Footer: KunbagysFooter },
 };
 
 export function findTheme(code: string | null | undefined): SiteTheme | null {

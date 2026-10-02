@@ -96,6 +96,7 @@
 /* ── Первый экран ── */
 
 [data-theme='erekshe'] .erekshe-hero {
+  overflow: hidden;
   background: rgb(var(--erekshe-sky));
 }
 
