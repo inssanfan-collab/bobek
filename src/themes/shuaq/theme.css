@@ -1,0 +1,484 @@
+/*
+ * Тема «Шуақ» — солнечная и игровая (структура дизайна №1). Бирюза #0E7C7B
+ * для заголовков и полосы распорядка (белый текст 5:1), кнопки — коралл
+ * #C93C27 (5:1); светлый коралл #FF6B57 и жёлтый #FFC93C — только украшения.
+ * Шрифты: Nunito (проверен на казахские буквы).
+ * Каждое правило — под [data-theme='shuaq'] (tests/unit/themes.test.ts).
+ */
+
+[data-theme='shuaq'] {
+  --surface: 244 249 255;
+  --card: 255 255 255;
+  --ink: 30 42 51;
+  --muted: 84 96 108;
+  --line: 222 234 240;
+  --brand: 201 60 39;
+  --brand-soft: 255 230 224;
+  --brand-ink: 150 40 24;
+  --accent: 14 124 123;
+  --accent-soft: 214 243 240;
+  --accent-ink: 9 92 91;
+  --shuaq-teal: 14 124 123;
+  --shuaq-sun: 255 201 60;
+  --shuaq-coral: 255 107 87;
+  --shuaq-cream: 255 248 236;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --font-display: 'Nunito', system-ui, sans-serif;
+  --font-sans: 'Nunito', system-ui, sans-serif;
+}
+
+[data-theme='shuaq'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+[data-theme='shuaq'] .btn-primary,
+[data-theme='shuaq'] .shuaq-cta {
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  font-weight: 800;
+  box-shadow: 0 12px 24px -14px rgb(var(--brand) / 0.9);
+}
+
+[data-theme='shuaq'] .btn-secondary {
+  border-radius: 999px;
+  border: 2px solid rgb(var(--shuaq-teal));
+  background: transparent;
+  color: rgb(var(--accent-ink));
+  font-weight: 800;
+}
+
+[data-theme='shuaq'] .kit-eyebrow {
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='shuaq'] .kit-title {
+  font-weight: 900;
+  color: rgb(var(--accent-ink));
+}
+
+/* ── Шапка ── */
+
+[data-theme='shuaq'] .shuaq-topbar {
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='shuaq'] .shuaq-header {
+  background: rgb(255 255 255 / 0.96);
+  box-shadow: 0 1px 0 rgb(var(--line));
+}
+
+[data-theme='shuaq'] .shuaq-logo {
+  border-radius: 999px;
+  background: rgb(var(--shuaq-cream));
+}
+
+[data-theme='shuaq'] .shuaq-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1.15;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='shuaq'] .shuaq-tagline {
+  font-size: 0.8rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='shuaq'] .shuaq-nav nav a {
+  border-radius: 999px;
+  color: rgb(var(--ink));
+  font-weight: 700;
+}
+
+/* ── Первый экран ── */
+
+[data-theme='shuaq'] .shuaq-hero {
+  background: linear-gradient(180deg, rgb(var(--accent-soft) / 0.6), rgb(var(--surface)));
+}
+
+[data-theme='shuaq'] .shuaq-bubble {
+  position: relative;
+  border-radius: 2rem;
+  background: rgb(255 255 255);
+  padding: 2.2rem 2rem;
+  box-shadow: 0 30px 60px -40px rgb(var(--ink) / 0.5);
+}
+
+/* «Хвостик» облачка. */
+[data-theme='shuaq'] .shuaq-bubble::after {
+  content: '';
+  position: absolute;
+  left: 3.5rem;
+  bottom: -1rem;
+  width: 2rem;
+  height: 2rem;
+  background: rgb(255 255 255);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+[data-theme='shuaq'] .shuaq-badge {
+  display: inline-block;
+  border-radius: 999px;
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
+  padding: 0.3rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+[data-theme='shuaq'] .shuaq-h1 {
+  margin-top: 1rem;
+  font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.08;
+  color: rgb(var(--accent-ink));
+  text-wrap: balance;
+}
+
+[data-theme='shuaq'] .shuaq-hero .hero-highlight {
+  background-image: none;
+  color: rgb(var(--brand));
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-theme='shuaq'] .shuaq-lead {
+  margin-top: 1rem;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  color: rgb(var(--muted));
+}
+
+[data-theme='shuaq'] .shuaq-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.6rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid rgb(var(--line));
+}
+
+[data-theme='shuaq'] .shuaq-hero-photo-wrap {
+  position: relative;
+  border-radius: 2rem;
+  background: rgb(255 255 255);
+  padding: 0.75rem;
+  box-shadow: 0 30px 60px -40px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='shuaq'] .shuaq-hero-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 1.5rem;
+}
+
+[data-theme='shuaq'] .shuaq-doodle {
+  position: absolute;
+  pointer-events: none;
+}
+
+[data-theme='shuaq'] .shuaq-bubble-sun {
+  top: -1.6rem;
+  left: 1.5rem;
+  width: 3.4rem;
+}
+
+[data-theme='shuaq'] .shuaq-hero-sparkle {
+  right: -0.8rem;
+  top: -0.8rem;
+  width: 2.2rem;
+  color: rgb(var(--shuaq-sun));
+}
+
+/* ── Секции ── */
+
+[data-theme='shuaq'] .shuaq-section {
+  padding-block: 4.5rem;
+}
+
+[data-theme='shuaq'] .shuaq-card {
+  overflow: hidden;
+  border-radius: 1.75rem;
+  background: rgb(255 255 255);
+  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='shuaq'] .shuaq-card-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+[data-theme='shuaq'] .shuaq-card-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='shuaq'] .shuaq-card-text {
+  margin-top: 0.6rem;
+  line-height: 1.6;
+  color: rgb(var(--muted));
+}
+
+[data-theme='shuaq'] .shuaq-about {
+  background: rgb(var(--shuaq-cream));
+}
+
+[data-theme='shuaq'] .shuaq-collage {
+  position: relative;
+  padding: 0 3rem 3rem 0;
+}
+
+[data-theme='shuaq'] .shuaq-collage-main {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 1.75rem;
+}
+
+[data-theme='shuaq'] .shuaq-collage-small {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 50%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 1.5rem;
+  border: 6px solid rgb(255 255 255);
+}
+
+[data-theme='shuaq'] .shuaq-collage-badge {
+  position: absolute;
+  left: -0.5rem;
+  top: 1.5rem;
+  border-radius: 1.25rem;
+  background: rgb(var(--shuaq-sun));
+  color: rgb(var(--ink));
+  padding: 0.7rem 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 14px 28px -18px rgb(var(--ink) / 0.6);
+}
+
+[data-theme='shuaq'] .shuaq-collage-badge b {
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+[data-theme='shuaq'] .shuaq-text {
+  line-height: 1.7;
+  color: rgb(var(--muted));
+}
+
+[data-theme='shuaq'] .shuaq-check {
+  position: relative;
+  padding-left: 2rem;
+  line-height: 1.5;
+}
+
+[data-theme='shuaq'] .shuaq-check::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 999px;
+  border: 2px solid rgb(var(--shuaq-teal));
+  color: rgb(var(--accent-ink));
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+/* Полоса распорядка */
+[data-theme='shuaq'] .shuaq-routine {
+  background: rgb(var(--shuaq-teal));
+}
+
+[data-theme='shuaq'] .shuaq-routine .kit-title {
+  color: rgb(255 255 255);
+}
+
+[data-theme='shuaq'] .shuaq-routine .kit-eyebrow {
+  background: rgb(255 255 255 / 0.16);
+  color: rgb(var(--shuaq-sun));
+}
+
+[data-theme='shuaq'] .shuaq-routine .hb-routine-item {
+  border-radius: 1.5rem;
+  padding: 1.4rem;
+}
+
+[data-theme='shuaq'] .shuaq-routine .hb-routine-item:nth-child(4n + 1) .hb-routine-time { background: rgb(255 236 179); color: rgb(110 75 0); }
+[data-theme='shuaq'] .shuaq-routine .hb-routine-item:nth-child(4n + 2) .hb-routine-time { background: rgb(var(--accent-soft)); color: rgb(var(--accent-ink)); }
+[data-theme='shuaq'] .shuaq-routine .hb-routine-item:nth-child(4n + 3) .hb-routine-time { background: rgb(226 236 255); color: rgb(40 64 140); }
+[data-theme='shuaq'] .shuaq-routine .hb-routine-item:nth-child(4n + 4) .hb-routine-time { background: rgb(var(--brand-soft)); color: rgb(var(--brand-ink)); }
+
+/* Галерея: первое фото крупно, остальные — сеткой справа */
+[data-theme='shuaq'] .shuaq-gallery {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 1024px) {
+  [data-theme='shuaq'] .shuaq-gallery {
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-auto-rows: 15rem;
+  }
+
+  [data-theme='shuaq'] .shuaq-gallery > li:first-child {
+    grid-row: span 2;
+  }
+}
+
+[data-theme='shuaq'] .shuaq-gallery-item {
+  position: relative;
+  display: block;
+  height: 100%;
+  min-height: 11rem;
+  overflow: hidden;
+  border-radius: 1.5rem;
+}
+
+[data-theme='shuaq'] .shuaq-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+[data-theme='shuaq'] .shuaq-gallery-item:hover img {
+  transform: scale(1.03);
+}
+
+[data-theme='shuaq'] .shuaq-gallery-item span {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 2.5rem 1.2rem 1rem;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.65));
+  color: rgb(255 255 255);
+  font-weight: 800;
+}
+
+[data-theme='shuaq'] .shuaq-more {
+  font-weight: 800;
+  color: rgb(var(--brand));
+}
+
+[data-theme='shuaq'] .shuaq-news article.card,
+[data-theme='shuaq'] .shuaq-reviews .card {
+  border: 0;
+  border-radius: 1.75rem;
+  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+}
+
+/* Коралловая полоса записи */
+[data-theme='shuaq'] .shuaq-band {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2rem;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+}
+
+[data-theme='shuaq'] .shuaq-band-sparkle {
+  left: 1.5rem;
+  top: 1.2rem;
+  width: 3rem;
+  color: rgb(var(--shuaq-sun));
+}
+
+[data-theme='shuaq'] .shuaq-band-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 900;
+}
+
+[data-theme='shuaq'] .shuaq-band-lead {
+  max-width: 38rem;
+  margin: 0.8rem auto 1.6rem;
+  opacity: 0.95;
+}
+
+[data-theme='shuaq'] .shuaq-band-button {
+  display: inline-flex;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  color: rgb(var(--brand-ink));
+  padding: 0.9rem 1.8rem;
+  font-weight: 900;
+  box-shadow: 0 14px 28px -16px rgb(0 0 0 / 0.5);
+}
+
+/* ── Подвал ── */
+
+[data-theme='shuaq'] .shuaq-footer-wave {
+  display: block;
+  width: 100%;
+  height: 3rem;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='shuaq'] .shuaq-footer-body {
+  margin-top: -1px;
+  background: rgb(var(--accent-ink));
+  color: rgb(226 244 242);
+}
+
+[data-theme='shuaq'] .shuaq-footer-name {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: rgb(255 255 255);
+}
+
+[data-theme='shuaq'] .shuaq-footer-title {
+  margin-bottom: 0.6rem;
+  font-weight: 900;
+  color: rgb(var(--shuaq-sun));
+}
+
+[data-theme='shuaq'] .shuaq-footer-body a:hover {
+  color: rgb(255 255 255);
+  text-decoration: underline;
+}
+
+[data-theme='shuaq'] .shuaq-footer-social a {
+  color: rgb(var(--ink));
+}
+
+[data-theme='shuaq'] .shuaq-footer-bottom {
+  border-top: 1px solid rgb(255 255 255 / 0.18);
+}
+
+@media (max-width: 639px) {
+  [data-theme='shuaq'] .shuaq-bubble {
+    padding: 1.8rem 1.3rem;
+  }
+
+  [data-theme='shuaq'] .shuaq-section {
+    padding-block: 3rem;
+  }
+
+  [data-theme='shuaq'] .shuaq-collage {
+    padding: 0 1.5rem 1.5rem 0;
+  }
+}

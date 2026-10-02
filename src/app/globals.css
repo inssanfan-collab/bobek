@@ -736,3 +736,79 @@ body {
     @apply min-w-16;
   }
 }
+
+/*
+ * Общие блоки тем (src/components/site/theme-kit.tsx, home-blocks.tsx).
+ * Здесь — нейтральная основа на токенах палитры: блоки читаются и без CSS
+ * темы (версия для слабовидящих снимает data-theme). Тема перекрашивает
+ * их своими правилами под [data-theme='код'].
+ */
+.kit-head { max-width: 46rem; }
+.kit-head.text-center { margin-inline: auto; }
+.kit-eyebrow {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  border-radius: 999px;
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+  padding: 0.25rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.kit-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+  color: rgb(var(--ink));
+}
+.kit-lead { margin-top: 0.75rem; font-size: 1.05rem; color: rgb(var(--muted)); }
+
+.hb-stat { display: flex; align-items: baseline; gap: 0.35rem; }
+.hb-stat-value { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: rgb(var(--brand-ink)); }
+.hb-stat-label { color: rgb(var(--muted)); }
+
+.hb-routine-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: var(--radius-lg, 1rem);
+  background: rgb(var(--card));
+  padding: 1.1rem 1.2rem;
+  box-shadow: 0 10px 24px -18px rgb(var(--ink) / 0.5);
+}
+.hb-routine-time {
+  align-self: flex-start;
+  border-radius: 999px;
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+  padding: 0.2rem 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.hb-routine-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: rgb(var(--ink)); }
+
+.hb-staff-card,
+.hb-club-card,
+.hb-group-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-radius: var(--radius-lg, 1rem);
+  background: rgb(var(--card));
+  padding: 1.4rem;
+  box-shadow: 0 10px 24px -18px rgb(var(--ink) / 0.5);
+}
+.hb-staff-card { align-items: center; text-align: center; }
+.hb-staff-photo { width: 7rem; height: 7rem; border-radius: 999px; object-fit: cover; margin-bottom: 0.6rem; }
+.hb-staff-photo-empty { display: grid; place-items: center; background: rgb(var(--brand-soft)); color: rgb(var(--brand-ink)); font-size: 2.2rem; font-weight: 800; }
+.hb-staff-name, .hb-club-name, .hb-group-name { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: rgb(var(--ink)); }
+.hb-staff-role { font-weight: 600; color: rgb(var(--brand)); }
+.hb-staff-meta, .hb-club-desc, .hb-group-age { font-size: 0.92rem; color: rgb(var(--muted)); }
+.hb-club-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem; font-size: 0.85rem; font-weight: 700; color: rgb(var(--brand-ink)); }
+.hb-group-free { font-size: 0.85rem; font-weight: 700; color: rgb(5 122 85); }
+.hb-enroll-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; }
+.hb-enroll-lead { margin-top: 0.4rem; color: rgb(var(--muted)); }
+.review-stars { color: rgb(217 119 6); letter-spacing: 0.1em; }

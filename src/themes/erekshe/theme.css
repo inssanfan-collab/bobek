@@ -1,0 +1,412 @@
+/*
+ * Тема «Ерекше» — светлая и современная (структура дизайна №6). Голубой
+ * #1F6FD6 для ссылок и акцентов (белый текст 4,9:1), кнопки — оранжевый
+ * #B8510F (5:1); яркий оранжевый и лимонный — только украшения.
+ * Шрифты: Onest (заголовки) и Nunito Sans — проверены на казахские буквы.
+ * Каждое правило — под [data-theme='erekshe'] (tests/unit/themes.test.ts).
+ */
+
+[data-theme='erekshe'] {
+  --surface: 255 255 255;
+  --card: 255 255 255;
+  --ink: 29 36 51;
+  --muted: 88 98 118;
+  --line: 226 233 245;
+  --brand: 184 81 15;
+  --brand-soft: 255 236 222;
+  --brand-ink: 140 60 10;
+  --accent: 31 111 214;
+  --accent-soft: 229 240 255;
+  --accent-ink: 22 82 168;
+  --erekshe-sky: 242 248 255;
+  --erekshe-lemon: 255 243 196;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --font-display: 'Onest', 'Nunito Sans', system-ui, sans-serif;
+  --font-sans: 'Nunito Sans', system-ui, sans-serif;
+}
+
+[data-theme='erekshe'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+[data-theme='erekshe'] .btn-primary,
+[data-theme='erekshe'] .erekshe-cta {
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  font-weight: 700;
+  box-shadow: 0 12px 24px -14px rgb(var(--brand) / 0.9);
+}
+
+[data-theme='erekshe'] .btn-secondary {
+  border-radius: 999px;
+  border: 2px solid rgb(var(--accent));
+  background: rgb(255 255 255);
+  color: rgb(var(--accent-ink));
+  font-weight: 700;
+}
+
+[data-theme='erekshe'] .kit-eyebrow {
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='erekshe'] .kit-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ── Шапка ── */
+
+[data-theme='erekshe'] .erekshe-topbar {
+  background: rgb(var(--erekshe-sky));
+  color: rgb(var(--muted));
+}
+
+[data-theme='erekshe'] .erekshe-header {
+  background: rgb(255 255 255 / 0.95);
+  box-shadow: 0 1px 0 rgb(var(--line));
+}
+
+[data-theme='erekshe'] .erekshe-name {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='erekshe'] .erekshe-tagline {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='erekshe'] .erekshe-nav nav a {
+  border-radius: 999px;
+  color: rgb(var(--ink));
+  font-weight: 600;
+}
+
+/* ── Первый экран ── */
+
+[data-theme='erekshe'] .erekshe-hero {
+  background: rgb(var(--erekshe-sky));
+}
+
+[data-theme='erekshe'] .erekshe-pill {
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgb(var(--accent) / 0.25);
+  background: rgb(255 255 255);
+  color: rgb(var(--accent-ink));
+  padding: 0.35rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+[data-theme='erekshe'] .erekshe-h1 {
+  font-size: clamp(2.3rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.07;
+  letter-spacing: -0.03em;
+  color: rgb(var(--ink));
+  text-wrap: balance;
+}
+
+/* Выделенная часть — с лимонным мазком снизу. */
+[data-theme='erekshe'] .erekshe-hero .hero-highlight {
+  background-image: none;
+  color: rgb(var(--ink));
+  -webkit-text-fill-color: currentColor;
+  box-shadow: inset 0 -0.32em 0 rgb(255 210 90 / 0.8);
+}
+
+[data-theme='erekshe'] .erekshe-lead {
+  max-width: 38rem;
+  margin-top: 1.2rem;
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: rgb(var(--muted));
+}
+
+[data-theme='erekshe'] .erekshe-head {
+  display: flex;
+  max-width: 34rem;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  border-radius: 1.5rem;
+  background: rgb(255 255 255);
+  padding: 1rem 1.2rem;
+  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='erekshe'] .erekshe-head-photo {
+  width: 4rem;
+  height: 4rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 3px solid rgb(var(--brand-soft));
+  object-fit: cover;
+}
+
+[data-theme='erekshe'] .erekshe-head-empty {
+  display: grid;
+  place-items: center;
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+[data-theme='erekshe'] .erekshe-head-name {
+  display: block;
+  font-weight: 800;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='erekshe'] .erekshe-head-role {
+  display: block;
+  font-size: 0.9rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='erekshe'] .erekshe-circle-wrap {
+  position: relative;
+  width: min(100%, 30rem);
+  margin-inline: auto;
+}
+
+[data-theme='erekshe'] .erekshe-circle-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 6% -6% -6% 6%;
+  z-index: 0;
+  border-radius: 999px;
+  background: rgb(var(--accent-soft));
+}
+
+[data-theme='erekshe'] .erekshe-circle {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 999px;
+  border: 10px solid rgb(255 255 255);
+  box-shadow: 0 30px 60px -36px rgb(var(--ink) / 0.6);
+}
+
+[data-theme='erekshe'] .erekshe-float {
+  position: absolute;
+  z-index: 2;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  padding: 0.55rem 1.1rem;
+  font-weight: 700;
+  color: rgb(var(--accent-ink));
+  box-shadow: 0 16px 30px -20px rgb(var(--ink) / 0.6);
+}
+
+[data-theme='erekshe'] .erekshe-float-top {
+  left: -0.5rem;
+  top: 8%;
+}
+
+[data-theme='erekshe'] .erekshe-float-bottom {
+  right: -0.5rem;
+  bottom: 10%;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='erekshe'] .erekshe-doodle {
+  position: absolute;
+  pointer-events: none;
+}
+
+[data-theme='erekshe'] .erekshe-star {
+  z-index: 2;
+  left: 8%;
+  bottom: 2%;
+  width: 3rem;
+}
+
+/* ── Секции ── */
+
+[data-theme='erekshe'] .erekshe-section {
+  padding-block: 4.5rem;
+}
+
+[data-theme='erekshe'] .erekshe-tint {
+  background: rgb(var(--erekshe-sky));
+}
+
+[data-theme='erekshe'] .erekshe-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 2rem;
+}
+
+[data-theme='erekshe'] .erekshe-scribble {
+  display: block;
+  width: 9rem;
+  margin-top: 0.4rem;
+}
+
+[data-theme='erekshe'] .erekshe-text {
+  line-height: 1.7;
+  color: rgb(var(--muted));
+}
+
+[data-theme='erekshe'] .erekshe-check {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-left: 2rem;
+  font-size: 0.95rem;
+  color: rgb(var(--muted));
+}
+
+[data-theme='erekshe'] .erekshe-check b {
+  color: rgb(var(--ink));
+}
+
+[data-theme='erekshe'] .erekshe-check::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+  display: grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: rgb(var(--brand));
+  color: rgb(255 255 255);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+/* Распорядок фото-плитками: время — плашкой на фото */
+[data-theme='erekshe'] .erekshe-tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  background: rgb(255 255 255);
+  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='erekshe'] .erekshe-tile-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+[data-theme='erekshe'] .erekshe-tile-time {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  border-radius: 999px;
+  background: rgb(var(--erekshe-lemon));
+  color: rgb(var(--ink));
+  padding: 0.3rem 0.85rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-theme='erekshe'] .erekshe-tile-title {
+  display: block;
+  padding: 1.1rem 1.3rem 1.3rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: rgb(var(--ink));
+}
+
+[data-theme='erekshe'] .erekshe-tint .hb-staff-card {
+  border-radius: 1.75rem;
+}
+
+[data-theme='erekshe'] .hb-staff-photo {
+  border: 4px solid rgb(var(--accent-soft));
+}
+
+[data-theme='erekshe'] .hb-staff-role {
+  border-radius: 999px;
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
+  padding: 0.15rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+[data-theme='erekshe'] .erekshe-more {
+  font-weight: 700;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='erekshe'] .erekshe-news article.card,
+[data-theme='erekshe'] .erekshe-reviews .card,
+[data-theme='erekshe'] .erekshe-contact .card {
+  border: 1px solid rgb(var(--line));
+  border-radius: 1.75rem;
+  box-shadow: 0 20px 40px -32px rgb(var(--ink) / 0.5);
+}
+
+[data-theme='erekshe'] .erekshe-map iframe {
+  border-radius: 1.75rem;
+}
+
+/* ── Подвал ── */
+
+[data-theme='erekshe'] .erekshe-footer-body {
+  border-top: 1px solid rgb(var(--line));
+  background: rgb(var(--erekshe-sky));
+  color: rgb(var(--muted));
+}
+
+[data-theme='erekshe'] .erekshe-footer-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='erekshe'] .erekshe-footer-title {
+  margin-bottom: 0.6rem;
+  font-weight: 800;
+  color: rgb(var(--ink));
+}
+
+[data-theme='erekshe'] .erekshe-footer-body a:hover {
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='erekshe'] .erekshe-footer-bottom {
+  border-top: 1px solid rgb(var(--line));
+}
+
+@media (max-width: 639px) {
+  [data-theme='erekshe'] .erekshe-section {
+    padding-block: 3rem;
+  }
+
+  [data-theme='erekshe'] .erekshe-float-top {
+    left: 0;
+  }
+
+  [data-theme='erekshe'] .erekshe-float-bottom {
+    right: 0;
+  }
+}

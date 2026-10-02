@@ -1,4 +1,7 @@
 import { findThemeInfo } from './catalog';
+import { ErekshFooter } from './erekshe/Footer';
+import { ErekshHeader } from './erekshe/Header';
+import { ErekshHome } from './erekshe/Home';
 import { AkkuFooter } from './akku/Footer';
 import { AkkuHeader } from './akku/Header';
 import { AkkuHome } from './akku/Home';
@@ -20,6 +23,9 @@ import { OyinHome } from './oyin/Home';
 import { ResmiFooter } from './resmi/Footer';
 import { ResmiHeader } from './resmi/Header';
 import { ResmiHome } from './resmi/Home';
+import { ShuaqFooter } from './shuaq/Footer';
+import { ShuaqHeader } from './shuaq/Header';
+import { ShuaqHome } from './shuaq/Home';
 import type { SiteTheme, ThemeParts } from './types';
 
 /**
@@ -37,6 +43,8 @@ const PARTS: Record<string, ThemeParts> = {
   akku: { Home: AkkuHome, Header: AkkuHeader, Footer: AkkuFooter },
   oyin: { Home: OyinHome, Header: OyinHeader, Footer: OyinFooter },
   resmi: { Home: ResmiHome, Header: ResmiHeader, Footer: ResmiFooter },
+  shuaq: { Home: ShuaqHome, Header: ShuaqHeader, Footer: ShuaqFooter },
+  erekshe: { Home: ErekshHome, Header: ErekshHeader, Footer: ErekshFooter },
 };
 
 export function findTheme(code: string | null | undefined): SiteTheme | null {
