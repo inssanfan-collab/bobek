@@ -1,20 +1,42 @@
-import { KitHeader } from '@/components/site/theme-kit';
+import Link from 'next/link';
+import { LinkButton } from '@/components/site/Hero';
+import { headerExtras } from '@/lib/hero';
+import { pick } from '@/lib/i18n';
 import type { ThemeHeaderProps } from '../types';
 
-/** Знак «Нұр»: солнышко в тёплом круге. */
-function Mark() {
-  return (
-    <svg className="decor h-10 w-10" viewBox="0 0 40 40" aria-hidden>
-      <circle cx="20" cy="20" r="19" fill="#F6B93B" />
-      <circle cx="20" cy="20" r="7" fill="#fff" />
-      <path d="M20 6v5M20 29v5M6 20h5M29 20h5M10.1 10.1l3.5 3.5M26.4 26.4l3.5 3.5M10.1 29.9l3.5-3.5M26.4 13.6l3.5-3.5" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" />
-    </svg>
-  );
-}
+/**
+ * Шапка «Нұр» — по образцу №7: белая, название красным рукописным
+ * шрифтом, меню мелкими красными капителями. Полоса с телефоном —
+ * если сад её включил.
+ */
+export function NurHeader({ profile, locale, homeHref, tools, nav }: ThemeHeaderProps) {
+  const name = pick(locale, profile?.shortNameKk || profile?.nameKk, profile?.shortNameRu || profile?.nameRu) || 'Балабақша';
+  const extras = headerExtras(profile, locale);
 
-/** Шапка «Нұр»: кремовая, название рукописным шрифтом, красная кнопка. */
-export function NurHeader({ profile, sections, locale, homeHref, tools, nav }: ThemeHeaderProps) {
   return (
-    <KitHeader prefix="nur" profile={profile} locale={locale} homeHref={homeHref} tools={tools} nav={nav} menu={sections} logoFallback={<Mark />} />
+    <header className="site-header nur-header sticky top-0 z-40">
+      {extras.phone || extras.hours ? (
+        <div className="nur-topbar">
+          <p className="container-page flex flex-wrap items-center justify-end gap-x-6 gap-y-1 py-1 text-sm">
+            {extras.phone ? <a href={`tel:${extras.phone.replace(/[^\d+]/g, '')}`} className="font-bold">{extras.phone}</a> : null}
+            {extras.hours ? <span>{extras.hours}</span> : null}
+          </p>
+        </div>
+      ) : null}
+      <div className="nur-row container-page">
+        <Link href={homeHref} className="nur-brand">
+          {profile?.logoMediaId ? (
+            // eslint-disable-next-line @next/next/no-img-element -- файл отдаёт /api/media
+            <img src={`/api/media/${profile.logoMediaId}`} alt="" className="h-11 w-11 shrink-0 object-contain" />
+          ) : null}
+          <span className="nur-wordmark">{name}</span>
+        </Link>
+        <div className="nur-side">
+          {extras.cta ? <LinkButton link={extras.cta} className="nur-cta" /> : null}
+          <div className="nur-tools">{tools}</div>
+        </div>
+      </div>
+      <div className="nur-nav">{nav}</div>
+    </header>
   );
 }
