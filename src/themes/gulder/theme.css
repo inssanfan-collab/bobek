@@ -1,282 +1,439 @@
 /*
- * Тема «Гүлдер» — розово-фиолетовая (структура дизайна №8). Малиновый
- * #B81C6B для кнопок (белый текст 6,2:1), фиолетовый #6A3FC9 (6,6:1),
- * лавандовые секции; яркий розовый — украшения.
- * Шрифты: Comfortaa (заголовки) и Nunito — проверены на казахские буквы.
+ * Тема «Гүлдер» — вплотную к образцу №8 (bibigül): пастельный узор
+ * из рисунков на фоне, фиолетовые заголовки с малиновыми словами, коллаж
+ * с малиновыми кругами-счётчиками, голубая облачная полоса с аккордеоном,
+ * цветные карточки с объёмными игрушками, малиновый подвал.
+ * Цвета: малиновый #DB2777 (белый текст 4,6:1), фиолетовый #6D28D9
+ * (7,1:1), карточки #D6336C, #C026D3, #7E22CE (от 4,6:1).
+ * Шрифты Comfortaa и Nunito — проверены на казахские буквы.
  * Каждое правило — под [data-theme='gulder'] (tests/unit/themes.test.ts).
  */
 
 [data-theme='gulder'] {
   --surface: 255 255 255;
   --card: 255 255 255;
-  --ink: 40 28 56;
-  --muted: 98 86 116;
-  --line: 240 230 250;
-  --brand: 184 28 107;
-  --brand-soft: 255 228 241;
-  --brand-ink: 150 18 86;
-  --accent: 106 63 201;
-  --accent-soft: 241 235 255;
-  --accent-ink: 86 46 176;
-  --gulder-lavender: 246 241 255;
+  --ink: 40 24 70;
+  --muted: 100 92 120;
+  --line: 240 230 245;
+  --brand: 219 39 119;
+  --brand-soft: 252 231 243;
+  --brand-ink: 157 23 77;
+  --accent: 109 40 217;
+  --accent-soft: 237 233 254;
+  --accent-ink: 91 33 182;
+  --gulder-pink: 219 39 119;
+  --gulder-violet: 109 40 217;
+  --gulder-sky: 220 230 245;
   --radius-md: 1rem;
-  --radius-lg: 1.5rem;
+  --radius-lg: 1.4rem;
   --radius-xl: 2rem;
   --font-display: 'Comfortaa', 'Nunito', system-ui, sans-serif;
   --font-sans: 'Nunito', system-ui, sans-serif;
+  --gulder-doodles: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' fill='none' stroke-opacity='0.4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M30 40c-6-8-18-4-15 5 2 6 15 13 15 13s13-7 15-13c3-9-9-13-15-5z' stroke='%23F9A8D4'/%3E%3Cpath d='m150 30 5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z' stroke='%23FCD34D'/%3E%3Cpath d='M100 120c10-10 25 0 15 10s-25 0-15-15 35-5 30 15' stroke='%23C4B5FD'/%3E%3Cpath d='M30 175h40c6 0 10-4 10-9s-4-9-10-9h-1c-1-6-6-10-12-10-5 0-9 3-11 7a8 8 0 0 0-12 4c-5 0-8 4-8 8s3 9 4 9z' stroke='%2393C5FD'/%3E%3Cpath d='M170 160h20M180 150v20' stroke='%2386EFAC'/%3E%3Ccircle cx='190' cy='95' r='6' stroke='%23FDBA74'/%3E%3Cpath d='M55 100c6-6 12 6 18 0s12 6 18 0' stroke='%23F9A8D4'/%3E%3C/svg%3E");
 }
 
 [data-theme='gulder'] body {
-  background-color: rgb(var(--surface));
-  background-image: none;
+  background-color: rgb(255 253 254);
+  background-image: var(--gulder-doodles);
+  background-size: 220px 220px;
 }
 
-[data-theme='gulder'] .btn-primary {
-  border-radius: 999px;
-  background: rgb(var(--brand));
-  color: rgb(255 255 255);
-  font-weight: 800;
-  box-shadow: 0 12px 24px -14px rgb(var(--brand) / 0.9);
+[data-theme='gulder'] .container-page {
+  max-width: 78rem;
 }
 
+[data-theme='gulder'] .btn-primary,
+[data-theme='gulder'] .gulder-btn,
 [data-theme='gulder'] .gulder-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
-  background: rgb(var(--accent));
+  background: rgb(var(--gulder-pink));
   color: rgb(255 255 255);
+  padding: 0.75rem 1.8rem;
   font-weight: 800;
 }
 
 [data-theme='gulder'] .btn-secondary {
   border-radius: 999px;
-  border: 2px solid rgb(var(--accent));
+  border: 2px solid rgb(var(--gulder-pink));
   background: rgb(255 255 255);
-  color: rgb(var(--accent-ink));
+  color: rgb(var(--brand-ink));
   font-weight: 800;
 }
 
-[data-theme='gulder'] .kit-title {
-  font-weight: 700;
+[data-theme='gulder'] .gulder-pink {
+  color: rgb(var(--gulder-pink));
 }
 
-[data-theme='gulder'] .kit-eyebrow {
-  background: rgb(255 255 255);
-  color: rgb(var(--accent-ink));
-  text-transform: none;
-  letter-spacing: 0;
-  box-shadow: 0 6px 16px -10px rgb(var(--ink) / 0.5);
+[data-theme='gulder'] .gulder-violet {
+  color: rgb(var(--gulder-violet));
 }
 
 /* ── Шапка ── */
 
-[data-theme='gulder'] .gulder-topbar {
-  background: rgb(var(--brand-soft));
-  color: rgb(var(--brand-ink));
-}
-
 [data-theme='gulder'] .gulder-header {
-  background: rgb(255 255 255 / 0.96);
-  box-shadow: 0 1px 0 rgb(var(--line));
+  background-color: rgb(255 253 254 / 0.96);
+  background-image: var(--gulder-doodles);
+  background-size: 220px 220px;
+  box-shadow: 0 6px 16px -14px rgb(80 20 80 / 0.3);
 }
 
-[data-theme='gulder'] .gulder-logo {
-  border-radius: 999px;
-  background: rgb(var(--brand-soft));
+[data-theme='gulder'] .gulder-topbar {
+  background: rgb(var(--gulder-violet));
+  color: rgb(255 255 255);
 }
 
-[data-theme='gulder'] .gulder-name {
+[data-theme='gulder'] .gulder-topbar a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='gulder'] .gulder-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 0.8rem 0.2rem;
+}
+
+[data-theme='gulder'] .gulder-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+[data-theme='gulder'] .gulder-wordmark {
+  min-width: 0;
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: clamp(1rem, 2.4vw, 1.6rem);
   font-weight: 700;
   line-height: 1.15;
-  color: rgb(var(--brand-ink));
 }
 
-[data-theme='gulder'] .gulder-tagline {
-  font-size: 0.8rem;
-  color: rgb(var(--muted));
+[data-theme='gulder'] .gulder-side {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
 }
 
-[data-theme='gulder'] .gulder-nav nav a {
+[data-theme='gulder'] .gulder-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (max-width: 1023px) {
+  [data-theme='gulder'] .gulder-side .gulder-cta {
+    display: none;
+  }
+}
+
+[data-theme='gulder'] .gulder-nav nav ul {
+  justify-content: flex-end;
+}
+
+[data-theme='gulder'] .gulder-nav nav > ul > li > a {
   border-radius: 999px;
-  color: rgb(var(--ink));
-  font-weight: 700;
+  color: rgb(var(--brand-ink));
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-/* ── Первый экран ── */
+[data-theme='gulder'] .gulder-nav nav a:hover {
+  background: rgb(var(--brand-soft));
+}
+
+/* ── Первый экран: текст и коллаж ── */
 
 [data-theme='gulder'] .gulder-hero {
-  background:
-    radial-gradient(30rem 20rem at 85% 20%, rgb(var(--accent-soft)), transparent 70%),
-    radial-gradient(26rem 18rem at 10% 90%, rgb(var(--brand-soft)), transparent 70%),
-    rgb(255 255 255);
+  display: grid;
+  align-items: center;
+  gap: 2.5rem;
+  padding-block: 3.5rem 4.5rem;
 }
 
-[data-theme='gulder'] .gulder-pill {
-  display: inline-block;
-  margin-bottom: 1.2rem;
-  border-radius: 999px;
-  background: rgb(var(--brand-soft));
-  color: rgb(var(--brand-ink));
-  padding: 0.35rem 1rem;
-  font-size: 0.9rem;
+@media (min-width: 1024px) {
+  [data-theme='gulder'] .gulder-hero {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+[data-theme='gulder'] .gulder-hero-text {
+  text-align: center;
+}
+
+[data-theme='gulder'] .gulder-eyebrow {
+  margin-bottom: 1rem;
+  color: rgb(var(--gulder-violet));
+  font-size: 0.72rem;
   font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 [data-theme='gulder'] .gulder-h1 {
-  font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.2vw, 2.7rem);
   font-weight: 700;
-  line-height: 1.15;
-  color: rgb(var(--ink));
-  text-wrap: balance;
+  line-height: 1.3;
+  color: rgb(var(--gulder-violet));
 }
 
 [data-theme='gulder'] .gulder-hero .hero-highlight {
   background-image: none;
-  color: rgb(var(--brand));
+  color: rgb(var(--gulder-pink));
   -webkit-text-fill-color: currentColor;
 }
 
 [data-theme='gulder'] .gulder-lead {
-  max-width: 36rem;
-  margin-top: 1.1rem;
-  font-size: 1.08rem;
-  line-height: 1.6;
+  max-width: 32rem;
+  margin: 1rem auto 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   color: rgb(var(--muted));
 }
 
-/* Два фото и значки-счётчики */
-[data-theme='gulder'] .gulder-photos {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 1rem;
-  align-items: start;
+[data-theme='gulder'] .gulder-collage {
+  position: relative;
+  width: min(100%, 34rem);
+  aspect-ratio: 1 / 0.8;
+  margin-inline: auto;
 }
 
-[data-theme='gulder'] .gulder-photo-main {
-  width: 100%;
-  aspect-ratio: 4 / 5;
+[data-theme='gulder'] .gulder-collage img {
+  position: absolute;
   object-fit: cover;
-  border-radius: 1.75rem;
-  border: 6px solid rgb(255 255 255);
-  box-shadow: 0 24px 50px -30px rgb(var(--ink) / 0.5);
 }
 
-[data-theme='gulder'] .gulder-photo-side {
-  width: 100%;
+[data-theme='gulder'] .gulder-c-hands {
+  top: 0;
+  right: 0;
+  width: 58%;
+  object-fit: contain;
+}
+
+[data-theme='gulder'] .gulder-c-run {
+  left: 0;
+  bottom: 0;
+  width: 46%;
+  aspect-ratio: 1.05 / 1;
+  border-radius: 1.4rem;
+  box-shadow: 0 20px 40px -26px rgb(80 20 80 / 0.5);
+}
+
+[data-theme='gulder'] .gulder-c-globe {
+  right: 0;
+  bottom: 0;
+  width: 30%;
+  aspect-ratio: 0.8 / 1;
+  border-radius: 1.4rem;
+  box-shadow: 0 20px 40px -26px rgb(80 20 80 / 0.5);
+}
+
+[data-theme='gulder'] .gulder-c-stat {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  width: 27%;
   aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 1.5rem;
-  border: 6px solid rgb(255 255 255);
-  box-shadow: 0 24px 50px -30px rgb(var(--ink) / 0.5);
-}
-
-[data-theme='gulder'] .gulder-badges {
-  grid-column: 2;
-  display: grid;
-  gap: 0.75rem;
-  margin-top: -40%;
-}
-
-[data-theme='gulder'] .gulder-badges .hb-stat {
-  border-radius: 1.25rem;
-  background: rgb(var(--accent));
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgb(var(--gulder-pink));
   color: rgb(255 255 255);
-  padding: 0.75rem 1rem;
-  box-shadow: 0 16px 30px -20px rgb(var(--accent) / 0.9);
+  text-align: center;
+  box-shadow: 0 16px 30px -18px rgb(var(--gulder-pink) / 0.9);
 }
 
-[data-theme='gulder'] .gulder-badges .hb-stat:nth-child(2) {
-  background: rgb(var(--brand));
+[data-theme='gulder'] .gulder-c-stat b {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+  line-height: 1;
 }
 
-[data-theme='gulder'] .gulder-badges .hb-stat:nth-child(3) {
+[data-theme='gulder'] .gulder-c-stat span {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+[data-theme='gulder'] .gulder-c-stat-1 {
+  top: 4%;
+  left: 6%;
+}
+
+[data-theme='gulder'] .gulder-c-stat-2 {
+  bottom: 12%;
+  left: 47%;
+}
+
+/* ── Голубая облачная полоса с аккордеоном ── */
+
+[data-theme='gulder'] .gulder-clouds {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 6% 12%, rgb(255 255 255) 3.2rem, transparent 3.3rem),
+    radial-gradient(circle at 12% 6%, rgb(255 255 255) 2.4rem, transparent 2.5rem),
+    radial-gradient(circle at 94% 20%, rgb(255 255 255) 3.4rem, transparent 3.5rem),
+    radial-gradient(circle at 88% 90%, rgb(255 255 255) 3rem, transparent 3.1rem),
+    radial-gradient(circle at 2% 70%, rgb(255 255 255) 2.8rem, transparent 2.9rem),
+    rgb(var(--gulder-sky));
+}
+
+[data-theme='gulder'] .gulder-clouds::before,
+[data-theme='gulder'] .gulder-clouds::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2.4rem;
+  background: radial-gradient(circle at 3rem 0, rgb(255 253 254) 2.6rem, transparent 2.7rem) 0 0 / 6rem 2.4rem repeat-x;
+}
+
+[data-theme='gulder'] .gulder-clouds::before {
+  top: 0;
+}
+
+[data-theme='gulder'] .gulder-clouds::after {
+  bottom: 0;
+  transform: scaleY(-1);
+}
+
+[data-theme='gulder'] .gulder-acc-wrap {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 3rem;
+  padding-block: 5rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='gulder'] .gulder-acc-wrap {
+    grid-template-columns: 0.9fr 1.1fr;
+  }
+}
+
+[data-theme='gulder'] .gulder-paint {
+  position: relative;
+  max-width: 28rem;
+  width: 100%;
+  margin-inline: auto;
+}
+
+[data-theme='gulder'] .gulder-paint-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 2rem;
+}
+
+[data-theme='gulder'] .gulder-heart {
+  position: absolute;
+  left: 4%;
+  bottom: 12%;
+  width: 18%;
+}
+
+[data-theme='gulder'] .gulder-fly-1 {
+  position: absolute;
+  top: 6%;
+  left: 44%;
+  width: 14%;
+}
+
+[data-theme='gulder'] .gulder-fly-2 {
+  position: absolute;
+  top: 30%;
+  right: 4%;
+  width: 12%;
+}
+
+[data-theme='gulder'] .gulder-acc {
+  display: grid;
+  gap: 0.8rem;
+}
+
+[data-theme='gulder'] .gulder-acc details {
+  overflow: hidden;
+  border-radius: 1.2rem;
   background: rgb(255 255 255);
 }
 
-[data-theme='gulder'] .gulder-badges .hb-stat-value {
-  color: inherit;
-}
-
-[data-theme='gulder'] .gulder-badges .hb-stat:nth-child(3) .hb-stat-value {
-  color: rgb(var(--brand-ink));
-}
-
-[data-theme='gulder'] .gulder-badges .hb-stat-label {
-  color: inherit;
-  opacity: 0.9;
-}
-
-/* ── Секции ── */
-
-[data-theme='gulder'] .gulder-section {
-  padding-block: 4.5rem;
-}
-
-[data-theme='gulder'] .gulder-lavender {
-  background: rgb(var(--gulder-lavender));
-}
-
-[data-theme='gulder'] .gulder-about-photo {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: 2rem;
-}
-
-[data-theme='gulder'] .gulder-subtitle {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-[data-theme='gulder'] .gulder-link {
+[data-theme='gulder'] .gulder-acc summary {
   display: flex;
-  justify-content: space-between;
-  border-radius: 999px;
-  background: rgb(var(--brand));
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgb(var(--gulder-pink));
+  padding: 0.85rem 1.2rem;
   color: rgb(255 255 255);
-  padding: 0.85rem 1.4rem;
   font-weight: 800;
-  transition: transform 0.15s;
 }
 
-[data-theme='gulder'] .gulder-link-1 {
-  background: rgb(var(--accent));
+[data-theme='gulder'] .gulder-acc summary::-webkit-details-marker {
+  display: none;
 }
 
-[data-theme='gulder'] .gulder-link:hover {
-  transform: translateX(4px);
+[data-theme='gulder'] .gulder-acc .gulder-acc-violet summary {
+  background: rgb(var(--gulder-violet));
 }
 
-/* Градиентные карточки кружков */
-[data-theme='gulder'] .gulder-card {
-  border-radius: 2rem;
-  background: linear-gradient(135deg, rgb(var(--brand)), rgb(214 60 140));
-  color: rgb(255 255 255);
-  padding: 2rem 1.8rem;
-  min-height: 12rem;
-  box-shadow: 0 24px 40px -30px rgb(var(--brand) / 0.9);
+[data-theme='gulder'] .gulder-acc-sign {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
 }
 
-[data-theme='gulder'] .gulder-card:nth-child(2) {
-  background: linear-gradient(135deg, rgb(150 30 130), rgb(var(--accent)));
+[data-theme='gulder'] .gulder-acc-sign::before,
+[data-theme='gulder'] .gulder-acc-sign::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
 }
 
-[data-theme='gulder'] .gulder-card:nth-child(3) {
-  background: linear-gradient(135deg, rgb(var(--accent)), rgb(70 40 160));
+[data-theme='gulder'] .gulder-acc-sign::after {
+  transform: rotate(90deg);
 }
 
-[data-theme='gulder'] .gulder-card h3 {
+[data-theme='gulder'] .gulder-acc details[open] .gulder-acc-sign::after {
+  display: none;
+}
+
+[data-theme='gulder'] .gulder-acc details p {
+  padding: 1rem 1.3rem 1.3rem;
+  color: rgb(var(--ink));
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+/* ── Цветные карточки с игрушками ── */
+
+[data-theme='gulder'] .gulder-title {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: clamp(1.7rem, 2.8vw, 2.3rem);
   font-weight: 700;
+  line-height: 1.25;
+  color: rgb(var(--gulder-violet));
 }
 
-[data-theme='gulder'] .gulder-card p {
-  margin-top: 0.7rem;
-  line-height: 1.55;
-  opacity: 0.95;
+[data-theme='gulder'] .gulder-text {
+  color: rgb(var(--muted));
+  line-height: 1.7;
 }
 
 [data-theme='gulder'] .gulder-more {
@@ -284,71 +441,272 @@
   color: rgb(var(--brand-ink));
 }
 
-[data-theme='gulder'] .gulder-news article.card,
-[data-theme='gulder'] .gulder-reviews .card {
-  border: 0;
-  border-radius: 1.75rem;
-  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+[data-theme='gulder'] .gulder-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 2.6rem;
 }
 
-[data-theme='gulder'] .gulder-enroll {
-  border: 3px solid rgb(var(--brand-soft));
-  border-radius: 2rem;
-  background: rgb(255 255 255);
-  padding: 2.4rem 2rem;
+[data-theme='gulder'] .gulder-card {
+  flex: 1 1 18rem;
+  min-width: 0;
+  max-width: 25rem;
+  border-radius: 1.4rem;
+  color: rgb(255 255 255);
+  text-align: left;
+  transition: transform 0.2s ease;
 }
 
-[data-theme='gulder'] .gulder-enroll h2 {
+[data-theme='gulder'] .gulder-card:hover {
+  transform: translateY(-4px);
+}
+
+[data-theme='gulder'] .gulder-card-pink { background: rgb(214 51 108); }
+[data-theme='gulder'] .gulder-card-magenta { background: rgb(192 38 211); }
+[data-theme='gulder'] .gulder-card-violet { background: rgb(126 34 206); }
+
+[data-theme='gulder'] .gulder-card-inner {
+  display: flex;
+  min-height: 10.5rem;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.2rem 0.8rem 1.2rem 1.6rem;
+}
+
+[data-theme='gulder'] .gulder-card-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+[data-theme='gulder'] .gulder-card-text b {
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+  font-size: 1.55rem;
+  line-height: 1.2;
+}
+
+[data-theme='gulder'] .gulder-card-text span {
+  font-size: 0.82rem;
   font-weight: 700;
+}
+
+[data-theme='gulder'] .gulder-toy {
+  width: 6.5rem;
+  height: 6.5rem;
+  flex-shrink: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 10px rgb(0 0 0 / 0.2));
+}
+
+/* ── Отзывы ── */
+
+[data-theme='gulder'] .gulder-reviews {
+  display: grid;
+  gap: 1.4rem;
+  margin-top: 2.6rem;
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  [data-theme='gulder'] .gulder-reviews {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+[data-theme='gulder'] .gulder-reviews li {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.6rem;
+  background: rgb(255 255 255);
+  padding: 1.5rem 1.6rem;
+  box-shadow: 0 20px 40px -30px rgb(80 20 80 / 0.4);
+}
+
+[data-theme='gulder'] .gulder-reviews .review-stars {
+  color: rgb(234 179 8);
+}
+
+[data-theme='gulder'] .gulder-reviews blockquote {
+  flex: 1;
+  margin-top: 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+[data-theme='gulder'] .gulder-review-author {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+[data-theme='gulder'] .gulder-review-author b {
   color: rgb(var(--brand-ink));
 }
 
-[data-theme='gulder'] .gulder-enroll p {
-  margin-top: 0.7rem;
-  color: rgb(var(--muted));
+[data-theme='gulder'] .gulder-avatar {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+  font-weight: 900;
+}
+
+/* ── Новости ── */
+
+[data-theme='gulder'] .gulder-news article.card {
+  border: 0;
+  border-radius: 1.2rem;
+  box-shadow: 0 20px 40px -30px rgb(80 20 80 / 0.45);
+}
+
+/* ── Запись: фото с подписями-таблетками ── */
+
+[data-theme='gulder'] .gulder-enroll {
+  display: grid;
+  align-items: center;
+  gap: 3rem;
+  padding-block: 4rem 5rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='gulder'] .gulder-enroll {
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 5rem;
+  }
+}
+
+[data-theme='gulder'] .gulder-teach {
+  position: relative;
+  max-width: 28rem;
+  width: 100%;
+  margin-inline: auto;
+}
+
+[data-theme='gulder'] .gulder-teach-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 0.85 / 1;
+  object-fit: cover;
+}
+
+[data-theme='gulder'] .gulder-tag {
+  position: absolute;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  padding: 0.4rem 0.9rem;
+  color: rgb(var(--brand-ink));
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 20px -12px rgb(0 0 0 / 0.4);
+}
+
+[data-theme='gulder'] .gulder-tag-0 { top: 8%; left: 6%; transform: rotate(-12deg); }
+[data-theme='gulder'] .gulder-tag-1 { top: 14%; right: -4%; transform: rotate(10deg); }
+[data-theme='gulder'] .gulder-tag-2 { bottom: 10%; left: 4%; transform: rotate(-8deg); }
+
+[data-theme='gulder'] .gulder-enroll-text {
+  text-align: center;
+}
+
+[data-theme='gulder'] .gulder-enroll-list {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 24rem;
+  margin: 1.5rem auto 0;
+}
+
+[data-theme='gulder'] .gulder-enroll-list li {
+  border: 2px solid rgb(244 114 182);
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  padding: 0.55rem 1.2rem;
+  font-weight: 700;
 }
 
 /* ── Подвал ── */
 
-[data-theme='gulder'] .gulder-footer-body {
-  background: linear-gradient(120deg, rgb(var(--brand-ink)), rgb(var(--accent-ink)));
-  color: rgb(250 232 244);
+[data-theme='gulder'] .gulder-footer {
+  margin-top: 2rem;
+  background: rgb(var(--gulder-pink));
+  color: rgb(255 255 255);
+}
+
+[data-theme='gulder'] .gulder-footer a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='gulder'] .gulder-footer a:hover {
+  text-decoration: underline;
+}
+
+[data-theme='gulder'] .gulder-footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem 3rem;
+  padding-block: 2.6rem 1.6rem;
 }
 
 [data-theme='gulder'] .gulder-footer-name {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
   font-weight: 700;
-  color: rgb(255 255 255);
+  line-height: 1.15;
 }
 
-[data-theme='gulder'] .gulder-footer-title {
-  margin-bottom: 0.6rem;
-  font-weight: 900;
-  color: rgb(255 210 232);
+[data-theme='gulder'] .gulder-footer-contacts {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  text-align: right;
 }
 
-[data-theme='gulder'] .gulder-footer-body a:hover {
-  color: rgb(255 255 255);
-  text-decoration: underline;
+[data-theme='gulder'] .gulder-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.3rem;
 }
 
-[data-theme='gulder'] .gulder-footer-social a {
+[data-theme='gulder'] .gulder-footer .gulder-footer-social a {
   color: rgb(var(--ink));
 }
 
 [data-theme='gulder'] .gulder-footer-bottom {
-  border-top: 1px solid rgb(255 255 255 / 0.2);
+  background: rgb(var(--gulder-violet));
 }
 
-@media (max-width: 639px) {
-  [data-theme='gulder'] .gulder-section {
-    padding-block: 3rem;
+@media (max-width: 767px) {
+  [data-theme='gulder'] .gulder-footer-contacts {
+    text-align: left;
   }
 
-  [data-theme='gulder'] .gulder-badges {
-    margin-top: 0;
+  [data-theme='gulder'] .gulder-tag-1 {
+    right: 2%;
+  }
+
+  /* Длинное название кружка не должно распирать карточку шире экрана. */
+  [data-theme='gulder'] .gulder-card-text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  [data-theme='gulder'] .gulder-card-text b {
+    font-size: 1.25rem;
+  }
+
+  [data-theme='gulder'] .gulder-toy {
+    width: 5rem;
+    height: 5rem;
   }
 }
