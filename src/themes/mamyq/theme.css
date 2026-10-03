@@ -1,319 +1,670 @@
 /*
- * Тема «Мамық» — пудровая и мягкая (структура дизайна №9). Малиновый
- * #B8325A для кнопок и акцентов (белый текст 5,8:1), пудра #FFE3EA
- * и сирень #E9E3FF — фоны, индиго #2C2A4A — текст.
- * Шрифт Nunito — проверен на казахские буквы.
+ * Тема «Мамық» — вплотную к образцу №9 (Balausa): пудровый первый
+ * экран с линейными рисунками и фото в рамке-«ромашке», розовая
+ * волнистая полоса миссии, абонементы (или группы) на узоре из радуг,
+ * крупные розовые счётчики, отзывы с радужным свечением, карта
+ * и контакты, светлый подвал с полосой рисунков.
+ * Цвета: тёмно-синий #3B2E83 (заголовки, 11:1), розовый — крупный
+ * #E0457B (3,9:1), мелкий текст и рамки кнопок #BE185D (6:1), синяя
+ * кнопка #4C3A9E (8:1).
+ * Шрифты Comfortaa и Nunito — проверены на казахские буквы.
  * Каждое правило — под [data-theme='mamyq'] (tests/unit/themes.test.ts).
  */
 
 [data-theme='mamyq'] {
-  --surface: 255 252 253;
+  --surface: 255 255 255;
   --card: 255 255 255;
-  --ink: 44 42 74;
-  --muted: 100 96 124;
-  --line: 244 232 240;
-  --brand: 184 50 90;
-  --brand-soft: 255 227 234;
-  --brand-ink: 150 36 72;
-  --accent: 120 96 200;
-  --accent-soft: 233 227 255;
-  --accent-ink: 84 64 168;
+  --ink: 40 34 90;
+  --muted: 98 96 120;
+  --line: 240 232 240;
+  --brand: 190 24 93;
+  --brand-soft: 252 231 243;
+  --brand-ink: 157 23 77;
+  --accent: 76 58 158;
+  --accent-soft: 237 233 254;
+  --accent-ink: 59 46 131;
+  --mamyq-navy: 59 46 131;
+  --mamyq-pink: 224 69 123;
+  --mamyq-pink-ink: 190 24 93;
+  --mamyq-blush: 253 236 240;
+  --mamyq-cream: 254 246 244;
   --radius-md: 1rem;
-  --radius-lg: 1.5rem;
+  --radius-lg: 1.4rem;
   --radius-xl: 2rem;
-  --font-display: 'Nunito', system-ui, sans-serif;
+  --font-display: 'Comfortaa', 'Nunito', system-ui, sans-serif;
   --font-sans: 'Nunito', system-ui, sans-serif;
 }
 
 [data-theme='mamyq'] body {
   background-color: rgb(var(--surface));
-  background-image: radial-gradient(rgb(var(--brand) / 0.07) 1.2px, transparent 1.6px);
-  background-size: 26px 26px;
+  background-image: none;
+}
+
+[data-theme='mamyq'] .container-page {
+  max-width: 76rem;
 }
 
 [data-theme='mamyq'] .btn-primary,
-[data-theme='mamyq'] .mamyq-cta {
+[data-theme='mamyq'] .mamyq-navy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
-  background: rgb(var(--brand));
+  background: rgb(var(--accent));
   color: rgb(255 255 255);
+  padding: 0.75rem 1.8rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  box-shadow: 0 12px 24px -14px rgb(var(--brand) / 0.9);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-[data-theme='mamyq'] .btn-secondary {
+[data-theme='mamyq'] .btn-secondary,
+[data-theme='mamyq'] .mamyq-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgb(var(--mamyq-pink-ink));
   border-radius: 999px;
-  border: 0;
-  background: rgb(var(--accent-soft));
-  color: rgb(var(--accent-ink));
+  background: rgb(255 255 255);
+  color: rgb(var(--mamyq-pink-ink));
+  padding: 0.65rem 1.6rem;
+  font-size: 0.78rem;
   font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-[data-theme='mamyq'] .kit-title {
-  font-weight: 900;
-}
-
-[data-theme='mamyq'] .kit-eyebrow {
-  background: transparent;
-  padding: 0;
-  color: rgb(var(--brand-ink));
+[data-theme='mamyq'] .mamyq-pink {
+  color: rgb(var(--mamyq-pink));
 }
 
 /* ── Шапка ── */
 
-[data-theme='mamyq'] .mamyq-topbar {
-  background: rgb(var(--brand-soft));
-  color: rgb(var(--brand-ink));
-}
-
 [data-theme='mamyq'] .mamyq-header {
-  background: rgb(255 255 255 / 0.95);
-  box-shadow: 0 1px 0 rgb(var(--line));
+  background: rgb(255 255 255);
+  box-shadow: 0 6px 16px -14px rgb(60 30 90 / 0.3);
 }
 
-[data-theme='mamyq'] .mamyq-name {
-  font-size: 1.15rem;
-  font-weight: 900;
-  line-height: 1.15;
-  color: rgb(var(--brand-ink));
+[data-theme='mamyq'] .mamyq-topbar {
+  background: rgb(var(--mamyq-navy));
+  color: rgb(255 255 255);
 }
 
-[data-theme='mamyq'] .mamyq-tagline {
-  font-size: 0.8rem;
-  color: rgb(var(--muted));
+[data-theme='mamyq'] .mamyq-topbar a {
+  color: rgb(255 255 255);
 }
 
-[data-theme='mamyq'] .mamyq-nav nav a {
-  border-radius: 999px;
-  color: rgb(var(--ink));
+[data-theme='mamyq'] .mamyq-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 0.8rem 0.2rem;
+}
+
+[data-theme='mamyq'] .mamyq-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+[data-theme='mamyq'] .mamyq-wordmark {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2.4vw, 1.55rem);
   font-weight: 700;
+  line-height: 1.15;
+  color: rgb(var(--mamyq-pink-ink));
 }
 
-/* ── Первый экран ── */
+[data-theme='mamyq'] .mamyq-side {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+[data-theme='mamyq'] .mamyq-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (max-width: 1023px) {
+  [data-theme='mamyq'] .mamyq-side .mamyq-cta {
+    display: none;
+  }
+}
+
+[data-theme='mamyq'] .mamyq-nav nav ul {
+  justify-content: center;
+}
+
+[data-theme='mamyq'] .mamyq-nav nav > ul > li > a {
+  border-radius: 999px;
+  color: rgb(var(--mamyq-navy));
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+[data-theme='mamyq'] .mamyq-nav nav > ul > li > a::before {
+  content: '●';
+  margin-right: 0.35rem;
+  color: rgb(var(--mamyq-pink));
+  font-size: 0.55rem;
+  vertical-align: 0.15em;
+}
+
+[data-theme='mamyq'] .mamyq-nav nav a:hover {
+  background: rgb(var(--brand-soft));
+}
+
+/* ── Первый экран: пудровый, рисунки линией, фото в «ромашке» ── */
 
 [data-theme='mamyq'] .mamyq-hero {
-  background: linear-gradient(120deg, rgb(var(--brand-soft) / 0.7), rgb(var(--accent-soft) / 0.6));
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgb(var(--mamyq-cream)), rgb(255 250 248));
+  padding-block: 3.5rem 5.5rem;
 }
 
-[data-theme='mamyq'] .mamyq-pill {
-  display: inline-block;
-  margin-bottom: 1.2rem;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.8);
-  color: rgb(var(--accent-ink));
-  padding: 0.35rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 800;
+/* Волнистый нижний край. */
+[data-theme='mamyq'] .mamyq-hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2.5rem;
+  background: radial-gradient(60% 100% at 50% 100%, rgb(255 255 255) 98%, transparent 100%) 0 0 / 16rem 2.5rem repeat-x;
+}
+
+[data-theme='mamyq'] .mamyq-d-sun { position: absolute; top: 12%; left: 4%; width: 7rem; }
+[data-theme='mamyq'] .mamyq-d-fly { position: absolute; top: 6%; left: 44%; width: 4rem; }
+[data-theme='mamyq'] .mamyq-d-flower { position: absolute; bottom: 18%; left: 46%; width: 4rem; }
+
+[data-theme='mamyq'] .mamyq-hero-grid {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='mamyq'] .mamyq-hero-grid {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
 }
 
 [data-theme='mamyq'] .mamyq-h1 {
-  font-size: clamp(2.3rem, 5vw, 3.9rem);
-  font-weight: 900;
-  line-height: 1.1;
-  color: rgb(var(--ink));
-  text-wrap: balance;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.4vw, 2.9rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgb(var(--mamyq-navy));
+  text-transform: uppercase;
 }
 
 [data-theme='mamyq'] .mamyq-hero .hero-highlight {
   background-image: none;
-  color: rgb(var(--brand));
+  color: rgb(var(--mamyq-pink));
   -webkit-text-fill-color: currentColor;
 }
 
 [data-theme='mamyq'] .mamyq-lead {
-  max-width: 36rem;
-  margin-top: 1.1rem;
-  font-size: 1.08rem;
-  line-height: 1.6;
+  max-width: 34rem;
+  margin-top: 1.2rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   color: rgb(var(--muted));
 }
 
-[data-theme='mamyq'] .mamyq-facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.4rem;
-  margin-top: 1.8rem;
-  padding-top: 1.1rem;
-  border-top: 1px solid rgb(var(--brand) / 0.15);
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: rgb(var(--muted));
-}
-
-[data-theme='mamyq'] .mamyq-facts li::before {
-  content: '♥';
-  margin-right: 0.4rem;
-  color: rgb(var(--brand));
-}
-
-/* Фото в «фестончатой» рамке: волнистый край из кружков */
-[data-theme='mamyq'] .mamyq-frame {
+[data-theme='mamyq'] .mamyq-scallop {
   position: relative;
-  width: min(100%, 30rem);
-  margin-inline: auto;
-  padding: 1.1rem;
-  border-radius: 2.5rem;
-  background:
-    radial-gradient(circle at 1rem 1rem, rgb(255 255 255) 0.95rem, transparent 1rem) 0 0 / 2rem 2rem,
-    rgb(255 255 255);
-  box-shadow: 0 30px 60px -36px rgb(var(--brand) / 0.5);
-}
-
-[data-theme='mamyq'] .mamyq-photo {
   display: block;
-  width: 100%;
-  aspect-ratio: 5 / 4;
-  object-fit: cover;
-  border-radius: 2rem;
-}
-
-/* ── Секции ── */
-
-[data-theme='mamyq'] .mamyq-section {
-  padding-block: 4.5rem;
-}
-
-[data-theme='mamyq'] .mamyq-blush {
-  background: rgb(var(--brand-soft) / 0.45);
-}
-
-[data-theme='mamyq'] .mamyq-circle {
-  display: block;
-  width: min(100%, 24rem);
-  margin-inline: auto;
   aspect-ratio: 1;
+  background: rgb(255 255 255);
+  clip-path: url(#mamyq-scallop);
+}
+
+[data-theme='mamyq'] .mamyq-scallop img {
+  position: absolute;
+  inset: 12%;
+  width: 76%;
+  height: 76%;
   object-fit: cover;
   border-radius: 999px;
-  border: 10px solid rgb(255 255 255);
-  outline: 3px dashed rgb(var(--brand) / 0.35);
-  outline-offset: 8px;
 }
 
-[data-theme='mamyq'] .mamyq-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  border-radius: 1.5rem;
-  background: rgb(255 255 255);
-  padding: 1.1rem 1.2rem;
-  box-shadow: 0 16px 32px -26px rgb(var(--ink) / 0.6);
-  font-size: 0.93rem;
-  color: rgb(var(--muted));
+[data-theme='mamyq'] .mamyq-hero-photo {
+  width: min(100%, 24rem);
+  margin-inline: auto;
+  filter: drop-shadow(0 16px 30px rgb(150 60 90 / 0.18));
 }
 
-[data-theme='mamyq'] .mamyq-card b {
-  font-size: 1.05rem;
-  color: rgb(var(--ink));
+/* ── Розовая волнистая полоса миссии ── */
+
+[data-theme='mamyq'] .mamyq-wave {
+  position: relative;
+  margin-block: 3rem;
+  background: rgb(var(--mamyq-blush));
+  padding-block: 3rem;
 }
 
-[data-theme='mamyq'] .mamyq-prices .card {
-  border: 0;
-  border-radius: 1.75rem;
-  box-shadow: 0 24px 44px -32px rgb(var(--ink) / 0.6);
+[data-theme='mamyq'] .mamyq-wave::before,
+[data-theme='mamyq'] .mamyq-wave::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2.5rem;
+  background: radial-gradient(60% 100% at 50% 100%, rgb(var(--mamyq-blush)) 98%, transparent 100%) 0 0 / 18rem 2.5rem repeat-x;
 }
 
-[data-theme='mamyq'] .mamyq-prices .price-card-featured {
-  background: rgb(var(--brand));
-  color: rgb(255 255 255);
+[data-theme='mamyq'] .mamyq-wave::before {
+  bottom: 100%;
 }
 
-[data-theme='mamyq'] .mamyq-prices .price-card-featured .text-muted,
-[data-theme='mamyq'] .mamyq-prices .price-card-featured .text-brand {
-  color: rgb(255 230 238);
+[data-theme='mamyq'] .mamyq-wave::after {
+  top: 100%;
+  transform: scaleY(-1);
 }
 
-[data-theme='mamyq'] .mamyq-prices .price-card-featured .badge {
-  background: rgb(255 255 255);
-  color: rgb(var(--brand-ink));
-}
+[data-theme='mamyq'] .mamyq-d-star { position: absolute; top: 4%; right: 8%; width: 3.5rem; }
+[data-theme='mamyq'] .mamyq-d-plane { position: absolute; top: 10%; left: 30%; width: 4.5rem; }
 
-[data-theme='mamyq'] .mamyq-stats {
+[data-theme='mamyq'] .mamyq-mission {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-  gap: 1rem;
-}
-
-[data-theme='mamyq'] .mamyq-stats .hb-stat {
-  flex-direction: column;
   align-items: center;
-  gap: 0;
-  border-radius: 1.75rem;
-  background: rgb(255 255 255);
-  padding: 1.5rem 1rem;
-  box-shadow: 0 16px 32px -26px rgb(var(--ink) / 0.6);
+  gap: 3rem;
 }
 
-[data-theme='mamyq'] .mamyq-stats .hb-stat-value {
-  font-size: 2.8rem;
-  font-weight: 900;
-  color: rgb(var(--brand));
+@media (min-width: 1024px) {
+  [data-theme='mamyq'] .mamyq-mission {
+    grid-template-columns: 0.8fr 1.2fr;
+  }
+}
+
+[data-theme='mamyq'] .mamyq-mission-photo {
+  width: min(100%, 22rem);
+  margin-inline: auto;
+}
+
+[data-theme='mamyq'] .mamyq-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.3;
+  color: rgb(var(--mamyq-navy));
+}
+
+[data-theme='mamyq'] .mamyq-text {
+  color: rgb(var(--muted));
 }
 
 [data-theme='mamyq'] .mamyq-more {
   font-weight: 800;
-  color: rgb(var(--brand-ink));
+  color: rgb(var(--mamyq-pink-ink));
 }
 
-[data-theme='mamyq'] .mamyq-news article.card,
-[data-theme='mamyq'] .mamyq-reviews .card,
-[data-theme='mamyq'] .mamyq-contact .card {
-  border: 0;
-  border-radius: 1.75rem;
-  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
-}
-
-/* Карта во всю ширину, контакты — карточкой поверх */
-[data-theme='mamyq'] .mamyq-map-wrap {
+[data-theme='mamyq'] .mamyq-mission-list {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.8rem;
+  margin-top: 2rem;
+}
+
+[data-theme='mamyq'] .mamyq-mission-list li {
+  display: flex;
+  gap: 1.4rem;
+}
+
+[data-theme='mamyq'] .mamyq-mission-icon {
+  width: 3.6rem;
+  height: 3.6rem;
+  flex-shrink: 0;
+}
+
+[data-theme='mamyq'] .mamyq-mission-list b {
+  display: block;
+  color: rgb(var(--mamyq-navy));
+  font-weight: 800;
+}
+
+[data-theme='mamyq'] .mamyq-mission-list b + span {
+  display: block;
+  margin-top: 0.3rem;
+  color: rgb(var(--muted));
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ── Абонементы на узоре из радуг ── */
+
+[data-theme='mamyq'] .mamyq-pattern {
+  position: relative;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.72)),
+    url('/images/themes/mamyq/pattern-640.webp') 0 0 / 22rem 22rem repeat;
+}
+
+/* Тарифов бывает меньше трёх — тогда они стоят по центру. */
+[data-theme='mamyq'] .mamyq-plans {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.4rem;
+  max-width: 62rem;
+  margin: 3rem auto 0;
+}
+
+[data-theme='mamyq'] .mamyq-plans > li {
+  flex: 1 1 16rem;
+  max-width: 20rem;
+}
+
+[data-theme='mamyq'] .mamyq-plans > li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  overflow: hidden;
+  border-radius: 1.6rem;
+  background: rgb(255 255 255);
+  padding: 2rem 1.6rem 1.8rem;
+  box-shadow: 0 24px 50px -30px rgb(60 40 120 / 0.45);
+}
+
+[data-theme='mamyq'] .mamyq-plans > li.mamyq-plan-featured {
+  padding-top: 3.6rem;
+  transform: translateY(-1rem);
+}
+
+[data-theme='mamyq'] .mamyq-plan-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgb(var(--mamyq-pink-ink));
+  padding: 0.55rem;
+  color: rgb(255 255 255);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+[data-theme='mamyq'] .mamyq-plan-icon {
+  display: grid;
+  width: 3.4rem;
+  height: 3.4rem;
+  place-items: center;
+  border: 1.5px solid rgb(249 168 212);
+  border-radius: 999px;
+  color: rgb(var(--mamyq-pink-ink));
+}
+
+[data-theme='mamyq'] .mamyq-plans h3 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgb(var(--mamyq-navy));
+}
+
+[data-theme='mamyq'] .mamyq-price {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: rgb(var(--mamyq-pink));
+}
+
+[data-theme='mamyq'] .mamyq-price span {
+  color: rgb(var(--mamyq-navy));
+  font-size: 0.9rem;
+}
+
+[data-theme='mamyq'] .mamyq-features {
+  display: grid;
+  gap: 0.45rem;
+  width: 100%;
+  margin-block: 0.4rem 1rem;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+[data-theme='mamyq'] .mamyq-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+[data-theme='mamyq'] .mamyq-features svg {
+  margin-top: 0.15rem;
+  color: rgb(var(--accent));
+}
+
+/* ── Крупные розовые счётчики ── */
+
+[data-theme='mamyq'] .mamyq-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem 5rem;
+  padding-block: 4rem 2rem;
+  text-align: center;
+}
+
+[data-theme='mamyq'] .mamyq-stats li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+[data-theme='mamyq'] .mamyq-stats b {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 500;
+  line-height: 1;
+  color: rgb(var(--mamyq-pink));
+}
+
+[data-theme='mamyq'] .mamyq-stats span {
+  margin-top: 0.5rem;
+  color: rgb(var(--mamyq-navy));
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ── Отзывы с радужным свечением ── */
+
+[data-theme='mamyq'] .mamyq-reviews {
+  display: grid;
+  gap: 1.6rem;
+  margin-top: 2.6rem;
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  [data-theme='mamyq'] .mamyq-reviews {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+[data-theme='mamyq'] .mamyq-reviews > li {
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.2rem;
+  background: rgb(255 255 255);
+  padding: 1.6rem;
+  box-shadow: -10px 0 30px -14px rgb(253 224 71 / 0.6), 10px 0 30px -14px rgb(196 181 253 / 0.7), 0 14px 30px -16px rgb(249 168 212 / 0.7);
+}
+
+[data-theme='mamyq'] .mamyq-reviews .review-stars {
+  color: rgb(234 179 8);
+}
+
+[data-theme='mamyq'] .mamyq-reviews blockquote {
+  flex: 1;
+  margin-top: 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+[data-theme='mamyq'] .mamyq-review-author {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+  font-size: 0.9rem;
+}
+
+[data-theme='mamyq'] .mamyq-avatar {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 999px;
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
+  font-weight: 900;
+}
+
+/* ── Новости ── */
+
+[data-theme='mamyq'] .mamyq-news article.card {
+  border: 0;
+  border-radius: 1.2rem;
+  box-shadow: 0 20px 40px -30px rgb(60 40 120 / 0.45);
+}
+
+/* ── Карта и контакты ── */
+
+[data-theme='mamyq'] .mamyq-contacts {
+  display: grid;
+  align-items: center;
+  gap: 2.5rem;
+  padding-block: 3.5rem 4rem;
 }
 
 @media (min-width: 1024px) {
-  [data-theme='mamyq'] .mamyq-map-wrap {
-    position: relative;
-  }
-
-  [data-theme='mamyq'] .mamyq-contact {
-    position: absolute;
-    left: 2rem;
-    top: 2rem;
-    width: 24rem;
+  [data-theme='mamyq'] .mamyq-contacts {
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
   }
 }
 
-[data-theme='mamyq'] .mamyq-map iframe {
-  border-radius: 2rem;
+[data-theme='mamyq'] .mamyq-map {
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+[data-theme='mamyq'] .mamyq-contact-grid {
+  display: grid;
+  gap: 1.6rem 2rem;
+  margin-top: 1.8rem;
+}
+
+@media (min-width: 640px) {
+  [data-theme='mamyq'] .mamyq-contact-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+[data-theme='mamyq'] .mamyq-contact-grid > div {
+  display: flex;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+[data-theme='mamyq'] .mamyq-ci {
+  width: 1.3rem;
+  height: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: rgb(var(--accent));
+}
+
+[data-theme='mamyq'] .mamyq-contact-grid b,
+[data-theme='mamyq'] .mamyq-ci-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: rgb(var(--mamyq-pink-ink));
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+[data-theme='mamyq'] .mamyq-contact-grid p span,
+[data-theme='mamyq'] .mamyq-contact-grid p a {
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 /* ── Подвал ── */
 
-[data-theme='mamyq'] .mamyq-footer-body {
-  border-top: 1px solid rgb(var(--line));
-  background: rgb(var(--brand-soft) / 0.5);
-  color: rgb(var(--muted));
-}
-
-[data-theme='mamyq'] .mamyq-footer-name {
-  font-size: 1.15rem;
-  font-weight: 900;
-  color: rgb(var(--brand-ink));
-}
-
-[data-theme='mamyq'] .mamyq-footer-title {
-  margin-bottom: 0.6rem;
-  font-weight: 900;
+[data-theme='mamyq'] .mamyq-footer {
+  margin-top: 2rem;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.85)),
+    url('/images/themes/mamyq/pattern-640.webp') 0 0 / 22rem 22rem repeat;
   color: rgb(var(--ink));
 }
 
-[data-theme='mamyq'] .mamyq-footer-body a:hover {
-  color: rgb(var(--brand-ink));
+[data-theme='mamyq'] .mamyq-footer-strip {
+  height: 5rem;
+  background: url('/images/themes/mamyq/pattern-640.webp') 0 -1.2rem / 22rem 22rem repeat-x;
 }
 
-[data-theme='mamyq'] .mamyq-footer-bottom {
-  border-top: 1px solid rgb(var(--line));
+[data-theme='mamyq'] .mamyq-footer-title {
+  margin-bottom: 1rem;
+  color: rgb(var(--mamyq-pink-ink));
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
 }
 
-@media (max-width: 639px) {
-  [data-theme='mamyq'] .mamyq-section {
-    padding-block: 3rem;
+[data-theme='mamyq'] .mamyq-footer-about {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.7;
+}
+
+[data-theme='mamyq'] .mamyq-footer-social > div > div {
+  justify-content: center;
+}
+
+[data-theme='mamyq'] .mamyq-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.3rem;
+}
+
+[data-theme='mamyq'] .mamyq-footer a:hover {
+  color: rgb(var(--mamyq-pink-ink));
+}
+
+[data-theme='mamyq'] .mamyq-footer-portal {
+  color: rgb(var(--mamyq-pink-ink));
+  font-weight: 800;
+}
+
+@media (max-width: 767px) {
+  [data-theme='mamyq'] .mamyq-d-sun,
+  [data-theme='mamyq'] .mamyq-d-fly,
+  [data-theme='mamyq'] .mamyq-d-flower,
+  [data-theme='mamyq'] .mamyq-d-plane {
+    display: none;
   }
 }

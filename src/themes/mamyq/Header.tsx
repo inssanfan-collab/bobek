@@ -1,19 +1,47 @@
-import { KitHeader } from '@/components/site/theme-kit';
+import Link from 'next/link';
+import { LinkButton } from '@/components/site/Hero';
+import { EnrollLink } from '@/components/site/theme-kit';
+import { headerExtras } from '@/lib/hero';
+import { pick } from '@/lib/i18n';
 import type { ThemeHeaderProps } from '../types';
 
-/** Знак «Мамық»: сердечко в пудровом круге. */
-function Heart() {
-  return (
-    <svg className="decor h-10 w-10" viewBox="0 0 40 40" aria-hidden>
-      <circle cx="20" cy="20" r="19" fill="#FFE3EA" />
-      <path d="M20 29c-6-4-9.5-7.6-9.5-11.6 0-2.7 2.1-4.7 4.6-4.7 2 0 3.8 1.2 4.9 3 1.1-1.8 2.9-3 4.9-3 2.5 0 4.6 2 4.6 4.7 0 4-3.5 7.6-9.5 11.6Z" fill="#B8325A" />
-    </svg>
-  );
-}
-
-/** Шапка «Мамық»: светлая, сердечко вместо логотипа, малиновая кнопка. */
+/**
+ * Шапка «Мамық» — по образцу №9: белая, название розовым, меню
+ * по центру, справа розовая кнопка-контур. Полоса с телефоном —
+ * если сад её включил.
+ */
 export function MamyqHeader({ profile, sections, locale, homeHref, tools, nav }: ThemeHeaderProps) {
+  const name = pick(locale, profile?.shortNameKk || profile?.nameKk, profile?.shortNameRu || profile?.nameRu) || 'Балабақша';
+  const extras = headerExtras(profile, locale);
+
   return (
-    <KitHeader prefix="mamyq" profile={profile} locale={locale} homeHref={homeHref} tools={tools} nav={nav} menu={sections} logoFallback={<Heart />} />
+    <header className="site-header mamyq-header sticky top-0 z-40">
+      {extras.phone || extras.hours ? (
+        <div className="mamyq-topbar">
+          <p className="container-page flex flex-wrap items-center justify-end gap-x-6 gap-y-1 py-1 text-sm">
+            {extras.phone ? <a href={`tel:${extras.phone.replace(/[^\d+]/g, '')}`} className="font-bold">{extras.phone}</a> : null}
+            {extras.hours ? <span>{extras.hours}</span> : null}
+          </p>
+        </div>
+      ) : null}
+      <div className="mamyq-row container-page">
+        <Link href={homeHref} className="mamyq-brand">
+          {profile?.logoMediaId ? (
+            // eslint-disable-next-line @next/next/no-img-element -- файл отдаёт /api/media
+            <img src={`/api/media/${profile.logoMediaId}`} alt="" className="h-11 w-11 shrink-0 object-contain" />
+          ) : null}
+          <span className="mamyq-wordmark">{name}</span>
+        </Link>
+        <div className="mamyq-side">
+          <div className="mamyq-tools">{tools}</div>
+          {extras.cta ? (
+            <LinkButton link={extras.cta} className="mamyq-outline mamyq-cta" />
+          ) : (
+            <EnrollLink menu={sections} locale={locale} className="mamyq-outline mamyq-cta" />
+          )}
+        </div>
+      </div>
+      <div className="mamyq-nav">{nav}</div>
+    </header>
   );
 }
