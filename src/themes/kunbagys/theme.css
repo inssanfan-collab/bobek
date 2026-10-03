@@ -1,28 +1,34 @@
 /*
- * Тема «Күнбағыс» — оранжевая и строгая (структура дизайна №10).
- * Кнопки — тёмно-оранжевый #B04F00 (белый текст 5,3:1), подвал #9A4500
- * (6,5:1); яркий оранжевый #FF7A00 — только линия шапки и украшения.
- * Шрифты: Montserrat (заголовки) и Open Sans — проверены на казахские буквы.
+ * Тема «Күнбағыс» — вплотную к образцу №10 (Baldauren): оранжевая
+ * полоса и подвал, разноцветное название, меню с цветными значками,
+ * фото детей с ладошками в краске на всю ширину и заголовок на оранжевой
+ * плашке, заголовки капителями с бледным словом позади, программы
+ * с объёмными игрушками на узоре из рисунков, стоимость вкладками.
+ * Цвета: оранжевый полос и кнопок #C2410C (белый текст 5,2:1), заголовки
+ * #EA580C — только крупные (3,6:1); пункты меню — каждый своим цветом,
+ * все от 4,5:1 на белом.
+ * Шрифты Montserrat и Open Sans — проверены на казахские буквы.
  * Каждое правило — под [data-theme='kunbagys'] (tests/unit/themes.test.ts).
  */
 
 [data-theme='kunbagys'] {
   --surface: 255 255 255;
   --card: 255 255 255;
-  --ink: 34 34 34;
-  --muted: 96 96 96;
-  --line: 236 236 236;
-  --brand: 176 79 0;
-  --brand-soft: 255 237 220;
-  --brand-ink: 140 62 0;
-  --accent: 176 79 0;
-  --accent-soft: 255 237 220;
-  --accent-ink: 140 62 0;
-  --kunbagys-orange: 255 122 0;
-  --kunbagys-deep: 154 69 0;
-  --radius-md: 0.75rem;
+  --ink: 31 31 36;
+  --muted: 96 96 106;
+  --line: 236 236 240;
+  --brand: 194 65 12;
+  --brand-soft: 255 237 213;
+  --brand-ink: 154 52 18;
+  --accent: 21 128 61;
+  --accent-soft: 220 252 231;
+  --accent-ink: 21 101 52;
+  --kunbagys-orange: 194 65 12;
+  --kunbagys-bright: 234 88 12;
+  --kunbagys-green: 74 222 128;
+  --radius-md: 0.8rem;
   --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
+  --radius-xl: 1.4rem;
   --font-display: 'Montserrat', 'Open Sans', system-ui, sans-serif;
   --font-sans: 'Open Sans', system-ui, sans-serif;
 }
@@ -32,43 +38,44 @@
   background-image: none;
 }
 
+[data-theme='kunbagys'] .container-page {
+  max-width: 78rem;
+}
+
 [data-theme='kunbagys'] .btn-primary,
+[data-theme='kunbagys'] .kunbagys-btn,
 [data-theme='kunbagys'] .kunbagys-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
-  background: rgb(var(--brand));
+  background: rgb(var(--kunbagys-orange));
   color: rgb(255 255 255);
+  padding: 0.7rem 1.7rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 [data-theme='kunbagys'] .btn-secondary {
   border-radius: 999px;
-  border: 2px solid rgb(var(--brand));
+  border: 2px solid rgb(var(--kunbagys-orange));
   background: rgb(255 255 255);
   color: rgb(var(--brand-ink));
   font-weight: 700;
 }
 
-[data-theme='kunbagys'] .kit-title {
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-[data-theme='kunbagys'] .kit-eyebrow {
-  border: 1px solid rgb(var(--kunbagys-orange) / 0.4);
-  background: rgb(var(--brand-soft));
-  color: rgb(var(--brand-ink));
-}
-
 /* ── Шапка ── */
 
 [data-theme='kunbagys'] .kunbagys-header {
-  border-top: 4px solid rgb(var(--kunbagys-orange));
-  background: rgb(255 255 255 / 0.97);
-  box-shadow: 0 1px 0 rgb(var(--line));
+  background: rgb(255 255 255);
+  box-shadow: 0 6px 16px -14px rgb(0 0 0 / 0.35);
 }
 
 [data-theme='kunbagys'] .kunbagys-topbar {
-  background: rgb(var(--brand));
+  background: rgb(var(--kunbagys-orange));
   color: rgb(255 255 255);
 }
 
@@ -76,244 +83,485 @@
   color: rgb(255 255 255);
 }
 
-[data-theme='kunbagys'] .kunbagys-name {
+[data-theme='kunbagys'] .kunbagys-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 0.7rem 0.2rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-wordmark {
+  min-width: 0;
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 700;
-  line-height: 1.2;
-  color: rgb(var(--ink));
+  font-size: clamp(1rem, 2.4vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.15;
 }
 
-[data-theme='kunbagys'] .kunbagys-tagline {
-  font-size: 0.78rem;
+[data-theme='kunbagys'] .kunbagys-side {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+[data-theme='kunbagys'] .kunbagys-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (max-width: 1023px) {
+  [data-theme='kunbagys'] .kunbagys-side .kunbagys-cta {
+    display: none;
+  }
+}
+
+[data-theme='kunbagys'] .kunbagys-nav nav ul {
+  justify-content: flex-end;
+}
+
+/* Каждый пункт меню — своим цветом и со значком-кружком сверху. */
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li > a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  border-radius: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgb(var(--brand-ink));
 }
 
-[data-theme='kunbagys'] .kunbagys-nav nav a {
-  border-radius: 0.5rem;
-  color: rgb(var(--ink));
-  font-weight: 600;
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li > a::before {
+  content: '';
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid currentColor;
+  border-radius: 0.3rem;
+  background: currentColor;
+  box-shadow: inset 0 0 0 2px rgb(255 255 255);
+  transform: rotate(45deg);
 }
 
-/* ── Первый экран: фото во всю ширину ── */
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 1) > a { color: rgb(220 38 38); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 2) > a { color: rgb(194 65 12); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 3) > a { color: rgb(161 98 7); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 4) > a { color: rgb(21 128 61); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 5) > a { color: rgb(29 78 216); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 6) > a { color: rgb(67 56 202); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 7) > a { color: rgb(126 34 206); }
+
+[data-theme='kunbagys'] .kunbagys-nav nav a:hover {
+  background: rgb(var(--brand-soft));
+}
+
+/* ── Первый экран: фото и заголовок на оранжевой плашке ── */
 
 [data-theme='kunbagys'] .kunbagys-hero {
   position: relative;
   overflow: hidden;
-  background: rgb(var(--ink));
-  color: rgb(255 255 255);
+  background: rgb(250 246 240);
 }
 
 [data-theme='kunbagys'] .kunbagys-hero-photo {
-  position: absolute;
-  inset: 0;
+  display: block;
   width: 100%;
-  height: 100%;
   object-fit: cover;
+  object-position: center 30%;
 }
 
-/* Затемнение слева, чтобы белый текст читался на любом фото. */
-[data-theme='kunbagys'] .kunbagys-hero::after {
-  content: '';
+[data-theme='kunbagys'] .kunbagys-hero-inner {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgb(20 14 8 / 0.85), rgb(20 14 8 / 0.55) 55%, rgb(20 14 8 / 0.15));
+  inset: auto 0 9% 0;
+  display: flex;
+  justify-content: center;
 }
 
-[data-theme='kunbagys'] .kunbagys-hero .container-page {
-  z-index: 1;
-}
-
-[data-theme='kunbagys'] .kunbagys-pill {
-  display: inline-block;
-  margin-bottom: 1.2rem;
-  border-radius: 999px;
-  border: 1px solid rgb(255 255 255 / 0.35);
-  background: rgb(255 255 255 / 0.12);
-  padding: 0.35rem 1rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+[data-theme='kunbagys'] .kunbagys-hero-bar {
+  max-width: 44rem;
+  border-radius: 0.3rem;
+  background: rgb(194 65 12 / 0.88);
+  padding: 0.9rem 2.2rem;
+  text-align: center;
 }
 
 [data-theme='kunbagys'] .kunbagys-h1 {
-  font-size: clamp(2.3rem, 5vw, 3.8rem);
-  font-weight: 800;
-  line-height: 1.1;
-  color: rgb(255 255 255);
-  text-wrap: balance;
-}
-
-[data-theme='kunbagys'] .kunbagys-lead {
-  margin-top: 1.2rem;
-  font-size: 1.1rem;
-  line-height: 1.65;
-  color: rgb(240 236 232);
-}
-
-[data-theme='kunbagys'] .kunbagys-ghost {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  border: 1px solid rgb(255 255 255 / 0.5);
-  background: rgb(255 255 255 / 0.1);
-  color: rgb(255 255 255);
-  padding: 0.75rem 1.5rem;
-  font-weight: 700;
-}
-
-[data-theme='kunbagys'] .kunbagys-checks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem 1.5rem;
-  margin-top: 2rem;
-  padding-top: 1.2rem;
-  border-top: 1px solid rgb(255 255 255 / 0.25);
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-[data-theme='kunbagys'] .kunbagys-checks li::before {
-  content: '✓';
-  margin-right: 0.45rem;
-  color: rgb(var(--kunbagys-orange));
-  font-weight: 800;
-}
-
-/* ── Секции ── */
-
-[data-theme='kunbagys'] .kunbagys-section {
-  padding-block: 4.5rem;
-}
-
-[data-theme='kunbagys'] .kunbagys-grey {
-  background: rgb(247 247 247);
-}
-
-[data-theme='kunbagys'] .kunbagys-photo {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border-radius: 1.25rem;
-  border: 8px solid rgb(var(--brand-soft));
-}
-
-[data-theme='kunbagys'] .kunbagys-subtitle {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: clamp(1.4rem, 2.8vw, 2.3rem);
   font-weight: 700;
+  line-height: 1.2;
+  color: rgb(255 255 255);
+}
+
+[data-theme='kunbagys'] .kunbagys-hero .hero-highlight-light {
+  text-decoration-color: rgb(255 237 213);
+}
+
+@media (min-width: 1024px) {
+  [data-theme='kunbagys'] .kunbagys-hero-photo {
+    height: clamp(28rem, 40vw, 38rem);
+  }
+}
+
+@media (max-width: 1023px) {
+  [data-theme='kunbagys'] .kunbagys-hero-photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  [data-theme='kunbagys'] .kunbagys-hero-inner {
+    position: relative;
+    inset: auto;
+    margin-top: -2rem;
+    padding-bottom: 1rem;
+  }
+
+  [data-theme='kunbagys'] .kunbagys-hero-bar {
+    padding: 0.8rem 1.2rem;
+  }
+}
+
+/* ── Заголовки с бледным словом позади ── */
+
+[data-theme='kunbagys'] .kunbagys-heading {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding-block: 1.5rem 0.5rem;
+  text-align: center;
+}
+
+[data-theme='kunbagys'] .kunbagys-mark {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  max-width: 100%;
+  overflow: hidden;
+  transform: translateX(-50%);
+  color: rgb(240 241 244);
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 4.6rem);
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+[data-theme='kunbagys'] .kunbagys-title {
+  position: relative;
+  margin-top: clamp(0.9rem, 2.5vw, 1.9rem);
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: rgb(var(--kunbagys-bright));
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgb(124 45 18 / 0.6);
+}
+
+[data-theme='kunbagys'] .kunbagys-text {
+  color: rgb(var(--muted));
+  line-height: 1.7;
+}
+
+/* ── «Қош келдіңіздер» ── */
+
+[data-theme='kunbagys'] .kunbagys-welcome {
+  padding-block: 4rem 3rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-welcome-grid {
+  display: grid;
+  align-items: center;
+  gap: 2.5rem;
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='kunbagys'] .kunbagys-welcome-grid {
+    grid-template-columns: 0.75fr 1.25fr;
+    gap: 3rem;
+  }
+}
+
+[data-theme='kunbagys'] .kunbagys-photos {
+  display: grid;
+  gap: 0.8rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-photos img {
+  width: 100%;
+  aspect-ratio: 1.6 / 1;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-intro {
+  color: rgb(var(--brand-ink));
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.55;
+  text-align: center;
 }
 
 [data-theme='kunbagys'] .kunbagys-why {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+  padding-left: 1.3rem;
+  list-style: disc;
+  font-size: 0.92rem;
+  font-style: italic;
+}
+
+/* ── Программы на узоре из рисунков ── */
+
+[data-theme='kunbagys'] .kunbagys-programs-wrap {
+  background:
+    linear-gradient(rgb(255 255 255 / 0.78), rgb(255 255 255 / 0.78)),
+    url('/images/themes/kunbagys/pattern-640.webp') 0 0 / 20rem 20rem repeat;
+}
+
+[data-theme='kunbagys'] .kunbagys-programs-wrap .kunbagys-mark {
+  color: rgb(236 238 242);
+}
+
+/* Программ бывает меньше четырёх — тогда они стоят по центру. */
+[data-theme='kunbagys'] .kunbagys-programs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 2.5rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-programs li {
+  flex: 0 1 100%;
+}
+
+@media (min-width: 640px) {
+  [data-theme='kunbagys'] .kunbagys-programs li {
+    flex-basis: calc(50% - 0.6rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-theme='kunbagys'] .kunbagys-programs li {
+    flex-basis: calc(25% - 0.9rem);
+  }
+}
+
+[data-theme='kunbagys'] .kunbagys-programs li {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  border-left: 4px solid rgb(var(--kunbagys-orange));
-  border-radius: 0.75rem;
-  background: rgb(250 250 250);
-  padding: 0.9rem 1.1rem;
-  color: rgb(var(--muted));
-}
-
-[data-theme='kunbagys'] .kunbagys-why b {
-  font-family: var(--font-display);
-  color: rgb(var(--ink));
-}
-
-[data-theme='kunbagys'] .kunbagys-program {
-  border-radius: 1.25rem;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 0.4rem;
   background: rgb(255 255 255);
-  padding: 1.8rem 1.5rem;
+  padding: 1.8rem 1.3rem 1.6rem;
   text-align: center;
-  box-shadow: 0 16px 32px -26px rgb(0 0 0 / 0.4);
-  transition: transform 0.2s;
+  box-shadow: 0 14px 30px -20px rgb(0 0 0 / 0.4);
 }
 
-[data-theme='kunbagys'] .kunbagys-program:hover {
-  transform: translateY(-4px);
+[data-theme='kunbagys'] .kunbagys-toy {
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: contain;
 }
 
-[data-theme='kunbagys'] .kunbagys-icon {
-  display: grid;
-  place-items: center;
-  width: 4rem;
-  height: 4rem;
-  margin: 0 auto 1rem;
-  border-radius: 999px;
-  background: rgb(var(--brand-soft));
+[data-theme='kunbagys'] .kunbagys-programs b {
   color: rgb(var(--brand-ink));
-}
-
-[data-theme='kunbagys'] .kunbagys-icon svg {
-  width: 2rem;
-  height: 2rem;
-}
-
-[data-theme='kunbagys'] .kunbagys-program h3 {
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 800;
 }
 
-[data-theme='kunbagys'] .kunbagys-program p {
-  margin-top: 0.5rem;
-  font-size: 0.93rem;
+[data-theme='kunbagys'] .kunbagys-programs li > span {
+  flex: 1;
   color: rgb(var(--muted));
+  font-size: 0.85rem;
+  line-height: 1.55;
 }
 
-[data-theme='kunbagys'] .kunbagys-prices .card,
-[data-theme='kunbagys'] .kunbagys-reviews .card,
-[data-theme='kunbagys'] .kunbagys-news article.card {
-  border: 1px solid rgb(var(--line));
-  border-radius: 1.25rem;
-  box-shadow: 0 16px 32px -28px rgb(0 0 0 / 0.4);
+[data-theme='kunbagys'] .kunbagys-btn-sm {
+  padding: 0.5rem 1.4rem;
+  font-size: 0.72rem;
 }
 
-[data-theme='kunbagys'] .kunbagys-more {
-  font-weight: 700;
+/* ── Стоимость вкладками ── */
+
+[data-theme='kunbagys'] .kunbagys-tabs {
+  max-width: 64rem;
+  margin: 2.5rem auto 0;
+}
+
+[data-theme='kunbagys'] .kunbagys-tab-labels {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+[data-theme='kunbagys'] .kunbagys-tab-labels label {
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  border-bottom: 0;
+  border-radius: 0.3rem 0.3rem 0 0;
+  padding: 0.8rem 1.4rem;
   color: rgb(var(--brand-ink));
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+[data-theme='kunbagys'] .kunbagys-tab-panels {
+  border: 1.5px solid rgb(var(--kunbagys-green));
+  border-radius: 0 0.3rem 0.3rem 0.3rem;
+  background: rgb(255 255 255);
+  padding: 1.6rem 1.8rem;
+  box-shadow: 0 16px 30px -24px rgb(0 0 0 / 0.4);
+}
+
+[data-theme='kunbagys'] .kunbagys-tab-panels > div {
+  display: none;
+}
+
+[data-theme='kunbagys'] .kunbagys-tab-panels ul {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  padding-left: 1.3rem;
+  list-style: disc;
+  font-size: 0.92rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-price {
+  margin-top: 0.6rem;
+  color: rgb(var(--brand-ink));
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(1):checked ~ .kunbagys-tab-panels > div:nth-child(1),
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(2):checked ~ .kunbagys-tab-panels > div:nth-child(2),
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(3):checked ~ .kunbagys-tab-panels > div:nth-child(3),
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(4):checked ~ .kunbagys-tab-panels > div:nth-child(4) {
+  display: block;
+}
+
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(1):checked ~ .kunbagys-tab-labels label:nth-child(1),
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(2):checked ~ .kunbagys-tab-labels label:nth-child(2),
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(3):checked ~ .kunbagys-tab-labels label:nth-child(3),
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(4):checked ~ .kunbagys-tab-labels label:nth-child(4) {
+  position: relative;
+  bottom: -1.5px;
+  border-color: rgb(var(--kunbagys-green));
+  background: rgb(255 255 255);
+  color: rgb(var(--accent-ink));
+}
+
+/* Фокус с клавиатуры виден на ярлыке вкладки. */
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(1):focus-visible ~ .kunbagys-tab-labels label:nth-child(1),
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(2):focus-visible ~ .kunbagys-tab-labels label:nth-child(2),
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(3):focus-visible ~ .kunbagys-tab-labels label:nth-child(3),
+[data-theme='kunbagys'] .kunbagys-tabs input:nth-of-type(4):focus-visible ~ .kunbagys-tab-labels label:nth-child(4) {
+  outline: 3px solid rgb(var(--kunbagys-bright));
+  outline-offset: 2px;
+}
+
+/* ── Отзывы ── */
+
+[data-theme='kunbagys'] .kunbagys-reviews {
+  display: grid;
+  gap: 1.4rem;
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  [data-theme='kunbagys'] .kunbagys-reviews {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+[data-theme='kunbagys'] .kunbagys-reviews li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+[data-theme='kunbagys'] .kunbagys-reviews blockquote {
+  width: 100%;
+  min-height: 7rem;
+  margin-bottom: 0.6rem;
+  border-radius: 0.6rem;
+  background: rgb(255 255 255);
+  padding: 1.6rem 1.4rem;
+  color: rgb(var(--muted));
+  font-size: 0.9rem;
+  line-height: 1.6;
+  box-shadow: 0 14px 30px -18px rgb(0 0 0 / 0.35);
+}
+
+[data-theme='kunbagys'] .kunbagys-reviews .review-stars {
+  color: rgb(234 179 8);
+}
+
+/* ── Новости ── */
+
+[data-theme='kunbagys'] .kunbagys-news article.card {
+  border: 0;
+  border-radius: 0.6rem;
+  box-shadow: 0 16px 30px -20px rgb(0 0 0 / 0.4);
 }
 
 /* ── Подвал ── */
 
-[data-theme='kunbagys'] .kunbagys-footer-body {
-  background: rgb(var(--kunbagys-deep));
-  color: rgb(255 236 220);
+[data-theme='kunbagys'] .kunbagys-footer {
+  margin-top: 2rem;
+  border-top: 1px solid rgb(var(--line));
+  background: rgb(255 255 255);
 }
 
-[data-theme='kunbagys'] .kunbagys-footer-name {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: rgb(255 255 255);
+[data-theme='kunbagys'] .kunbagys-footer-links {
+  columns: 2;
+  column-gap: 1.5rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-footer-links li {
+  break-inside: avoid;
+  margin-bottom: 0.45rem;
+}
+
+[data-theme='kunbagys'] .kunbagys-footer a:hover {
+  color: rgb(var(--brand-ink));
 }
 
 [data-theme='kunbagys'] .kunbagys-footer-title {
   margin-bottom: 0.6rem;
+  color: rgb(var(--brand-ink));
   font-family: var(--font-display);
-  font-weight: 700;
-  color: rgb(255 210 160);
-}
-
-[data-theme='kunbagys'] .kunbagys-footer-body a:hover {
-  color: rgb(255 255 255);
-  text-decoration: underline;
-}
-
-[data-theme='kunbagys'] .kunbagys-footer-social a {
-  color: rgb(var(--ink));
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 [data-theme='kunbagys'] .kunbagys-footer-bottom {
-  border-top: 1px solid rgb(255 255 255 / 0.2);
+  background: rgb(var(--kunbagys-orange));
+  color: rgb(255 255 255);
 }
 
-@media (max-width: 639px) {
-  [data-theme='kunbagys'] .kunbagys-section {
-    padding-block: 3rem;
-  }
+[data-theme='kunbagys'] .kunbagys-footer-bottom a {
+  color: rgb(255 255 255);
 }
