@@ -42,7 +42,8 @@ export default async function TenantHome({
       where: { isVisible: true },
       orderBy: [{ position: 'asc' }, { createdAt: 'desc' }],
       take: 3,
-      include: { items: { orderBy: { position: 'asc' }, take: 1, include: { media: true } } },
+      // До шести фото на альбом: темам с галереей плиткой нужно больше одной обложки.
+      include: { items: { orderBy: { position: 'asc' }, take: 6, include: { media: true } } },
     }),
     profile?.coverMediaId
       ? prisma.media.findFirst({ where: { id: profile.coverMediaId, tenantId: tenant.id } })

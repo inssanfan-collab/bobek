@@ -30,9 +30,10 @@ const T = {
 /** Картинка к пункту распорядка — по смыслу: еда, занятия, прогулка, сон, игры. */
 function routineImage(title: string): string {
   const t = title.toLowerCase();
-  if (/ас|тамақ|завтрак|обед|полдник|ужин|питани/.test(t)) return 'meal';
+  // Сон — первым: в «Тихий час» есть буквы «ас», а «ас» — это «еда».
+  if (/ұйқы|сон|тихий/.test(t)) return 'sleep';
+  if (/(^|\s)ас(\s|$)|тамақ|завтрак|обед|полдник|ужин|питани/.test(t)) return 'meal';
   if (/серуен|прогулк|ойын алаң|улиц/.test(t)) return 'walk';
-  if (/ұйқы|сон|тихий/.test(t)) return 'sleep';
   if (/сабақ|оқу|занят|іс-әрекет|урок/.test(t)) return 'lessons';
   return 'play';
 }

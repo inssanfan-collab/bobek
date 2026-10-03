@@ -1,202 +1,210 @@
-import { NewsCard, SiteLink, T as BLOCK_T, mediaUrl } from '@/components/site/blocks';
+import { NewsCard, SiteLink, T as BLOCK_T } from '@/components/site/blocks';
 import { HeroButtons, HeroTitle } from '@/components/site/Hero';
-import { RoutineCards, StatsRow } from '@/components/site/home-blocks';
-import { ReviewList } from '@/components/site/sections';
-import { CoverOr, EnrollLink, SectionHead, ThemeImage, aboutSection as findAbout, developmentAreas, findSection } from '@/components/site/theme-kit';
+import { Stars } from '@/components/site/sections';
+import { CoverOr, EnrollLink, ThemeImage, aboutSection, albumPhotos, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
-import { pick } from '@/lib/i18n';
+import { pick, type Locale } from '@/lib/i18n';
 import type { HomeProps } from '@/templates/types';
-import { Sparkle, Sun } from './Doodles';
+import { Cloud, HangingClouds, Icon, Plane, routineIcon } from './Doodles';
 
 const THEME = 'shuaq';
 
+type Pair = { kk: [string, string]; ru: [string, string] };
+
+const H: Record<string, Pair> = {
+  give: { kk: ['Бүлдіршіндерге біз', 'не береміз?'], ru: ['Что мы даём', 'малышам?'] },
+  about: { kk: ['Балаларға арналған', 'сапалы тәрбие'], ru: ['Заботливое воспитание', 'для каждого ребёнка'] },
+  routine: { kk: ['Күн', 'тәртібі'], ru: ['Распорядок', 'дня'] },
+  gallery: { kk: ['Балалардың', 'жарқын сәттері'], ru: ['Яркие', 'моменты детей'] },
+  reviews: { kk: ['Ата-аналардың', 'пікірлері'], ru: ['Отзывы', 'родителей'] },
+  news: { kk: ['Соңғы', 'жаңалықтар'], ru: ['Последние', 'новости'] },
+};
+
 const T = {
-  welcome: { kk: 'Қош келдіңіз!', ru: 'Добро пожаловать!' },
-  give: { kk: 'Бүлдіршіндерге біз не береміз?', ru: 'Что мы даём малышам?' },
-  giveEyebrow: { kk: 'Даму бағыттары', ru: 'Направления развития' },
-  about: { kk: 'Біз туралы', ru: 'О нас' },
-  aboutTitle: { kk: 'Балаларға арналған сапалы тәрбие', ru: 'Качественное воспитание для детей' },
+  welcome: { kk: 'Кел, балалар, ойнайық!', ru: 'Давайте играть вместе!' },
+  aboutPill: { kk: 'Біз туралы', ru: 'О нас' },
   more: { kk: 'Толығырақ', ru: 'Подробнее' },
-  routine: { kk: 'Күн тәртібі', ru: 'Распорядок дня' },
-  routineEyebrow: { kk: 'Балалардың күні', ru: 'День ребёнка' },
-  gallery: { kk: 'Балалардың жарқын сәттері', ru: 'Яркие моменты детей' },
-  allPhotos: { kk: 'Барлық фотолар', ru: 'Все фото' },
-  reviews: { kk: 'Ата-аналар пікірлері', ru: 'Отзывы родителей' },
-  cta: { kk: 'Балаңызды бізге әкеліңіз!', ru: 'Приводите малыша к нам!' },
-  ctaLead: { kk: 'Балабақшамен танысып, тәрбиешілермен жүздесуге шақырамыз.', ru: 'Приглашаем познакомиться с садом и встретиться с воспитателями.' },
-  langKk: { kk: 'Оқыту қазақ тілінде', ru: 'Обучение на казахском языке' },
-  langRu: { kk: 'Оқыту орыс тілінде', ru: 'Обучение на русском языке' },
-  langBoth: { kk: 'Қазақ және орыс топтары', ru: 'Казахские и русские группы' },
-  hours: { kk: 'Жұмыс уақыты', ru: 'Часы работы' },
-  free: { kk: 'Бос орындар бар', ru: 'Есть свободные места' },
+  allPhotos: { kk: 'Барлық фото', ru: 'Все фото' },
 } as const;
 
-/** Картинка к карточке направления: своя для спорта, логики, творчества. */
-const AREA_IMAGE: Record<string, string> = { health: 'sport', logic: 'logic', art: 'paint', speech: 'logic', social: 'paint' };
-const CARD_IMAGES = ['sport', 'logic', 'paint'];
+/** Заголовок в два цвета: первая часть тёмная, вторая — зелёная, как в образце. */
+function TwoTone({ pair, locale, id, light = false }: { pair: Pair; locale: Locale; id?: string; light?: boolean }) {
+  const [first, accent] = pair[locale];
+  return (
+    <h2 id={id} className={`shuaq-title ${light ? 'shuaq-title-light' : ''}`}>
+      {first} <span className="shuaq-green">{accent}</span>
+    </h2>
+  );
+}
+
+const CARD_IMAGES = ['play', 'sport', 'abacus'];
+const CARD_ICONS = ['slide', 'school', 'easel'];
 
 /**
- * Главная «Шуақ» — по структуре популярного «детского» сайта: первый экран
- * с карточкой-облачком и фото, «Что мы даём малышам» (кружки сада или
- * направления ГОСО), «О нас» с двумя фото, бирюзовая полоса распорядка,
- * галерея альбомов, новости, отзывы, коралловая полоса записи.
+ * Главная «Шуақ» — по образцу дизайна №1: фото ребёнка на всю ширину
+ * с белым облачком-карточкой и рисунком, кремовый фон в узорах с тремя
+ * фото-карточками, «О нас» с бежевым кругом и плашкой, фиолетовая
+ * полоса распорядка с облаками и самолётиком, галерея плиткой из альбомов
+ * сада, новости, отзыв на розово-оранжевом градиенте рядом с фото.
+ * Фото и рисунки — сгенерированные; тексты и данные — сада.
  */
 export function ShuaqHome({ profile, news, albums, locale, coverUrl, coverPosition, hero, menu, clubs = [], routine = [], reviews = [], counts }: HomeProps) {
   const stats = homeStats(profile, counts, locale);
-  const cards = clubs.length > 0
-    ? clubs.slice(0, 3).map((club, index) => ({
-        key: club.id,
-        title: pick(locale, club.nameKk, club.nameRu),
-        text: pick(locale, club.descKk, club.descRu),
-        image: CARD_IMAGES[index % CARD_IMAGES.length],
-      }))
-    : developmentAreas(locale).filter((area) => ['health', 'logic', 'art'].includes(area.key)).map((area) => ({ ...area, image: AREA_IMAGE[area.key] }));
-  const aboutText = pick(locale, profile?.aboutKk, profile?.aboutRu);
-  const aboutSection = findAbout(menu);
+  const about = aboutSection(menu);
+  const clubsSection = findSection(menu, 'CLUBS');
   const gallerySection = findSection(menu, 'GALLERY');
-  const checks = [
-    profile?.langKk && profile?.langRu ? T.langBoth[locale] : profile?.langKk ? T.langKk[locale] : profile?.langRu ? T.langRu[locale] : null,
-    profile?.workHours ? `${T.hours[locale]}: ${profile.workHours}` : null,
-    profile?.placesFree ? T.free[locale] : null,
-  ].filter((item): item is string => Boolean(item));
+  const aboutText = pick(locale, profile?.aboutKk, profile?.aboutRu) || hero.lead;
+  const photos = albumPhotos(albums, locale, 5);
+  const cards = clubs.length > 0
+    ? clubs.slice(0, 3).map((club) => ({ key: club.id, title: pick(locale, club.nameKk, club.nameRu) }))
+    : developmentAreas(locale).filter((area) => ['health', 'logic', 'art'].includes(area.key)).map((area) => ({ key: area.key, title: area.title }));
+  const cardHref = clubsSection ? `/${clubsSection.slug}` : about ? `/${about.slug}` : null;
 
   return (
     <div className="shuaq-home">
       <section className="shuaq-hero">
-        <div className="container-page grid items-center gap-8 py-10 lg:grid-cols-[0.9fr_1.1fr] lg:py-16">
+        <ThemeImage theme={THEME} name="hero" className="shuaq-hero-photo" sizes="100vw" eager />
+        <div className="container-page shuaq-hero-inner">
           <div className="shuaq-bubble">
-            <Sun className="shuaq-doodle shuaq-bubble-sun" />
-            <p className="shuaq-badge">{hero.eyebrow || T.welcome[locale]}</p>
-            <HeroTitle hero={hero} tone="plain" withEyebrow={false} className="shuaq-h1 font-display" />
-            {hero.lead ? <p className="shuaq-lead">{hero.lead}</p> : null}
-            <div className="mt-6 flex flex-wrap gap-3">
-              <HeroButtons hero={hero} tone="plain">
-                <EnrollLink menu={menu} locale={locale} className="btn-primary" />
-              </HeroButtons>
+            <div className="shuaq-bubble-text">
+              <p className="shuaq-eyebrow"><span aria-hidden>♥</span>{hero.eyebrow || T.welcome[locale]}</p>
+              <HeroTitle hero={hero} tone="plain" withEyebrow={false} className="shuaq-h1" />
+              {hero.lead ? <p className="shuaq-lead">{hero.lead}</p> : null}
+              <div className="mt-5 flex flex-wrap gap-3">
+                <HeroButtons hero={hero} tone="plain">
+                  <EnrollLink menu={menu} locale={locale} className="shuaq-btn" />
+                </HeroButtons>
+              </div>
             </div>
-            <StatsRow stats={stats} className="shuaq-stats" />
-          </div>
-          <div className="shuaq-hero-photo-wrap">
-            <CoverOr coverUrl={coverUrl} coverPosition={coverPosition} theme={THEME} name="hero" className="shuaq-hero-photo" eager />
-            <Sparkle className="shuaq-doodle shuaq-hero-sparkle" />
+            <ThemeImage theme={THEME} name="cartoon" className="shuaq-cartoon decor" sizes="(min-width: 1024px) 18vw, 50vw" />
           </div>
         </div>
       </section>
 
-      <section className="shuaq-section" aria-labelledby="shuaq-give">
-        <div className="container-page">
-          <SectionHead id="shuaq-give" eyebrow={T.giveEyebrow[locale]} title={T.give[locale]} className="kit-head text-center" />
-          <ul className="mt-10 grid gap-6 md:grid-cols-3">
-            {cards.map((card) => (
-              <li key={card.key} className="shuaq-card">
-                <ThemeImage theme={THEME} name={card.image} className="shuaq-card-photo" sizes="(min-width: 768px) 33vw, 100vw" />
-                <div className="p-6">
-                  <h3 className="shuaq-card-title">{card.title}</h3>
-                  {card.text ? <p className="shuaq-card-text">{card.text}</p> : null}
-                </div>
-              </li>
-            ))}
+      <section className="shuaq-pattern" aria-labelledby="shuaq-give">
+        <div className="container-page py-16 text-center">
+          <TwoTone pair={H.give} locale={locale} id="shuaq-give" />
+          <ul className="mt-10 grid gap-7 text-left md:grid-cols-3">
+            {cards.map((card, index) => {
+              const inner = (
+                <>
+                  <ThemeImage theme={THEME} name={CARD_IMAGES[index % 3]} className="shuaq-card-photo" sizes="(min-width: 768px) 33vw, 100vw" />
+                  <span className="shuaq-card-label">
+                    <Icon name={CARD_ICONS[index % 3]} className="h-7 w-7 shrink-0" />
+                    <span className="flex-1">{card.title}</span>
+                    <span className="shuaq-card-arrow"><Icon name="arrow" className="h-4 w-4" /></span>
+                  </span>
+                </>
+              );
+              return (
+                <li key={card.key} className="shuaq-card">
+                  {cardHref ? <SiteLink href={cardHref} locale={locale} className="block">{inner}</SiteLink> : inner}
+                </li>
+              );
+            })}
           </ul>
         </div>
       </section>
 
-      <section className="shuaq-section shuaq-about" aria-labelledby="shuaq-about">
-        <div className="container-page grid items-center gap-10 lg:grid-cols-2">
-          <div className="shuaq-collage">
-            <CoverOr coverUrl={coverUrl} coverPosition={coverPosition} theme={THEME} name="logic" className="shuaq-collage-main" />
-            <ThemeImage theme={THEME} name="paint" className="shuaq-collage-small" sizes="(min-width: 1024px) 25vw, 50vw" />
+      <section className="shuaq-about" aria-labelledby="shuaq-about">
+        <div className="container-page grid items-center gap-12 py-20 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="shuaq-about-art">
+            <span className="shuaq-about-circle" aria-hidden />
+            <ThemeImage theme={THEME} name="girl" className="shuaq-about-small" sizes="(min-width: 1024px) 12vw, 30vw" />
+            <CoverOr coverUrl={coverUrl} coverPosition={coverPosition} theme={THEME} name="faces" className="shuaq-about-main" />
             {stats[0] ? (
-              <p className="shuaq-collage-badge"><b>{stats[0].value}</b> {stats[0].label}</p>
+              <p className="shuaq-about-badge">
+                <b>{stats[0].value}</b>
+                <span>{stats[0].label}</span>
+              </p>
             ) : null}
+            <Plane className="shuaq-about-plane" color="#D61C6B" />
           </div>
           <div>
-            <SectionHead id="shuaq-about" eyebrow={T.about[locale]} title={T.aboutTitle[locale]} />
-            {aboutText && aboutText !== hero.lead ? <p className="shuaq-text mt-4">{aboutText}</p> : null}
-            {checks.length > 0 ? (
-              <ul className="mt-5 space-y-3">
-                {checks.map((check) => (
-                  <li key={check} className="shuaq-check">{check}</li>
-                ))}
-              </ul>
-            ) : null}
-            {aboutSection ? (
-              <SiteLink href={`/${aboutSection.slug}`} locale={locale} className="btn-secondary mt-7 inline-flex">{T.more[locale]} →</SiteLink>
-            ) : null}
+            <TwoTone pair={H.about} locale={locale} id="shuaq-about" />
+            <p className="shuaq-pill">{T.aboutPill[locale]}</p>
+            {aboutText ? <p className="shuaq-text">{aboutText}</p> : null}
+            {about ? <SiteLink href={`/${about.slug}`} locale={locale} className="shuaq-btn mt-6">{T.more[locale]}</SiteLink> : null}
           </div>
         </div>
       </section>
 
       {routine.length > 0 ? (
-        <section className="shuaq-routine" aria-labelledby="shuaq-routine">
-          <div className="container-page py-14">
-            <SectionHead id="shuaq-routine" eyebrow={T.routineEyebrow[locale]} title={T.routine[locale]} className="kit-head text-center" />
-            <RoutineCards items={routine} locale={locale} className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" />
+        <section className="shuaq-band" aria-labelledby="shuaq-routine">
+          <HangingClouds className="shuaq-band-clouds" />
+          <Plane className="shuaq-band-plane" />
+          <div className="container-page relative py-16 text-center">
+            <TwoTone pair={H.routine} locale={locale} id="shuaq-routine" light />
+            <ol className="mx-auto mt-10 grid max-w-4xl gap-5 text-left sm:grid-cols-2">
+              {routine.slice(0, 8).map((item) => (
+                <li key={item.id} className="shuaq-routine-card">
+                  <span className="flex-1">
+                    <b>{pick(locale, item.titleKk, item.titleRu)}</b>
+                    <span className="block">{item.time}</span>
+                  </span>
+                  <span className="shuaq-routine-icon"><Icon name={routineIcon(`${item.titleKk} ${item.titleRu}`)} className="h-6 w-6" /></span>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
       ) : null}
 
-      {albums.length > 0 ? (
-        <section className="shuaq-section" aria-labelledby="shuaq-gallery">
-          <div className="container-page">
-            <SectionHead id="shuaq-gallery" title={T.gallery[locale]} className="kit-head text-center" />
-            <ul className="shuaq-gallery mt-10">
-              {albums.slice(0, 5).map((album) => {
-                const cover = mediaUrl(album.items[0]?.media);
-                return (
-                  <li key={album.id}>
-                    <SiteLink href={`/${gallerySection?.slug ?? 'gallery'}/${album.slug}`} locale={locale} className="shuaq-gallery-item">
-                      {cover ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- медиа отдаёт свой роут
-                        <img src={cover} alt="" loading="lazy" />
-                      ) : (
-                        <ThemeImage theme={THEME} name="paint" />
-                      )}
-                      <span>{pick(locale, album.titleKk, album.titleRu)}</span>
-                    </SiteLink>
-                  </li>
-                );
-              })}
-            </ul>
-            {gallerySection ? (
-              <p className="mt-8 text-center">
-                <SiteLink href={`/${gallerySection.slug}`} locale={locale} className="btn-primary">{T.allPhotos[locale]}</SiteLink>
-              </p>
-            ) : null}
-          </div>
+      {photos.length > 0 ? (
+        <section className="container-page py-16 text-center" aria-labelledby="shuaq-gallery">
+          <TwoTone pair={H.gallery} locale={locale} id="shuaq-gallery" />
+          <ul className={`shuaq-masonry shuaq-masonry-${photos.length} mt-10`}>
+            {photos.map((photo) => (
+              <li key={photo.key}>
+                <SiteLink href={`/${gallerySection?.slug ?? 'gallery'}/${photo.albumSlug}`} locale={locale} className="shuaq-masonry-item">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- медиа отдаёт свой роут */}
+                  <img src={photo.src} alt={photo.title} loading="lazy" />
+                </SiteLink>
+              </li>
+            ))}
+          </ul>
+          {gallerySection ? <SiteLink href={`/${gallerySection.slug}`} locale={locale} className="shuaq-btn mt-8">{T.allPhotos[locale]}</SiteLink> : null}
         </section>
       ) : null}
 
       {news.length > 0 ? (
-        <section className="shuaq-section" aria-labelledby="shuaq-news">
-          <div className="container-page">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <SectionHead id="shuaq-news" title={BLOCK_T.news[locale]} />
-              <SiteLink href="/news" locale={locale} className="shuaq-more">{BLOCK_T.allNews[locale]} →</SiteLink>
-            </div>
-            <div className="shuaq-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
-            </div>
+        <section className="container-page py-12" aria-labelledby="shuaq-news">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <TwoTone pair={H.news} locale={locale} id="shuaq-news" />
+            <SiteLink href="/news" locale={locale} className="shuaq-more">{BLOCK_T.allNews[locale]} →</SiteLink>
+          </div>
+          <div className="shuaq-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
         </section>
       ) : null}
 
       {reviews.length > 0 ? (
-        <section className="shuaq-section" aria-labelledby="shuaq-reviews">
-          <div className="container-page">
-            <SectionHead id="shuaq-reviews" title={T.reviews[locale]} className="kit-head text-center" />
-            <ReviewList reviews={reviews.slice(0, 3)} locale={locale} className="shuaq-reviews mt-10 grid gap-6 md:grid-cols-3" />
+        <section className="shuaq-reviews" aria-labelledby="shuaq-reviews">
+          <ThemeImage theme={THEME} name="hands" className="shuaq-reviews-photo" sizes="(min-width: 1024px) 45vw, 100vw" />
+          <div className="shuaq-reviews-panel">
+            <Cloud className="shuaq-reviews-cloud" />
+            <TwoTone pair={H.reviews} locale={locale} id="shuaq-reviews" light />
+            <ul className="shuaq-reviews-track">
+              {reviews.slice(0, 6).map((review) => (
+                <li key={review.id} className="shuaq-review">
+                  <figure>
+                    <figcaption className="flex items-center gap-4">
+                      <span className="shuaq-review-avatar" aria-hidden>{review.authorName.charAt(0)}</span>
+                      <span>
+                        <b className="block">{review.authorName}</b>
+                        {pick(locale, review.authorNoteKk, review.authorNoteRu) ? <span className="block text-sm opacity-90">{pick(locale, review.authorNoteKk, review.authorNoteRu)}</span> : null}
+                        {review.rating ? <Stars rating={review.rating} locale={locale} /> : null}
+                      </span>
+                    </figcaption>
+                    <blockquote className="mt-4">«{pick(locale, review.textKk, review.textRu)}»</blockquote>
+                  </figure>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       ) : null}
-
-      <section className="container-page pb-6">
-        <div className="shuaq-band">
-          <Sparkle className="shuaq-doodle shuaq-band-sparkle" />
-          <h2 className="shuaq-band-title">{T.cta[locale]}</h2>
-          <p className="shuaq-band-lead">{T.ctaLead[locale]}</p>
-          <EnrollLink menu={menu} locale={locale} className="shuaq-band-button" />
-        </div>
-      </section>
     </div>
   );
 }

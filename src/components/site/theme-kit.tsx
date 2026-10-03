@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Section, TenantProfile } from '@prisma/client';
 import Link from 'next/link';
-import { SectionLinkList, SiteLink } from '@/components/site/blocks';
+import { SectionLinkList, SiteLink, mediaUrl, type AlbumWithCover } from '@/components/site/blocks';
 import { LinkButton } from '@/components/site/Hero';
 import { SocialLinks } from '@/components/site/SocialLinks';
 import { headerExtras } from '@/lib/hero';
@@ -138,6 +138,25 @@ const AREAS = [
 
 export function developmentAreas(locale: Locale, count = 5): Area[] {
   return AREAS.slice(0, count).map((area) => ({ key: area.key, title: area[locale][0], text: area[locale][1] }));
+}
+
+/** Фото из альбомов сада подряд — для галерей плиткой. Только настоящие снимки сада. */
+export type AlbumPhoto = { key: string; src: string; albumSlug: string; title: string };
+
+export function albumPhotos(albums: AlbumWithCover[], locale: Locale, limit: number): AlbumPhoto[] {
+  const photos: AlbumPhoto[] = [];
+  // По кругу: сначала первое фото каждого альбома, потом вторые — галерея
+  // показывает разные события, а не шесть снимков одного утренника.
+  const longest = Math.max(0, ...albums.map((album) => album.items.length));
+  for (let index = 0; index < longest && photos.length < limit; index += 1) {
+    for (const album of albums) {
+      const item = album.items[index];
+      const src = item ? mediaUrl(item.media) : null;
+      if (src) photos.push({ key: `${album.id}-${index}`, src, albumSlug: album.slug, title: pick(locale, album.titleKk, album.titleRu) });
+      if (photos.length >= limit) break;
+    }
+  }
+  return photos;
 }
 
 /** Раздел меню нужного типа — для кнопок «Записаться», «Все фото» и т.п. */
