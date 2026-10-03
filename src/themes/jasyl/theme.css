@@ -1,7 +1,12 @@
 /*
- * Тема «Жасыл» — свежая зелёная (структура дизайна №2). Зелёная плашка
- * и подвал #17794A (белый текст 5,4:1), кнопки — малиновый #C2185B
- * (5,9:1); светлый зелёный #2BB673 и жёлтый — только украшения.
+ * Тема «Жасыл» — вплотную к образцу №2 (Äsemai): красно-оранжевые
+ * полоса и подвал, фото на всю ширину с зелёной плашкой, коллаж с голубыми
+ * перемычками, карточки с цветным низом, распорядок в зелёной плашке
+ * поверх фото, голубая клякса отзыва.
+ * Цвета сгущены до читаемых: полоса и подвал #D43F18 (белый текст 4,7:1),
+ * красный заголовков и кнопок #E0301E (4,6:1), карточки — #D0450E,
+ * #D4198F, #15803D, #0278B8 (все от 4,6:1). Зелёная плашка первого экрана
+ * #16A34A (3,3:1) несёт только крупный текст — для него порог 3:1.
  * Шрифты: Rubik (заголовки) и Nunito — проверены на казахские буквы.
  * Каждое правило — под [data-theme='jasyl'] (tests/unit/themes.test.ts).
  */
@@ -9,18 +14,22 @@
 [data-theme='jasyl'] {
   --surface: 255 255 255;
   --card: 255 255 255;
-  --ink: 26 38 32;
-  --muted: 82 96 90;
-  --line: 222 238 228;
-  --brand: 194 24 91;
-  --brand-soft: 255 228 238;
-  --brand-ink: 150 16 70;
-  --accent: 23 121 74;
-  --accent-soft: 224 246 234;
-  --accent-ink: 17 96 58;
-  --jasyl-green: 23 121 74;
-  --jasyl-mint: 43 182 115;
-  --jasyl-sun: 255 210 63;
+  --ink: 24 24 30;
+  --muted: 92 96 108;
+  --line: 230 233 240;
+  --brand: 224 48 30;
+  --brand-soft: 255 233 228;
+  --brand-ink: 176 34 18;
+  --accent: 212 25 143;
+  --accent-soft: 253 230 244;
+  --accent-ink: 160 14 104;
+  --jasyl-red: 224 48 30;
+  --jasyl-orange: 212 63 24;
+  --jasyl-green: 22 163 74;
+  --jasyl-pink: 212 25 143;
+  --jasyl-blue: 2 120 184;
+  --jasyl-sky: 30 181 240;
+  --jasyl-sun: 255 225 77;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
   --radius-xl: 2rem;
@@ -33,76 +42,532 @@
   background-image: none;
 }
 
+[data-theme='jasyl'] .container-page {
+  max-width: 84rem;
+}
+
 [data-theme='jasyl'] .btn-primary,
+[data-theme='jasyl'] .jasyl-btn,
 [data-theme='jasyl'] .jasyl-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
-  background: rgb(var(--brand));
+  background: rgb(var(--jasyl-red));
   color: rgb(255 255 255);
-  font-weight: 700;
-  box-shadow: 0 12px 24px -14px rgb(var(--brand) / 0.9);
+  padding: 0.75rem 1.8rem;
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 12px 24px -14px rgb(var(--jasyl-red) / 0.9);
 }
 
 [data-theme='jasyl'] .btn-secondary {
   border-radius: 999px;
-  border: 2px solid rgb(var(--jasyl-green));
+  border: 2px solid rgb(var(--jasyl-red));
   background: rgb(255 255 255);
-  color: rgb(var(--accent-ink));
-  font-weight: 700;
-}
-
-[data-theme='jasyl'] .kit-eyebrow {
-  background: rgb(var(--brand-soft));
   color: rgb(var(--brand-ink));
-  text-transform: none;
-  letter-spacing: 0;
+  font-weight: 800;
 }
 
-[data-theme='jasyl'] .kit-title {
-  font-weight: 700;
+[data-theme='jasyl'] .jasyl-white-btn,
+[data-theme='jasyl'] .jasyl-hero-panel .btn.bg-white {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  color: rgb(var(--brand-ink));
+  padding: 0.8rem 1.8rem;
+  font-weight: 800;
+}
+
+/* Вторая кнопка — белая надпись на затемнённой подложке (4,6:1). */
+[data-theme='jasyl'] .jasyl-hero-panel .btn.text-white {
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.2);
+  padding: 0.8rem 1.6rem;
+  font-weight: 800;
 }
 
 /* ── Шапка ── */
 
 [data-theme='jasyl'] .jasyl-topbar {
-  background: rgb(var(--accent-soft));
-  color: rgb(var(--accent-ink));
+  background: rgb(var(--jasyl-orange));
+  color: rgb(255 255 255);
+}
+
+[data-theme='jasyl'] .jasyl-topbar a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='jasyl'] .jasyl-dot,
+[data-theme='jasyl'] .jasyl-footer-dot {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  color: rgb(var(--jasyl-orange));
 }
 
 [data-theme='jasyl'] .jasyl-header {
-  background: rgb(255 255 255 / 0.96);
-  box-shadow: 0 1px 0 rgb(var(--line));
+  background: rgb(255 255 255);
+  box-shadow: 0 6px 18px -14px rgb(0 0 0 / 0.35);
 }
 
-[data-theme='jasyl'] .jasyl-name {
+[data-theme='jasyl'] .jasyl-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 0.75rem;
+}
+
+[data-theme='jasyl'] .jasyl-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+[data-theme='jasyl'] .jasyl-mark {
+  display: block;
+  flex-shrink: 0;
+  width: 3.1rem;
+  height: 3.1rem;
+}
+
+[data-theme='jasyl'] .jasyl-wordmark {
+  min-width: 0;
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: clamp(1.15rem, 2.4vw, 1.7rem);
   font-weight: 700;
-  line-height: 1.15;
-  color: rgb(var(--accent-ink));
+  line-height: 1.1;
 }
 
-[data-theme='jasyl'] .jasyl-tagline {
-  font-size: 0.8rem;
-  color: rgb(var(--muted));
+[data-theme='jasyl'] .jasyl-wordmark-a {
+  color: rgb(var(--jasyl-red));
+}
+
+[data-theme='jasyl'] .jasyl-wordmark-b {
+  color: rgb(var(--jasyl-blue));
+}
+
+[data-theme='jasyl'] .jasyl-side {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+[data-theme='jasyl'] .jasyl-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+[data-theme='jasyl'] .jasyl-nav nav ul {
+  justify-content: center;
 }
 
 [data-theme='jasyl'] .jasyl-nav nav a {
-  border-radius: 0.6rem;
+  border-radius: 999px;
   color: rgb(var(--ink));
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
-/* ── Первый экран: фото-баннер с зелёной плашкой ── */
+[data-theme='jasyl'] .jasyl-nav nav a:hover {
+  background: rgb(var(--brand-soft));
+  color: rgb(var(--brand-ink));
+}
+
+/* ── Первый экран: фото на всю ширину и зелёная плашка ── */
 
 [data-theme='jasyl'] .jasyl-hero {
   position: relative;
-  overflow: hidden;
-  border-radius: 2rem;
-  min-height: 30rem;
-  box-shadow: 0 30px 60px -40px rgb(var(--ink) / 0.6);
 }
 
 [data-theme='jasyl'] .jasyl-hero-photo {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  object-position: 70% center;
+}
+
+[data-theme='jasyl'] .jasyl-hero-panel {
+  position: relative;
+  z-index: 1;
+  border-radius: 3rem;
+  background: rgb(var(--jasyl-green));
+  color: rgb(255 255 255);
+  padding: 2.4rem 2rem;
+}
+
+[data-theme='jasyl'] .jasyl-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.6vw, 3.3rem);
+  font-weight: 500;
+  line-height: 1.15;
+  color: rgb(255 255 255);
+}
+
+[data-theme='jasyl'] .jasyl-hero .hero-highlight-light {
+  text-decoration-color: rgb(var(--jasyl-sun));
+}
+
+/* Крупно и жирно: на зелёном белому тексту нужен размер «крупного». */
+[data-theme='jasyl'] .jasyl-hero-sub {
+  margin-top: 1.4rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+[data-theme='jasyl'] .jasyl-hero-lead {
+  margin-top: 1.2rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+[data-theme='jasyl'] .jasyl-hero-line {
+  display: block;
+  width: 5.5rem;
+  height: 0.3rem;
+  margin-top: 1.5rem;
+  border-radius: 999px;
+  background: rgb(var(--jasyl-red));
+}
+
+@media (min-width: 1024px) {
+  [data-theme='jasyl'] .jasyl-hero-photo {
+    height: clamp(28rem, 40vw, 40rem);
+  }
+
+  [data-theme='jasyl'] .jasyl-hero-panel {
+    position: absolute;
+    top: 50%;
+    left: 0.6rem;
+    width: min(54%, 46rem);
+    transform: translateY(-50%);
+    border-radius: 4.5rem;
+    padding: 3.2rem 3.4rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  [data-theme='jasyl'] .jasyl-hero-photo {
+    aspect-ratio: 16 / 11;
+  }
+
+  [data-theme='jasyl'] .jasyl-hero-panel {
+    margin: -3rem 1rem 0;
+  }
+}
+
+/* ── Общие заголовки ── */
+
+[data-theme='jasyl'] .jasyl-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 500;
+  line-height: 1.2;
+  color: rgb(var(--ink));
+}
+
+[data-theme='jasyl'] .jasyl-red {
+  color: rgb(var(--jasyl-red));
+}
+
+[data-theme='jasyl'] .jasyl-blue {
+  color: rgb(2 132 199);
+}
+
+[data-theme='jasyl'] .jasyl-pink {
+  color: rgb(var(--jasyl-pink));
+}
+
+[data-theme='jasyl'] .jasyl-eyebrow {
+  margin-bottom: 0.6rem;
+  color: rgb(var(--jasyl-red));
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+[data-theme='jasyl'] .jasyl-text {
+  color: rgb(var(--muted));
+  line-height: 1.7;
+}
+
+/* ── «О нас»: коллаж 2×2 с голубыми перемычками и счётчики ── */
+
+[data-theme='jasyl'] .jasyl-about {
+  display: grid;
+  align-items: center;
+  gap: 3rem;
+  padding-block: 5rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='jasyl'] .jasyl-about {
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+  }
+}
+
+[data-theme='jasyl'] .jasyl-collage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+[data-theme='jasyl'] .jasyl-collage li {
+  position: relative;
+  aspect-ratio: 1 / 0.9;
+}
+
+[data-theme='jasyl'] .jasyl-collage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 2.6rem;
+}
+
+[data-theme='jasyl'] .jasyl-collage li:nth-child(1) img { border-bottom-right-radius: 0.8rem; }
+[data-theme='jasyl'] .jasyl-collage li:nth-child(2) img { border-bottom-left-radius: 0.8rem; }
+[data-theme='jasyl'] .jasyl-collage li:nth-child(3) img { border-top-right-radius: 0.8rem; }
+[data-theme='jasyl'] .jasyl-collage li:nth-child(4) img { border-top-left-radius: 0.8rem; }
+
+[data-theme='jasyl'] .jasyl-collage li::after {
+  content: '';
+  position: absolute;
+  background: rgb(var(--jasyl-sky));
+}
+
+[data-theme='jasyl'] .jasyl-collage li:nth-child(1)::after { right: -1rem; top: 52%; width: 1rem; height: 1.6rem; }
+[data-theme='jasyl'] .jasyl-collage li:nth-child(2)::after { bottom: -1rem; left: 42%; width: 1.6rem; height: 1rem; }
+[data-theme='jasyl'] .jasyl-collage li:nth-child(3)::after { top: -1rem; left: 58%; width: 1.6rem; height: 1rem; }
+[data-theme='jasyl'] .jasyl-collage li:nth-child(4)::after { left: -1rem; top: 36%; width: 1rem; height: 1.6rem; }
+
+[data-theme='jasyl'] .jasyl-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 3rem;
+  margin-top: 2rem;
+}
+
+[data-theme='jasyl'] .jasyl-stats li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+[data-theme='jasyl'] .jasyl-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 4.2rem;
+  height: 4.2rem;
+  border-radius: 999px;
+  background: rgb(241 243 247);
+  color: rgb(var(--ink));
+}
+
+[data-theme='jasyl'] .jasyl-stats b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 500;
+  line-height: 1;
+  color: rgb(var(--jasyl-red));
+}
+
+[data-theme='jasyl'] .jasyl-stats b + span {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+}
+
+/* ── Карточки с цветным низом ── */
+
+[data-theme='jasyl'] .jasyl-family {
+  padding-block: 3rem 5rem;
+}
+
+[data-theme='jasyl'] .jasyl-family-lead {
+  max-width: 44rem;
+  margin: 0.8rem auto 0;
+  text-align: center;
+  color: rgb(var(--muted));
+}
+
+/* Карточек у сада бывает три — тогда они стоят по центру, а не с дырой справа. */
+[data-theme='jasyl'] .jasyl-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 2.5rem;
+}
+
+[data-theme='jasyl'] .jasyl-cards > li {
+  flex: 0 1 100%;
+}
+
+@media (min-width: 640px) {
+  [data-theme='jasyl'] .jasyl-cards > li {
+    flex-basis: calc(50% - 0.6rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-theme='jasyl'] .jasyl-cards > li {
+    flex-basis: calc(25% - 0.9rem);
+  }
+}
+
+[data-theme='jasyl'] .jasyl-card {
+  --card-color: var(--jasyl-orange);
+  overflow: hidden;
+  border-radius: 1.8rem;
+  background: rgb(var(--card-color));
+  color: rgb(255 255 255);
+  transition: transform 0.2s ease;
+}
+
+[data-theme='jasyl'] .jasyl-card:hover {
+  transform: translateY(-4px);
+}
+
+[data-theme='jasyl'] .jasyl-card-0 { --card-color: 208 69 14; }
+[data-theme='jasyl'] .jasyl-card-1 { --card-color: 212 25 143; }
+[data-theme='jasyl'] .jasyl-card-2 { --card-color: 21 128 61; }
+[data-theme='jasyl'] .jasyl-card-3 { --card-color: 2 120 184; }
+
+[data-theme='jasyl'] .jasyl-card-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 4.2;
+  object-fit: cover;
+}
+
+/* Низ карточки — купол: верхний край выгнут, как в образце. */
+[data-theme='jasyl'] .jasyl-card-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -3rem;
+  padding: 2.6rem 1.2rem 1.6rem;
+  border-radius: 50% 50% 0 0 / 3rem 3rem 0 0;
+  background: rgb(var(--card-color));
+  text-align: center;
+}
+
+[data-theme='jasyl'] .jasyl-card-icon {
+  position: absolute;
+  top: -2.1rem;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 4.2rem;
+  height: 4.2rem;
+  transform: translateX(-50%);
+  border-radius: 1rem;
+  background: rgb(255 255 255);
+  color: rgb(var(--ink));
+  box-shadow: 0 10px 20px -12px rgb(0 0 0 / 0.5);
+}
+
+[data-theme='jasyl'] .jasyl-card-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+[data-theme='jasyl'] .jasyl-card-text {
+  margin-top: 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+/* ── «Почему мы»: голубой заголовок, розовые галочки, фото в кляксе ── */
+
+[data-theme='jasyl'] .jasyl-why {
+  display: grid;
+  align-items: center;
+  gap: 3rem;
+  padding-block: 4rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='jasyl'] .jasyl-why {
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+}
+
+[data-theme='jasyl'] .jasyl-checks {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+[data-theme='jasyl'] .jasyl-checks li {
+  display: flex;
+  gap: 0.7rem;
+  font-size: 0.95rem;
+}
+
+[data-theme='jasyl'] .jasyl-why-art {
+  position: relative;
+  max-width: 34rem;
+  margin-inline: auto;
+  padding: 1.5rem;
+}
+
+[data-theme='jasyl'] .jasyl-why-arc {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 55%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: rgb(var(--jasyl-sun));
+}
+
+[data-theme='jasyl'] .jasyl-why-photo {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1.1 / 1;
+  object-fit: cover;
+  border-radius: 58% 42% 46% 54% / 52% 48% 52% 48%;
+  box-shadow: -10px 14px 0 -2px rgb(var(--jasyl-sun));
+}
+
+/* ── Распорядок: зелёная плашка поверх фото с красками ── */
+
+[data-theme='jasyl'] .jasyl-routine {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme='jasyl'] .jasyl-routine-photo {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -110,295 +575,403 @@
   object-fit: cover;
 }
 
-[data-theme='jasyl'] .jasyl-hero-box {
+[data-theme='jasyl'] .jasyl-routine-panel {
   position: relative;
-  max-width: 32rem;
-  margin: 2rem;
-  border-radius: 1.75rem;
-  background: rgb(var(--jasyl-green) / 0.94);
-  color: rgb(255 255 255);
-  padding: 2rem;
-  box-shadow: 0 30px 50px -30px rgb(0 0 0 / 0.6);
+  max-width: 50rem;
+  margin: 2rem auto 0;
+  border-radius: 4.5rem;
+  background: rgb(21 150 68 / 0.92);
+  padding: 3.6rem 1.2rem 2.6rem;
+  text-align: center;
+  backdrop-filter: blur(2px);
 }
 
-[data-theme='jasyl'] .jasyl-chip {
-  display: inline-block;
-  margin-bottom: 1rem;
-  border-radius: 999px;
-  background: rgb(var(--jasyl-sun));
-  color: rgb(var(--ink));
-  padding: 0.25rem 0.85rem;
-  font-size: 0.85rem;
-  font-weight: 800;
+@media (min-width: 768px) {
+  [data-theme='jasyl'] .jasyl-routine-panel {
+    padding-inline: 4.5rem;
+    border-radius: 6rem;
+  }
 }
 
-[data-theme='jasyl'] .jasyl-h1 {
-  font-size: clamp(2rem, 4.2vw, 3.3rem);
-  font-weight: 800;
-  line-height: 1.1;
-  color: rgb(255 255 255);
-  text-wrap: balance;
-}
-
-[data-theme='jasyl'] .jasyl-hero .hero-highlight {
-  background-image: none;
-  color: rgb(var(--jasyl-sun));
-  -webkit-text-fill-color: currentColor;
-}
-
-[data-theme='jasyl'] .jasyl-lead {
-  margin-top: 1rem;
-  line-height: 1.6;
-  opacity: 0.95;
-}
-
-[data-theme='jasyl'] .jasyl-white-btn,
-[data-theme='jasyl'] .jasyl-hero .btn-primary {
-  display: inline-flex;
-  border-radius: 999px;
-  background: rgb(255 255 255);
-  color: rgb(var(--accent-ink));
-  padding: 0.8rem 1.6rem;
-  font-weight: 800;
-  box-shadow: none;
-}
-
-[data-theme='jasyl'] .jasyl-hero .btn-secondary {
-  border-color: rgb(255 255 255 / 0.6);
-  background: transparent;
-  color: rgb(255 255 255);
-}
-
-/* ── Секции ── */
-
-[data-theme='jasyl'] .jasyl-section {
-  padding-block: 4.5rem;
-}
-
-[data-theme='jasyl'] .jasyl-soft {
-  background: rgb(var(--accent-soft) / 0.5);
-}
-
-[data-theme='jasyl'] .jasyl-collage {
+[data-theme='jasyl'] .jasyl-alarm {
+  position: absolute;
+  top: -2.4rem;
+  left: 50%;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  place-items: center;
+  width: 4.8rem;
+  height: 4.8rem;
+  transform: translateX(-50%);
+  border: 4px solid rgb(255 255 255 / 0.7);
+  border-radius: 999px;
+  background: rgb(var(--jasyl-red));
+  color: rgb(255 255 255);
 }
 
-[data-theme='jasyl'] .jasyl-collage img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 1.5rem;
+[data-theme='jasyl'] .jasyl-routine-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 500;
+  color: rgb(255 255 255);
 }
 
-[data-theme='jasyl'] .jasyl-collage img:nth-child(2) {
-  margin-top: 2rem;
-}
-
-[data-theme='jasyl'] .jasyl-collage img:nth-child(3) {
-  margin-top: -2rem;
-}
-
-[data-theme='jasyl'] .jasyl-text {
-  line-height: 1.7;
-  color: rgb(var(--muted));
-}
-
-[data-theme='jasyl'] .jasyl-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
+[data-theme='jasyl'] .jasyl-rows {
+  display: grid;
+  gap: 0.55rem;
   margin-top: 1.6rem;
 }
 
-[data-theme='jasyl'] .jasyl-stats .hb-stat {
-  flex-direction: column;
-  gap: 0;
-}
-
-[data-theme='jasyl'] .jasyl-stats .hb-stat-value {
-  font-size: 2.6rem;
-  color: rgb(var(--accent-ink));
-}
-
-/* Четыре цветные карточки */
-[data-theme='jasyl'] .jasyl-card {
-  overflow: hidden;
-  border-radius: 1.75rem;
-  background: rgb(var(--jasyl-green));
-  color: rgb(255 255 255);
-  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.6);
-}
-
-[data-theme='jasyl'] .jasyl-card:nth-child(4n + 2) { background: rgb(var(--brand)); }
-[data-theme='jasyl'] .jasyl-card:nth-child(4n + 3) { background: rgb(255 210 63); color: rgb(var(--ink)); }
-[data-theme='jasyl'] .jasyl-card:nth-child(4n + 4) { background: rgb(22 101 178); }
-
-[data-theme='jasyl'] .jasyl-card-photo {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-}
-
-[data-theme='jasyl'] .jasyl-card-title {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
+[data-theme='jasyl'] .jasyl-rows li {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  padding: 0.55rem 1.2rem;
+  color: rgb(var(--ink));
+  font-size: 0.92rem;
   font-weight: 700;
 }
 
-[data-theme='jasyl'] .jasyl-card-text {
-  margin-top: 0.5rem;
-  font-size: 0.95rem;
-  line-height: 1.55;
-  opacity: 0.95;
+[data-theme='jasyl'] .jasyl-rows li span:first-child {
+  border-right: 1px solid rgb(var(--line));
 }
 
-[data-theme='jasyl'] .jasyl-why-item {
+/* ── Частые вопросы: фото в кляксе и аккордеон ── */
+
+[data-theme='jasyl'] .jasyl-faq-wrap {
+  display: grid;
+  align-items: center;
+  gap: 3rem;
+  padding-block: 5rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='jasyl'] .jasyl-faq-wrap {
+    grid-template-columns: 0.85fr 1.15fr;
+  }
+}
+
+[data-theme='jasyl'] .jasyl-faq-art {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  border-radius: 1.25rem;
-  background: rgb(255 255 255);
-  padding: 0.9rem 1.1rem 0.9rem 3.2rem;
-  box-shadow: 0 12px 26px -20px rgb(var(--ink) / 0.5);
-  color: rgb(var(--muted));
-  font-size: 0.95rem;
+  max-width: 30rem;
+  margin-inline: auto;
 }
 
-[data-theme='jasyl'] .jasyl-why-item b {
-  color: rgb(var(--ink));
-  font-size: 1.02rem;
-}
-
-[data-theme='jasyl'] .jasyl-why-item::before {
-  content: '✓';
+[data-theme='jasyl'] .jasyl-faq-blob {
   position: absolute;
-  left: 1rem;
-  top: 0.95rem;
+  top: -1.2rem;
+  left: -1.2rem;
+  width: 45%;
+  aspect-ratio: 1;
+  border-radius: 999px 999px 999px 30%;
+  background: rgb(var(--jasyl-sky));
+}
+
+[data-theme='jasyl'] .jasyl-faq-photo {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 0.85 / 1;
+  object-fit: cover;
+  border-radius: 46% 54% 42% 58% / 40% 38% 62% 60%;
+}
+
+[data-theme='jasyl'] .jasyl-faq details {
+  margin-bottom: 0.75rem;
+  border-radius: 1.5rem;
+}
+
+[data-theme='jasyl'] .jasyl-faq details[open] {
+  border: 1.5px solid rgb(var(--line));
+  box-shadow: 0 16px 30px -24px rgb(0 0 0 / 0.4);
+}
+
+[data-theme='jasyl'] .jasyl-faq summary {
+  display: flex;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-radius: 999px;
+  background: rgb(246 244 240);
+  padding: 0.85rem 0.9rem 0.85rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+[data-theme='jasyl'] .jasyl-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+[data-theme='jasyl'] .jasyl-faq details[open] summary {
+  background: rgb(var(--jasyl-pink));
+  color: rgb(255 255 255);
+}
+
+[data-theme='jasyl'] .jasyl-faq-chevron {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  color: rgb(var(--ink));
+  transition: transform 0.2s ease;
+}
+
+[data-theme='jasyl'] .jasyl-faq details[open] .jasyl-faq-chevron {
+  transform: rotate(180deg);
+  background: rgb(var(--jasyl-red));
+  color: rgb(255 255 255);
+}
+
+[data-theme='jasyl'] .jasyl-faq details p {
+  padding: 1rem 1.4rem 1.3rem;
+  white-space: pre-line;
+  color: rgb(var(--muted));
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+/* ── Отзывы: голубая клякса и фото ── */
+
+[data-theme='jasyl'] .jasyl-reviews {
+  background: rgb(238 243 248);
+}
+
+[data-theme='jasyl'] .jasyl-reviews-track {
+  display: grid;
+  grid-auto-columns: 100%;
+  grid-auto-flow: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  padding-bottom: 0.8rem;
+}
+
+[data-theme='jasyl'] .jasyl-review {
+  scroll-snap-align: start;
+}
+
+[data-theme='jasyl'] .jasyl-review figure {
+  position: relative;
+  height: 100%;
+  border-radius: 3.2rem 5rem 4rem 2.6rem / 2.6rem 3.4rem 5rem 4.2rem;
+  background: rgb(var(--jasyl-blue));
+  padding: 2.2rem 2.4rem 2.6rem;
+  color: rgb(255 255 255);
+}
+
+[data-theme='jasyl'] .jasyl-quote {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.6rem;
   display: grid;
   place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 3.4rem;
+  height: 3.4rem;
   border-radius: 999px;
-  background: rgb(var(--jasyl-mint));
-  color: rgb(255 255 255);
-  font-size: 0.8rem;
-  font-weight: 900;
+  background: rgb(var(--jasyl-sun));
+  color: rgb(var(--brand-ink));
+  font-family: Georgia, serif;
+  font-size: 2.6rem;
+  line-height: 1;
+  padding-top: 0.9rem;
 }
 
-[data-theme='jasyl'] .jasyl-why-photo {
+[data-theme='jasyl'] .jasyl-review figcaption {
+  padding-right: 4rem;
+}
+
+[data-theme='jasyl'] .jasyl-review figcaption b {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+[data-theme='jasyl'] .jasyl-review .review-stars {
+  margin-top: 0.3rem;
+  color: rgb(var(--jasyl-sun));
+}
+
+[data-theme='jasyl'] .jasyl-review blockquote {
+  margin-top: 1rem;
+  line-height: 1.65;
+}
+
+[data-theme='jasyl'] .jasyl-reviews-photo {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 0.95;
   object-fit: cover;
-  border-radius: 2rem;
+  border-radius: 0.6rem;
 }
 
-/* Распорядок таблицей на зелёной полосе */
-[data-theme='jasyl'] .jasyl-routine {
-  background:
-    linear-gradient(rgb(var(--jasyl-green) / 0.92), rgb(var(--jasyl-green) / 0.92)),
-    url('/images/themes/jasyl/hero-1200.webp') center / cover;
+/* ── Новости и нарисованные дети ── */
+
+[data-theme='jasyl'] .jasyl-news-lead {
+  margin: 0.8rem auto 0.4rem;
+  max-width: 40rem;
+  color: rgb(var(--muted));
+  font-size: 0.92rem;
 }
 
-[data-theme='jasyl'] .jasyl-table {
-  max-width: 46rem;
-  margin-inline: auto;
-  border-radius: 2rem;
-  background: rgb(255 255 255);
-  padding: 2rem 1.5rem;
-  box-shadow: 0 30px 60px -36px rgb(0 0 0 / 0.6);
-}
-
-[data-theme='jasyl'] .jasyl-row {
-  display: flex;
-  gap: 1.2rem;
-  border-bottom: 1px solid rgb(var(--line));
-  padding: 0.85rem 0.4rem;
-}
-
-[data-theme='jasyl'] .jasyl-row:last-child {
-  border-bottom: 0;
-}
-
-[data-theme='jasyl'] .jasyl-row-time {
-  min-width: 7.5rem;
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: rgb(var(--accent-ink));
-  font-variant-numeric: tabular-nums;
-}
-
-[data-theme='jasyl'] .jasyl-faq .card {
-  border: 1px solid rgb(var(--line));
-  border-radius: 1.25rem;
-  box-shadow: none;
-}
-
-[data-theme='jasyl'] .jasyl-faq summary span {
-  color: rgb(var(--brand));
-}
-
-[data-theme='jasyl'] .jasyl-more {
-  font-weight: 800;
-  color: rgb(var(--brand-ink));
-}
-
-[data-theme='jasyl'] .jasyl-news article.card,
-[data-theme='jasyl'] .jasyl-reviews .card {
+[data-theme='jasyl'] .jasyl-news article.card {
   border: 0;
-  border-radius: 1.75rem;
-  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+  border-radius: 1.4rem;
+  box-shadow: 0 20px 40px -30px rgb(0 0 0 / 0.5);
 }
 
-/* ── Подвал ── */
+[data-theme='jasyl'] .jasyl-kids {
+  display: block;
+  width: min(100%, 72rem);
+  margin: 2.5rem auto 0;
+  mix-blend-mode: multiply;
+}
 
-[data-theme='jasyl'] .jasyl-footer-body {
-  background: rgb(var(--accent-ink));
-  color: rgb(222 244 232);
+/* ── Подвал: красно-оранжевый поверх фото ── */
+
+[data-theme='jasyl'] .jasyl-footer {
+  position: relative;
+  overflow: hidden;
+  color: rgb(255 255 255);
+}
+
+[data-theme='jasyl'] .jasyl-footer-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-theme='jasyl'] .jasyl-footer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: rgb(201 58 20 / 0.93);
+}
+
+[data-theme='jasyl'] .jasyl-footer-photo {
+  z-index: 0;
+}
+
+[data-theme='jasyl'] .jasyl-footer > .relative {
+  z-index: 2;
+}
+
+[data-theme='jasyl'] .jasyl-footer a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='jasyl'] .jasyl-footer a:hover {
+  text-decoration: underline;
+}
+
+[data-theme='jasyl'] .jasyl-footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem 2rem;
+  padding-block: 2.2rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.35);
+}
+
+[data-theme='jasyl'] .jasyl-footer-mark {
+  display: block;
+  flex-shrink: 0;
+  width: 3.2rem;
+  height: 3.2rem;
 }
 
 [data-theme='jasyl'] .jasyl-footer-name {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+[data-theme='jasyl'] .jasyl-footer-ask {
+  max-width: 28rem;
   font-weight: 700;
-  color: rgb(255 255 255);
+}
+
+[data-theme='jasyl'] .jasyl-footer .jasyl-footer-btn {
+  display: inline-flex;
+  border-radius: 999px;
+  background: rgb(255 255 255);
+  color: rgb(var(--brand-ink));
+  padding: 0.75rem 1.8rem;
+  font-weight: 800;
 }
 
 [data-theme='jasyl'] .jasyl-footer-title {
-  margin-bottom: 0.6rem;
-  font-weight: 800;
+  margin-bottom: 0.8rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+[data-theme='jasyl'] .jasyl-footer-thumbs {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+
+[data-theme='jasyl'] .jasyl-footer-thumbs img {
+  width: 30%;
+  max-width: 7rem;
+  aspect-ratio: 1.15 / 1;
+  object-fit: cover;
+  border-radius: 0.9rem;
+}
+
+[data-theme='jasyl'] .jasyl-footer-links {
+  columns: 2;
+  column-gap: 1.5rem;
+}
+
+[data-theme='jasyl'] .jasyl-footer-links li {
+  break-inside: avoid;
+  margin-bottom: 0.45rem;
+}
+
+[data-theme='jasyl'] .jasyl-footer-links li::before {
+  content: '•';
+  margin-right: 0.45rem;
   color: rgb(var(--jasyl-sun));
 }
 
-[data-theme='jasyl'] .jasyl-footer-body a:hover {
-  color: rgb(255 255 255);
-  text-decoration: underline;
-}
-
-[data-theme='jasyl'] .jasyl-footer-social a {
-  color: rgb(var(--ink));
+[data-theme='jasyl'] .jasyl-footer .jasyl-footer-social a {
+  color: rgb(var(--brand-ink));
 }
 
 [data-theme='jasyl'] .jasyl-footer-bottom {
-  border-top: 1px solid rgb(255 255 255 / 0.18);
+  background: rgb(184 51 15);
 }
 
-@media (max-width: 639px) {
-  [data-theme='jasyl'] .jasyl-hero {
-    min-height: 0;
-    padding-top: 14rem;
-  }
-
-  [data-theme='jasyl'] .jasyl-hero-box {
-    margin: 0;
-    border-radius: 1.75rem 1.75rem 0 0;
-    padding: 1.6rem 1.3rem;
-  }
-
-  [data-theme='jasyl'] .jasyl-section {
+@media (max-width: 767px) {
+  [data-theme='jasyl'] .jasyl-about,
+  [data-theme='jasyl'] .jasyl-faq-wrap {
     padding-block: 3rem;
+  }
+
+  [data-theme='jasyl'] .jasyl-footer-links {
+    columns: 1;
+  }
+}
+
+/* Кнопка шапки — только на широком экране: на телефоне она теснила название. */
+@media (max-width: 1023px) {
+  [data-theme='jasyl'] .jasyl-side .jasyl-cta {
+    display: none;
   }
 }
