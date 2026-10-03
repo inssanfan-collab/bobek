@@ -21,7 +21,7 @@ export function JasylHeader({ profile, sections, locale, homeHref, tools, nav }:
     <header className="site-header jasyl-header sticky top-0 z-40">
       <div className="jasyl-topbar">
         <div className="container-page flex flex-wrap items-center justify-between gap-x-6 gap-y-1 py-1.5 text-sm">
-          <p className="flex min-w-0 items-center gap-2">
+          <p className="hidden min-w-0 items-center gap-2 md:flex">
             {address ? <><span className="jasyl-dot"><Pin /></span><span className="truncate">{address}</span></> : null}
           </p>
           <p className="flex flex-wrap items-center gap-x-6 gap-y-1">

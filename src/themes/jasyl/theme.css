@@ -141,7 +141,7 @@
 [data-theme='jasyl'] .jasyl-wordmark {
   min-width: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.15rem, 2.4vw, 1.7rem);
+  font-size: clamp(0.95rem, 2.4vw, 1.7rem);
   font-weight: 700;
   line-height: 1.1;
 }
@@ -973,5 +973,12 @@
 @media (max-width: 1023px) {
   [data-theme='jasyl'] .jasyl-side .jasyl-cta {
     display: none;
+  }
+}
+
+@media (max-width: 639px) {
+  [data-theme='jasyl'] .jasyl-mark {
+    width: 2.4rem;
+    height: 2.4rem;
   }
 }
