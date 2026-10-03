@@ -1,187 +1,213 @@
 import { NewsCard, SiteLink, T as BLOCK_T } from '@/components/site/blocks';
 import { HeroButtons, HeroTitle } from '@/components/site/Hero';
-import { StatsRow } from '@/components/site/home-blocks';
 import { Stars } from '@/components/site/sections';
-import { CoverOr, EnrollLink, SectionHead, ThemeImage, developmentAreas } from '@/components/site/theme-kit';
+import { EnrollLink, ThemeImage, aboutSection, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
 import { pick } from '@/lib/i18n';
+import { formatAgeRange } from '@/lib/labels';
 import type { HomeProps } from '@/templates/types';
+import { CloudEdge, Icon, Plane, Rocket, Stripes } from './Doodles';
 
 const THEME = 'kuanysh';
 
 const T = {
-  best: { kk: 'Балаңыз үшін ең жақсы жағдай', ru: 'Лучшие условия для ребёнка' },
-  about: { kk: 'Біз туралы', ru: 'О нас' },
-  aboutTitle: { kk: 'Өсеміз, ойнаймыз, әлемді қуанышпен танимыз', ru: 'Растём, играем и с радостью познаём мир' },
-  hours: { kk: 'Жұмыс уақыты', ru: 'Часы работы' },
-  phone: { kk: 'Телефон', ru: 'Телефон' },
-  langKk: { kk: 'Қазақ тілінде', ru: 'На казахском' },
-  langRu: { kk: 'Орыс тілінде', ru: 'На русском' },
-  band: { kk: 'Баланың әлеуетін алғашқы қадамнан ашамыз', ru: 'Раскрываем потенциал ребёнка с первых шагов' },
-  bandLead: { kk: 'Балабақшамен танысыңыз — тәрбиешілер бәрін көрсетіп, айтып береді.', ru: 'Познакомьтесь с садом — воспитатели всё покажут и расскажут.' },
-  lessons: { kk: 'Балаларға арналған сабақтар', ru: 'Занятия для детей' },
-  reviews: { kk: 'Ата-аналар пікірлері', ru: 'Отзывы родителей' },
-  cta: { kk: 'Экскурсияға жазылыңыз', ru: 'Запишитесь на экскурсию' },
-  ctaLead: { kk: 'Өтінім қалдырыңыз — біз хабарласып, ыңғайлы уақытты келісеміз.', ru: 'Оставьте заявку — мы перезвоним и договоримся об удобном времени.' },
+  eyebrow: { kk: 'Бақытты балалық шақ осы жерден басталады', ru: 'Счастливое детство начинается здесь' },
+  title: { kk: 'Өсеміз, ойнаймыз және әлемді қуана танимыз!', ru: 'Растём, играем и с радостью познаём мир!' },
+  hours: { kk: 'Жұмыс уақыты:', ru: 'Режим работы:' },
+  bandEyebrow: { kk: 'Есігіміз ашық', ru: 'Двери открыты' },
+  band: { kk: 'Балабақшамен жақынырақ танысыңыз', ru: 'Познакомьтесь с детским садом поближе' },
+  activities: { kk: 'Балаларға арналған сабақтарымыз', ru: 'Наши занятия для детей' },
+  activitiesLead: { kk: 'Балаңыз балабақшада қандай қызықты жолдан өтетінін біліңіз.', ru: 'Узнайте, какой увлекательный путь пройдёт ваш ребёнок в нашем саду.' },
+  reviewsEyebrow: { kk: 'Пікірлер', ru: 'Отклики и отзывы' },
+  reviews: { kk: 'Ата-аналардың пікірлері', ru: 'Отзывы родителей' },
+  apply: { kk: 'Балаңызды балабақшаға жазыңыз', ru: 'Запишите ребёнка в детский сад' },
+  applyText: { kk: 'Сұрағыңызды жазыңыз немесе экскурсияға келіңіз — біз жауап береміз.', ru: 'Напишите нам вопрос или приходите на экскурсию — мы ответим.' },
+  more: { kk: 'Толығырақ', ru: 'Подробнее' },
 } as const;
 
-/**
- * Главная «Қуаныш» — яркие кляксы (структура дизайна №4): фото на
- * жёлто-сиреневой кляксе, три карточки-кляксы, «О нас» с часами работы,
- * зелёная полоса с фото, занятия вокруг центрального фото, отзыв крупно
- * со счётчиками, новости, фиолетовая полоса записи.
- */
-export function KuanyshHome({ profile, news, locale, coverUrl, coverPosition, hero, menu, clubs = [], reviews = [], counts }: HomeProps) {
-  const stats = homeStats(profile, counts, locale);
-  const areas = developmentAreas(locale);
-  const blobs = areas.filter((area) => ['health', 'social', 'logic'].includes(area.key));
-  const aboutText = pick(locale, profile?.aboutKk, profile?.aboutRu);
-  const lessons = clubs.length > 0
-    ? clubs.slice(0, 6).map((club) => ({ key: club.id, title: pick(locale, club.nameKk, club.nameRu), text: pick(locale, club.descKk, club.descRu) }))
-    : areas;
-  const left = lessons.filter((_, index) => index % 2 === 0);
-  const right = lessons.filter((_, index) => index % 2 === 1);
-  const [mainReview, ...otherReviews] = reviews;
-  const langs = [profile?.langKk ? T.langKk[locale] : null, profile?.langRu ? T.langRu[locale] : null].filter(Boolean);
+const CARD_TONES = ['kuanysh-pink', 'kuanysh-mint', 'kuanysh-lemon'];
+const CARD_ICONS = ['medal', 'blocks', 'game'];
+const ACT_ICONS = ['game', 'book', 'slide', 'run'];
+const STAT_TONES = ['kuanysh-mint', 'kuanysh-pink', 'kuanysh-lemon', 'kuanysh-sky'];
 
-  const lesson = (item: { key: string; title: string; text?: string | null }) => (
-    <li key={item.key} className="kuanysh-lesson">
-      <span className="kuanysh-lesson-dot" aria-hidden />
-      <b>{item.title}</b>
-      {item.text ? <span>{item.text}</span> : null}
+/**
+ * Главная «Қуаныш» — вплотную к образцу №4: фото малыша на фоне неба
+ * с облачным краем, три облачные карточки, малыши-вырезка в жёлтом
+ * кольце с часами работы, зелёная облачная полоса с девочкой, занятия
+ * вокруг коллажа из трёх фото, отзыв в жёлтом облаке и счётчики
+ * в цветных облачках, новости, фиолетовая плашка записи с нарисованными
+ * детьми. Фото и рисунки — сгенерированные; тексты и данные — сада.
+ */
+export function KuanyshHome({ profile, news, locale, hero, menu, clubs = [], groups = [], reviews = [], counts }: HomeProps) {
+  const stats = homeStats(profile, counts, locale);
+  const about = aboutSection(menu);
+  const clubsSection = findSection(menu, 'CLUBS');
+  const aboutText = pick(locale, profile?.aboutKk, profile?.aboutRu);
+  const areas = developmentAreas(locale);
+  const area = (key: string) => areas.find((item) => item.key === key)!;
+  const cards = ['health', 'social', 'logic'].map(area);
+  const hours = (profile?.workHours ?? '').split(/[;\n]/).map((line) => line.trim()).filter(Boolean);
+  const activities = clubs.length > 0
+    ? clubs.slice(0, 4).map((club) => ({ key: club.id, title: pick(locale, club.nameKk, club.nameRu), text: pick(locale, club.descKk, club.descRu) }))
+    : groups.length > 0
+      ? groups.slice(0, 4).map((group) => ({ key: group.id, title: pick(locale, group.nameKk, group.nameRu), text: formatAgeRange(group.ageFrom, group.ageTo, locale) ?? '' }))
+      : ['speech', 'art'].map(area);
+  const half = Math.ceil(activities.length / 2);
+  const activitiesHref = clubs.length > 0 && clubsSection ? `/${clubsSection.slug}` : null;
+
+  const activity = (item: (typeof activities)[number], index: number) => (
+    <li key={item.key} className="kuanysh-act">
+      <span className="kuanysh-act-icon"><Icon name={ACT_ICONS[index % 4]} className="h-7 w-7" /></span>
+      <span>
+        <b>{item.title}</b>
+        {item.text ? <span>{item.text}</span> : null}
+      </span>
     </li>
   );
 
   return (
     <div className="kuanysh-home">
       <section className="kuanysh-hero">
-        <div className="container-page grid items-center gap-10 py-12 lg:grid-cols-2 lg:py-16">
-          <div>
-            {hero.eyebrow ? <p className="kuanysh-pill">{hero.eyebrow}</p> : null}
-            <HeroTitle hero={hero} tone="plain" withEyebrow={false} className="kuanysh-h1 font-display" />
+        <ThemeImage theme={THEME} name="hero" className="kuanysh-hero-photo" sizes="100vw" eager />
+        <div className="container-page kuanysh-hero-inner">
+          <div className="kuanysh-hero-text">
+            <HeroTitle hero={hero} tone="light" withEyebrow={false} className="kuanysh-h1" />
             {hero.lead ? <p className="kuanysh-lead">{hero.lead}</p> : null}
             <div className="mt-7 flex flex-wrap gap-3">
-              <HeroButtons hero={hero} tone="plain">
-                <EnrollLink menu={menu} locale={locale} className="btn-primary" />
+              <HeroButtons hero={hero} tone="light">
+                <EnrollLink menu={menu} locale={locale} className="kuanysh-btn" />
               </HeroButtons>
             </div>
-            <StatsRow stats={stats} className="kuanysh-stats" />
           </div>
-          <div className="kuanysh-blob-wrap">
-            <CoverOr coverUrl={coverUrl} coverPosition={coverPosition} theme={THEME} name="hero" className="kuanysh-blob" eager />
-          </div>
+        </div>
+        <CloudEdge className="kuanysh-hero-edge" />
+      </section>
+
+      <ul className="container-page kuanysh-clouds">
+        {cards.map((card, index) => {
+          const inner = (
+            <>
+              <span className="kuanysh-cloud-icon"><Icon name={CARD_ICONS[index % 3]} className="h-8 w-8" /></span>
+              <b>{card.title}</b>
+              <span>{card.text}</span>
+              <span className="kuanysh-cloud-go" aria-hidden><Icon name="arrow" className="h-4 w-4" /></span>
+            </>
+          );
+          return (
+            <li key={card.key} className={`kuanysh-cloud ${CARD_TONES[index % 3]}`}>
+              {about ? <SiteLink href={`/${about.slug}`} locale={locale} className="kuanysh-cloud-inner">{inner}</SiteLink> : <span className="kuanysh-cloud-inner">{inner}</span>}
+            </li>
+          );
+        })}
+      </ul>
+
+      <section className="container-page kuanysh-split" aria-labelledby="kuanysh-about">
+        <div className="kuanysh-split-art">
+          <span className="kuanysh-ring" aria-hidden />
+          <span className="kuanysh-play" aria-hidden />
+          <ThemeImage theme={THEME} name="toddlers" className="kuanysh-toddlers" sizes="(min-width: 1024px) 45vw, 95vw" />
+        </div>
+        <div>
+          <p className="kuanysh-eyebrow">{T.eyebrow[locale]}</p>
+          <h2 id="kuanysh-about" className="kuanysh-title kuanysh-green">{T.title[locale]}</h2>
+          {aboutText ? <p className="kuanysh-text mt-5">{aboutText}</p> : null}
+          {hours.length > 0 ? (
+            <>
+              <p className="mt-6 font-bold">{T.hours[locale]}</p>
+              <ul className="kuanysh-hours">
+                {hours.map((line) => <li key={line}>{line}</li>)}
+              </ul>
+            </>
+          ) : null}
+          {about ? <SiteLink href={`/${about.slug}`} locale={locale} className="kuanysh-btn mt-7">{T.more[locale]}</SiteLink> : null}
         </div>
       </section>
 
-      <section className="kuanysh-section" aria-labelledby="kuanysh-best">
-        <div className="container-page">
-          <SectionHead id="kuanysh-best" title={T.best[locale]} className="kit-head text-center" />
-          <ul className="mt-10 grid gap-6 md:grid-cols-3">
-            {blobs.map((area) => (
-              <li key={area.key} className="kuanysh-card">
-                <span className="kuanysh-card-icon" aria-hidden>✦</span>
-                <h3>{area.title}</h3>
-                <p>{area.text}</p>
-              </li>
-            ))}
-          </ul>
+      <section className="kuanysh-band" aria-labelledby="kuanysh-band">
+        <div className="kuanysh-band-cloud">
+          <Rocket className="kuanysh-rocket" />
+          <div className="kuanysh-band-text">
+            <p className="kuanysh-band-eyebrow">{T.bandEyebrow[locale]}</p>
+            <h2 id="kuanysh-band" className="kuanysh-band-title">{T.band[locale]}</h2>
+            <EnrollLink menu={menu} locale={locale} className="kuanysh-btn mt-6" />
+          </div>
+          <ThemeImage theme={THEME} name="heart" className="kuanysh-heart" sizes="(min-width: 1024px) 30vw, 70vw" />
         </div>
+        <Plane className="kuanysh-plane" />
       </section>
 
-      <section className="kuanysh-section kuanysh-warm" aria-labelledby="kuanysh-about">
-        <div className="container-page grid items-center gap-10 lg:grid-cols-2">
-          <div className="kuanysh-arc-wrap">
-            <ThemeImage theme={THEME} name="paint" className="kuanysh-arc-photo" />
-          </div>
-          <div>
-            <SectionHead id="kuanysh-about" eyebrow={T.about[locale]} title={T.aboutTitle[locale]} />
-            {aboutText && aboutText !== hero.lead ? <p className="kuanysh-text mt-4">{aboutText}</p> : null}
-            {profile?.workHours || profile?.phone ? (
-              <dl className="kuanysh-hours">
-                {profile?.workHours ? (<><dt>{T.hours[locale]}</dt><dd>{profile.workHours}</dd></>) : null}
-                {profile?.phone ? (<><dt>{T.phone[locale]}</dt><dd><a href={`tel:${profile.phone.replace(/[^\d+]/g, '')}`}>{profile.phone}</a></dd></>) : null}
-              </dl>
-            ) : null}
-            {langs.length > 0 ? (
-              <p className="mt-4 flex flex-wrap gap-2">
-                {langs.map((lang) => <span key={lang} className="kuanysh-chip">{lang}</span>)}
-              </p>
-            ) : null}
-          </div>
-        </div>
-      </section>
-
-      <section className="container-page py-10">
-        <div className="kuanysh-band">
-          <div>
-            <h2 className="kuanysh-band-title">{T.band[locale]}</h2>
-            <p className="kuanysh-band-lead">{T.bandLead[locale]}</p>
-            <EnrollLink menu={menu} locale={locale} className="kuanysh-band-button" />
-          </div>
-          <ThemeImage theme={THEME} name="play" className="kuanysh-band-photo" sizes="(min-width: 1024px) 30vw, 80vw" />
-        </div>
-      </section>
-
-      <section className="kuanysh-section" aria-labelledby="kuanysh-lessons">
-        <div className="container-page">
-          <SectionHead id="kuanysh-lessons" title={T.lessons[locale]} className="kit-head text-center" />
-          <div className="mt-10 grid items-center gap-8 lg:grid-cols-[1fr_auto_1fr]">
-            <ul className="space-y-5 lg:text-right">{left.map(lesson)}</ul>
-            <ThemeImage theme={THEME} name="hero" className="kuanysh-center" sizes="(min-width: 1024px) 28vw, 100vw" />
-            <ul className="space-y-5">{right.map(lesson)}</ul>
-          </div>
-        </div>
-      </section>
-
-      {mainReview ? (
-        <section className="kuanysh-section kuanysh-warm" aria-labelledby="kuanysh-reviews">
-          <div className="container-page">
-            <SectionHead id="kuanysh-reviews" title={T.reviews[locale]} className="kit-head text-center" />
-            <div className="mt-10 grid items-center gap-8 lg:grid-cols-[1.3fr_0.7fr]">
-              <figure className="kuanysh-quote">
-                {mainReview.rating ? <Stars rating={mainReview.rating} locale={locale} /> : null}
-                <blockquote>{pick(locale, mainReview.textKk, mainReview.textRu)}</blockquote>
-                <figcaption>
-                  <b>{mainReview.authorName}</b>
-                  {pick(locale, mainReview.authorNoteKk, mainReview.authorNoteRu) ? <span> · {pick(locale, mainReview.authorNoteKk, mainReview.authorNoteRu)}</span> : null}
-                </figcaption>
-              </figure>
-              <StatsRow stats={stats} className="kuanysh-bubbles" />
+      {activities.length > 0 ? (
+        <section className="container-page kuanysh-acts" aria-labelledby="kuanysh-acts">
+          <Stripes />
+          <h2 id="kuanysh-acts" className="kuanysh-title mt-3 text-center">{T.activities[locale]}</h2>
+          <p className="kuanysh-text mx-auto mt-3 max-w-xl text-center">{T.activitiesLead[locale]}</p>
+          <div className="kuanysh-acts-grid">
+            <ul className="kuanysh-acts-col">{activities.slice(0, half).map((item, index) => activity(item, index))}</ul>
+            <div className="kuanysh-collage" aria-hidden>
+              <ThemeImage theme={THEME} name="act1" sizes="14rem" />
+              <ThemeImage theme={THEME} name="act2" sizes="16rem" />
+              <ThemeImage theme={THEME} name="act3" sizes="16rem" />
             </div>
-            {otherReviews.length > 0 ? (
-              <ul className="mt-8 grid gap-6 md:grid-cols-2">
-                {otherReviews.slice(0, 2).map((review) => (
-                  <li key={review.id} className="kuanysh-small-quote">
-                    <p>{pick(locale, review.textKk, review.textRu)}</p>
-                    <b>{review.authorName}</b>
+            <ul className="kuanysh-acts-col">{activities.slice(half).map((item, index) => activity(item, index + half))}</ul>
+          </div>
+          {activitiesHref ? <p className="mt-8 text-center"><SiteLink href={activitiesHref} locale={locale} className="kuanysh-btn">{T.more[locale]}</SiteLink></p> : null}
+        </section>
+      ) : null}
+
+      {reviews.length > 0 || stats.length > 0 ? (
+        <section className="container-page kuanysh-reviews" aria-labelledby="kuanysh-reviews">
+          <div className="min-w-0">
+            <p className="kuanysh-eyebrow">{T.reviewsEyebrow[locale]}</p>
+            <h2 id="kuanysh-reviews" className="kuanysh-title">{T.reviews[locale]}</h2>
+            {reviews.length > 0 ? (
+              <ul className="kuanysh-review-track">
+                {reviews.slice(0, 6).map((review) => (
+                  <li key={review.id} className="kuanysh-review">
+                    <figure>
+                      <span className="kuanysh-quote" aria-hidden>“</span>
+                      <blockquote>{pick(locale, review.textKk, review.textRu)}</blockquote>
+                      <figcaption>
+                        {review.rating ? <Stars rating={review.rating} locale={locale} /> : null}
+                        <b>{review.authorName}</b>
+                        {pick(locale, review.authorNoteKk, review.authorNoteRu) ? <span className="block text-sm">{pick(locale, review.authorNoteKk, review.authorNoteRu)}</span> : null}
+                      </figcaption>
+                    </figure>
                   </li>
                 ))}
               </ul>
             ) : null}
           </div>
+          {stats.length > 0 ? (
+            <ul className="kuanysh-stats">
+              {stats.map((stat, index) => (
+                <li key={stat.label} className={`kuanysh-stat ${STAT_TONES[index % 4]}`}>
+                  <b>{stat.value}</b>
+                  <span>{stat.label}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
       ) : null}
 
       {news.length > 0 ? (
-        <section className="kuanysh-section" aria-labelledby="kuanysh-news">
-          <div className="container-page">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <SectionHead id="kuanysh-news" title={BLOCK_T.news[locale]} />
-              <SiteLink href="/news" locale={locale} className="kuanysh-more">{BLOCK_T.allNews[locale]} →</SiteLink>
-            </div>
-            <div className="kuanysh-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
-            </div>
+        <section className="container-page py-12" aria-labelledby="kuanysh-news">
+          <Stripes />
+          <h2 id="kuanysh-news" className="kuanysh-title mt-3 text-center">{BLOCK_T.news[locale]}</h2>
+          <div className="kuanysh-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
+          <p className="mt-8 text-center"><SiteLink href="/news" locale={locale} className="kuanysh-btn">{BLOCK_T.allNews[locale]}</SiteLink></p>
         </section>
       ) : null}
 
-      <section className="container-page pb-6">
-        <div className="kuanysh-cta-band">
-          <h2>{T.cta[locale]}</h2>
-          <p>{T.ctaLead[locale]}</p>
-          <EnrollLink menu={menu} locale={locale} className="kuanysh-band-button" />
+      <section className="container-page kuanysh-apply" aria-labelledby="kuanysh-apply">
+        <div className="kuanysh-apply-card">
+          <h2 id="kuanysh-apply" className="kuanysh-apply-title">{T.apply[locale]}</h2>
+          <p className="mt-3">{T.applyText[locale]}</p>
+          <EnrollLink menu={menu} locale={locale} className="kuanysh-btn mt-6" />
         </div>
+        <ThemeImage theme={THEME} name="kids" className="kuanysh-kids decor" sizes="(min-width: 1024px) 70rem, 100vw" />
       </section>
     </div>
   );
