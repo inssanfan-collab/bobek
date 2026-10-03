@@ -1,28 +1,40 @@
 /*
- * Тема «Кемпірқосақ» — радуга (структура дизайна №5). Фиолетовый #6C3FD1
- * для кнопок и подвала (белый текст 6,4:1); оранжевый и цвета радуги —
- * только украшения. Шрифт Nunito — проверен на казахские буквы.
+ * Тема «Қосақ» — вплотную к образцу №5 (Aigölek): белая шапка
+ * с разноцветным названием, светлое небо с облаками, солнцем и радугой,
+ * фото в рамке-«ромашке», оранжево-красные заголовки с зелёной волной,
+ * значки в облачках, цветной аккордеон групп, персиковая полоса,
+ * синий подвал с малиновой полосой.
+ * Цвета сгущены до читаемых: кнопки — зелёная #15803D (белый текст
+ * 5:1) и оранжево-красная #D23A0E (4,8:1); крупные заголовки #E0481A
+ * (3,8:1 — порог для крупного 3:1); полосы аккордеона #7C3AED, #C2410C,
+ * #0F766E (от 5:1). Подвал #3730A3, нижняя полоса #A21CAF.
+ * Шрифты: Rubik (заголовки) и Nunito — проверены на казахские буквы.
  * Каждое правило — под [data-theme='kosaq'] (tests/unit/themes.test.ts).
  */
 
 [data-theme='kosaq'] {
   --surface: 255 255 255;
   --card: 255 255 255;
-  --ink: 34 30 52;
-  --muted: 92 90 112;
-  --line: 236 232 248;
-  --brand: 108 63 209;
-  --brand-soft: 240 234 255;
-  --brand-ink: 86 46 180;
-  --accent: 179 95 0;
-  --accent-soft: 255 238 214;
-  --accent-ink: 140 72 0;
-  --kosaq-orange: 255 138 0;
-  --kosaq-green: 34 176 125;
+  --ink: 28 28 40;
+  --muted: 96 98 112;
+  --line: 234 234 242;
+  --brand: 21 128 61;
+  --brand-soft: 220 252 231;
+  --brand-ink: 21 101 52;
+  --accent: 210 58 14;
+  --accent-soft: 255 237 228;
+  --accent-ink: 160 40 8;
+  --kosaq-red: 224 72 26;
+  --kosaq-cta: 210 58 14;
+  --kosaq-green: 21 128 61;
+  --kosaq-sky: 230 241 250;
+  --kosaq-peach: 248 237 230;
+  --kosaq-indigo: 55 48 163;
+  --kosaq-magenta: 162 28 175;
   --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
-  --font-display: 'Nunito', system-ui, sans-serif;
+  --radius-lg: 1.4rem;
+  --radius-xl: 1.8rem;
+  --font-display: 'Rubik', 'Nunito', system-ui, sans-serif;
   --font-sans: 'Nunito', system-ui, sans-serif;
 }
 
@@ -31,315 +43,331 @@
   background-image: none;
 }
 
+[data-theme='kosaq'] .container-page {
+  max-width: 80rem;
+}
+
 [data-theme='kosaq'] .btn-primary,
-[data-theme='kosaq'] .kosaq-cta {
-  border-radius: 999px;
-  background: rgb(var(--brand));
+[data-theme='kosaq'] .kosaq-green-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.9rem;
+  background: rgb(var(--kosaq-green));
   color: rgb(255 255 255);
+  padding: 0.8rem 1.6rem;
   font-weight: 800;
-  box-shadow: 0 12px 24px -14px rgb(var(--brand) / 0.9);
+  box-shadow: 0 12px 22px -14px rgb(var(--kosaq-green) / 0.9);
 }
 
 [data-theme='kosaq'] .btn-secondary {
-  border-radius: 999px;
-  border: 2px solid rgb(var(--brand) / 0.4);
+  border-radius: 0.9rem;
+  border: 2px solid rgb(var(--kosaq-green));
   background: rgb(255 255 255);
   color: rgb(var(--brand-ink));
   font-weight: 800;
 }
 
-[data-theme='kosaq'] .kit-title {
-  font-weight: 900;
-}
-
-[data-theme='kosaq'] .kit-eyebrow {
-  text-transform: none;
-  letter-spacing: 0;
-}
-
 /* ── Шапка ── */
 
-[data-theme='kosaq'] .kosaq-topbar {
-  background: rgb(var(--brand-soft));
-  color: rgb(var(--brand-ink));
-}
-
 [data-theme='kosaq'] .kosaq-header {
-  background: rgb(255 255 255 / 0.96);
-  box-shadow: 0 1px 0 rgb(var(--line));
+  background: rgb(255 255 255);
+  box-shadow: 0 6px 16px -14px rgb(0 0 0 / 0.35);
 }
 
-[data-theme='kosaq'] .kosaq-logo {
-  border-radius: 999px;
-  background: rgb(var(--brand-soft));
+[data-theme='kosaq'] .kosaq-topbar {
+  background: rgb(var(--kosaq-indigo));
+  color: rgb(255 255 255);
 }
 
-[data-theme='kosaq'] .kosaq-name {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
+[data-theme='kosaq'] .kosaq-topbar a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='kosaq'] .kosaq-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 0.8rem 0.3rem;
+}
+
+[data-theme='kosaq'] .kosaq-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+[data-theme='kosaq'] .kosaq-wordmark {
+  min-width: 0;
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-size: clamp(1rem, 2.4vw, 1.7rem);
   font-weight: 900;
-  line-height: 1.15;
-  color: rgb(var(--brand-ink));
+  line-height: 1.1;
 }
 
-[data-theme='kosaq'] .kosaq-tagline {
-  font-size: 0.8rem;
-  color: rgb(var(--muted));
+[data-theme='kosaq'] .kosaq-side {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+[data-theme='kosaq'] .kosaq-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+[data-theme='kosaq'] .kosaq-cta {
+  display: inline-flex;
+  border-radius: 999px;
+  background: rgb(var(--kosaq-cta));
+  color: rgb(255 255 255);
+  padding: 0.6rem 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1023px) {
+  [data-theme='kosaq'] .kosaq-side .kosaq-cta {
+    display: none;
+  }
+}
+
+[data-theme='kosaq'] .kosaq-nav nav ul {
+  justify-content: flex-end;
 }
 
 [data-theme='kosaq'] .kosaq-nav nav a {
-  border-radius: 999px;
+  border-radius: 0.7rem;
   color: rgb(var(--ink));
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
-/* ── Первый экран ── */
-
-[data-theme='kosaq'] .kosaq-hero {
-  background: linear-gradient(180deg, rgb(var(--brand-soft) / 0.7), rgb(255 255 255));
+[data-theme='kosaq'] .kosaq-nav nav a:hover {
+  background: rgb(var(--accent-soft));
+  color: rgb(var(--accent-ink));
 }
 
-[data-theme='kosaq'] .kosaq-pill {
-  display: inline-block;
-  margin-bottom: 1.2rem;
+/* ── Первый экран: небо, облака, радуга, фото в «ромашке» ── */
+
+[data-theme='kosaq'] .kosaq-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgb(var(--kosaq-sky)), rgb(244 249 253));
+  padding-block: 3rem 4rem;
+}
+
+[data-theme='kosaq'] .kosaq-cloud {
+  position: absolute;
+  opacity: 0.95;
+}
+
+[data-theme='kosaq'] .kosaq-cloud-1 { top: 8%; left: 18%; width: 8rem; }
+[data-theme='kosaq'] .kosaq-cloud-2 { top: 4%; right: 6%; width: 11rem; }
+[data-theme='kosaq'] .kosaq-cloud-3 { bottom: 4%; left: 4%; width: 13rem; }
+
+[data-theme='kosaq'] .kosaq-hero-sun {
+  position: absolute;
+  top: 0.4rem;
+  left: 21%;
+  width: 5rem;
+}
+
+[data-theme='kosaq'] .kosaq-rainbow {
+  position: absolute;
+  bottom: -1rem;
+  left: 52%;
+  width: 20rem;
+  opacity: 0.9;
+}
+
+[data-theme='kosaq'] .kosaq-hero-plane {
+  position: absolute;
+  bottom: 14%;
+  left: 28%;
+  width: 3.5rem;
+}
+
+[data-theme='kosaq'] .kosaq-hero-grid {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='kosaq'] .kosaq-hero-grid {
+    grid-template-columns: 0.8fr 1.1fr 0.8fr;
+  }
+}
+
+/* «Ромашка»: белая волнистая рамка, внутри — круглое фото. */
+[data-theme='kosaq'] .kosaq-scallop {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  background: rgb(255 255 255);
+  clip-path: url(#kosaq-scallop);
+}
+
+[data-theme='kosaq'] .kosaq-scallop img {
+  position: absolute;
+  inset: 11%;
+  width: 78%;
+  height: 78%;
+  object-fit: cover;
   border-radius: 999px;
-  background: rgb(var(--brand-soft));
-  color: rgb(var(--brand-ink));
-  padding: 0.35rem 1rem;
-  font-size: 0.9rem;
-  font-weight: 800;
+}
+
+[data-theme='kosaq'] .kosaq-hero-photo {
+  width: min(100%, 22rem);
+  margin-inline: auto;
+  filter: drop-shadow(0 18px 24px rgb(40 80 140 / 0.18));
+}
+
+[data-theme='kosaq'] .kosaq-hero-text {
+  position: relative;
+  z-index: 1;
+  text-align: center;
 }
 
 [data-theme='kosaq'] .kosaq-h1 {
-  font-size: clamp(2.3rem, 5vw, 4rem);
-  font-weight: 900;
-  line-height: 1.08;
-  color: rgb(var(--ink));
-  text-wrap: balance;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.6vw, 3.2rem);
+  font-weight: 500;
+  line-height: 1.15;
+  color: rgb(var(--kosaq-red));
 }
 
 [data-theme='kosaq'] .kosaq-hero .hero-highlight {
   background-image: none;
-  color: rgb(var(--brand));
+  color: rgb(var(--kosaq-green));
   -webkit-text-fill-color: currentColor;
-  text-decoration: underline wavy rgb(var(--kosaq-orange));
-  text-decoration-thickness: 0.07em;
-  text-underline-offset: 0.18em;
 }
 
 [data-theme='kosaq'] .kosaq-lead {
-  max-width: 36rem;
-  margin-top: 1.1rem;
-  font-size: 1.08rem;
-  line-height: 1.6;
+  max-width: 34rem;
+  margin: 1rem auto 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   color: rgb(var(--muted));
 }
 
 [data-theme='kosaq'] .kosaq-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  margin-top: 2rem;
-  padding-top: 1.2rem;
-  border-top: 1px solid rgb(var(--line));
+  justify-content: center;
+  gap: 1.5rem 2.6rem;
+  margin-top: 2.2rem;
 }
 
-[data-theme='kosaq'] .kosaq-stats .hb-stat {
-  border-radius: 1rem;
-  background: rgb(var(--brand-soft));
-  padding: 0.5rem 0.9rem;
+[data-theme='kosaq'] .kosaq-stats li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
 }
 
-[data-theme='kosaq'] .kosaq-stats .hb-stat:nth-child(2) { background: rgb(var(--accent-soft)); }
-[data-theme='kosaq'] .kosaq-stats .hb-stat:nth-child(3) { background: rgb(222 247 236); }
-
-/* Коллаж на радуге */
-[data-theme='kosaq'] .kosaq-collage {
-  position: relative;
+[data-theme='kosaq'] .kosaq-stat-icon {
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 1rem;
-  padding-top: 4rem;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 999px;
+  color: rgb(255 255 255);
 }
 
-[data-theme='kosaq'] .kosaq-rainbow {
-  position: absolute;
-  left: 10%;
-  right: 10%;
-  top: 0;
-  width: 80%;
-  opacity: 0.85;
+[data-theme='kosaq'] .kosaq-stats b {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1;
 }
 
-[data-theme='kosaq'] .kosaq-main {
-  position: relative;
-  grid-row: span 2;
-  width: 100%;
-  height: 100%;
-  min-height: 20rem;
-  object-fit: cover;
-  border-radius: 1.75rem;
-  border: 6px solid rgb(255 255 255);
-  box-shadow: 0 24px 50px -30px rgb(var(--ink) / 0.5);
+[data-theme='kosaq'] .kosaq-stats li > span:last-child {
+  font-size: 0.85rem;
+  font-weight: 800;
 }
 
-[data-theme='kosaq'] .kosaq-small {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 9rem;
-  object-fit: cover;
-  border-radius: 1.5rem;
-  border: 6px solid rgb(255 255 255);
-  box-shadow: 0 24px 50px -30px rgb(var(--ink) / 0.5);
+[data-theme='kosaq'] .kosaq-green .kosaq-stat-icon { background: rgb(34 197 94); }
+[data-theme='kosaq'] .kosaq-green { color: rgb(21 128 61); }
+[data-theme='kosaq'] .kosaq-orange .kosaq-stat-icon { background: rgb(249 115 22); }
+[data-theme='kosaq'] .kosaq-orange { color: rgb(194 65 12); }
+[data-theme='kosaq'] .kosaq-purple .kosaq-stat-icon { background: rgb(168 85 247); }
+[data-theme='kosaq'] .kosaq-purple { color: rgb(126 34 206); }
+
+@media (max-width: 1023px) {
+  [data-theme='kosaq'] .kosaq-hero-left {
+    order: 2;
+    width: min(70%, 18rem);
+  }
+
+  [data-theme='kosaq'] .kosaq-hero-right {
+    display: none;
+  }
+
+  [data-theme='kosaq'] .kosaq-rainbow,
+  [data-theme='kosaq'] .kosaq-hero-plane {
+    display: none;
+  }
+
+  [data-theme='kosaq'] .kosaq-hero-sun {
+    top: 0.3rem;
+    left: auto;
+    right: 3%;
+    width: 3.4rem;
+  }
 }
 
-/* ── Секции ── */
+/* ── Заголовки ── */
 
-[data-theme='kosaq'] .kosaq-section {
-  padding-block: 4.5rem;
+[data-theme='kosaq'] .kosaq-eyebrow {
+  margin-bottom: 0.6rem;
+  color: rgb(185 28 28);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-[data-theme='kosaq'] .kosaq-soft {
-  background: rgb(250 248 255);
+[data-theme='kosaq'] .kosaq-eyebrow-green {
+  color: rgb(21 128 61);
 }
 
-[data-theme='kosaq'] .kosaq-stack {
-  display: grid;
-  gap: 1rem;
+[data-theme='kosaq'] .kosaq-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1.2;
+  color: rgb(var(--ink));
 }
 
-[data-theme='kosaq'] .kosaq-stack img {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  border-radius: 1.75rem;
+[data-theme='kosaq'] .kosaq-red {
+  color: rgb(var(--kosaq-red));
 }
 
-[data-theme='kosaq'] .kosaq-stack img:last-child {
-  width: 80%;
-  margin-left: auto;
+[data-theme='kosaq'] .kosaq-squiggle {
+  display: block;
+  width: 5rem;
+  margin-top: 0.7rem;
 }
 
 [data-theme='kosaq'] .kosaq-text {
+  color: rgb(var(--muted));
   line-height: 1.7;
-  color: rgb(var(--muted));
 }
 
-[data-theme='kosaq'] .kosaq-bullet {
-  position: relative;
-  padding-left: 1.3rem;
-  font-size: 0.95rem;
-  line-height: 1.55;
-  color: rgb(var(--muted));
-}
-
-[data-theme='kosaq'] .kosaq-bullet b {
-  color: rgb(var(--ink));
-}
-
-[data-theme='kosaq'] .kosaq-bullet::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.55rem;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 999px;
-  background: rgb(var(--kosaq-orange));
-}
-
-/* Сетка занятий: цветные кружки с номерами */
-[data-theme='kosaq'] .kosaq-step {
-  display: flex;
-  gap: 1rem;
-  border-radius: 1.5rem;
-  background: rgb(255 255 255);
-  padding: 1.2rem 1.3rem;
-  box-shadow: 0 14px 28px -24px rgb(var(--ink) / 0.6);
-  font-size: 0.95rem;
-  color: rgb(var(--muted));
-}
-
-[data-theme='kosaq'] .kosaq-step b {
-  display: block;
-  margin-bottom: 0.2rem;
-  font-size: 1.05rem;
-  color: rgb(var(--ink));
-}
-
-[data-theme='kosaq'] .kosaq-step-icon {
-  display: grid;
-  flex-shrink: 0;
-  place-items: center;
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 999px;
-  background: rgb(255 228 233);
-  color: rgb(var(--ink));
-  font-weight: 900;
-}
-
-[data-theme='kosaq'] .kosaq-step-1 .kosaq-step-icon { background: rgb(255 236 214); }
-[data-theme='kosaq'] .kosaq-step-2 .kosaq-step-icon { background: rgb(255 246 200); }
-[data-theme='kosaq'] .kosaq-step-3 .kosaq-step-icon { background: rgb(222 247 236); }
-[data-theme='kosaq'] .kosaq-step-4 .kosaq-step-icon { background: rgb(222 238 255); }
-[data-theme='kosaq'] .kosaq-step-5 .kosaq-step-icon { background: rgb(var(--brand-soft)); }
-
-/* Группы раскрывашками */
-[data-theme='kosaq'] .kosaq-group {
-  border-radius: 1.25rem;
-  background: rgb(var(--brand-soft));
-  padding: 0.9rem 1.2rem;
-}
-
-[data-theme='kosaq'] .kosaq-group:nth-child(4n + 2) { background: rgb(var(--accent-soft)); }
-[data-theme='kosaq'] .kosaq-group:nth-child(4n + 3) { background: rgb(222 247 236); }
-[data-theme='kosaq'] .kosaq-group:nth-child(4n + 4) { background: rgb(222 238 255); }
-
-[data-theme='kosaq'] .kosaq-group summary {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.5rem;
-  cursor: pointer;
-  list-style: none;
-}
-
-[data-theme='kosaq'] .kosaq-group summary::-webkit-details-marker {
-  display: none;
-}
-
-[data-theme='kosaq'] .kosaq-group summary span {
-  font-weight: 700;
-  color: rgb(var(--brand-ink));
-}
-
-[data-theme='kosaq'] .kosaq-group dl {
-  display: grid;
-  gap: 0.3rem;
-  margin-top: 0.7rem;
-  font-size: 0.92rem;
-}
-
-[data-theme='kosaq'] .kosaq-group dl div {
-  display: flex;
-  gap: 0.5rem;
-}
-
-[data-theme='kosaq'] .kosaq-group dt {
-  color: rgb(var(--muted));
-}
-
-[data-theme='kosaq'] .kosaq-circle {
-  display: block;
-  width: min(100%, 24rem);
-  margin-inline: auto;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 999px;
-  border: 10px solid rgb(var(--brand-soft));
+[data-theme='kosaq'] .kosaq-sub {
+  font-weight: 800;
 }
 
 [data-theme='kosaq'] .kosaq-more {
@@ -347,86 +375,374 @@
   color: rgb(var(--brand-ink));
 }
 
-[data-theme='kosaq'] .kosaq-news article.card {
-  border: 0;
-  border-radius: 1.5rem;
-  box-shadow: 0 20px 40px -30px rgb(var(--ink) / 0.5);
+/* ── «О нас»: два фото в цветных рамках ── */
+
+[data-theme='kosaq'] .kosaq-about {
+  display: grid;
+  align-items: center;
+  gap: 3rem;
+  padding-block: 5rem;
 }
 
-/* Фиолетовая полоса */
-[data-theme='kosaq'] .kosaq-band {
+@media (min-width: 1024px) {
+  [data-theme='kosaq'] .kosaq-about {
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 4.5rem;
+  }
+}
+
+[data-theme='kosaq'] .kosaq-frames {
+  position: relative;
+  min-height: 34rem;
+  max-width: 30rem;
+  width: 100%;
+  margin-inline: auto;
+}
+
+[data-theme='kosaq'] .kosaq-frame {
+  position: absolute;
+  object-fit: cover;
+  border: 7px solid rgb(255 255 255);
+}
+
+[data-theme='kosaq'] .kosaq-frame-1 {
+  top: 0;
+  right: 4%;
+  width: 78%;
+  aspect-ratio: 1 / 1;
+  transform: rotate(-3deg);
+  box-shadow: -14px 14px 0 rgb(251 207 232), -8px 8px 0 rgb(253 230 138);
+}
+
+[data-theme='kosaq'] .kosaq-frame-2 {
+  bottom: 0;
+  left: 22%;
+  width: 52%;
+  aspect-ratio: 0.9 / 1;
+  transform: rotate(-2deg);
+  box-shadow: 12px 12px 0 rgb(187 247 208), 6px 6px 0 rgb(253 230 138);
+}
+
+[data-theme='kosaq'] .kosaq-frames-sun {
+  position: absolute;
+  bottom: 22%;
+  left: 0;
+  width: 5rem;
+}
+
+@media (max-width: 639px) {
+  [data-theme='kosaq'] .kosaq-frames {
+    min-height: 24rem;
+  }
+}
+
+/* ── Шесть направлений со значками в облачках ── */
+
+[data-theme='kosaq'] .kosaq-steps {
+  padding-block: 3rem 5rem;
+}
+
+[data-theme='kosaq'] .kosaq-step-grid {
+  display: grid;
+  gap: 2.2rem 2rem;
+  margin-top: 3rem;
+}
+
+@media (min-width: 768px) {
+  [data-theme='kosaq'] .kosaq-step-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-theme='kosaq'] .kosaq-step-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+[data-theme='kosaq'] .kosaq-step {
   display: flex;
-  flex-wrap: wrap;
+  gap: 1.1rem;
+}
+
+[data-theme='kosaq'] .kosaq-step b {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+[data-theme='kosaq'] .kosaq-step b + span {
+  display: block;
+  margin-top: 0.35rem;
+  color: rgb(var(--muted));
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+[data-theme='kosaq'] .kosaq-badge {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 5rem;
+  height: 4rem;
+}
+
+[data-theme='kosaq'] .kosaq-badge-cloud {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+[data-theme='kosaq'] .kosaq-badge-icon {
+  position: relative;
+  width: 1.7rem;
+  height: 1.7rem;
+  margin-top: 0.5rem;
+}
+
+/* ── Группы: цветной аккордеон и фото в «ромашке» ── */
+
+[data-theme='kosaq'] .kosaq-groups {
+  display: grid;
+  align-items: center;
+  gap: 3rem;
+  padding-block: 4rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='kosaq'] .kosaq-groups {
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+  }
+}
+
+[data-theme='kosaq'] .kosaq-accordion {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.8rem;
+  max-width: 34rem;
+}
+
+[data-theme='kosaq'] .kosaq-accordion details {
+  border-radius: 0.8rem;
+  background: rgb(255 255 255);
+  box-shadow: 0 14px 28px -20px rgb(0 0 0 / 0.45);
+}
+
+[data-theme='kosaq'] .kosaq-accordion summary {
+  display: flex;
+  cursor: pointer;
+  list-style: none;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
-  border-radius: 2rem;
-  background: rgb(var(--brand));
+  gap: 1rem;
+  border-radius: 0.8rem;
+  padding: 0.85rem 1.1rem;
   color: rgb(255 255 255);
-  padding: 2.4rem 2.2rem;
+  font-size: 0.92rem;
+  font-weight: 800;
 }
 
-[data-theme='kosaq'] .kosaq-band h2 {
-  font-size: clamp(1.6rem, 3.2vw, 2.2rem);
-  font-weight: 900;
+[data-theme='kosaq'] .kosaq-accordion summary::-webkit-details-marker {
+  display: none;
 }
 
-[data-theme='kosaq'] .kosaq-band p {
-  margin-top: 0.5rem;
-  opacity: 0.95;
+[data-theme='kosaq'] .kosaq-bar-purple summary { background: rgb(124 58 237); }
+[data-theme='kosaq'] .kosaq-bar-orange summary { background: rgb(194 65 12); }
+[data-theme='kosaq'] .kosaq-bar-teal summary { background: rgb(15 118 110); }
+
+[data-theme='kosaq'] .kosaq-accordion details[open] summary {
+  border-radius: 0.8rem 0.8rem 0 0;
 }
 
-[data-theme='kosaq'] .kosaq-band-button {
-  display: inline-flex;
-  border-radius: 999px;
+[data-theme='kosaq'] .kosaq-chevron {
+  transition: transform 0.2s ease;
+}
+
+[data-theme='kosaq'] .kosaq-accordion details[open] .kosaq-chevron {
+  transform: rotate(180deg);
+}
+
+[data-theme='kosaq'] .kosaq-accordion ul {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem 1.2rem 1.2rem;
+  color: rgb(var(--muted));
+  font-size: 0.9rem;
+}
+
+[data-theme='kosaq'] .kosaq-groups-art {
+  position: relative;
+  max-width: 30rem;
+  width: 100%;
+  margin-inline: auto;
+}
+
+[data-theme='kosaq'] .kosaq-groups-photo {
+  filter: drop-shadow(0 20px 30px rgb(0 0 0 / 0.15));
+}
+
+[data-theme='kosaq'] .kosaq-groups-sun {
+  position: absolute;
+  z-index: 1;
+  top: -1rem;
+  right: 6%;
+  width: 5.5rem;
+}
+
+/* ── Новости: облачный край у фото ── */
+
+[data-theme='kosaq'] .kosaq-news-wrap {
+  padding-block: 3rem 5rem;
+}
+
+[data-theme='kosaq'] .kosaq-news article.card {
+  border: 0;
+  border-radius: 0.8rem;
+  box-shadow: 0 20px 40px -26px rgb(0 0 0 / 0.45);
+}
+
+[data-theme='kosaq'] .kosaq-news article.card .p-5 {
+  position: relative;
   background: rgb(255 255 255);
-  color: rgb(var(--brand-ink));
-  padding: 0.85rem 1.7rem;
-  font-weight: 900;
+}
+
+[data-theme='kosaq'] .kosaq-news article.card .p-5::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -0.9rem;
+  height: 1rem;
+  background: radial-gradient(circle at 0.9rem 1.1rem, rgb(255 255 255) 0.95rem, transparent 1rem) 0 0 / 1.8rem 1rem repeat-x;
+}
+
+/* ── Персиковая полоса с детьми-вырезками ── */
+
+[data-theme='kosaq'] .kosaq-band {
+  position: relative;
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  background: rgb(var(--kosaq-peach));
+  padding-top: 3rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='kosaq'] .kosaq-band {
+    grid-template-columns: 0.9fr 1.4fr 0.7fr;
+  }
+}
+
+[data-theme='kosaq'] .kosaq-band-left,
+[data-theme='kosaq'] .kosaq-band-right {
+  display: block;
+  width: 100%;
+  align-self: end;
+}
+
+[data-theme='kosaq'] .kosaq-band-right {
+  max-width: 16rem;
+  justify-self: end;
+}
+
+[data-theme='kosaq'] .kosaq-band-text {
+  padding-block: 1rem 3rem;
+  text-align: center;
+}
+
+[data-theme='kosaq'] .kosaq-band-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgb(185 28 28);
+}
+
+@media (max-width: 1023px) {
+  [data-theme='kosaq'] .kosaq-band-left {
+    order: 2;
+    max-width: 20rem;
+    margin-inline: auto;
+  }
+
+  [data-theme='kosaq'] .kosaq-band-right {
+    display: none;
+  }
 }
 
 /* ── Подвал ── */
 
-[data-theme='kosaq'] .kosaq-footer-body {
-  background: rgb(var(--brand-ink));
-  color: rgb(234 228 252);
-}
-
-[data-theme='kosaq'] .kosaq-footer-name {
-  font-size: 1.2rem;
-  font-weight: 900;
+[data-theme='kosaq'] .kosaq-footer {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 50% at 85% 10%, rgb(255 255 255 / 0.07), transparent 70%),
+    radial-gradient(40% 40% at 10% 90%, rgb(255 255 255 / 0.06), transparent 70%),
+    rgb(var(--kosaq-indigo));
   color: rgb(255 255 255);
 }
 
-[data-theme='kosaq'] .kosaq-footer-title {
-  margin-bottom: 0.6rem;
-  font-weight: 900;
-  color: rgb(255 214 150);
+[data-theme='kosaq'] .kosaq-footer a {
+  color: rgb(255 255 255);
 }
 
-[data-theme='kosaq'] .kosaq-footer-body a:hover {
-  color: rgb(255 255 255);
+[data-theme='kosaq'] .kosaq-footer a:hover {
   text-decoration: underline;
 }
 
-[data-theme='kosaq'] .kosaq-footer-social a {
+[data-theme='kosaq'] .kosaq-footer-name {
+  font-size: 1.9rem;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+[data-theme='kosaq'] .kosaq-footer-about {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.7;
+}
+
+[data-theme='kosaq'] .kosaq-footer-title {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+[data-theme='kosaq'] .kosaq-footer-links {
+  columns: 2;
+  column-gap: 1.5rem;
+}
+
+[data-theme='kosaq'] .kosaq-footer-links li {
+  break-inside: avoid;
+  margin-bottom: 0.5rem;
+}
+
+[data-theme='kosaq'] .kosaq-footer .kosaq-footer-social a {
   color: rgb(var(--ink));
 }
 
 [data-theme='kosaq'] .kosaq-footer-bottom {
-  border-top: 1px solid rgb(255 255 255 / 0.18);
+  background: rgb(var(--kosaq-magenta));
 }
 
-@media (max-width: 639px) {
-  [data-theme='kosaq'] .kosaq-section {
-    padding-block: 3rem;
-  }
+[data-theme='kosaq'] .kosaq-top {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 2px solid rgb(255 255 255);
+  border-radius: 999px;
+  font-weight: 900;
+}
 
-  [data-theme='kosaq'] .kosaq-main {
-    min-height: 14rem;
-  }
-
-  [data-theme='kosaq'] .kosaq-small {
-    min-height: 6.5rem;
+@media (max-width: 767px) {
+  [data-theme='kosaq'] .kosaq-footer-links {
+    columns: 1;
   }
 }
