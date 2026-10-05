@@ -211,7 +211,9 @@
   display: block;
   width: 100%;
   object-fit: cover;
-  object-position: 75% 85%; /* трава внизу кадра не должна обрезаться */
+  /* Сверху — голова малыша, снизу — трава и плед: на широком экране кадр
+     режется по высоте, и при нижней привязке голова уходила за край. */
+  object-position: 75% 25%;
 }
 
 [data-theme='kuanysh'] .kuanysh-hero::before {
