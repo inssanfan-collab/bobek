@@ -452,3 +452,39 @@ html.lenis { scroll-behavior: auto !important; }
 @media (prefers-reduced-motion: reduce) {
   .sales *, .sales *::before, .sales *::after { animation: none !important; transition: none !important; }
 }
+
+/* ── витрина дизайнов (/designs): снимки во всю длину, прокрутка при наведении ── */
+.sales .dz-grid { display: grid; gap: 34px 28px; list-style: none; margin: 0; padding: 0; }
+@media (min-width: 760px) { .sales .dz-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .sales .dz-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.sales .dz-card { display: flex; flex-direction: column; border-radius: 26px; background: #fff; box-shadow: 0 22px 44px -30px rgb(106 88 216 / .45), 0 0 0 1px var(--line); overflow: hidden; }
+.sales .dz-shot { display: block; text-decoration: none; background: #F7F3FF; }
+.sales .dz-window { position: relative; display: block; height: 330px; overflow: hidden; background: var(--milk); }
+.sales .dz-window img { position: absolute; inset: 0 0 auto 0; width: 100%; height: auto; transform: translateY(0); transition: transform .9s ease; }
+/* Наведение или фокус — страница медленно едет вниз до подвала. */
+.sales .dz-shot:hover .dz-window img,
+.sales .dz-shot:focus-visible .dz-window img { transform: translateY(calc(-100% + 330px)); transition: transform var(--dz-dur, 12s) linear; }
+.sales .dz-body { display: flex; flex: 1; flex-direction: column; gap: 10px; padding: 20px 22px 24px; }
+.sales .dz-body h2 { font-size: 22px; }
+.sales .dz-body p { flex: 1; color: var(--ink-2); font-size: 15.5px; line-height: 1.55; }
+.sales .dz-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 6px; }
+.sales .dz-actions .sbtn { min-height: 46px; padding: 0 20px; font-size: 15px; }
+.sales .dz-live { color: var(--plum); font-weight: 800; }
+.sales .dz-how { margin-top: 40px; text-align: center; color: var(--ink-2); }
+.sales .dz-how a { color: var(--plum); font-weight: 800; }
+.sales .dz-actions-top { justify-content: center; margin: 0 0 30px; }
+.sales .dz-view { display: grid; gap: 30px; align-items: start; }
+@media (min-width: 900px) { .sales .dz-view { grid-template-columns: minmax(0, 1fr) 300px; } }
+.sales .dz-view figure { margin: 0; }
+.sales .dz-view figcaption { margin-bottom: 10px; text-align: center; color: var(--ink-3); font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: .08em; }
+.sales .dz-desk .browser { box-shadow: 0 30px 60px -36px rgb(106 88 216 / .6), 0 0 0 1px var(--line); }
+.sales .dz-scrollbox { max-height: min(78vh, 760px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; background: var(--milk); }
+.sales .dz-scrollbox img { width: 100%; height: auto; aspect-ratio: auto; object-fit: initial; }
+.sales .dz-phone { width: min(300px, 100%); margin-inline: auto; padding: 8px; border-radius: 34px; background: #fff; box-shadow: 0 26px 50px -24px rgb(106 88 216 / .6), 0 0 0 1px var(--line); }
+.sales .dz-phone .dz-scrollbox { border-radius: 26px; max-height: min(78vh, 640px); }
+.sales .dz-pager { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 36px; }
+.sales .dz-pager a { color: var(--plum); font-weight: 800; }
+@media (prefers-reduced-motion: reduce) {
+  .sales .dz-shot:hover .dz-window img, .sales .dz-shot:focus-visible .dz-window img { transform: none; }
+}
+.sales .dz-more { margin-top: 34px; text-align: center; }

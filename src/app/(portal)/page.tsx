@@ -4,6 +4,7 @@ import { formatMoney, formatPhone, phoneHref } from '@/lib/labels';
 import { localeFromParam, withLocale, type Locale } from '@/lib/i18n';
 import { EDU_DOMAIN_NOTE, isPlanCode, PLAN_CODES, PLAN_COMMON, PLAN_INFO, STATE_PRICE_NOTE } from '@/lib/plans';
 import { findThemeInfo } from '@/themes/catalog';
+import { DESIGNS } from '@/lib/designs';
 import { csrfToken } from '@/server/auth/csrf';
 import { portalSettings } from '@/server/docs/contract';
 import { SalesTabs } from '@/components/portal/sales/SalesTabs';
@@ -69,6 +70,7 @@ const T = {
     ru: 'Шаблон, палитру и шрифты сад выбирает сам. Если нужен собственный облик, нарисуем индивидуальный дизайн.',
   },
   lookTabs: { kk: 'Сайттың түрі', ru: 'Вид сайта' },
+  allDesigns: { kk: 'Барлық дизайндарды қарау (%s)', ru: 'Смотреть все дизайны (%s)' },
   standard: { kk: 'Дайын үлгі', ru: 'Готовый шаблон' },
   inPlan: { kk: 'Тарифке кіреді', ru: 'Входит в тариф' },
   ownDesign: { kk: 'Жеке дизайн', ru: 'Индивидуальный дизайн' },
@@ -436,6 +438,9 @@ export default async function PortalHome({
                 </div>
               </div>
             ))}
+            <p className="dz-more">
+              <a className="sbtn sbtn-secondary" href={withLocale('/designs', locale)}>{fill(T.allDesigns[locale], String(DESIGNS.length))} →</a>
+            </p>
           </div>
         </section>
 

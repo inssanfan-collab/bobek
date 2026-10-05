@@ -23,6 +23,7 @@
     "maps:geocode": "tsx scripts/geocode-tenants.ts",
     "template:xlsx": "tsx scripts/make-tenant-template.ts",
     "guide:shots": "tsx scripts/guide-shots.ts",
+    "designs:shots": "tsx scripts/design-shots.ts",
     "guide:pdf": "tsx scripts/make-guide-pdf.ts",
     "template:example": "tsx scripts/make-anketa-example.ts",
     "og:image": "tsx scripts/make-og-image.ts",

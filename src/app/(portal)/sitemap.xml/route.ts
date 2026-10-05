@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/server/db';
 import { portalUrl } from '@/lib/seo';
+import { DESIGNS } from '@/lib/designs';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 /** Страницы, которые есть всегда. Заявка и оферта — тоже точки входа из поиска. */
 // /connect, /pricing и /apply ведут на главную — в карте сайта им не место.
-const STATIC_PATHS = ['/', '/guide', '/catalog', '/parents', '/news', '/contacts', '/offer'];
+const STATIC_PATHS = ['/', '/designs', '/guide', '/catalog', '/parents', '/news', '/contacts', '/offer'];
 
 /** & в адресе — сущностью: иначе XML карты не разберётся. */
 const xml = (url: string) => url.replace(/&/g, '&amp;');
@@ -37,6 +38,7 @@ export async function GET() {
       path,
       lastmod: path === '/catalog' ? lastGarden?.updatedAt ?? null : null,
     })),
+    ...DESIGNS.map((design) => ({ path: `/designs/${design.code}`, lastmod: null })),
     ...posts.map((post) => ({ path: `/news/${post.slug}`, lastmod: post.updatedAt })),
   ];
 

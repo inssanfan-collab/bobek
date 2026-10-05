@@ -16,6 +16,7 @@ const T = {
   home: { kk: 'EduSad, басты бет', ru: 'EduSad, на главную' },
   sections: { kk: 'Бөлімдер', ru: 'Разделы' },
   navLook: { kk: 'Сыртқы келбеті', ru: 'Как выглядит' },
+  navDesigns: { kk: 'Дизайндар', ru: 'Дизайны' },
   navFeatures: { kk: 'Әкімші бөлімі', ru: 'Админка' },
   navPlans: { kk: 'Тарифтер', ru: 'Тарифы' },
   navSteps: { kk: 'Қалай қосылуға болады', ru: 'Как подключиться' },
@@ -70,6 +71,7 @@ export function SalesHeader({ locale, pathname, onHome = false }: { locale: Loca
         </a>
         <nav className="nav" aria-label={T.sections[locale]}>
           <a href={section(locale, onHome, 'vid')}>{T.navLook[locale]}</a>
+          <a href={withLocale('/designs', locale)} aria-current={pathname.startsWith('/designs') ? 'page' : undefined}>{T.navDesigns[locale]}</a>
           <a href={section(locale, onHome, 'adminka')}>{T.navFeatures[locale]}</a>
           <a href={section(locale, onHome, 'tarify')}>{T.navPlans[locale]}</a>
           {/* «Как подключиться» — только в подвале: по-казахски «Қалай
@@ -114,6 +116,7 @@ export async function SalesFooter({ locale, onHome = false }: { locale: Locale; 
           <a href={section(locale, onHome, 'tarify')}>{T.navPlans[locale]}</a>
           <a href={section(locale, onHome, 'podkluchenie')}>{T.navSteps[locale]}</a>
           <a href={withLocale('/contacts', locale)}>{T.contacts[locale]}</a>
+          <a href={withLocale('/designs', locale)}>{T.navDesigns[locale]}</a>
           <a href={withLocale('/guide', locale)}>{T.guide[locale]}</a>
           <a href={withLocale('/offer', locale)}>{T.offer[locale]}</a>
         </nav>
