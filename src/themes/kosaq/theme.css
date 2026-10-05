@@ -630,9 +630,16 @@
   padding-top: 3rem;
 }
 
+/* На широком экране дети не растут вслед за окном: левая пара и мальчик
+   справа в одном масштабе, как в образце, текст по центру между ними. */
 @media (min-width: 1024px) {
   [data-theme='kosaq'] .kosaq-band {
-    grid-template-columns: 0.9fr 1.4fr 0.7fr;
+    grid-template-columns: minmax(0, 26rem) 1fr minmax(0, 17rem);
+    padding-inline: max(1rem, calc((100% - 84rem) / 2));
+  }
+
+  [data-theme='kosaq'] .kosaq-band-text {
+    align-self: center;
   }
 }
 
@@ -643,8 +650,12 @@
   align-self: end;
 }
 
+[data-theme='kosaq'] .kosaq-band-left {
+  max-width: 26rem;
+}
+
 [data-theme='kosaq'] .kosaq-band-right {
-  max-width: 16rem;
+  max-width: 17rem;
   justify-self: end;
 }
 
