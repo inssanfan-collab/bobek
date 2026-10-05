@@ -7,7 +7,7 @@ import { pick } from '@/lib/i18n';
 import { env } from '@/lib/env';
 import { fontPair, isHeaderStyleCode, isPaletteCode, isPatternCode, isShapeCode } from '@/lib/templates';
 import { cssTriplet, derivePalette } from '@/lib/colors';
-import { activeTheme } from '@/server/tenant/theme';
+import { activeTheme, a11yOn } from '@/server/tenant/theme';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,6 +67,10 @@ export default async function TenantLayout({
   const headerStyle = isHeaderStyleCode(tenant.headerStyle) ? tenant.headerStyle : 'light';
   // Индивидуальная тема: её CSS действует только при этом атрибуте.
   const theme = await activeTheme(tenant.themeCode);
+  // В версии для слабовидящих темы нет, но переключателю надо знать, что она
+  // у сайта есть: выключая режим, он перезагрузит страницу, и тема вернётся.
+  const a11y = await a11yOn();
+  const ownTheme = a11y ? await activeTheme(tenant.themeCode, { ignoreA11y: true }) : null;
   // Тема задаёт вид целиком. Стиль шапки, узор, форма элементов и «свой
   // цвет» из «Внешнего вида» сада при ней не применяются: их правила
   // сильнее правил темы и перебили бы её. Шрифты — темы, если она их задала.
@@ -85,7 +89,8 @@ export default async function TenantLayout({
       data-header-style={own && headerStyle !== 'light' ? headerStyle : undefined}
       data-font={theme?.fonts || fonts.code === 'soft' ? undefined : fonts.code}
       data-shape={own && shape !== 'soft' ? shape : undefined}
-      data-a11y="off"
+      data-a11y={a11y ? 'on' : 'off'}
+      data-theme-own={ownTheme?.code}
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -44,9 +44,13 @@ test.describe('Индивидуальные темы', () => {
       await page.goto(`${SAD}/?theme=${code}`);
       await page.locator(a11yButton).click();
 
+      // Сервер отдаёт стандартную доступную вёрстку: ни стилей, ни разметки
+      // темы — иначе её значки без стилей раздуваются на весь экран.
       const html = page.locator('html');
       await expect(html).toHaveAttribute('data-a11y', 'on');
       await expect(html).not.toHaveAttribute('data-theme', code);
+      await expect(html).toHaveAttribute('data-theme-own', code);
+      await expect(page.locator(`[class*="${code}-"]`)).toHaveCount(0);
 
       await page.locator(a11yButton).click();
       await expect(html).toHaveAttribute('data-theme', code);

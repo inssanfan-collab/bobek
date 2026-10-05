@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { UiIcon } from '@/components/site/UiIcon';
+import { A11Y_COOKIE } from '@/lib/a11y';
 import type { Locale } from '@/lib/i18n';
 
 const KEY = 'edusad:a11y';
@@ -12,49 +13,67 @@ const T = {
   off: { kk: 'Кәдімгі нұсқа', ru: 'Обычная версия' },
 } as const;
 
-/**
- * Включить или выключить режим. Индивидуальная тема на время режима
- * снимается: её CSS действует только при data-theme, и контрастная версия
- * не должна зависеть от того, как тема раскрасила сайт.
- */
-function apply(on: boolean) {
-  const root = document.documentElement;
-  root.dataset.a11y = on ? 'on' : 'off';
-  if (on && root.dataset.theme) {
-    root.dataset.themeOff = root.dataset.theme;
-    delete root.dataset.theme;
-  } else if (!on && root.dataset.themeOff) {
-    root.dataset.theme = root.dataset.themeOff;
-    delete root.dataset.themeOff;
-  }
+function readCookie(): boolean {
+  return document.cookie.split('; ').some((part) => part === `${A11Y_COOKIE}=1`);
+}
+
+function writeCookie(on: boolean) {
+  // Год, весь сайт сада. Lax — обычные переходы по ссылкам режим сохраняют.
+  document.cookie = `${A11Y_COOKIE}=${on ? '1' : '0'}; path=/; max-age=31536000; samesite=lax`;
 }
 
 /**
- * Версия для слабовидящих. Состояние держим в localStorage самого сайта сада —
- * у каждого сада свой домен, значит и своя настройка, что как раз правильно.
+ * У сайта индивидуальная тема? Её разметку рисует сервер, поэтому смена
+ * режима требует перезагрузки: в версии для слабовидящих сервер отдаёт
+ * стандартную вёрстку вместо темы (см. activeTheme). Без темы режим — только
+ * CSS, и страницу перезагружать незачем.
+ */
+function themed(): boolean {
+  const root = document.documentElement;
+  return Boolean(root.dataset.theme || root.dataset.themeOwn);
+}
+
+/**
+ * Версия для слабовидящих. Режим хранится в cookie сайта сада — у каждого
+ * сада свой домен, значит и своя настройка. Сервер знает о нём заранее.
  */
 export function A11yToggle({ locale }: { locale: Locale }) {
   const [on, setOn] = useState(false);
 
   useEffect(() => {
+    const cookie = readCookie();
+    let stored = cookie;
     try {
-      const stored = localStorage.getItem(KEY) === '1';
-      setOn(stored);
-      apply(stored);
+      // Прежде режим жил только в localStorage — переносим его в cookie один раз.
+      if (!cookie && localStorage.getItem(KEY) === '1') stored = true;
     } catch {
       /* приватный режим браузера — просто работаем без сохранения */
     }
+    setOn(stored);
+    if (stored && !cookie) {
+      writeCookie(true);
+      if (themed()) {
+        window.location.reload();
+        return;
+      }
+    }
+    document.documentElement.dataset.a11y = stored ? 'on' : 'off';
   }, []);
 
   function toggle() {
     const next = !on;
-    setOn(next);
-    apply(next);
+    writeCookie(next);
     try {
       localStorage.setItem(KEY, next ? '1' : '0');
     } catch {
       /* игнорируем */
     }
+    if (themed()) {
+      window.location.reload();
+      return;
+    }
+    setOn(next);
+    document.documentElement.dataset.a11y = next ? 'on' : 'off';
   }
 
   return (

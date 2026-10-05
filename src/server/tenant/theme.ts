@@ -1,5 +1,6 @@
 import 'server-only';
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
+import { A11Y_COOKIE } from '@/lib/a11y';
 import { env } from '@/lib/env';
 import { findTheme } from '@/themes';
 import type { SiteTheme } from '@/themes/types';
@@ -17,7 +18,12 @@ export const THEME_PREVIEW_HEADER = 'x-edusad-theme-preview';
  * сделанную для другого. Проверяем здесь, а не только в middleware:
  * заголовок мог прислать и сам посетитель.
  */
-export async function activeTheme(stored: string | null | undefined): Promise<SiteTheme | null> {
+export async function activeTheme(
+  stored: string | null | undefined,
+  { ignoreA11y = false }: { ignoreA11y?: boolean } = {},
+): Promise<SiteTheme | null> {
+  // Версия для слабовидящих — стандартная доступная вёрстка, без темы.
+  if (!ignoreA11y && (await a11yOn())) return null;
   const requestHeaders = await headers();
   const host = (requestHeaders.get('host') ?? '').toLowerCase().replace(/:\d+$/, '');
   if (process.env.THEME_PREVIEW === '1' || host === `demo.${env.portalDomain}`) {
@@ -27,4 +33,9 @@ export async function activeTheme(stored: string | null | undefined): Promise<Si
     if (theme) return theme;
   }
   return findTheme(stored);
+}
+
+/** Включена ли у посетителя версия для слабовидящих (cookie сайта сада). */
+export async function a11yOn(): Promise<boolean> {
+  return (await cookies()).get(A11Y_COOKIE)?.value === '1';
 }
