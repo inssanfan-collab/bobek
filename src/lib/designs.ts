@@ -12,7 +12,7 @@ type Size = [number, number];
 export type DesignShot = { desk: Size; mob: Size };
 export type Design = ThemeInfo & { showcase: { kk: string; ru: string }; shot: DesignShot };
 
-const SHOTS = shots as Record<string, DesignShot>;
+const SHOTS = shots as unknown as Record<string, DesignShot>;
 
 export const DESIGNS: Design[] = THEME_CATALOG.flatMap((theme) =>
   theme.showcase && SHOTS[theme.code] ? [{ ...theme, showcase: theme.showcase, shot: SHOTS[theme.code] }] : [],

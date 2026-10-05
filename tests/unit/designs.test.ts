@@ -10,7 +10,7 @@ import shots from '@/lib/design-shots.json';
  */
 
 const PUBLIC = path.resolve(__dirname, '../../public/images/designs');
-const manifest = shots as Record<string, { desk: [number, number]; mob: [number, number] }>;
+const manifest = shots as unknown as Record<string, { desk: [number, number]; mob: [number, number] }>;
 
 describe('витрина дизайнов', () => {
   for (const theme of THEME_CATALOG.filter((item) => item.showcase)) {
