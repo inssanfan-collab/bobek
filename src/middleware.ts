@@ -29,12 +29,14 @@ export function middleware(request: NextRequest) {
   url.pathname = `/s/${encodeURIComponent(siteHost)}${request.nextUrl.pathname}`;
 
   // Предпросмотр индивидуальной темы: ?theme=код (или none). Заголовок от
-  // посетителя всегда сбрасываем и ставим сами — и только при THEME_PREVIEW=1,
-  // то есть в разработке и сквозных тестах. Сервер проверяет это ещё раз.
+  // посетителя всегда сбрасываем и ставим сами — при THEME_PREVIEW=1
+  // (разработка и сквозные тесты) и на демо-саде: данные там выдуманные,
+  // по нему садам показывают дизайны (/designs). Сервер проверяет это ещё раз.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.delete('x-edusad-theme-preview');
   const preview = request.nextUrl.searchParams.get('theme');
-  if (process.env.THEME_PREVIEW === '1' && preview && /^[a-z0-9-]{1,40}$/.test(preview)) {
+  const previewAllowed = process.env.THEME_PREVIEW === '1' || siteHost === `demo.${portalDomain}`;
+  if (previewAllowed && preview && /^[a-z0-9-]{1,40}$/.test(preview)) {
     requestHeaders.set('x-edusad-theme-preview', preview);
   }
 
