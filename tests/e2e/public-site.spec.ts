@@ -8,8 +8,8 @@ test.describe('Публичная часть', () => {
     // Цены приходят из PLAN_*_PRICE_KZT: расхождение здесь — забытая настройка.
     await expect(page.locator('#tarify')).toContainText('90 000 ₸');
     await expect(page.locator('#tarify')).toContainText('150 000 ₸');
-    // Пример сайта — демо-сад, а не настоящий: чужие сады в рекламе не показываем.
-    await expect(page.getByRole('link', { name: /Посмотреть пример сайта/ })).toHaveAttribute('href', /^https:\/\/demo\./);
+    // Примеры сайта — витрина дизайнов, снятая на демо-саде: чужие сады в рекламе не показываем.
+    await expect(page.getByRole('link', { name: /Посмотреть дизайны сайта/ })).toHaveAttribute('href', /^\/designs/);
 
     // «Выбрать тариф» заранее отмечает его в форме.
     await page.getByRole('link', { name: 'Выбрать «С наполнением»' }).click();

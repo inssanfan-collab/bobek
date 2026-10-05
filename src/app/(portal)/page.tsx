@@ -44,7 +44,7 @@ const T = {
     kk: 'Қазақ және орыс тіліндегі ресми сайт: нашар көретіндерге арналған нұсқасы бар, ал әкімші бөлімін кез келген қызметкер оңай меңгереді.',
     ru: 'Официальный сайт на казахском и русском, с версией для слабовидящих и админкой, в которой разберётся любой сотрудник.',
   },
-  demo: { kk: 'Сайт үлгісін көру', ru: 'Посмотреть пример сайта' },
+  demo: { kk: 'Сайт дизайндарын көру', ru: 'Посмотреть дизайны сайта' },
   factPrice: { kk: 'жылына %s бастап', ru: 'от %s в год' },
   factHosting: { kk: 'хостинг кіреді', ru: 'хостинг включён' },
   factDocs: { kk: 'шарт, шот және акт', ru: 'договор, счёт и акт' },
@@ -294,7 +294,6 @@ export default async function PortalHome({
   const locale = localeFromParam(lang);
   const minPrice = formatMoney(Math.min(...PLAN_CODES.map((code) => env.planPrices[code])));
   // Демо-сад открываем на языке страницы: у него основной язык казахский.
-  const demoHref = `https://demo.${env.portalDomain}${locale === 'ru' ? '/?lang=ru' : '/'}`;
   // Адрес в окне браузера — такой получит сад: имя.edusad.kz.
   const host = `balapan.${env.portalDomain}`;
 
@@ -354,7 +353,7 @@ export default async function PortalHome({
               <p className="lead">{T.lead[locale]}</p>
               <div className="cta">
                 <a className="sbtn sbtn-primary" href="#zayavka">{T.apply[locale]}</a>
-                <a className="sbtn sbtn-secondary" href={demoHref} target="_blank" rel="noopener">
+                <a className="sbtn sbtn-secondary" href={withLocale('/designs', locale)}>
                   {T.demo[locale]}
                   <Icon name="arrow" width={2.4} />
                 </a>
