@@ -153,14 +153,15 @@
 }
 
 [data-theme='aspan'] .aspan-nav nav > ul > li > a,
-[data-theme='aspan'] .aspan-nav nav > ul > li > button {
+[data-theme='aspan'] .aspan-nav nav > ul > li > span > a {
   border-radius: 999px;
   color: rgb(255 255 255);
   font-size: 0.92rem;
   font-weight: 700;
 }
 
-[data-theme='aspan'] .aspan-nav nav > ul > li > a:hover {
+[data-theme='aspan'] .aspan-nav nav > ul > li > a:hover,
+[data-theme='aspan'] .aspan-nav nav > ul > li > span > a:hover {
   background: rgb(255 255 255 / 0.16);
 }
 
@@ -950,4 +951,9 @@
     width: 2.4rem;
     height: 2.4rem;
   }
+}
+
+/* Стрелка подменю — того же цвета, что и пункт. */
+[data-theme='aspan'] .aspan-nav nav > ul > li > span > button {
+  color: rgb(255 255 255);
 }

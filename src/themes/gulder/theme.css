@@ -135,7 +135,8 @@
   justify-content: flex-end;
 }
 
-[data-theme='gulder'] .gulder-nav nav > ul > li > a {
+[data-theme='gulder'] .gulder-nav nav > ul > li > a,
+[data-theme='gulder'] .gulder-nav nav > ul > li > span > a {
   border-radius: 999px;
   color: rgb(var(--brand-ink));
   font-size: 0.75rem;
@@ -709,4 +710,9 @@
     width: 5rem;
     height: 5rem;
   }
+}
+
+/* Стрелка подменю — того же цвета, что и пункт. */
+[data-theme='gulder'] .gulder-nav nav > ul > li > span > button {
+  color: rgb(var(--brand-ink));
 }

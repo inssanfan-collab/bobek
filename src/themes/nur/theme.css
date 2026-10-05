@@ -135,7 +135,8 @@
   justify-content: flex-end;
 }
 
-[data-theme='nur'] .nur-nav nav > ul > li > a {
+[data-theme='nur'] .nur-nav nav > ul > li > a,
+[data-theme='nur'] .nur-nav nav > ul > li > span > a {
   border-radius: 0.4rem;
   color: rgb(var(--brand-ink));
   font-size: 0.75rem;
@@ -144,7 +145,8 @@
   text-transform: uppercase;
 }
 
-[data-theme='nur'] .nur-nav nav > ul > li:first-child > a {
+[data-theme='nur'] .nur-nav nav > ul > li:first-child > a,
+[data-theme='nur'] .nur-nav nav > ul > li:first-child > span > a {
   background: rgb(254 240 138);
   color: rgb(var(--ink));
 }
@@ -595,4 +597,9 @@
 [data-theme='nur'] .nur-footer-portal {
   font-weight: 800;
   text-decoration: underline;
+}
+
+/* Стрелка подменю — того же цвета, что и пункт. */
+[data-theme='nur'] .nur-nav nav > ul > li > span > button {
+  color: rgb(var(--brand-ink));
 }

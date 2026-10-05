@@ -126,7 +126,8 @@
   justify-content: flex-end;
 }
 
-[data-theme='erekshe'] .erekshe-nav nav > ul > li > a {
+[data-theme='erekshe'] .erekshe-nav nav > ul > li > a,
+[data-theme='erekshe'] .erekshe-nav nav > ul > li > span > a {
   border-radius: 999px;
   color: rgb(190 24 93);
   font-size: 0.75rem;
@@ -135,7 +136,8 @@
   text-transform: uppercase;
 }
 
-[data-theme='erekshe'] .erekshe-nav nav > ul > li:first-child > a {
+[data-theme='erekshe'] .erekshe-nav nav > ul > li:first-child > a,
+[data-theme='erekshe'] .erekshe-nav nav > ul > li:first-child > span > a {
   color: rgb(14 116 144);
 }
 
@@ -593,4 +595,9 @@
 [data-theme='erekshe'] .erekshe-footer-portal {
   color: rgb(var(--accent-ink));
   font-weight: 800;
+}
+
+/* Стрелка подменю — того же цвета, что и пункт. */
+[data-theme='erekshe'] .erekshe-nav nav > ul > li > span > button {
+  color: rgb(190 24 93);
 }

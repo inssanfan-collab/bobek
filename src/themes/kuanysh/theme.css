@@ -170,7 +170,8 @@
   }
 }
 
-[data-theme='kuanysh'] .kuanysh-nav nav > ul > li > a {
+[data-theme='kuanysh'] .kuanysh-nav nav > ul > li > a,
+[data-theme='kuanysh'] .kuanysh-nav nav > ul > li > span > a {
   color: rgb(var(--ink));
   font-size: 0.88rem;
   font-weight: 700;
@@ -971,4 +972,9 @@
   [data-theme='kuanysh'] .kuanysh-heart {
     max-width: 16rem;
   }
+}
+
+/* Стрелка подменю — того же цвета, что и пункт. */
+[data-theme='kuanysh'] .kuanysh-nav nav > ul > li > span > button {
+  color: rgb(var(--ink));
 }

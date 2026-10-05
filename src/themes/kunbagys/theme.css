@@ -130,7 +130,8 @@
 }
 
 /* Каждый пункт меню — своим цветом и со значком-кружком сверху. */
-[data-theme='kunbagys'] .kunbagys-nav nav > ul > li > a {
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li > span > a {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -143,7 +144,8 @@
   text-transform: uppercase;
 }
 
-[data-theme='kunbagys'] .kunbagys-nav nav > ul > li > a::before {
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li > a::before,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li > span > a::before {
   content: '';
   width: 0.8rem;
   height: 0.8rem;
@@ -154,13 +156,27 @@
   transform: rotate(45deg);
 }
 
-[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 1) > a { color: rgb(220 38 38); }
-[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 2) > a { color: rgb(194 65 12); }
-[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 3) > a { color: rgb(161 98 7); }
-[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 4) > a { color: rgb(21 128 61); }
-[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 5) > a { color: rgb(29 78 216); }
-[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 6) > a { color: rgb(67 56 202); }
-[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 7) > a { color: rgb(126 34 206); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 1) > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 1) > span > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 1) > span > button { color: rgb(220 38 38); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 2) > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 2) > span > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 2) > span > button { color: rgb(194 65 12); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 3) > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 3) > span > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 3) > span > button { color: rgb(161 98 7); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 4) > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 4) > span > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 4) > span > button { color: rgb(21 128 61); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 5) > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 5) > span > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 5) > span > button { color: rgb(29 78 216); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 6) > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 6) > span > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 6) > span > button { color: rgb(67 56 202); }
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 7) > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 7) > span > a,
+[data-theme='kunbagys'] .kunbagys-nav nav > ul > li:nth-child(7n + 7) > span > button { color: rgb(126 34 206); }
 
 [data-theme='kunbagys'] .kunbagys-nav nav a:hover {
   background: rgb(var(--brand-soft));
