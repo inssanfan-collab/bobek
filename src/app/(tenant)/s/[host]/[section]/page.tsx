@@ -29,7 +29,10 @@ type Params = { host: string; section: string };
 
 async function loadSection(host: string, slug: string) {
   const context = await publicSiteContext(host);
-  const section = await context.db.sections.findFirst({ where: { slug, isVisible: true } });
+  // «Скрыть» в конструкторе меню убирает раздел из меню, но не выключает его:
+  // объявление на главной или старая ссылка на раздел не должны вести в 404.
+  // В карту сайта скрытые разделы не попадают.
+  const section = await context.db.sections.findFirst({ where: { slug } });
   if (!section) notFound();
 
   // Раздел-ссылка своей страницы не имеет. В меню он и так ведёт куда надо,

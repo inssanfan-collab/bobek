@@ -26,7 +26,8 @@ type Params = { host: string; section: string; slug: string };
  */
 async function load({ host, section: sectionSlug, slug }: Params) {
   const context = await publicSiteContext(host);
-  const section = await context.db.sections.findFirst({ where: { slug: sectionSlug, isVisible: true } });
+  // Раздел, скрытый из меню, по ссылке открывается — см. [section]/page.tsx.
+  const section = await context.db.sections.findFirst({ where: { slug: sectionSlug } });
   if (!section) notFound();
 
   if (section.type === 'GALLERY') {
