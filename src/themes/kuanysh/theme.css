@@ -211,7 +211,7 @@
   display: block;
   width: 100%;
   object-fit: cover;
-  object-position: 75% center;
+  object-position: 75% 85%; /* трава внизу кадра не должна обрезаться */
 }
 
 [data-theme='kuanysh'] .kuanysh-hero::before {
@@ -291,7 +291,7 @@
     position: absolute;
     inset: 0;
     height: 100%;
-    object-position: 72% center;
+    object-position: 72% 85%;
   }
 
   [data-theme='kuanysh'] .kuanysh-hero::before {
