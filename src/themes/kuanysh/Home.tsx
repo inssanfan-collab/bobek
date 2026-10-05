@@ -3,6 +3,7 @@ import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import { Stars } from '@/components/site/sections';
 import { EnrollLink, ThemeImage, aboutSection, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick } from '@/lib/i18n';
 import { formatAgeRange } from '@/lib/labels';
 import type { HomeProps } from '@/templates/types';
@@ -30,6 +31,15 @@ const CARD_ICONS = ['medal', 'blocks', 'game'];
 const ACT_ICONS = ['game', 'book', 'slide', 'run'];
 const STAT_TONES = ['kuanysh-mint', 'kuanysh-pink', 'kuanysh-lemon', 'kuanysh-sky'];
 
+const K = {
+  ann: { kk: 'Хабарландырулар', ru: 'Объявления' },
+  annMark: { kk: 'Ақпарат', ru: 'Информация' },
+  photos: { kk: 'Фотогалерея', ru: 'Фотогалерея' },
+  photosMark: { kk: 'Сәттер', ru: 'Моменты' },
+  docs: { kk: 'Соңғы құжаттар', ru: 'Последние документы' },
+  docsMark: { kk: 'Құжаттар', ru: 'Документы' },
+} as const;
+
 /**
  * Главная «Қуаныш» — вплотную к образцу №4: фото малыша на фоне неба
  * с облачным краем, три облачные карточки, малыши-вырезка в жёлтом
@@ -38,7 +48,11 @@ const STAT_TONES = ['kuanysh-mint', 'kuanysh-pink', 'kuanysh-lemon', 'kuanysh-sk
  * в цветных облачках, новости, фиолетовая плашка записи с нарисованными
  * детьми. Фото и рисунки — сгенерированные; тексты и данные — сада.
  */
-export function KuanyshHome({ profile, news, locale, hero, menu, clubs = [], groups = [], reviews = [], counts }: HomeProps) {
+export function KuanyshHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], locale, hero, menu, clubs = [], groups = [], reviews = [], counts }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const stats = homeStats(profile, counts, locale);
   const about = aboutSection(menu);
   const clubsSection = findSection(menu, 'CLUBS');
@@ -190,14 +204,38 @@ export function KuanyshHome({ profile, news, locale, hero, menu, clubs = [], gro
         </section>
       ) : null}
 
-      {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="kuanysh-ann">
+          <Stripes />
+          <h2 id="kuanysh-ann" className="kuanysh-title mt-3 text-center">{K.ann[locale]}</h2>
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {feed.length > 0 ? (
         <section className="container-page py-12" aria-labelledby="kuanysh-news">
           <Stripes />
           <h2 id="kuanysh-news" className="kuanysh-title mt-3 text-center">{BLOCK_T.news[locale]}</h2>
           <div className="kuanysh-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+            {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
           <p className="mt-8 text-center"><SiteLink href="/news" locale={locale} className="kuanysh-btn">{BLOCK_T.allNews[locale]}</SiteLink></p>
+        </section>
+      ) : null}
+
+      {photos.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="kuanysh-photos">
+          <Stripes />
+          <h2 id="kuanysh-photos" className="kuanysh-title mt-3 text-center">{K.photos[locale]}</h2>
+          <div className="mt-8"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="kuanysh-docs">
+          <Stripes />
+          <h2 id="kuanysh-docs" className="kuanysh-title mt-3 text-center">{K.docs[locale]}</h2>
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
         </section>
       ) : null}
 

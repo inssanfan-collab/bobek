@@ -3,6 +3,7 @@ import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import { Stars } from '@/components/site/sections';
 import { CoverOr, EnrollLink, ThemeImage, aboutSection, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick, type Locale } from '@/lib/i18n';
 import { formatAgeRange } from '@/lib/labels';
 import type { HomeProps } from '@/templates/types';
@@ -48,6 +49,15 @@ const CARD_IMAGES = ['play', 'care', 'crafts', 'climb'];
 const CARD_ICONS = ['puzzle', 'hands', 'music', 'shield'];
 const STAT_ICONS = ['home', 'teacher', 'hands'];
 
+const K = {
+  ann: { kk: 'Хабарландырулар', ru: 'Объявления' },
+  annMark: { kk: 'Ақпарат', ru: 'Информация' },
+  photos: { kk: 'Фотогалерея', ru: 'Фотогалерея' },
+  photosMark: { kk: 'Сәттер', ru: 'Моменты' },
+  docs: { kk: 'Соңғы құжаттар', ru: 'Последние документы' },
+  docsMark: { kk: 'Құжаттар', ru: 'Документы' },
+} as const;
+
 /**
  * Главная «Жасыл» — вплотную к образцу №2: фото на всю ширину с зелёной
  * плашкой, коллаж 2×2 с голубыми перемычками и счётчиками, четыре карточки
@@ -56,7 +66,11 @@ const STAT_ICONS = ['home', 'teacher', 'hands'];
  * отзыв в голубой кляксе, новости и дети, нарисованные мелками.
  * Фото и рисунки — сгенерированные; тексты и данные — сада.
  */
-export function JasylHome({ profile, news, locale, coverUrl, coverPosition, hero, menu, clubs = [], groups = [], routine = [], faq = [], reviews = [], counts }: HomeProps) {
+export function JasylHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], locale, coverUrl, coverPosition, hero, menu, clubs = [], groups = [], routine = [], faq = [], reviews = [], counts }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const stats = homeStats(profile, counts, locale).slice(0, 3);
   const about = aboutSection(menu);
   const clubsSection = findSection(menu, 'CLUBS');
@@ -237,14 +251,35 @@ export function JasylHome({ profile, news, locale, coverUrl, coverPosition, hero
         </section>
       ) : null}
 
-      <section className="jasyl-news-band" aria-labelledby={news.length > 0 ? 'jasyl-news' : undefined}>
-        {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="jasyl-ann">
+          <h2 id="jasyl-ann" className="jasyl-title jasyl-red">{K.ann[locale]}</h2>
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {photos.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="jasyl-photos">
+          <h2 id="jasyl-photos" className="jasyl-title jasyl-red">{K.photos[locale]}</h2>
+          <div className="mt-8"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="jasyl-docs">
+          <h2 id="jasyl-docs" className="jasyl-title jasyl-red">{K.docs[locale]}</h2>
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
+        </section>
+      ) : null}
+
+      <section className="jasyl-news-band" aria-labelledby={feed.length > 0 ? 'jasyl-news' : undefined}>
+        {feed.length > 0 ? (
           <div className="container-page pt-16 text-center">
             <Bell />
             <p className="jasyl-news-lead">{T.newsLead[locale]}</p>
             <h2 id="jasyl-news" className="jasyl-title jasyl-pink">{T.news[locale]}</h2>
             <div className="jasyl-news mt-8 grid gap-6 text-left sm:grid-cols-2 lg:grid-cols-3">
-              {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+              {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
             </div>
             <SiteLink href="/news" locale={locale} className="jasyl-btn mt-8">{BLOCK_T.allNews[locale]}</SiteLink>
           </div>

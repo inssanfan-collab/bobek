@@ -2,6 +2,7 @@ import { NewsCard, SiteLink, T as BLOCK_T } from '@/components/site/blocks';
 import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import { EnrollLink, ThemeImage, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick } from '@/lib/i18n';
 import { formatAgeRange } from '@/lib/labels';
 import type { HomeProps } from '@/templates/types';
@@ -39,6 +40,15 @@ const STEP_ICONS = ['binoculars', 'palette', 'star', 'music', 'abacus', 'heart']
 const STEP_COLORS = ['#16A34A', '#DB2777', '#7C3AED', '#DB2777', '#7C3AED', '#EA580C'];
 const GROUP_TONES = ['kosaq-bar-purple', 'kosaq-bar-orange', 'kosaq-bar-teal'];
 
+const K = {
+  ann: { kk: 'Хабарландырулар', ru: 'Объявления' },
+  annMark: { kk: 'Ақпарат', ru: 'Информация' },
+  photos: { kk: 'Фотогалерея', ru: 'Фотогалерея' },
+  photosMark: { kk: 'Сәттер', ru: 'Моменты' },
+  docs: { kk: 'Соңғы құжаттар', ru: 'Последние документы' },
+  docsMark: { kk: 'Құжаттар', ru: 'Документы' },
+} as const;
+
 /**
  * Главная «Қосақ» — вплотную к образцу №5: светлое небо с облаками,
  * солнцем и радугой, по краям два фото в рамке-«ромашке», заголовок
@@ -47,7 +57,11 @@ const GROUP_TONES = ['kosaq-bar-purple', 'kosaq-bar-orange', 'kosaq-bar-teal'];
  * аккордеоном рядом с фото в «ромашке»; новости с облачным краем;
  * персиковая полоса с детьми-вырезками; синий подвал.
  */
-export function KosaqHome({ profile, news, locale, hero, menu, clubs = [], groups = [], counts }: HomeProps) {
+export function KosaqHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], locale, hero, menu, clubs = [], groups = [], counts }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const stats = homeStats(profile, counts, locale).slice(0, 3);
   const groupsSection = findSection(menu, 'GROUPS');
   const aboutText = pick(locale, profile?.aboutKk, profile?.aboutRu);
@@ -174,14 +188,38 @@ export function KosaqHome({ profile, news, locale, hero, menu, clubs = [], group
         </section>
       ) : null}
 
-      {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="kosaq-ann">
+          <h2 id="kosaq-ann" className="kosaq-title kosaq-red text-center">{K.ann[locale]}</h2>
+          <Squiggle className="kosaq-squiggle mx-auto" />
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {feed.length > 0 ? (
         <section className="container-page kosaq-news-wrap" aria-labelledby="kosaq-news">
           <p className="kosaq-eyebrow kosaq-eyebrow-green text-center">{T.newsEyebrow[locale]}</p>
           <h2 id="kosaq-news" className="kosaq-title kosaq-red text-center">{T.news[locale]}</h2>
           <Squiggle className="kosaq-squiggle mx-auto" />
           <div className="kosaq-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+            {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
+        </section>
+      ) : null}
+
+      {photos.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="kosaq-photos">
+          <h2 id="kosaq-photos" className="kosaq-title kosaq-red text-center">{K.photos[locale]}</h2>
+          <Squiggle className="kosaq-squiggle mx-auto" />
+          <div className="mt-8"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="kosaq-docs">
+          <h2 id="kosaq-docs" className="kosaq-title kosaq-red text-center">{K.docs[locale]}</h2>
+          <Squiggle className="kosaq-squiggle mx-auto" />
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
         </section>
       ) : null}
 
@@ -189,7 +227,7 @@ export function KosaqHome({ profile, news, locale, hero, menu, clubs = [], group
         <ThemeImage theme={THEME} name="band-left" className="kosaq-band-left decor" sizes="(min-width: 1024px) 24vw, 40vw" />
         <div className="container-page kosaq-band-text">
           <h2 id="kosaq-band" className="kosaq-band-title">{T.band[locale]}</h2>
-          {news.length > 0 ? (
+          {feed.length > 0 ? (
             <SiteLink href="/news" locale={locale} className="kosaq-green-btn mt-6">{BLOCK_T.allNews[locale]} <Icon name="arrow" className="h-4 w-4" /></SiteLink>
           ) : (
             <EnrollLink menu={menu} locale={locale} className="kosaq-green-btn mt-6" />

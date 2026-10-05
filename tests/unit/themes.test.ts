@@ -113,3 +113,27 @@ describe('тема только рисует', () => {
     });
   }
 });
+
+describe('главная темы показывает то, что публикует сад', () => {
+  // Тема свободна в раскладке, но не в составе: объявление или новость,
+  // которые сад опубликовал, обязаны дойти до главной в любой теме. Иначе
+  // заведующая публикует — а на сайте пусто, и выглядит как поломка движка.
+  const MUST: [RegExp, string][] = [
+    [/AnnouncementsList|AnnouncementList|announcements\.(map|slice|length)/, 'объявления (announcements)'],
+    [/NewsCard|\b(news|feed)\.(map|slice)|=\s*news;/, 'новости (news)'],
+  ];
+
+  for (const code of themeDirs) {
+    const home = path.join(ROOT, code, 'Home.tsx');
+    try {
+      statSync(home);
+    } catch {
+      continue; // тема из одного CSS — главную рисует шаблон, он всё показывает
+    }
+    it(code, () => {
+      const source = readFileSync(home, 'utf8');
+      const missing = MUST.filter(([pattern]) => !pattern.test(source)).map(([, what]) => what);
+      expect(missing, `${code}/Home.tsx не выводит`).toEqual([]);
+    });
+  }
+});

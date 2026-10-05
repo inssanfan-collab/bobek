@@ -2,6 +2,7 @@ import { NewsCard, SiteLink, T as BLOCK_T, mediaUrl } from '@/components/site/bl
 import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import { Stars as RatingStars } from '@/components/site/sections';
 import { CoverOr, EnrollLink, ThemeImage, aboutSection, developmentAreas, findSection } from '@/components/site/theme-kit';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick } from '@/lib/i18n';
 import { formatAgeRange } from '@/lib/labels';
 import type { HomeProps } from '@/templates/types';
@@ -32,6 +33,15 @@ const FLAG_ICONS = ['bulb', 'game', 'shield'];
 const GAME_IMAGES = ['build', 'sand', 'friends'];
 const QUARTERS = ['read', 'hand', 'balls', 'ride'];
 
+const K = {
+  ann: { kk: 'Хабарландырулар', ru: 'Объявления' },
+  annMark: { kk: 'Ақпарат', ru: 'Информация' },
+  photos: { kk: 'Фотогалерея', ru: 'Фотогалерея' },
+  photosMark: { kk: 'Сәттер', ru: 'Моменты' },
+  docs: { kk: 'Соңғы құжаттар', ru: 'Последние документы' },
+  docsMark: { kk: 'Құжаттар', ru: 'Документы' },
+} as const;
+
 /**
  * Главная «Аспан» — вплотную к образцу №3: голубой первый экран (фото
  * в «бусах» из трёх овалов, нарисованная поляна с мальчиком, солнце
@@ -40,7 +50,11 @@ const QUARTERS = ['read', 'hand', 'balls', 'ride'];
  * вокруг фото в фигурной рамке, персиковая полоса творчества, отзыв
  * в жёлтом овале с фото, новости. Фото и рисунки — сгенерированные.
  */
-export function AspanHome({ profile, news, albums, locale, coverUrl, coverPosition, hero, menu, clubs = [], groups = [], routine = [], reviews = [] }: HomeProps) {
+export function AspanHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], albums, locale, coverUrl, coverPosition, hero, menu, clubs = [], groups = [], routine = [], reviews = [] }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const about = aboutSection(menu);
   const clubsSection = findSection(menu, 'CLUBS');
   const gallerySection = findSection(menu, 'GALLERY');
@@ -223,15 +237,36 @@ export function AspanHome({ profile, news, albums, locale, coverUrl, coverPositi
         </section>
       ) : null}
 
-      {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="aspan-ann">
+          <h2 id="aspan-ann" className="aspan-title">{K.ann[locale]}</h2>
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {feed.length > 0 ? (
         <section className="container-page pb-6 pt-10" aria-labelledby="aspan-news">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 id="aspan-news" className="aspan-title">{BLOCK_T.news[locale]}</h2>
             <SiteLink href="/news" locale={locale} className="aspan-more">{BLOCK_T.allNews[locale]} →</SiteLink>
           </div>
           <div className="aspan-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+            {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
+        </section>
+      ) : null}
+
+      {photos.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="aspan-photos">
+          <h2 id="aspan-photos" className="aspan-title">{K.photos[locale]}</h2>
+          <div className="mt-8"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="aspan-docs">
+          <h2 id="aspan-docs" className="aspan-title">{K.docs[locale]}</h2>
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
         </section>
       ) : null}
     </div>

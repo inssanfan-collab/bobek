@@ -3,7 +3,7 @@ import { pick, type Locale } from '@/lib/i18n';
 import { withLocale } from '@/server/tenant/context';
 import { formatAgeRange, formatDate, formatDocCount, formatFolderCount } from '@/lib/labels';
 import { childrenByParent, deepDocCounts, folderPath, subtreeIds } from '@/lib/doc-tree';
-import { mediaUrl, type AlbumWithCover, type PostWithCover } from '@/components/site/blocks';
+import { PinnedMark, mediaUrl, type AlbumWithCover, type PostWithCover } from '@/components/site/blocks';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { UiIcon } from '@/components/site/UiIcon';
 import { isOfficeDoc } from '@/lib/media-kind';
@@ -82,7 +82,10 @@ export function PostFeed({
               </span>
             ) : null}
             <div className="min-w-0">
-              <p className="text-sm text-muted">{formatDate(post.publishedAt, locale)}</p>
+              <p className="flex flex-wrap items-center gap-2 text-sm text-muted">
+                {post.isPinned ? <PinnedMark locale={locale} /> : null}
+                {formatDate(post.publishedAt, locale)}
+              </p>
               <h2 className="mt-1 font-display text-xl font-bold">
                 <Link href={withLocale(`${basePath}/${post.slug}`, locale)} className="hover:text-brand">
                   {pick(locale, post.titleKk, post.titleRu)}

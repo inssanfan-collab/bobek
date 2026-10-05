@@ -5,6 +5,7 @@ import { SocialLinks } from '@/components/site/SocialLinks';
 import { Stars } from '@/components/site/sections';
 import { CoverOr, EnrollLink, ThemeImage, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick, type Locale } from '@/lib/i18n';
 import { formatAgeRange } from '@/lib/labels';
 import type { HomeProps } from '@/templates/types';
@@ -50,6 +51,12 @@ function Title({ pair, locale, id, className = '' }: { pair: Pair; locale: Local
 
 const MISSION = ['house', 'sun', 'pinwheel'];
 
+const KP: Record<'ann' | 'photos' | 'docs', Pair> = {
+  ann: { kk: ['Соңғы', 'хабарландырулар'], ru: ['Последние', 'объявления'] },
+  photos: { kk: ['Біздің', 'фотогалерея'], ru: ['Наша', 'фотогалерея'] },
+  docs: { kk: ['Соңғы', 'құжаттар'], ru: ['Последние', 'документы'] },
+};
+
 /**
  * Главная «Мамық» — вплотную к образцу №9: пудровый первый экран
  * с линейными рисунками и фото в рамке-«ромашке», розовая волнистая
@@ -57,7 +64,11 @@ const MISSION = ['house', 'sun', 'pinwheel'];
  * группы) на узоре из радуг, крупные розовые счётчики, отзывы с радужным
  * свечением, карта и контакты, подвал с полосой рисунков.
  */
-export function MamyqHome({ profile, news, locale, coverUrl, coverPosition, hero, menu, prices = [], groups = [], reviews = [], counts }: HomeProps) {
+export function MamyqHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], locale, coverUrl, coverPosition, hero, menu, prices = [], groups = [], reviews = [], counts }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const stats = homeStats(profile, counts, locale);
   const pricesSection = findSection(menu, 'PRICES');
   const groupsSection = findSection(menu, 'GROUPS');
@@ -195,15 +206,36 @@ export function MamyqHome({ profile, news, locale, coverUrl, coverPosition, hero
         </section>
       ) : null}
 
-      {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="mamyq-ann">
+          <Title pair={KP.ann} locale={locale} id="mamyq-ann" />
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {feed.length > 0 ? (
         <section className="container-page py-12" aria-labelledby="mamyq-news">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <Title pair={H.news} locale={locale} id="mamyq-news" />
             <SiteLink href="/news" locale={locale} className="mamyq-more">{BLOCK_T.allNews[locale]} →</SiteLink>
           </div>
           <div className="mamyq-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+            {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
+        </section>
+      ) : null}
+
+      {photos.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="mamyq-photos">
+          <Title pair={KP.photos} locale={locale} id="mamyq-photos" />
+          <div className="mt-8"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="mamyq-docs">
+          <Title pair={KP.docs} locale={locale} id="mamyq-docs" />
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
         </section>
       ) : null}
 

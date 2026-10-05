@@ -812,3 +812,33 @@ body {
 .hb-enroll-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; }
 .hb-enroll-lead { margin-top: 0.4rem; color: rgb(var(--muted)); }
 .review-stars { color: rgb(217 119 6); letter-spacing: 0.1em; }
+
+/* Общие блоки главной для индивидуальных тем (src/components/site/theme-blocks.tsx):
+   нейтральные, на токенах палитры — тема перекрашивает их под себя. */
+.kit-docs-card { overflow: hidden; border-radius: var(--radius-lg, 1rem); border: 1px solid rgb(var(--line)); background: rgb(var(--card)); box-shadow: 0 16px 34px -28px rgb(0 0 0 / 0.45); }
+.kit-docs { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.kit-docs th { padding: 0.65rem 1rem; background: rgb(var(--brand-soft)); text-align: left; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: rgb(var(--brand-ink)); }
+.kit-docs td { padding: 0.75rem 1rem; border-top: 1px solid rgb(var(--line)); vertical-align: middle; color: rgb(var(--muted)); }
+.kit-format { display: inline-block; min-width: 2.6rem; margin-right: 0.6rem; border-radius: 0.35rem; background: rgb(var(--brand-soft)); padding: 0.1rem 0.35rem; text-align: center; font-size: 0.7rem; font-weight: 800; color: rgb(var(--brand-ink)); }
+.kit-doc-link { font-weight: 700; color: rgb(var(--ink)); }
+.kit-doc-link:hover { color: rgb(var(--brand-ink)); text-decoration: underline; text-underline-offset: 3px; }
+.kit-download { display: inline-block; white-space: nowrap; border: 1.5px solid rgb(var(--brand) / 0.5); border-radius: 999px; padding: 0.3rem 0.85rem; font-size: 0.85rem; font-weight: 700; color: rgb(var(--brand-ink)); }
+.kit-download:hover { background: rgb(var(--brand-soft)); }
+.kit-block-more { padding: 0.8rem 1rem; font-weight: 800; color: rgb(var(--brand-ink)); }
+.kit-block-more-center { text-align: center; }
+.kit-ann { border-radius: var(--radius-lg, 1rem); border: 1.5px solid rgb(var(--accent) / 0.35); background: rgb(var(--accent-soft)); padding: 1rem 1.25rem; }
+.kit-ann ul { display: grid; gap: 0.6rem; }
+.kit-ann li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.9rem; }
+.kit-ann-date { flex-shrink: 0; font-size: 0.85rem; font-weight: 700; color: rgb(var(--accent-ink)); }
+.kit-ann-link { font-weight: 700; color: rgb(var(--ink)); text-decoration: underline; text-decoration-color: rgb(var(--accent) / 0.45); text-underline-offset: 3px; }
+.kit-ann-link:hover { color: rgb(var(--accent-ink)); }
+.kit-ann .kit-block-more { padding: 0.6rem 0 0; color: rgb(var(--accent-ink)); }
+.kit-photos { display: grid; gap: 1rem; }
+@media (min-width: 640px) { .kit-photos-2, .kit-photos-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .kit-photos-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.kit-photo { position: relative; display: block; overflow: hidden; border-radius: var(--radius-lg, 1rem); aspect-ratio: 4 / 3; background: rgb(var(--brand-soft)); }
+.kit-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+.kit-photo:hover img { transform: scale(1.04); }
+.kit-photo-title { position: absolute; left: 0.75rem; bottom: 0.75rem; max-width: calc(100% - 1.5rem); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 999px; background: rgb(255 255 255 / 0.92); padding: 0.3rem 0.85rem; font-size: 0.82rem; font-weight: 800; color: rgb(var(--ink)); }
+.kit-photos-1 { max-width: 36rem; margin-inline: auto; }
+.pinned-mark { display: inline-flex; align-items: center; gap: 0.25rem; border-radius: 999px; background: rgb(var(--brand-soft)); padding: 0.1rem 0.55rem; font-size: 0.75rem; font-weight: 800; color: rgb(var(--brand-ink)); }

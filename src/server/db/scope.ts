@@ -66,6 +66,18 @@ export function scoped(tenantId: string) {
         prisma.album.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.AlbumGetPayload<T>[]>,
       findFirst: <T extends Prisma.AlbumFindFirstArgs>(args?: Prisma.SelectSubset<T, Prisma.AlbumFindFirstArgs>) =>
         prisma.album.findFirst(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.AlbumGetPayload<T> | null>,
+      /**
+       * Последние загруженные фото из видимых альбомов — для «Фотогалереи»
+       * на главной. У фото альбома своего tenantId нет, поэтому сад
+       * проверяется дважды: по альбому и по самому файлу.
+       */
+      latestPhotos: (take: number) =>
+        prisma.albumItem.findMany({
+          where: { album: { tenantId, isVisible: true }, media: { tenantId } },
+          orderBy: [{ media: { createdAt: 'desc' } }, { id: 'desc' }],
+          take,
+          include: { media: true, album: { select: { slug: true, titleKk: true, titleRu: true } } },
+        }),
     },
 
     documents: {

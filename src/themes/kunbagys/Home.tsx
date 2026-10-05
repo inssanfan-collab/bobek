@@ -3,6 +3,7 @@ import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import { Stars } from '@/components/site/sections';
 import { CoverOr, EnrollLink, ThemeImage, aboutSection, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick } from '@/lib/i18n';
 import { formatAgeRange } from '@/lib/labels';
 import type { HomeProps } from '@/templates/types';
@@ -48,6 +49,15 @@ const TOYS = ['ball', 'bear', 'train', 'rattle'];
 
 type Tab = { key: string; title: string; lines: string[]; price?: string };
 
+const K = {
+  ann: { kk: 'Хабарландырулар', ru: 'Объявления' },
+  annMark: { kk: 'Ақпарат', ru: 'Информация' },
+  photos: { kk: 'Фотогалерея', ru: 'Фотогалерея' },
+  photosMark: { kk: 'Сәттер', ru: 'Моменты' },
+  docs: { kk: 'Соңғы құжаттар', ru: 'Последние документы' },
+  docsMark: { kk: 'Құжаттар', ru: 'Документы' },
+} as const;
+
 /**
  * Главная «Күнбағыс» — вплотную к образцу №10: оранжевая полоса,
  * разноцветное название и меню со значками, фото детей с ладошками
@@ -56,7 +66,11 @@ type Tab = { key: string; title: string; lines: string[]; price?: string };
  * программы с объёмными игрушками на узоре из рисунков; стоимость
  * вкладками (у государственного сада — группы); отзывы; оранжевый подвал.
  */
-export function KunbagysHome({ profile, news, locale, coverUrl, coverPosition, hero, menu, clubs = [], groups = [], prices = [], reviews = [], counts }: HomeProps) {
+export function KunbagysHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], locale, coverUrl, coverPosition, hero, menu, clubs = [], groups = [], prices = [], reviews = [], counts }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const about = aboutSection(menu);
   const clubsSection = findSection(menu, 'CLUBS');
   const aboutText = pick(locale, profile?.aboutKk, profile?.aboutRu);
@@ -187,13 +201,34 @@ export function KunbagysHome({ profile, news, locale, coverUrl, coverPosition, h
         </section>
       ) : null}
 
-      {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="kunbagys-ann">
+          <Heading mark={K.annMark[locale]} title={K.ann[locale]} id="kunbagys-ann" />
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {feed.length > 0 ? (
         <section className="container-page py-14" aria-labelledby="kunbagys-news">
           <Heading mark={T.newsMark[locale]} title={BLOCK_T.news[locale]} id="kunbagys-news" />
           <div className="kunbagys-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+            {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
           <p className="mt-8 text-center"><SiteLink href="/news" locale={locale} className="kunbagys-btn">{BLOCK_T.allNews[locale]}</SiteLink></p>
+        </section>
+      ) : null}
+
+      {photos.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="kunbagys-photos">
+          <Heading mark={K.photosMark[locale]} title={K.photos[locale]} id="kunbagys-photos" />
+          <div className="mt-8"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="kunbagys-docs">
+          <Heading mark={K.docsMark[locale]} title={K.docs[locale]} id="kunbagys-docs" />
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
         </section>
       ) : null}
     </div>

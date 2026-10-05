@@ -1,10 +1,9 @@
-import type { ReactNode } from 'react';
 import { GalleryStrip, SiteLink, T as BLOCK_T, mediaUrl } from '@/components/site/blocks';
 import { formatSize } from '@/lib/file-cards';
-import { pick, type Locale } from '@/lib/i18n';
+import { pick } from '@/lib/i18n';
 import { formatDate } from '@/lib/labels';
-import { isOfficeDoc } from '@/lib/media-kind';
-import type { DocumentWithMedia, HomeProps } from '@/templates/types';
+import { DocLink, docFormat } from '@/components/site/theme-blocks';
+import type { HomeProps } from '@/templates/types';
 
 const T = {
   mainNews: { kk: 'Басты жаңалықтар', ru: 'Главные новости' },
@@ -52,23 +51,6 @@ const ICON: Record<string, string> = {
   MENU_FOOD: 'M7 3v8m-3-8v5a3 3 0 0 0 6 0V3M7 11v10m10-18c-2 0-3 2-3 6s1 5 3 5v7',
   FAQ: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18m-2.5-11.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14m0 3h.01',
 };
-
-function docFormat(mime: string): string {
-  if (mime === 'application/pdf') return 'PDF';
-  if (mime.includes('word')) return 'DOC';
-  if (mime.includes('sheet') || mime.includes('excel')) return 'XLS';
-  if (mime.startsWith('image/')) return mime.slice(6).toUpperCase();
-  return 'FILE';
-}
-
-/** Ссылка на документ: Word и Excel открывает просмотрщик /doc, остальное браузер показывает сам. */
-function DocLink({ doc, locale, className, children }: { doc: DocumentWithMedia; locale: Locale; className?: string; children: ReactNode }) {
-  return isOfficeDoc(doc.media.mime) ? (
-    <SiteLink href={`/doc/${doc.id}`} locale={locale} className={className}>{children}</SiteLink>
-  ) : (
-    <a href={`/api/media/${doc.mediaId}`} target="_blank" rel="noopener" className={className}>{children}</a>
-  );
-}
 
 /**
  * Главная «Ресми» — как у сайта государственной организации (макет

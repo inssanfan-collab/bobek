@@ -1,8 +1,9 @@
 import { NewsCard, SiteLink, T as BLOCK_T } from '@/components/site/blocks';
 import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import { Stars } from '@/components/site/sections';
-import { CoverOr, EnrollLink, ThemeImage, aboutSection, albumPhotos, developmentAreas, findSection } from '@/components/site/theme-kit';
+import { CoverOr, EnrollLink, ThemeImage, aboutSection, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick, type Locale } from '@/lib/i18n';
 import type { HomeProps } from '@/templates/types';
 import { Cloud, HangingClouds, Icon, Plane, routineIcon } from './Doodles';
@@ -40,6 +41,12 @@ function TwoTone({ pair, locale, id, light = false }: { pair: Pair; locale: Loca
 const CARD_IMAGES = ['play', 'sport', 'abacus'];
 const CARD_ICONS = ['slide', 'school', 'easel'];
 
+const KP: Record<'ann' | 'photos' | 'docs', Pair> = {
+  ann: { kk: ['Соңғы', 'хабарландырулар'], ru: ['Последние', 'объявления'] },
+  photos: { kk: ['Біздің', 'фотогалерея'], ru: ['Наша', 'фотогалерея'] },
+  docs: { kk: ['Соңғы', 'құжаттар'], ru: ['Последние', 'документы'] },
+};
+
 /**
  * Главная «Шуақ» — по образцу дизайна №1: фото ребёнка на всю ширину
  * с белым облачком-карточкой и рисунком, кремовый фон в узорах с тремя
@@ -48,13 +55,15 @@ const CARD_ICONS = ['slide', 'school', 'easel'];
  * сада, новости, отзыв на розово-оранжевом градиенте рядом с фото.
  * Фото и рисунки — сгенерированные; тексты и данные — сада.
  */
-export function ShuaqHome({ profile, news, albums, locale, coverUrl, coverPosition, hero, menu, clubs = [], routine = [], reviews = [], counts }: HomeProps) {
+export function ShuaqHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], locale, coverUrl, coverPosition, hero, menu, clubs = [], routine = [], reviews = [], counts }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const stats = homeStats(profile, counts, locale);
   const about = aboutSection(menu);
   const clubsSection = findSection(menu, 'CLUBS');
-  const gallerySection = findSection(menu, 'GALLERY');
   const aboutText = pick(locale, profile?.aboutKk, profile?.aboutRu) || hero.lead;
-  const photos = albumPhotos(albums, locale, 5);
   const cards = clubs.length > 0
     ? clubs.slice(0, 3).map((club) => ({ key: club.id, title: pick(locale, club.nameKk, club.nameRu) }))
     : developmentAreas(locale).filter((area) => ['health', 'logic', 'art'].includes(area.key)).map((area) => ({ key: area.key, title: area.title }));
@@ -153,29 +162,33 @@ export function ShuaqHome({ profile, news, albums, locale, coverUrl, coverPositi
       {photos.length > 0 ? (
         <section className="container-page py-16 text-center" aria-labelledby="shuaq-gallery">
           <TwoTone pair={H.gallery} locale={locale} id="shuaq-gallery" />
-          <ul className={`shuaq-masonry shuaq-masonry-${photos.length} mt-10`}>
-            {photos.map((photo) => (
-              <li key={photo.key}>
-                <SiteLink href={`/${gallerySection?.slug ?? 'gallery'}/${photo.albumSlug}`} locale={locale} className="shuaq-masonry-item">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- медиа отдаёт свой роут */}
-                  <img src={photo.src} alt={photo.title} loading="lazy" />
-                </SiteLink>
-              </li>
-            ))}
-          </ul>
-          {gallerySection ? <SiteLink href={`/${gallerySection.slug}`} locale={locale} className="shuaq-btn mt-8">{T.allPhotos[locale]}</SiteLink> : null}
+          <div className="mt-10 text-left"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
         </section>
       ) : null}
 
-      {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="shuaq-ann">
+          <TwoTone pair={KP.ann} locale={locale} id="shuaq-ann" />
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {feed.length > 0 ? (
         <section className="container-page py-12" aria-labelledby="shuaq-news">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <TwoTone pair={H.news} locale={locale} id="shuaq-news" />
             <SiteLink href="/news" locale={locale} className="shuaq-more">{BLOCK_T.allNews[locale]} →</SiteLink>
           </div>
           <div className="shuaq-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+            {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="shuaq-docs">
+          <TwoTone pair={KP.docs} locale={locale} id="shuaq-docs" />
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
         </section>
       ) : null}
 

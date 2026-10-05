@@ -4,6 +4,7 @@ import { RouteMap } from '@/components/site/RouteMap';
 import { SocialLinks } from '@/components/site/SocialLinks';
 import { Stars } from '@/components/site/sections';
 import { EnrollLink, ThemeImage, aboutSection, developmentAreas, findSection } from '@/components/site/theme-kit';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick } from '@/lib/i18n';
 import type { HomeProps } from '@/templates/types';
 import { CloudOutline, Sparks } from './Doodles';
@@ -40,6 +41,15 @@ function routineImage(title: string, index: number): string {
 
 const PILLS = ['erekshe-pill-pink', 'erekshe-pill-green', 'erekshe-pill-violet', 'erekshe-pill-blue', 'erekshe-pill-yellow'];
 
+const K = {
+  ann: { kk: 'Хабарландырулар', ru: 'Объявления' },
+  annMark: { kk: 'Ақпарат', ru: 'Информация' },
+  photos: { kk: 'Фотогалерея', ru: 'Фотогалерея' },
+  photosMark: { kk: 'Сәттер', ru: 'Моменты' },
+  docs: { kk: 'Соңғы құжаттар', ru: 'Последние документы' },
+  docsMark: { kk: 'Құжаттар', ru: 'Документы' },
+} as const;
+
 /**
  * Главная «Ерекше» — вплотную к образцу №6: слоган с выделенным словом
  * в жёлтой рамке и карточкой заведующей, малыш-вырезка в голубом круге
@@ -47,7 +57,11 @@ const PILLS = ['erekshe-pill-pink', 'erekshe-pill-green', 'erekshe-pill-violet',
  * заголовок; распорядок мозаикой фото с цветными подписями; специалисты
  * карточками с круглым фото; адрес с картой. Фото — сгенерированные.
  */
-export function ErekshHome({ profile, news, locale, hero, menu, routine = [], staff = [], reviews = [] }: HomeProps) {
+export function ErekshHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], locale, hero, menu, routine = [], staff = [], reviews = [] }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const headName = pick(locale, profile?.headNameKk, profile?.headNameRu);
   // Фото заведующей — только настоящее, из карточки педагога.
   const headCard = staff.find((member) => /меңгеруш|заведующ/i.test(`${member.positionKk} ${member.positionRu}`));
@@ -156,15 +170,36 @@ export function ErekshHome({ profile, news, locale, hero, menu, routine = [], st
         </section>
       ) : null}
 
-      {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="erekshe-ann">
+          <h2 id="erekshe-ann" className="erekshe-script">{K.ann[locale]}</h2>
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {feed.length > 0 ? (
         <section className="container-page py-12" aria-labelledby="erekshe-news">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 id="erekshe-news" className="erekshe-script">{BLOCK_T.news[locale]}</h2>
             <SiteLink href="/news" locale={locale} className="erekshe-more">{BLOCK_T.allNews[locale]} →</SiteLink>
           </div>
           <div className="erekshe-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+            {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
+        </section>
+      ) : null}
+
+      {photos.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="erekshe-photos">
+          <h2 id="erekshe-photos" className="erekshe-script">{K.photos[locale]}</h2>
+          <div className="mt-8"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="erekshe-docs">
+          <h2 id="erekshe-docs" className="erekshe-script">{K.docs[locale]}</h2>
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
         </section>
       ) : null}
 

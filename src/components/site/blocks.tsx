@@ -22,7 +22,20 @@ export const T = {
   places: { kk: 'Бос орындар', ru: 'Свободные места' },
   workHours: { kk: 'Жұмыс уақыты', ru: 'Режим работы' },
   head: { kk: 'Меңгеруші', ru: 'Заведующая' },
+  pinned: { kk: 'Бекітілген', ru: 'Закреплено' },
 } as const;
+
+/** Метка закреплённой записи: в ленте видно, почему она стоит первой. */
+export function PinnedMark({ locale }: { locale: Locale }) {
+  return (
+    <span className="pinned-mark">
+      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3Z" />
+      </svg>
+      {T.pinned[locale]}
+    </span>
+  );
+}
 
 export function mediaUrl(media: Media | null | undefined): string | null {
   return media ? `/api/media/${media.id}` : null;
@@ -59,7 +72,10 @@ export function NewsCard({
           <div className={`bg-gradient-to-br from-brand/70 to-accent/60 ${featured ? 'h-64' : 'h-44'}`} aria-hidden />
         )}
         <div className="p-5">
-          <p className="text-sm text-muted">{formatDate(post.publishedAt, locale)}</p>
+          <p className="flex flex-wrap items-center gap-2 text-sm text-muted">
+            {post.isPinned ? <PinnedMark locale={locale} /> : null}
+            {formatDate(post.publishedAt, locale)}
+          </p>
           <h3 className={`mt-1 font-display font-bold group-hover:text-brand ${featured ? 'text-2xl' : 'text-lg'}`}>
             {title}
           </h3>
@@ -87,6 +103,7 @@ export function AnnouncementList({
       <ul className="mt-3 space-y-2">
         {items.map((item) => (
           <li key={item.id} className="flex flex-wrap items-baseline gap-x-3">
+            {item.isPinned ? <PinnedMark locale={locale} /> : null}
             <span className="text-sm text-amber-800">{formatDate(item.publishedAt, locale)}</span>
             <Link
               href={withLocale(`${basePath}/${item.slug}`, locale)}

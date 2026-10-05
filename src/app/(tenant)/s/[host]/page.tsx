@@ -24,17 +24,19 @@ export default async function TenantHome({
   const locale = localeFrom(search.lang);
 
   const visible = { where: { isVisible: true }, orderBy: { position: 'asc' as const } };
-  const [sections, news, announcements, albums, cover, documents, staff, groups, clubs, faq, reviews, prices, routine] = await Promise.all([
+  const [sections, newsFeed, announcements, albums, cover, documents, staff, groups, clubs, faq, reviews, prices, routine, photos] = await Promise.all([
     siteMenu(db),
     db.posts.findMany({
       where: { status: 'PUBLISHED', publishedAt: { lte: new Date() }, section: { type: 'NEWS' } },
       orderBy: [{ isPinned: 'desc' }, { publishedAt: 'desc' }],
-      take: 6,
+      // Девять — для тем с лентой подлиннее; шаблонам по-прежнему уходит шесть.
+      take: 9,
       include: { coverMedia: true },
     }),
     db.posts.findMany({
       where: { status: 'PUBLISHED', publishedAt: { lte: new Date() }, section: { type: 'ANNOUNCEMENT' } },
-      orderBy: { publishedAt: 'desc' },
+      // Закреплённое — первым, как в новостях и на странице раздела.
+      orderBy: [{ isPinned: 'desc' }, { publishedAt: 'desc' }],
       take: 5,
       include: { coverMedia: true },
     }),
@@ -56,7 +58,9 @@ export default async function TenantHome({
     db.reviews.findMany(visible),
     db.pricePlans.findMany(visible),
     db.routine.findMany({ orderBy: { position: 'asc' } }),
+    db.albums.latestPhotos(3),
   ]);
+  const news = newsFeed.slice(0, 6);
 
   await recordVisit(tenant.id);
 
@@ -80,6 +84,8 @@ export default async function TenantHome({
           coverPosition={coverPosition(profile?.coverFocus)}
           documents={documents}
           menu={sections}
+          newsFeed={newsFeed}
+          photos={photos}
           staff={staff}
           groups={groups}
           clubs={clubs}

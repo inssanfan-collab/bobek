@@ -1,4 +1,4 @@
-import type { Club, Document, FaqItem, Group, Media, PricePlan, Review, RoutineItem, Section, TenantProfile } from '@prisma/client';
+import type { AlbumItem, Club, Document, FaqItem, Group, Media, PricePlan, Review, RoutineItem, Section, TenantProfile } from '@prisma/client';
 import type { Locale } from '@/lib/i18n';
 import type { HeroContent } from '@/lib/hero';
 import type { AlbumWithCover, PostWithCover } from '@/components/site/blocks';
@@ -7,6 +7,9 @@ import type { HomeCounts } from '@/lib/home-stats';
 
 /** Документ с файлом — для блока «Последние документы». */
 export type DocumentWithMedia = Document & { media: Media };
+
+/** Фото из альбома — для блока «Фотогалерея» на главной (последние загруженные). */
+export type LatestPhoto = AlbumItem & { media: Media; album: { slug: string; titleKk: string; titleRu: string } };
 
 /** Один и тот же набор данных получают все шаблоны — различается только вёрстка. */
 export type HomeProps = {
@@ -34,6 +37,14 @@ export type HomeProps = {
    */
   documents?: DocumentWithMedia[];
   menu?: Section[];
+  /**
+   * Лента новостей подлиннее (до девяти) — для тем, где новостей на главной
+   * больше обычного. `news` при этом остаётся прежней длины, чтобы
+   * стандартные шаблоны не менялись.
+   */
+  newsFeed?: PostWithCover[];
+  /** Последние загруженные фото галереи (до трёх). */
+  photos?: LatestPhoto[];
   /**
    * Данные для блоков главной (src/components/site/home-blocks.tsx):
    * только видимые записи, в порядке, заданном садом.

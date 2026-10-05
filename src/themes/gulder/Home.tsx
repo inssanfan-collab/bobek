@@ -3,6 +3,7 @@ import { HeroButtons, HeroTitle } from '@/components/site/Hero';
 import { Stars } from '@/components/site/sections';
 import { EnrollLink, ThemeImage, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick, type Locale } from '@/lib/i18n';
 import { formatAgeRange } from '@/lib/labels';
 import type { HomeProps } from '@/templates/types';
@@ -38,6 +39,12 @@ const ACC_ICONS = ['bulb', 'palette', 'shield'];
 const CARD_TONES = ['gulder-card-pink', 'gulder-card-magenta', 'gulder-card-violet'];
 const TOYS = ['pyramid', 'cubes', 'top'];
 
+const KP: Record<'ann' | 'photos' | 'docs', Pair> = {
+  ann: { kk: ['Соңғы', 'хабарландырулар'], ru: ['Последние', 'объявления'] },
+  photos: { kk: ['Біздің', 'фотогалерея'], ru: ['Наша', 'фотогалерея'] },
+  docs: { kk: ['Соңғы', 'құжаттар'], ru: ['Последние', 'документы'] },
+};
+
 /**
  * Главная «Гүлдер» — вплотную к образцу №8: пастельный узор на фоне,
  * заголовок фиолетовым с малиновыми словами, справа коллаж — девочка
@@ -46,7 +53,11 @@ const TOYS = ['pyramid', 'cubes', 'top'];
  * игрушками; отзывы карточками; фото с подписями-таблетками и запись;
  * малиновый подвал. Фото и игрушки — сгенерированные.
  */
-export function GulderHome({ profile, news, locale, hero, menu = [], clubs = [], groups = [], reviews = [], counts }: HomeProps) {
+export function GulderHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], locale, hero, menu = [], clubs = [], groups = [], reviews = [], counts }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const stats = homeStats(profile, counts, locale);
   const clubsSection = findSection(menu, 'CLUBS');
   const groupsSection = findSection(menu, 'GROUPS');
@@ -149,15 +160,36 @@ export function GulderHome({ profile, news, locale, hero, menu = [], clubs = [],
         </section>
       ) : null}
 
-      {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="gulder-ann">
+          <Title pair={KP.ann} locale={locale} id="gulder-ann" />
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {feed.length > 0 ? (
         <section className="container-page py-12" aria-labelledby="gulder-news">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <Title pair={H.news} locale={locale} id="gulder-news" />
             <SiteLink href="/news" locale={locale} className="gulder-more">{BLOCK_T.allNews[locale]} →</SiteLink>
           </div>
           <div className="gulder-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+            {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
+        </section>
+      ) : null}
+
+      {photos.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="gulder-photos">
+          <Title pair={KP.photos} locale={locale} id="gulder-photos" />
+          <div className="mt-8"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="gulder-docs">
+          <Title pair={KP.docs} locale={locale} id="gulder-docs" />
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
         </section>
       ) : null}
 

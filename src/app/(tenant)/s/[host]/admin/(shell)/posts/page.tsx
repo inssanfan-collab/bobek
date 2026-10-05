@@ -54,7 +54,9 @@ export default async function PostsPage({
   const [posts, section] = await Promise.all([
     ctx.db.posts.findMany({
       where: { section: { type } },
-      orderBy: [{ publishedAt: 'desc' }, { updatedAt: 'desc' }],
+      // Закреплённые — наверху, как и на сайте: иначе галочка «Закрепить»
+      // выглядит так, будто не сработала.
+      orderBy: [{ isPinned: 'desc' }, { publishedAt: 'desc' }, { updatedAt: 'desc' }],
       include: { section: true },
     }),
     ctx.db.sections.findFirst({ where: { type } }),

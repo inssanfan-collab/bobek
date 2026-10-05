@@ -4,6 +4,7 @@ import { RouteMap } from '@/components/site/RouteMap';
 import { Stars } from '@/components/site/sections';
 import { EnrollLink, ThemeImage, aboutSection, developmentAreas, findSection } from '@/components/site/theme-kit';
 import { homeStats } from '@/lib/home-stats';
+import { AnnouncementsList, DocsTable, LatestPhotos } from '@/components/site/theme-blocks';
 import { pick, type Locale } from '@/lib/i18n';
 import type { HomeProps } from '@/templates/types';
 
@@ -41,6 +42,12 @@ function Title({ parts, locale, id, className = '' }: { parts: Parts; locale: Lo
 
 const TOYS = ['ball', 'top', 'abc'];
 
+const KP: Record<'ann' | 'photos' | 'docs', Parts> = {
+  ann: { kk: ['Соңғы', 'хабарландырулар', ''], ru: ['Последние', 'объявления', ''] },
+  photos: { kk: ['Біздің', 'фотогалерея', ''], ru: ['Наша', 'фотогалерея', ''] },
+  docs: { kk: ['Соңғы', 'құжаттар', ''], ru: ['Последние', 'документы', ''] },
+};
+
 /**
  * Главная «Нұр» — вплотную к образцу №7: фото девочки с ладошками
  * в краске на всю ширину и белая плашка с рукописным заголовком; фото
@@ -49,7 +56,11 @@ const TOYS = ['ball', 'top', 'abc'];
  * фото в жёлтой рамке; отзывы на облаках; плашка вопроса и адрес
  * с картой; красный подвал. Фото и игрушки — сгенерированные.
  */
-export function NurHome({ profile, news, locale, hero, menu, staff = [], reviews = [], counts }: HomeProps) {
+export function NurHome({ profile, news, newsFeed, announcements = [], documents = [], photos = [], locale, hero, menu, staff = [], reviews = [], counts }: HomeProps) {
+  const feed = (newsFeed ?? news).slice(0, 9);
+  const kitAnn = findSection(menu, 'ANNOUNCEMENT');
+  const kitGallery = findSection(menu, 'GALLERY');
+  const kitDocs = findSection(menu, 'DOCUMENTS');
   const stats = homeStats(profile, counts, locale).slice(0, 3);
   const about = aboutSection(menu);
   const staffSection = findSection(menu, 'STAFF');
@@ -155,15 +166,36 @@ export function NurHome({ profile, news, locale, hero, menu, staff = [], reviews
         </section>
       ) : null}
 
-      {news.length > 0 ? (
+      {announcements.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="nur-ann">
+          <Title parts={KP.ann} locale={locale} id="nur-ann" />
+          <div className="mt-8"><AnnouncementsList items={announcements} locale={locale} section={kitAnn} /></div>
+        </section>
+      ) : null}
+
+      {feed.length > 0 ? (
         <section className="container-page py-16" aria-labelledby="nur-news">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <Title parts={H.news} locale={locale} id="nur-news" />
             <SiteLink href="/news" locale={locale} className="nur-more">{BLOCK_T.allNews[locale]} →</SiteLink>
           </div>
           <div className="nur-news mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {news.slice(0, 3).map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
+            {feed.map((post) => <NewsCard key={post.id} post={post} locale={locale} />)}
           </div>
+        </section>
+      ) : null}
+
+      {photos.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="nur-photos">
+          <Title parts={KP.photos} locale={locale} id="nur-photos" />
+          <div className="mt-8"><LatestPhotos photos={photos} locale={locale} gallerySection={kitGallery} /></div>
+        </section>
+      ) : null}
+
+      {documents.length > 0 ? (
+        <section className="container-page py-12" aria-labelledby="nur-docs">
+          <Title parts={KP.docs} locale={locale} id="nur-docs" />
+          <div className="mt-8"><DocsTable documents={documents} locale={locale} docsSection={kitDocs} /></div>
         </section>
       ) : null}
 
