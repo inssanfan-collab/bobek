@@ -7,7 +7,7 @@ import { EnrollLink, ThemeImage, findSection } from '@/components/site/theme-kit
 import { pick } from '@/lib/i18n';
 import { formatDate } from '@/lib/labels';
 import type { HomeProps } from '@/templates/types';
-import { Cloud, Flag, Sun } from './Doodles';
+import { Flag } from './Doodles';
 
 const T = {
   door: { kk: 'Кіру', ru: 'Войти' },
@@ -89,9 +89,6 @@ export function UyshikHome({
   return (
     <div className="uyshik-home">
       <section className="uyshik-scene">
-        <Sun className="uyshik-sun" />
-        <Cloud className="uyshik-cloud uyshik-cloud-a" />
-        <Cloud className="uyshik-cloud uyshik-cloud-b" />
         <div className="container-page">
           <div className="uyshik-house">
             <div className="uyshik-roof">

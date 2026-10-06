@@ -4,33 +4,34 @@
  * (яркость растёт) — отклик, который говорит «сюда можно войти». Во дворе
  * новости на бельевой верёвке, объявления, фото полароидами.
  *
- * Сдержанно, «дороже»: фон — слоновая кость, три основных цвета — кирпич
- * крыши #B25C54 (белый на нём 4,6:1), баклажан #402E44 (полоса шапки,
- * кнопки, подвал; белый 12:1) и лесной зелёный #3C5848 (ссылки; белый
- * 7,8:1), плюс приглушённое золото #B8925A только в мелочах (прищепки,
- * черта над заголовком, рамки портретов). Трава — шалфей, только полосой
- * под домом. Тени мягкие и рассеянные, без «игрушечных» жёстких.
+ * Верх цветной: небо, солнце, облака и холмы — картинка sky-*.webp
+ * (Stitch, без людей и надписей), дом стоит на лугу. Центр белый, с лёгким
+ * узором из звёздочек, сердечек и кружков и гирляндой флажков над двором.
+ * Основные цвета — кирпич крыши #C44E3E (белый на нём 4,7:1), баклажан
+ * #402E44 (полоса шапки, кнопки, подвал; белый 12:1), лесной зелёный
+ * #3C5848 (ссылки; белый 7,8:1); группы — светлые солнечный, небесный,
+ * мятный и коралловый, текст на них тёмный (от 11:1). Тени мягкие.
  * Шрифты: Lora (заголовки), Playpen Sans (таблички комнат и дверь),
  * Golos Text (текст) — все проверены на казахские буквы ә ғ қ ң ө ұ ү һ і.
- * Выделенное слово на крыше кремовое (3,8:1) — только в крупном заголовке,
+ * Выделенное слово на крыше кремовое (3,9:1) — только в крупном заголовке,
  * порог 3:1.
  * Каждое правило — под [data-theme='uyshik'] (tests/unit/themes.test.ts).
  */
 
 [data-theme='uyshik'] {
-  --surface: 250 246 239;
-  --card: 255 253 249;
+  --surface: 255 255 255;
+  --card: 255 255 255;
   --ink: 43 33 41;
   --muted: 103 90 98;
-  --line: 230 220 205;
+  --line: 236 231 224;
   --brand: 60 88 72;
   --brand-soft: 226 234 224;
   --brand-ink: 32 54 42;
-  --accent: 178 92 84;
+  --accent: 196 78 62;
   --accent-soft: 246 228 220;
   --accent-ink: 140 62 54;
-  --uyshik-roof: 178 92 84;
-  --uyshik-roof-deep: 150 74 68;
+  --uyshik-roof: 196 78 62;
+  --uyshik-roof-deep: 160 60 50;
   --uyshik-aubergine: 64 46 68;
   --uyshik-gold: 184 146 90;
   --uyshik-gold-light: 228 200 146;
@@ -39,6 +40,10 @@
   --uyshik-sage-deep: 124 148 108;
   --uyshik-sage-light: 222 230 212;
   --uyshik-blush: 242 224 216;
+  --uyshik-sun-light: 255 238 186;
+  --uyshik-sky-light: 218 238 252;
+  --uyshik-mint-light: 216 242 224;
+  --uyshik-coral-light: 255 226 218;
   /* Для рисунков (Doodles.tsx): знак-домик, флажок, солнце, облака. */
   --uyshik-mustard: 222 186 120;
   --uyshik-teal: 150 172 132;
@@ -156,41 +161,28 @@
   overflow-x: clip;
 }
 
-/* Небо — тёплая дымка, внизу полоса шалфейной травы, на которой стоит дом. */
+/* Небо, солнце и холмы — картинка; дом стоит на лугу в её середине. */
 [data-theme='uyshik'] .uyshik-scene {
   position: relative;
-  background: linear-gradient(
-    rgb(222 234 236) 0%,
-    rgb(244 240 230) 74%,
-    rgb(var(--uyshik-sage)) 74%,
-    rgb(var(--uyshik-sage-deep)) 100%
-  );
+  background: rgb(150 205 240) url('/images/themes/uyshik/sky-1376.webp') center 82% / cover no-repeat;
   padding-top: clamp(3.5rem, 7vw, 5.5rem);
 }
 
-[data-theme='uyshik'] .uyshik-sun {
+@media (max-width: 767px) {
+  /* Узкий высокий экран: показываем левый край картинки — с солнцем и деревом. */
+  [data-theme='uyshik'] .uyshik-scene {
+    background-image: url('/images/themes/uyshik/sky-900.webp');
+    background-position: 12% 100%;
+  }
+}
+
+/* Белая кромка-фестон между лугом и двором. */
+[data-theme='uyshik'] .uyshik-scene::after {
+  content: '';
   position: absolute;
-  top: 1.25rem;
-  left: 6%;
-  width: 4rem;
-  opacity: 0.85;
-}
-
-[data-theme='uyshik'] .uyshik-cloud {
-  position: absolute;
-  opacity: 0.85;
-}
-
-[data-theme='uyshik'] .uyshik-cloud-a {
-  top: 2.5rem;
-  right: 8%;
-  width: 7rem;
-}
-
-[data-theme='uyshik'] .uyshik-cloud-b {
-  top: 7rem;
-  left: 24%;
-  width: 5rem;
+  inset: auto 0 -1px;
+  height: 18px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='18' viewBox='0 0 48 18'%3E%3Cpath d='M0 18V10Q12 -2 24 10T48 10V18z' fill='%23ffffff'/%3E%3C/svg%3E") repeat-x bottom / 48px 18px;
 }
 
 [data-theme='uyshik'] .uyshik-house {
@@ -360,7 +352,7 @@
 /* Дверь — запись. Стоит на траве и чуть залезает на дом. */
 [data-theme='uyshik'] .uyshik-ground {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   justify-content: center;
   margin-top: -0.6rem;
@@ -409,9 +401,17 @@
 
 /* ── Двор ── */
 
+/* Двор: белый, гирлянда флажков вверху и редкий узор — звёздочки,
+   сердечки, кружки. */
 [data-theme='uyshik'] .uyshik-yard {
-  background: rgb(var(--surface));
-  padding-block: 1.5rem 4.5rem;
+  background-color: rgb(255 255 255);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='46' viewBox='0 0 200 46'%3E%3Cpath d='M0 6Q100 38 200 6' fill='none' stroke='%23b8925a' stroke-width='1.5'/%3E%3Cpath d='M8 9h24l-12 26z' fill='%23f2846e'/%3E%3Cpath d='M48 13h24l-12 26z' fill='%23f6c445'/%3E%3Cpath d='M88 14h24l-12 26z' fill='%2378bfe8'/%3E%3Cpath d='M128 13h24l-12 26z' fill='%238ccb7a'/%3E%3Cpath d='M168 9h24l-12 26z' fill='%23c4a0d8'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg opacity='.32'%3E%3Cpath d='M40 22l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z' fill='%23f6c445'/%3E%3Cpath d='M160 70c-4-6-14-3-13 5 1 6 13 13 13 13s12-7 13-13c1-8-9-11-13-5z' fill='%23f2846e'/%3E%3Ccircle cx='70' cy='140' r='6' fill='%2378bfe8'/%3E%3Ccircle cx='190' cy='180' r='4' fill='%238ccb7a'/%3E%3Cpath d='M120 170l3 7 7 1-5 5 1 7-6-4-6 4 1-7-5-5 7-1z' fill='%23c4a0d8'/%3E%3Ccircle cx='20' cy='200' r='3' fill='%23f2846e'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat-x, repeat;
+  background-position: center top, 0 3rem;
+  background-size: 200px 46px, 220px 220px;
+  padding-block: 2.5rem 4.5rem;
   color: rgb(var(--ink));
 }
 
@@ -441,9 +441,10 @@
   content: '';
   display: block;
   width: 2.5rem;
-  height: 2px;
+  height: 4px;
   margin-bottom: 0.9rem;
-  background: rgb(var(--uyshik-gold));
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgb(242 132 110) 0 33%, rgb(246 196 69) 33% 66%, rgb(120 191 232) 66%);
 }
 
 [data-theme='uyshik'] .uyshik-link {
@@ -606,14 +607,15 @@
   gap: 0.3rem;
   padding: 3.6rem 1.1rem 1.25rem;
   clip-path: polygon(50% 0, 100% 24%, 100% 100%, 0 100%, 0 24%);
-  background: rgb(var(--uyshik-sand));
+  background: rgb(var(--uyshik-sun-light));
   color: rgb(var(--ink));
   text-align: center;
   align-items: center;
 }
 
-[data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(3n + 2) { background: rgb(var(--uyshik-sage-light)); }
-[data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(3n + 3) { background: rgb(var(--uyshik-blush)); }
+[data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(4n + 2) { background: rgb(var(--uyshik-sky-light)); }
+[data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(4n + 3) { background: rgb(var(--uyshik-mint-light)); }
+[data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(4n + 4) { background: rgb(var(--uyshik-coral-light)); }
 
 [data-theme='uyshik'] .uyshik-groups .hb-group-name,
 [data-theme='uyshik'] .uyshik-groups .hb-group-age,
@@ -691,7 +693,7 @@
 /* Кромка подвала: пологая волна цвета баклажана над подвалом. */
 [data-theme='uyshik'] .uyshik-soil {
   height: 24px;
-  background-color: rgb(var(--surface));
+  background-color: rgb(255 255 255);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24' viewBox='0 0 120 24'%3E%3Cpath d='M0 24V14Q30 2 60 13T120 13V24z' fill='%23402e44'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
   background-position: bottom;
