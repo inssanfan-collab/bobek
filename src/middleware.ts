@@ -49,6 +49,6 @@ export const config = {
   matcher: [
     // Пропускаем статику Next и общие API-роуты: медиа, health и запрос Caddy о сертификате
     // одинаковы для всех доменов, поэтому переписывать их под тенанта нельзя.
-    '/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|woff2?)$).*)',
+    '/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|woff2?|mp4|webm)$).*)',
   ],
 };

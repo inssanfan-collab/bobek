@@ -2,6 +2,12 @@ import { findThemeInfo } from './catalog';
 import { KunbagysFooter } from './kunbagys/Footer';
 import { KunbagysHeader } from './kunbagys/Header';
 import { KunbagysHome } from './kunbagys/Home';
+import { AkordaFooter } from './akorda/Footer';
+import { AkordaHeader } from './akorda/Header';
+import { AkordaHome } from './akorda/Home';
+import { KitapFooter } from './kitap/Footer';
+import { KitapHeader } from './kitap/Header';
+import { KitapHome } from './kitap/Home';
 import { MamyqFooter } from './mamyq/Footer';
 import { MamyqHeader } from './mamyq/Header';
 import { MamyqHome } from './mamyq/Home';
@@ -66,6 +72,8 @@ const PARTS: Record<string, ThemeParts> = {
   konstruktor: { Home: KonstruktorHome, Header: KonstruktorHeader, Footer: KonstruktorFooter },
   akku: { Home: AkkuHome, Header: AkkuHeader, Footer: AkkuFooter },
   oyin: { Home: OyinHome, Header: OyinHeader, Footer: OyinFooter },
+  akorda: { Home: AkordaHome, Header: AkordaHeader, Footer: AkordaFooter },
+  kitap: { Home: KitapHome, Header: KitapHeader, Footer: KitapFooter },
   resmi: { Home: ResmiHome, Header: ResmiHeader, Footer: ResmiFooter },
   shuaq: { Home: ShuaqHome, Header: ShuaqHeader, Footer: ShuaqFooter },
   erekshe: { Home: ErekshHome, Header: ErekshHeader, Footer: ErekshFooter },

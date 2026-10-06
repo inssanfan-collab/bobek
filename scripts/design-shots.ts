@@ -30,12 +30,20 @@ async function shoot(page: Page, url: string): Promise<Buffer> {
   await page.addStyleTag({ content: '.site-header{position:static!important} nextjs-portal{display:none!important}' });
   // Ленивые картинки грузятся у края экрана — проходим страницу дважды.
   await page.evaluate(async () => {
+    // Ленивые картинки в самом низу в безголовом браузере иногда не успевают
+    // загрузиться при прокрутке — просим их сразу.
+    document.querySelectorAll('img[loading=lazy]').forEach((img) => {
+      (img as HTMLImageElement).loading = 'eager';
+    });
     for (let pass = 0; pass < 2; pass += 1) {
       for (let y = 0; y < document.body.scrollHeight; y += 500) {
         window.scrollTo(0, y);
         await new Promise((resolve) => setTimeout(resolve, 90));
       }
     }
+    // Декодируем всё до снимка: повёрнутая или в overflow:hidden картинка
+    // иначе может остаться пустой рамкой на снимке во всю длину.
+    await Promise.all(Array.from(document.images, (img) => img.decode().catch(() => undefined)));
     window.scrollTo(0, 0);
   });
   await page.waitForTimeout(2500);

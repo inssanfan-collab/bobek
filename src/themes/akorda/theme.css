@@ -1,0 +1,1017 @@
+/*
+ * Тема «Акорда» — по образцу сайта akorda.kz (раскладка, размеры, шрифт и
+ * цвета сняты с него): серая полоса шапки с орнаментом, под ней синий блок
+ * с флагом и гербом, белая карточка главной новости с узорной полосой,
+ * серая таблетка разделов с жёлтой активной вкладкой, лента событий и серая
+ * колонка, блок руководителя, тёмный подвал со знаком.
+ * Шрифт Montserrat (у образца тот же) проверен на казахские буквы.
+ * Цвета образца: #333 текст, #00AFCA циан, #FEC50C золото, #F2F2F2 серый.
+ * Что изменено ради читаемости (контраст 4,5:1): белый текст кнопок —
+ * на глубоком циане #007D96 (у образца на #00AFCA, это 2,6:1), даты —
+ * #6B6B6B вместо #999, ссылки подвала — #AAA вместо #999.
+ * Герб и флаг — государственные символы, поэтому только у государственных
+ * садов: у частного (`isPrivate`) те же блоки без герба и без флага.
+ * Каждое правило — под [data-theme='akorda'] (tests/unit/themes.test.ts).
+ */
+
+[data-theme='akorda'] {
+  --surface: 255 255 255;
+  --card: 255 255 255;
+  --ink: 51 51 51;
+  --muted: 107 107 107;
+  --line: 229 229 229;
+  --brand: 0 125 150;
+  --brand-soft: 224 244 248;
+  --brand-ink: 0 77 92;
+  --accent: 254 197 12;
+  --accent-soft: 255 244 204;
+  --accent-ink: 102 77 0;
+  --akorda-cyan: 0 175 202;
+  --akorda-gold: 254 197 12;
+  --akorda-gray: 242 242 242;
+  --akorda-dark: 51 51 51;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.25rem;
+  --font-display: 'Montserrat', system-ui, sans-serif;
+  --font-sans: 'Montserrat', system-ui, sans-serif;
+  scroll-padding-top: 6rem;
+}
+
+[data-theme='akorda'] body {
+  background-color: rgb(255 255 255);
+  background-image: none;
+  font-weight: 500;
+}
+
+[data-theme='akorda'] h1,
+[data-theme='akorda'] h2,
+[data-theme='akorda'] h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: rgb(var(--ink));
+}
+
+[data-theme='akorda'] a:hover {
+  color: rgb(var(--brand));
+}
+
+[data-theme='akorda'] :focus-visible {
+  outline: 3px solid rgb(var(--brand));
+  outline-offset: 2px;
+}
+
+[data-theme='akorda'] .btn-primary,
+[data-theme='akorda'] .akorda-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: rgb(var(--brand));
+  padding: 0.6rem 1.8rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgb(255 255 255);
+  box-shadow: none;
+}
+
+[data-theme='akorda'] .btn-primary:hover,
+[data-theme='akorda'] .akorda-button:hover {
+  background: rgb(var(--brand-ink));
+  color: rgb(255 255 255);
+}
+
+[data-theme='akorda'] .btn-secondary {
+  border: 1px solid rgb(var(--brand));
+  border-radius: 20px;
+  background: rgb(255 255 255);
+  color: rgb(var(--brand-ink));
+  font-weight: 600;
+}
+
+/* ── Шапка: серая полоса 80 px с орнаментом ── */
+
+[data-theme='akorda'] .akorda-skip {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 60;
+  background: rgb(var(--akorda-dark));
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  color: rgb(255 255 255);
+}
+
+[data-theme='akorda'] .akorda-skip:focus {
+  top: 0.5rem;
+}
+
+[data-theme='akorda'] .akorda-header {
+  background-color: rgb(var(--akorda-gray));
+  background-image: url('/images/themes/akorda/ornament.png');
+  background-repeat: repeat-x;
+  background-position: left top;
+  box-shadow: none;
+}
+
+[data-theme='akorda'] .akorda-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.6rem;
+  padding-top: 0.2rem;
+}
+
+[data-theme='akorda'] .akorda-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+[data-theme='akorda'] .akorda-mini img {
+  display: block;
+  width: 46px;
+  height: auto;
+}
+
+[data-theme='akorda'] .akorda-socials {
+  display: none;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+[data-theme='akorda'] .akorda-socials a {
+  display: grid;
+  min-height: 24px;
+  min-width: 24px;
+  place-items: center;
+  color: rgb(102 102 102);
+}
+
+[data-theme='akorda'] .akorda-socials a:hover {
+  color: rgb(var(--brand));
+}
+
+[data-theme='akorda'] .akorda-contact {
+  display: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgb(var(--akorda-dark));
+}
+
+[data-theme='akorda'] .akorda-contact a {
+  color: inherit;
+}
+
+[data-theme='akorda'] .akorda-tools {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  [data-theme='akorda'] .akorda-mini {
+    display: none;
+  }
+
+  [data-theme='akorda'] .akorda-socials,
+  [data-theme='akorda'] .akorda-contact {
+    display: flex;
+  }
+}
+
+/* Меню — по ширине полосы, мелким полужирным, как у образца. */
+[data-theme='akorda'] .akorda-nav nav > ul {
+  justify-content: space-between;
+  gap: 0;
+}
+
+[data-theme='akorda'] .akorda-nav nav > ul > li > a,
+[data-theme='akorda'] .akorda-nav nav > ul > li > span > a,
+[data-theme='akorda'] .akorda-nav nav > ul > li > span > button {
+  border-radius: 0;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgb(var(--akorda-dark));
+}
+
+[data-theme='akorda'] .akorda-nav nav > ul > li > a:hover,
+[data-theme='akorda'] .akorda-nav nav > ul > li > span > a:hover,
+[data-theme='akorda'] .akorda-nav nav > ul > li > span > button:hover {
+  background: transparent;
+  color: rgb(var(--brand));
+}
+
+/* Выпадающий список: серый, прямые углы, тонкие разделители. */
+[data-theme='akorda'] .akorda-nav nav li > ul {
+  border: 0;
+  border-radius: 0;
+  background: rgb(var(--akorda-gray));
+  padding: 0;
+  box-shadow: 0 6px 14px -8px rgb(0 0 0 / 0.4);
+}
+
+[data-theme='akorda'] .akorda-nav nav li > ul a {
+  border-radius: 0;
+  border-bottom: 1px solid rgb(196 196 196);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgb(92 92 92);
+}
+
+[data-theme='akorda'] .akorda-crumbs {
+  border-top: 1px solid rgb(var(--line));
+  background: rgb(255 255 255);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgb(var(--muted));
+}
+
+[data-theme='akorda'] .akorda-crumbs a {
+  color: rgb(var(--brand));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+[data-theme='akorda'] .akorda-crumbs [aria-current] {
+  color: rgb(var(--akorda-dark));
+}
+
+/* ── Блок с флагом и гербом ── */
+
+[data-theme='akorda'] .akorda-flag {
+  position: relative;
+  display: flex;
+  min-height: 259px;
+  align-items: flex-start;
+  overflow: hidden;
+  background-color: rgb(var(--akorda-cyan));
+}
+
+[data-theme='akorda'] .akorda-flag-state {
+  background-image: url('/images/themes/akorda/flag.jpg');
+  background-position: center;
+  background-size: cover;
+}
+
+[data-theme='akorda'] .akorda-flag-plain {
+  background-image: linear-gradient(135deg, rgb(0 118 142), rgb(var(--akorda-cyan)));
+}
+
+[data-theme='akorda'] .akorda-flag-small {
+  min-height: 200px;
+}
+
+/* Видео флага лежит под содержимым и растягивается на весь блок. */
+[data-theme='akorda'] .akorda-video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+  [data-theme='akorda'] .akorda-video {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-data: reduce) {
+  [data-theme='akorda'] .akorda-video {
+    display: none;
+  }
+}
+
+[data-theme='akorda'] .akorda-flag-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 5fr);
+  align-items: center;
+  padding-top: 1.5rem;
+}
+
+[data-theme='akorda'] .akorda-flag-mark {
+  display: flex;
+  justify-content: center;
+}
+
+[data-theme='akorda'] .akorda-flag-nomark .akorda-flag-inner {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+[data-theme='akorda'] .akorda-flag-nomark .akorda-flag-mark {
+  display: none;
+}
+
+[data-theme='akorda'] .akorda-emblem {
+  display: block;
+  width: 144px;
+  height: auto;
+  max-width: 100%;
+}
+
+[data-theme='akorda'] .akorda-logo {
+  display: block;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: rgb(255 255 255);
+  object-fit: contain;
+}
+
+[data-theme='akorda'] .akorda-flag-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+[data-theme='akorda'] .akorda-official {
+  font-size: 1.06rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: rgb(255 255 255);
+  text-shadow: 0 1px 8px rgb(0 40 70 / 0.55);
+}
+
+[data-theme='akorda'] .akorda-site-name {
+  margin-top: 0.4rem;
+  font-size: 2.12rem;
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: 0.02em;
+  color: rgb(255 255 255);
+  text-shadow: 0 1px 8px rgb(0 40 70 / 0.55);
+  text-wrap: balance;
+}
+
+@media (max-width: 959px) {
+  [data-theme='akorda'] .akorda-flag {
+    min-height: 200px;
+  }
+
+  [data-theme='akorda'] .akorda-flag-state {
+    background-image: url('/images/themes/akorda/flag-mobile.png');
+  }
+
+  [data-theme='akorda'] .akorda-flag-small {
+    min-height: 130px;
+  }
+
+  [data-theme='akorda'] .akorda-flag-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+    padding-top: 1rem;
+  }
+
+  /* На телефоне герб уже стоит в полосе сверху (как у образца), здесь только надпись. */
+  [data-theme='akorda'] .akorda-flag-state .akorda-flag-mark {
+    display: none;
+  }
+
+  [data-theme='akorda'] .akorda-flag-mark {
+    justify-content: flex-start;
+  }
+
+
+  [data-theme='akorda'] .akorda-official {
+    font-size: 0.82rem;
+  }
+
+  [data-theme='akorda'] .akorda-site-name {
+    font-size: 1.3rem;
+  }
+}
+
+/* ── Главная новость: белая карточка поверх флага ── */
+
+[data-theme='akorda'] .akorda-home {
+  overflow-x: clip;
+}
+
+[data-theme='akorda'] .akorda-top {
+  position: relative;
+  z-index: 2;
+  margin-top: -80px;
+}
+
+[data-theme='akorda'] .akorda-slider {
+  background: rgb(255 255 255);
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 0.15);
+}
+
+[data-theme='akorda'] .akorda-slide {
+  display: none;
+}
+
+[data-theme='akorda'] #akorda-r0:checked ~ .akorda-slides .akorda-slide-0,
+[data-theme='akorda'] #akorda-r1:checked ~ .akorda-slides .akorda-slide-1,
+[data-theme='akorda'] #akorda-r2:checked ~ .akorda-slides .akorda-slide-2,
+[data-theme='akorda'] #akorda-r3:checked ~ .akorda-slides .akorda-slide-3,
+[data-theme='akorda'] #akorda-r4:checked ~ .akorda-slides .akorda-slide-4 {
+  display: grid;
+}
+
+/* Фокус радиокнопки показываем на стрелках слайда. */
+[data-theme='akorda'] #akorda-r0:focus-visible ~ .akorda-slides .akorda-slide-0 .akorda-arrows,
+[data-theme='akorda'] #akorda-r1:focus-visible ~ .akorda-slides .akorda-slide-1 .akorda-arrows,
+[data-theme='akorda'] #akorda-r2:focus-visible ~ .akorda-slides .akorda-slide-2 .akorda-arrows,
+[data-theme='akorda'] #akorda-r3:focus-visible ~ .akorda-slides .akorda-slide-3 .akorda-arrows,
+[data-theme='akorda'] #akorda-r4:focus-visible ~ .akorda-slides .akorda-slide-4 .akorda-arrows {
+  outline: 3px solid rgb(var(--brand));
+  outline-offset: 4px;
+}
+
+[data-theme='akorda'] .akorda-slide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1024px) {
+  [data-theme='akorda'] .akorda-slide {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+[data-theme='akorda'] .akorda-slide-pic {
+  position: relative;
+  display: flex;
+  min-height: 200px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: rgb(var(--akorda-gray));
+}
+
+@media (min-width: 1024px) {
+  [data-theme='akorda'] .akorda-slide-pic {
+    height: 423px;
+  }
+}
+
+[data-theme='akorda'] .akorda-slide-pic img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 423px;
+  object-fit: contain;
+  object-position: center;
+}
+
+[data-theme='akorda'] .akorda-slide-text,
+[data-theme='akorda'] .akorda-orn {
+  background-color: rgb(var(--akorda-gray));
+  background-image: url('/images/themes/akorda/ornament-vertical.png');
+  background-position: top right;
+  background-repeat: repeat-y;
+}
+
+[data-theme='akorda'] .akorda-slide-text {
+  position: relative;
+  padding: 1.5rem 1.5rem 4rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='akorda'] .akorda-slide-text {
+    padding-right: 3.5rem;
+  }
+}
+
+[data-theme='akorda'] .akorda-date {
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgb(var(--muted));
+}
+
+[data-theme='akorda'] .akorda-slide-title {
+  margin-top: 0.4rem;
+  font-size: 1.41rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+}
+
+[data-theme='akorda'] .akorda-slide-title a:hover,
+[data-theme='akorda'] .akorda-row-title a:hover {
+  color: rgb(var(--brand));
+}
+
+[data-theme='akorda'] .akorda-arrows {
+  position: absolute;
+  bottom: 1rem;
+  right: 4.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgb(var(--akorda-dark));
+}
+
+[data-theme='akorda'] .akorda-arrow {
+  display: grid;
+  min-height: 24px;
+  min-width: 24px;
+  cursor: pointer;
+  place-items: center;
+  color: rgb(var(--akorda-dark));
+}
+
+[data-theme='akorda'] .akorda-arrow:hover {
+  color: rgb(var(--brand));
+}
+
+/* ── Таблетка разделов ── */
+
+[data-theme='akorda'] .akorda-tabs-wrap {
+  margin-top: 3rem;
+}
+
+[data-theme='akorda'] .akorda-tabs {
+  display: flex;
+  min-height: 40px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 20px;
+  background: rgb(var(--akorda-gray));
+}
+
+[data-theme='akorda'] .akorda-tab {
+  display: block;
+  border-radius: 20px;
+  padding: 0.62rem 2.4rem;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: rgb(var(--muted));
+}
+
+[data-theme='akorda'] .akorda-tab-active {
+  background: rgb(var(--akorda-gold));
+  color: rgb(var(--akorda-dark));
+}
+
+[data-theme='akorda'] .akorda-tab:hover:not(.akorda-tab-active) {
+  color: rgb(var(--brand));
+}
+
+@media (max-width: 639px) {
+  [data-theme='akorda'] .akorda-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* ── События и серая колонка ── */
+
+[data-theme='akorda'] .akorda-main {
+  margin-top: 3rem;
+}
+
+[data-theme='akorda'] .akorda-main-grid {
+  display: grid;
+  gap: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='akorda'] .akorda-main-grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 1.9rem;
+  }
+}
+
+[data-theme='akorda'] .akorda-h1 {
+  font-size: 1.88rem;
+  line-height: 1.2;
+}
+
+[data-theme='akorda'] .akorda-hr {
+  margin: 1rem 0 0;
+  border: 0;
+  border-top: 1px solid rgb(0 0 0 / 0.1);
+}
+
+[data-theme='akorda'] .akorda-row {
+  display: grid;
+  gap: 1rem 1.9rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  [data-theme='akorda'] .akorda-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+[data-theme='akorda'] .akorda-row-pic {
+  display: block;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: rgb(var(--akorda-gray));
+}
+
+[data-theme='akorda'] .akorda-row-pic img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+[data-theme='akorda'] .akorda-row-title {
+  font-size: 1.06rem;
+  line-height: 1.3;
+}
+
+[data-theme='akorda'] .akorda-row .akorda-date {
+  margin-top: 0.5rem;
+}
+
+[data-theme='akorda'] .akorda-more {
+  margin: 2.5rem 0 3rem;
+}
+
+[data-theme='akorda'] .akorda-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-self: start;
+}
+
+[data-theme='akorda'] .akorda-box {
+  background-color: rgb(var(--akorda-gray));
+  padding: 1.5rem;
+}
+
+[data-theme='akorda'] .akorda-box.akorda-orn {
+  padding-right: 3.5rem;
+}
+
+[data-theme='akorda'] .akorda-box-title {
+  margin-bottom: 1rem;
+  font-size: 1.06rem;
+  line-height: 1.3;
+}
+
+[data-theme='akorda'] .akorda-box .kit-ann {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+[data-theme='akorda'] .akorda-box .kit-ann ul {
+  gap: 0.9rem;
+}
+
+[data-theme='akorda'] .akorda-box .kit-ann li {
+  display: block;
+}
+
+[data-theme='akorda'] .akorda-box .kit-ann-date {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgb(var(--muted));
+}
+
+[data-theme='akorda'] .akorda-box .kit-ann-link {
+  display: inline-block;
+  padding-block: 0.15rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.45;
+  text-decoration: none;
+  color: rgb(var(--akorda-dark));
+}
+
+[data-theme='akorda'] .akorda-box .kit-ann-link:hover {
+  color: rgb(var(--brand));
+}
+
+[data-theme='akorda'] .akorda-dl {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+[data-theme='akorda'] .akorda-dl dt {
+  margin-top: 0.7rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: rgb(var(--muted));
+}
+
+[data-theme='akorda'] .akorda-dl dd {
+  font-weight: 600;
+}
+
+[data-theme='akorda'] .akorda-dl a {
+  color: rgb(var(--brand-ink));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+[data-theme='akorda'] .akorda-link {
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgb(var(--brand-ink));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Блок руководителя ── */
+
+[data-theme='akorda'] .akorda-lead {
+  margin-top: 1.5rem;
+}
+
+[data-theme='akorda'] .akorda-lead-card {
+  display: grid;
+  background: rgb(255 255 255);
+  box-shadow: 0 0.5rem 1rem rgb(0 0 0 / 0.15);
+}
+
+@media (min-width: 768px) {
+  [data-theme='akorda'] .akorda-lead-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+[data-theme='akorda'] .akorda-lead-pic {
+  min-height: 200px;
+  background: rgb(var(--akorda-gray));
+}
+
+[data-theme='akorda'] .akorda-lead-pic img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  object-fit: cover;
+}
+
+@media (min-width: 768px) {
+  [data-theme='akorda'] .akorda-lead-pic,
+  [data-theme='akorda'] .akorda-lead-pic img {
+    min-height: 359px;
+  }
+}
+
+[data-theme='akorda'] .akorda-lead-text {
+  padding: 1.5rem 3.5rem 1.5rem 1.5rem;
+}
+
+[data-theme='akorda'] .akorda-lead-title {
+  margin-top: 1.5rem;
+  font-size: 1.41rem;
+  line-height: 1.3;
+}
+
+[data-theme='akorda'] .akorda-lead-name {
+  margin-top: 0.6rem;
+  font-size: 1.06rem;
+  font-weight: 700;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='akorda'] .akorda-lead-note {
+  margin-top: 0.8rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: rgb(var(--akorda-dark));
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+[data-theme='akorda'] .akorda-lead-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+/* ── Остальные блоки в том же духе ── */
+
+[data-theme='akorda'] .akorda-block {
+  margin-top: 3.5rem;
+}
+
+[data-theme='akorda'] .akorda-groups,
+[data-theme='akorda'] .akorda-staff {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+[data-theme='akorda'] .akorda-groups .hb-group-card,
+[data-theme='akorda'] .akorda-staff .hb-staff-card {
+  border-radius: 0;
+  background: rgb(var(--akorda-gray));
+  box-shadow: none;
+}
+
+[data-theme='akorda'] .akorda-groups .hb-group-name,
+[data-theme='akorda'] .akorda-staff .hb-staff-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+[data-theme='akorda'] .akorda-staff .hb-staff-role {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgb(var(--brand-ink));
+}
+
+[data-theme='akorda'] .akorda-staff .hb-staff-photo {
+  border-radius: 0;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+}
+
+[data-theme='akorda'] .akorda-docs {
+  margin-top: 1rem;
+}
+
+[data-theme='akorda'] .akorda-docs li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+  border-top: 1px solid rgb(229 229 229);
+  padding: 15px 15px;
+}
+
+[data-theme='akorda'] .akorda-doc-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: rgb(var(--akorda-dark));
+}
+
+[data-theme='akorda'] .akorda-doc-title:hover {
+  color: rgb(var(--brand));
+}
+
+[data-theme='akorda'] .akorda-doc-meta {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: rgb(var(--muted));
+}
+
+/* ── Подвал: тёмная плита со знаком ── */
+
+[data-theme='akorda'] .akorda-footer-plate {
+  background-color: rgb(var(--akorda-dark));
+  color: rgb(170 170 170);
+}
+
+[data-theme='akorda'] .akorda-footer-state {
+  background-image: url('/images/themes/akorda/symbol.png');
+  background-position: top right;
+  background-repeat: no-repeat;
+}
+
+[data-theme='akorda'] .akorda-search {
+  position: relative;
+  display: flex;
+  max-width: 44rem;
+}
+
+[data-theme='akorda'] .akorda-search input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  border-radius: 20px 0 0 20px;
+  background: rgb(255 255 255);
+  padding: 0.65rem 1.25rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgb(var(--akorda-dark));
+  outline: none;
+}
+
+[data-theme='akorda'] .akorda-search input:focus-visible {
+  outline: 3px solid rgb(var(--akorda-gold));
+  outline-offset: 2px;
+}
+
+[data-theme='akorda'] .akorda-search button {
+  border: 0;
+  border-radius: 0 20px 20px 0;
+  background: rgb(var(--brand));
+  padding: 0.65rem 1.5rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: rgb(255 255 255);
+}
+
+[data-theme='akorda'] .akorda-search button:hover {
+  background: rgb(var(--brand-ink));
+}
+
+[data-theme='akorda'] .akorda-map {
+  display: grid;
+  gap: 1.5rem 2rem;
+  margin-top: 3rem;
+}
+
+@media (min-width: 768px) {
+  [data-theme='akorda'] .akorda-map {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+[data-theme='akorda'] .akorda-map-title {
+  margin-bottom: 0.9rem;
+  font-size: 0.94rem;
+  font-weight: 300;
+  line-height: 1.5;
+  letter-spacing: 0.05em;
+  color: rgb(255 255 255);
+}
+
+[data-theme='akorda'] .akorda-map-title-link {
+  margin-top: 1.5rem;
+}
+
+[data-theme='akorda'] .akorda-map-list {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+
+[data-theme='akorda'] .akorda-footer-plate a {
+  color: rgb(170 170 170);
+}
+
+[data-theme='akorda'] .akorda-footer-plate a:hover {
+  color: rgb(var(--akorda-gold));
+}
+
+[data-theme='akorda'] .akorda-map-title a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='akorda'] .akorda-footer-hr {
+  margin: 3rem 0 2rem;
+  border: 0;
+  border-top: 1px solid rgb(255 255 255 / 0.2);
+}
+
+[data-theme='akorda'] .akorda-footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+[data-theme='akorda'] .akorda-footer-social a {
+  border-color: rgb(255 255 255);
+  background: rgb(255 255 255);
+  color: rgb(var(--akorda-dark));
+}
+
+[data-theme='akorda'] .akorda-footer-plate :focus-visible {
+  outline-color: rgb(var(--akorda-gold));
+}
+
+[data-theme='akorda'] .akorda-footer-top {
+  margin-top: 1.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+@media (max-width: 959px) {
+  [data-theme='akorda'] .akorda-top {
+    margin-top: -48px;
+  }
+}
