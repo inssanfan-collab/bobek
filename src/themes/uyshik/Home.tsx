@@ -101,7 +101,7 @@ export function UyshikHome({
               {hero.lead ? <p className="uyshik-lead">{hero.lead}</p> : null}
               {hero.buttons.length > 0 ? (
                 <div className="uyshik-roof-actions">
-                  <HeroButtons hero={hero} tone="plain" />
+                  <HeroButtons hero={hero} tone="light" />
                 </div>
               ) : null}
             </div>
