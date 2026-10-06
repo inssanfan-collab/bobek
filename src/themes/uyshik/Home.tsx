@@ -97,11 +97,11 @@ export function UyshikHome({
             <div className="uyshik-roof">
               <span className="uyshik-chimney decor" aria-hidden />
               <Flag className="uyshik-flag" />
-              <HeroTitle hero={hero} tone="light" className="uyshik-h1" withEyebrow={false} />
+              <HeroTitle hero={hero} tone="plain" className="uyshik-h1" withEyebrow={false} />
               {hero.lead ? <p className="uyshik-lead">{hero.lead}</p> : null}
               {hero.buttons.length > 0 ? (
                 <div className="uyshik-roof-actions">
-                  <HeroButtons hero={hero} tone="light" />
+                  <HeroButtons hero={hero} tone="plain" />
                 </div>
               ) : null}
             </div>

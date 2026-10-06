@@ -3,9 +3,12 @@
  * Разделы — комнаты в стенах цвета сливы; при наведении и фокусе в комнате
  * «включается свет» (яркость растёт) — отклик, который говорит «сюда можно
  * войти». Двор — трава: новости на бельевой верёвке, объявления на указателе.
- * Цвета с картинок комнат: горчица #E7A92B, терракота #B04628 (крыша; белый
- * на ней — 5,6:1), бирюза #126B70 (белый — 6,3:1), слива #4A2E43, крем
- * #FFF6E4. Шрифты: Playpen Sans (вывески и заголовки) и Golos Text (текст) —
+ * Цвета нежные, пастельные: масло #F8DA96, персик #F1B8A6, мята #BAE2D8,
+ * сирень #EEE4F2 (полоса шапки) и пыльная мальва #C4ACC8 (стены дома),
+ * крем #FFF6E4 — текст на них тёмный, слива #342030, от 7:1. Крыша и дверь
+ * темнее — пыльный кирпич #B25C54 (белый на нём 4,6:1), подвал — сливово-
+ * сиреневый #6E5674 (белый 6,5:1). Выделенное слово на крыше кремовое
+ * (3,8:1) — только в крупном заголовке, порог 3:1. Ссылки — бирюза #2A787C. Шрифты: Playpen Sans (вывески и заголовки) и Golos Text (текст) —
  * оба проверены на казахские буквы ә ғ қ ң ө ұ ү һ і.
  * Каждое правило — под [data-theme='uyshik'] (tests/unit/themes.test.ts).
  */
@@ -16,20 +19,25 @@
   --ink: 52 32 48;
   --muted: 104 84 98;
   --line: 232 216 192;
-  --brand: 18 107 112;
+  --brand: 42 120 124;
   --brand-soft: 214 236 236;
   --brand-ink: 10 66 70;
   --accent: 176 70 40;
   --accent-soft: 252 226 205;
   --accent-ink: 128 44 18;
-  --uyshik-mustard: 231 169 43;
-  --uyshik-roof: 176 70 40;
-  --uyshik-teal: 18 107 112;
+  --uyshik-mustard: 248 218 150;
+  --uyshik-roof: 178 92 84;
+  --uyshik-peach: 241 184 166;
+  --uyshik-cellar: 110 86 116;
+  --uyshik-teal: 186 226 216;
   --uyshik-plum: 74 46 67;
+  --uyshik-wall: 196 172 200;
+  --uyshik-lilac: 238 228 242;
+  --uyshik-mint-deep: 140 196 182;
   --uyshik-cream: 255 246 228;
   --uyshik-white: 255 255 255;
-  --uyshik-grass: 128 186 104;
-  --uyshik-sky: 190 227 240;
+  --uyshik-grass: 192 226 170;
+  --uyshik-sky: 216 239 248;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
@@ -60,11 +68,11 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.8rem;
-  background: rgb(var(--brand));
+  background: rgb(var(--uyshik-teal));
   padding: 0.75rem 1.4rem;
   font-weight: 700;
-  color: rgb(255 255 255);
-  box-shadow: 0 4px 0 rgb(var(--brand-ink));
+  color: rgb(var(--brand-ink));
+  box-shadow: 0 4px 0 rgb(var(--uyshik-mint-deep));
   transition: transform 0.12s, box-shadow 0.12s;
 }
 
@@ -75,7 +83,7 @@
 [data-theme='uyshik'] .btn-primary:hover,
 [data-theme='uyshik'] .uyshik-cta:hover {
   transform: translateY(2px);
-  box-shadow: 0 2px 0 rgb(var(--brand-ink));
+  box-shadow: 0 2px 0 rgb(var(--uyshik-mint-deep));
 }
 
 [data-theme='uyshik'] .btn-secondary {
@@ -94,12 +102,12 @@
 }
 
 [data-theme='uyshik'] .uyshik-topbar {
-  background: rgb(var(--uyshik-plum));
-  color: rgb(255 255 255 / 0.92);
+  background: rgb(var(--uyshik-lilac));
+  color: rgb(var(--ink));
 }
 
 [data-theme='uyshik'] .uyshik-topbar a {
-  color: rgb(255 255 255);
+  color: rgb(var(--ink));
 }
 
 [data-theme='uyshik'] .uyshik-name {
@@ -200,7 +208,7 @@
   width: 2.6rem;
   height: 3.4rem;
   border-radius: 0.2rem 0.2rem 0 0;
-  background: rgb(var(--uyshik-plum));
+  background: rgb(var(--uyshik-wall));
 }
 
 [data-theme='uyshik'] .uyshik-flag {
@@ -219,8 +227,9 @@
   text-wrap: balance;
 }
 
-[data-theme='uyshik'] .uyshik-roof .hero-highlight-light {
-  color: rgb(255 214 120);
+[data-theme='uyshik'] .uyshik-roof .hero-highlight {
+  background: none;
+  color: rgb(255 232 184);
 }
 
 [data-theme='uyshik'] .uyshik-lead {
@@ -251,7 +260,7 @@
   gap: 0.6rem;
   margin-inline: 1.4%;
   border-radius: 0 0 0.5rem 0.5rem;
-  background: rgb(var(--uyshik-plum));
+  background: rgb(var(--uyshik-wall));
   padding: 0.6rem;
 }
 
@@ -277,13 +286,13 @@
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  filter: brightness(0.84) saturate(0.9);
+  filter: brightness(0.96) saturate(0.82);
   transition: filter 0.2s, transform 0.3s;
 }
 
 [data-theme='uyshik'] .uyshik-room:hover .uyshik-room-img,
 [data-theme='uyshik'] .uyshik-room:focus-visible .uyshik-room-img {
-  filter: brightness(1.06) saturate(1.05);
+  filter: brightness(1.06) saturate(0.95);
   transform: scale(1.03);
 }
 
@@ -314,7 +323,7 @@
   top: -0.7rem;
   width: 2px;
   height: 0.7rem;
-  background: rgb(var(--uyshik-plum));
+  background: rgb(var(--uyshik-wall));
 }
 
 [data-theme='uyshik'] .uyshik-sign::before { left: 18%; }
@@ -342,7 +351,7 @@
   height: 9.5rem;
   align-items: flex-end;
   justify-content: center;
-  border: 0.5rem solid rgb(var(--uyshik-plum));
+  border: 0.5rem solid rgb(var(--uyshik-wall));
   border-bottom: 0;
   border-radius: 4rem 4rem 0 0;
   background: rgb(var(--uyshik-roof));
@@ -352,7 +361,7 @@
 }
 
 [data-theme='uyshik'] .uyshik-door:hover {
-  background: rgb(150 56 30);
+  background: rgb(160 78 72);
 }
 
 [data-theme='uyshik'] .uyshik-door-label {
@@ -415,7 +424,7 @@
 [data-theme='uyshik'] .uyshik-line {
   height: 2.4rem;
   margin-inline: 1%;
-  border-bottom: 3px solid rgb(var(--uyshik-plum));
+  border-bottom: 3px solid rgb(var(--uyshik-wall));
   border-radius: 0 0 50% 50% / 0 0 100% 100%;
 }
 
@@ -558,8 +567,8 @@
 }
 
 [data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(4n + 2) { background: rgb(var(--uyshik-cream)); }
-[data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(4n + 3) { background: rgb(var(--uyshik-teal)); color: rgb(255 255 255); }
-[data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(4n + 4) { background: rgb(var(--uyshik-roof)); color: rgb(255 255 255); }
+[data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(4n + 3) { background: rgb(var(--uyshik-teal)); }
+[data-theme='uyshik'] .uyshik-groups .hb-group-card:nth-child(4n + 4) { background: rgb(var(--uyshik-peach)); }
 
 [data-theme='uyshik'] .uyshik-groups .hb-group-name,
 [data-theme='uyshik'] .uyshik-groups .hb-group-age,
@@ -629,11 +638,11 @@
   color: rgb(var(--ink));
 }
 
-/* Земля под двором: сливовая кромка с «кочками». */
+/* Земля под двором: кромка подвала с «кочками». */
 [data-theme='uyshik'] .uyshik-soil {
   height: 26px;
   background-color: rgb(var(--uyshik-grass));
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='26' viewBox='0 0 36 26'%3E%3Cpath d='M0 26V12Q9 0 18 12T36 12V26z' fill='%234a2e43'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='26' viewBox='0 0 36 26'%3E%3Cpath d='M0 26V12Q9 0 18 12T36 12V26z' fill='%236e5674'/%3E%3C/svg%3E");
   background-repeat: repeat-x;
   background-position: bottom;
 }
@@ -641,7 +650,7 @@
 /* ── Подвал ── */
 
 [data-theme='uyshik'] .uyshik-footer {
-  background: rgb(var(--uyshik-plum));
+  background: rgb(var(--uyshik-cellar));
   color: rgb(255 255 255 / 0.9);
 }
 
@@ -682,7 +691,7 @@
 
 [data-theme='uyshik'] .uyshik-footer-bottom {
   border-top: 1px dashed rgb(255 255 255 / 0.3);
-  color: rgb(255 255 255 / 0.8);
+  color: rgb(255 255 255 / 0.85);
 }
 
 @media (prefers-reduced-motion: reduce) {
