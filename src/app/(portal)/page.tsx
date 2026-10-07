@@ -48,8 +48,6 @@ const T = {
   factPrice: { kk: 'жылына %s бастап', ru: 'от %s в год' },
   factHosting: { kk: 'хостинг кіреді', ru: 'хостинг включён' },
   factDocs: { kk: 'шарт, шот және акт', ru: 'договор, счёт и акт' },
-  bubbleDay: { kk: '1 күнде', ru: 'за 1 день' },
-  bubbleEye: { kk: 'Нашар көретіндерге', ru: 'Для слабовидящих' },
   heroHand: { kk: 'сіздің сайтыңыз осындай болады ♡', ru: 'вот таким будет ваш сайт ♡' },
   heroAlt: { kk: '«Балапан» балабақшасы сайтының басты беті компьютерде', ru: 'Главная страница сайта детского сада «Балапан» на компьютере' },
   heroPhoneAlt: { kk: 'Сол сайт телефонда', ru: 'Тот же сайт на телефоне' },
@@ -71,29 +69,7 @@ const T = {
   },
   lookTabs: { kk: 'Сайттың түрі', ru: 'Вид сайта' },
   allDesigns: { kk: 'Барлық дизайндарды қарау (%s)', ru: 'Смотреть все дизайны (%s)' },
-  standard: { kk: 'Дайын үлгі', ru: 'Готовый шаблон' },
-  inPlan: { kk: 'Тарифке кіреді', ru: 'Входит в тариф' },
   ownDesign: { kk: 'Жеке дизайн', ru: 'Индивидуальный дизайн' },
-  standardText: {
-    kk: 'Балабақшаның кең фотосы, хабарландырулар, жаңалықтар және ата-аналарға арналған бөлімдер. Бәрі әкімші бөлімінде, «Сыртқы көрініс» бөлімінде өзгертіледі.',
-    ru: 'Фото сада на всю ширину, объявления, новости и разделы для родителей. Всё меняется в админке, в разделе «Внешний вид».',
-  },
-  standardChecks: {
-    kk: ['басты беттің үлгілері және 19 палитра', 'қазақ әріптері бар қаріп жұптары', 'балабақшаның өз фирмалық түсі'],
-    ru: ['шаблоны главной и 19 палитр', 'пары шрифтов с казахскими буквами', 'свой фирменный цвет сада'],
-  },
-  akvarelText: {
-    kk: 'Жұмсақ акварель дақтары, дөңгелек мұқаба және балалар суреттері: бұлттар, күн, қайық.',
-    ru: 'Мягкие акварельные пятна, круглая обложка и детские рисунки: облака, солнце, кораблик.',
-  },
-  dalaText: {
-    kk: 'Даланың көгілдір және сарғыш түстері, фото жиегінің орнына арка, сайттың басы мен аяғында «қошқар мүйіз» ою-өрнегі.',
-    ru: 'Бирюза и охра степи, арка вместо рамки фотографии и казахский орнамент «қошқар мүйіз» в шапке и подвале.',
-  },
-  konstruktorText: {
-    kk: 'Анық жиегі бар жарқын блоктар — балалар құрастырғышының бөлшектері сияқты.',
-    ru: 'Яркие блоки с чёткой обводкой, как детали детского конструктора.',
-  },
 
   adminKicker: { kk: 'әкімші бөлімі', ru: 'админка' },
   adminTitle: { kk: 'Сайтты балабақшаның кез келген қызметкері жүргізе алады', ru: 'Вести сайт сможет любой сотрудник' },
@@ -297,16 +273,17 @@ export default async function PortalHome({
   // Адрес в окне браузера — такой получит сад: имя.edusad.kz.
   const host = `balapan.${env.portalDomain}`;
 
-  // Вкладки тем: сначала «Акварель» — она же на первом экране.
+  // Вкладки тем: свежие индивидуальные темы, на первом экране которых дети.
+  // Описание — из каталога (showcase), тот же текст, что на витрине.
   const looks = [
-    { code: 'akvarel', dot: 'var(--peach-d)', soft: 'var(--peach)', text: T.akvarelText },
-    { code: 'standard', dot: 'var(--sky-d)', soft: 'var(--sky)', text: T.standardText },
-    { code: 'dala', dot: 'var(--mint-d)', soft: 'var(--mint)', text: T.dalaText },
-    { code: 'konstruktor', dot: 'var(--butter-d)', soft: 'var(--butter)', text: T.konstruktorText },
-  ].map((look) => {
+    { code: 'jasyl', dot: 'var(--mint-d)', soft: 'var(--mint)' },
+    { code: 'kunbagys', dot: 'var(--peach-d)', soft: 'var(--peach)' },
+    { code: 'aspan', dot: 'var(--sky-d)', soft: 'var(--sky)' },
+    { code: 'erekshe', dot: 'var(--butter-d)', soft: 'var(--butter)' },
+  ].flatMap((look) => {
     const theme = findThemeInfo(look.code);
-    const name = theme ? `«${locale === 'kk' ? theme.nameKk : theme.nameRu}»` : T.standard[locale];
-    return { ...look, name, own: Boolean(theme) };
+    if (!theme?.showcase) return [];
+    return [{ ...look, name: `«${locale === 'kk' ? theme.nameKk : theme.nameRu}»`, text: theme.showcase }];
   });
 
   // Живая админка: кадры инструкции (дело «documents» у инструкции — «docs» у снимков).
@@ -367,15 +344,12 @@ export default async function PortalHome({
             <Devices
               className="hero-stage"
               host={host}
-              desk={img('site-akvarel-desk', locale)}
-              mob={img('site-akvarel-mob', locale)}
+              desk={img('site-kuanysh-desk', locale)}
+              mob={img('site-kuanysh-mob', locale)}
               alt={T.heroAlt[locale]}
               phoneAlt={T.heroPhoneAlt[locale]}
               lazy={false}
             >
-              <span className="bubble b-lang" aria-hidden="true"><span className="ic"><Icon name="lang" /></span>Қаз · Рус</span>
-              <span className="bubble b-day" aria-hidden="true"><span className="ic"><Icon name="clock" /></span>{T.bubbleDay[locale]}</span>
-              <span className="bubble b-eye" aria-hidden="true"><span className="ic"><Icon name="eye" /></span>{T.bubbleEye[locale]}</span>
               <span className="hand hero-hand" aria-hidden="true">{T.heroHand[locale]}</span>
             </Devices>
           </div>
@@ -426,14 +400,9 @@ export default async function PortalHome({
                   phoneAlt=""
                 />
                 <div className="memo" style={cssVars({ '--nc': look.soft })}>
-                  <span className="tag">{look.own ? T.ownDesign[locale] : T.inPlan[locale]}</span>
+                  <span className="tag">{T.ownDesign[locale]}</span>
                   <h3>{look.name}</h3>
                   <p>{look.text[locale]}</p>
-                  {look.own ? null : (
-                    <ul className="checks">
-                      {T.standardChecks[locale].map((item) => <li key={item}><Icon name="check" width={2.8} />{item}</li>)}
-                    </ul>
-                  )}
                 </div>
               </div>
             ))}

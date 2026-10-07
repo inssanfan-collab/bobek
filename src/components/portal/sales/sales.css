@@ -117,12 +117,6 @@
 .sales .browser img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
 .sales .phone { position: absolute; left: 0; bottom: 0; width: 25%; padding: 7px; border-radius: 34px; background: #fff; box-shadow: 0 26px 50px -24px rgb(106 88 216 / .6), 0 0 0 5px rgb(255 255 255 / .5); }
 .sales .phone img { width: 100%; border-radius: 27px; aspect-ratio: 390 / 844; object-fit: cover; object-position: top; }
-.sales .bubble { position: absolute; z-index: 3; display: inline-flex; align-items: center; gap: 9px; padding: 10px 16px 10px 10px; border-radius: 999px; background: #fff; color: var(--ink); font: 800 14.5px/1.2 var(--f-text); white-space: nowrap; box-shadow: 0 14px 28px -16px rgb(106 88 216 / .6); animation: sales-bob 5s ease-in-out infinite; }
-.sales .bubble .ic { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--bc); }
-.sales .bubble .ic svg { width: 17px; height: 17px; color: var(--ink); }
-.sales .b-lang { --bc: var(--lav); top: 0; left: 22%; }
-.sales .b-day { --bc: var(--butter); top: 34%; right: -22px; animation-delay: -1.6s; }
-.sales .b-eye { --bc: var(--mint); bottom: 8px; right: 10%; animation-delay: -3s; }
 .sales .hero-hand { position: absolute; z-index: 3; left: 30%; bottom: -18px; transform: rotate(-3deg); white-space: nowrap; }
 
 /* ── секции ── */
@@ -405,12 +399,6 @@ html.sales-intro .sales .hero :is(.label, h1, .lead, .cta, .facts, .hero-stage) 
   .sales .url { font-size: 9.5px; padding: 2px 9px; }
   .sales .phone { width: 30%; padding: 4px; border-radius: 20px; }
   .sales .phone img { border-radius: 16px; }
-  .sales .bubble { font-size: 12px; padding: 6px 11px 6px 6px; gap: 6px; }
-  .sales .bubble .ic { width: 24px; height: 24px; }
-  .sales .bubble .ic svg { width: 13px; height: 13px; }
-  .sales .b-lang { left: 26%; top: 4px; }
-  .sales .b-day { right: -4px; top: 30%; }
-  .sales .b-eye { right: 2%; bottom: 0; }
   .sales .hero-hand, .sales .cloud { display: none; }
   .sales .live-cap { bottom: 8px; padding: 5px 10px 5px 5px; gap: 6px; font-size: 11.5px; }
   .sales .live-cap b { width: 20px; height: 20px; font-size: 11px; }
