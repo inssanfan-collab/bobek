@@ -8,9 +8,6 @@ import { AkordaHome } from './akorda/Home';
 import { UyshikFooter } from './uyshik/Footer';
 import { UyshikHeader } from './uyshik/Header';
 import { UyshikHome } from './uyshik/Home';
-import { UyshikAnimFooter } from './uyshik-anim/Footer';
-import { UyshikAnimHeader } from './uyshik-anim/Header';
-import { UyshikAnimHome } from './uyshik-anim/Home';
 import { MamyqFooter } from './mamyq/Footer';
 import { MamyqHeader } from './mamyq/Header';
 import { MamyqHome } from './mamyq/Home';
@@ -77,7 +74,6 @@ const PARTS: Record<string, ThemeParts> = {
   oyin: { Home: OyinHome, Header: OyinHeader, Footer: OyinFooter },
   akorda: { Home: AkordaHome, Header: AkordaHeader, Footer: AkordaFooter },
   uyshik: { Home: UyshikHome, Header: UyshikHeader, Footer: UyshikFooter },
-  'uyshik-anim': { Home: UyshikAnimHome, Header: UyshikAnimHeader, Footer: UyshikAnimFooter },
   resmi: { Home: ResmiHome, Header: ResmiHeader, Footer: ResmiFooter },
   shuaq: { Home: ShuaqHome, Header: ShuaqHeader, Footer: ShuaqFooter },
   erekshe: { Home: ErekshHome, Header: ErekshHeader, Footer: ErekshFooter },

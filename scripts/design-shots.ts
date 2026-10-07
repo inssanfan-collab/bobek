@@ -58,10 +58,8 @@ async function main() {
   mkdirSync(OUT, { recursive: true });
 
   const browser = await chromium.launch();
-  // «Меньше движения»: темы с анимацией по прокрутке (uyshik-anim) на снимке
-  // во всю длину показывают неподвижную сцену, а не кадр из середины ролика.
-  const desk = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
-  const mob = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+  const desk = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  const mob = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 
   const manifest: Record<string, { desk: Size; mob: Size }> = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf8')) : {};
   for (const theme of themes) {
