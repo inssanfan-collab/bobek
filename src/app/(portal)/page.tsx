@@ -4,7 +4,7 @@ import { formatMoney, formatPhone, phoneHref } from '@/lib/labels';
 import { localeFromParam, withLocale, type Locale } from '@/lib/i18n';
 import { EDU_DOMAIN_NOTE, isPlanCode, PLAN_CODES, PLAN_COMMON, PLAN_INFO, STATE_PRICE_NOTE } from '@/lib/plans';
 import { findThemeInfo } from '@/themes/catalog';
-import { DESIGNS } from '@/lib/designs';
+import { DESIGNS, designImage, findDesign } from '@/lib/designs';
 import { csrfToken } from '@/server/auth/csrf';
 import { portalSettings } from '@/server/docs/contract';
 import { SalesTabs } from '@/components/portal/sales/SalesTabs';
@@ -62,6 +62,15 @@ const T = {
   trustEyeNote: { kk: 'нұсқасы бір түймемен қосылады', ru: 'версия включается одной кнопкой' },
   trustDocs: { kk: 'Шарт, шот және акт', ru: 'Договор, счёт и акт' },
   trustDocsNote: { kk: 'шот бойынша төлем', ru: 'оплата по счёту' },
+
+  reelKicker: { kk: 'төмен айналдырыңыз', ru: 'листайте вниз' },
+  reelTitle: { kk: 'Бір сайт — бірнеше келбет', ru: 'Один сайт — много нарядов' },
+  reelLead: {
+    kk: 'Мәтіндер, жаңалықтар мен құжаттар орнында қалады, тек безендіру ауысады. Міне, %s дизайнның бірнешеуі — «Балапан» демо-балабақшасында.',
+    ru: 'Тексты, новости и документы остаются на месте, меняется только оформление. Вот несколько из %s дизайнов — на демо-саде «Балапан».',
+  },
+  reelAll: { kk: 'Барлық дизайндар', ru: 'Все дизайны' },
+  reelAlt: { kk: '«%s» дизайнындағы сайт', ru: 'Сайт в дизайне «%s»' },
 
   lookKicker: { kk: 'сыртқы келбеті', ru: 'как выглядит' },
   lookTitle: { kk: 'Ата-аналарға да, тексерушіге де көрсетуге болатын сайт', ru: 'Сайт, который не стыдно показать родителям и проверке' },
@@ -297,6 +306,13 @@ export default async function PortalHome({
   // Адрес в окне браузера — такой получит сад: имя.edusad.kz.
   const host = `balapan.${env.portalDomain}`;
 
+  // Лента дизайнов: при прокрутке сайт в рамке листается и «переодевается».
+  // Подбор — самые непохожие друг на друга темы витрины.
+  const reel = ['uyshik', 'akorda', 'kuanysh', 'aspan', 'kosaq', 'erekshe']
+    .map((code) => findDesign(code))
+    .filter((design) => design !== undefined)
+    .map((design) => ({ ...design, name: locale === 'kk' ? design.nameKk : design.nameRu }));
+
   // Вкладки тем: сначала «Акварель» — она же на первом экране.
   const looks = [
     { code: 'akvarel', dot: 'var(--peach-d)', soft: 'var(--peach)', text: T.akvarelText },
@@ -390,6 +406,64 @@ export default async function PortalHome({
             <li><span className="ic"><Icon name="doc" /></span><b>{T.trustDocs[locale]}</b><span>{T.trustDocsNote[locale]}</span></li>
           </ul>
         </section>
+
+        {reel.length > 0 ? (
+          <section className="block reel" id="lenta" aria-labelledby="reel-title">
+            <div className="wrap reel-grid">
+              <div className="reel-copy">
+                <span className="kicker">{T.reelKicker[locale]}</span>
+                <h2 id="reel-title">{T.reelTitle[locale]}</h2>
+                <p className="reel-lead">{fill(T.reelLead[locale], String(DESIGNS.length))}</p>
+                <ol className="reel-list">
+                  {reel.map((design, i) => (
+                    <li key={design.code} className={i === 0 ? 'on' : undefined}>
+                      <b>«{design.name}»</b>
+                      <span>{design.showcase[locale]}</span>
+                    </li>
+                  ))}
+                </ol>
+                <a className="sbtn sbtn-secondary" href={withLocale('/designs', locale)}>{T.reelAll[locale]} ({DESIGNS.length}) →</a>
+              </div>
+              <div className="stage reel-stage">
+                <div className="frame">
+                  <div className="browser">
+                    <div className="bar"><i /><i /><i /><span className="url"><Lock />{host}</span></div>
+                    <div className="reel-screen">
+                      {reel.map((design) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={design.code}
+                          src={designImage(design.code, 'desk')}
+                          width={design.shot.desk[0]}
+                          height={design.shot.desk[1]}
+                          alt={fill(T.reelAlt[locale], design.name)}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="phone">
+                  <div className="reel-phone-screen">
+                    {reel.map((design) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        key={design.code}
+                        src={designImage(design.code, 'mob')}
+                        width={design.shot.mob[0]}
+                        height={design.shot.mob[1]}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         <section className="block" id="vid">
           <div className="blot" style={{ width: 420, height: 320, left: -120, top: 160, background: 'var(--rose)' }} aria-hidden="true" />

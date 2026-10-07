@@ -13,6 +13,8 @@ import { useEffect } from 'react';
  * - Макет первого экрана чуть наклоняется за мышью; радуга и макет смещаются
  *   при прокрутке.
  * - Плавная прокрутка (Lenis), якоря меню — с поправкой на шапку.
+ * - Лента дизайнов: раздел залипает, и прокрутка листает сайт в рамке,
+ *   а потом «переодевает» его в следующий дизайн (только от 1081 px).
  * - Ниже первого экрана всё всплывает при появлении: карточки с лёгким
  *   поворотом, рукописные подписи разделов «пишутся», шарики шагов взлетают,
  *   цены набегают от нуля.
@@ -87,6 +89,40 @@ export function SalesMotion() {
             gsap.to('.hero-stage', { y: -50, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
           } else {
             html.classList.remove('sales-intro');
+          }
+
+          // ── лента дизайнов: раздел залипает, сайт в рамке листается вниз
+          // и «переодевается» в следующий дизайн, слева подсвечено название ──
+          const reel = root.querySelector<HTMLElement>('.reel');
+          const desks = $('.reel-screen img');
+          if (reel && desks.length > 1 && matchMedia('(min-width: 1081px)').matches) {
+            const mobs = $('.reel-phone-screen img');
+            const items = $('.reel-list li');
+            const n = desks.length;
+            // Листаем верхние ~55 % страницы: там самое узнаваемое.
+            const travel = (img: HTMLElement) => () => -Math.max(0, img.offsetHeight * 0.55 - (img.parentElement?.clientHeight ?? 0));
+            const tl = gsap.timeline({
+              defaults: { ease: 'none' },
+              scrollTrigger: {
+                trigger: reel,
+                start: 'top 70px',
+                end: () => `+=${n * innerHeight * 0.85}`,
+                pin: true,
+                scrub: 0.6,
+                invalidateOnRefresh: true,
+                onUpdate: (self) => {
+                  const active = Math.min(n - 1, Math.floor(self.progress * n));
+                  items.forEach((item, i) => item.classList.toggle('on', i === active));
+                },
+              },
+            });
+            desks.forEach((desk, i) => {
+              const mob = mobs[i];
+              tl.to(desk, { y: travel(desk), duration: 1 }, i);
+              if (mob) tl.to(mob, { y: travel(mob), duration: 1 }, i);
+              const next = [desks[i + 1], mobs[i + 1]].filter(Boolean);
+              if (next.length) tl.fromTo(next, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.22 }, i + 0.78);
+            });
           }
 
           // ── ниже первого экрана ──

@@ -1,0 +1,1070 @@
+/*
+ * Тема «Үйшік — анимация» — копия «Үйшік» (кукольный дом в разрезе) с первым
+ * экраном-«роликом», которым управляет прокрутка. Без JavaScript: CSS
+ * scroll-driven animations (animation-timeline: view()). Сцена .stage
+ * высокая, внутри неё .scene залипает на экран, и на этом отрезке
+ * прокрутки: облака расходятся, солнце встаёт, деревья раздвигаются, дом
+ * «подлетает» (scale), потом камера едет вниз по дому (translate), в
+ * комнатах по очереди загорается свет и появляются таблички, в конце
+ * светится дверь. Включается только при поддержке браузера, на экране
+ * от 900×620 и без prefers-reduced-motion; иначе — тот же пейзаж из слоёв
+ * неподвижно, как в «Үйшік». Название сада видно с первого кадра.
+ * Слои (солнце, облака, холмы, луг, деревья) — вырезки из Stitch
+ * в public/images/themes/uyshik-anim, комнаты берутся у «Үйшік».
+ *
+ * Цвета и шрифты — как у «Үйшік»: кирпич крыши #C44E3E (белый 4,7:1),
+ * баклажан #402E44 (белый 12:1), лесной зелёный #3C5848 (белый 7,8:1),
+ * группы светлые с тёмным текстом (от 11:1); Lora, Playpen Sans, Golos Text
+ * проверены на казахские буквы. Выделенное слово на крыше кремовое (3,9:1) —
+ * только в крупном заголовке, порог 3:1.
+ * Каждое правило — под [data-theme='uyshik-anim'], анимации — с префиксом
+ * uyshik-anim- (tests/unit/themes.test.ts).
+ */
+
+[data-theme='uyshik-anim'] {
+  --surface: 255 255 255;
+  --card: 255 255 255;
+  --ink: 43 33 41;
+  --muted: 103 90 98;
+  --line: 236 231 224;
+  --brand: 60 88 72;
+  --brand-soft: 226 234 224;
+  --brand-ink: 32 54 42;
+  --accent: 196 78 62;
+  --accent-soft: 246 228 220;
+  --accent-ink: 140 62 54;
+  --uyshik-anim-roof: 196 78 62;
+  --uyshik-anim-roof-deep: 160 60 50;
+  --uyshik-anim-aubergine: 64 46 68;
+  --uyshik-anim-gold: 184 146 90;
+  --uyshik-anim-gold-light: 228 200 146;
+  --uyshik-anim-sand: 232 220 200;
+  --uyshik-anim-sage: 150 172 132;
+  --uyshik-anim-sage-deep: 124 148 108;
+  --uyshik-anim-sage-light: 222 230 212;
+  --uyshik-anim-blush: 242 224 216;
+  --uyshik-anim-sun-light: 255 238 186;
+  --uyshik-anim-sky-light: 218 238 252;
+  --uyshik-anim-mint-light: 216 242 224;
+  --uyshik-anim-coral-light: 255 226 218;
+  /* Для рисунков (Doodles.tsx): знак-домик, флажок, солнце, облака. */
+  --uyshik-anim-mustard: 222 186 120;
+  --uyshik-anim-teal: 150 172 132;
+  --uyshik-anim-plum: 64 46 68;
+  --uyshik-anim-cream: 255 250 240;
+  --uyshik-anim-white: 255 255 255;
+  --uyshik-anim-shadow: 0 22px 44px -28px rgb(43 33 41 / 0.45);
+  --uyshik-anim-shadow-sm: 0 12px 24px -16px rgb(43 33 41 / 0.4);
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --font-display: 'Lora', Georgia, serif;
+  --font-hand: 'Playpen Sans', 'Golos Text', system-ui, sans-serif;
+  --font-sans: 'Golos Text', system-ui, sans-serif;
+  scroll-padding-top: 9rem;
+}
+
+[data-theme='uyshik-anim'] body {
+  background-color: rgb(var(--surface));
+  background-image: none;
+}
+
+[data-theme='uyshik-anim'] h1,
+[data-theme='uyshik-anim'] h2,
+[data-theme='uyshik-anim'] h3 {
+  font-family: var(--font-display);
+  color: rgb(var(--ink));
+}
+
+[data-theme='uyshik-anim'] :focus-visible {
+  outline: 3px solid rgb(var(--brand));
+  outline-offset: 3px;
+}
+
+[data-theme='uyshik-anim'] .btn-primary,
+[data-theme='uyshik-anim'] .uyshik-anim-cta {
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgb(var(--uyshik-anim-aubergine));
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgb(255 255 255);
+  box-shadow: var(--uyshik-anim-shadow-sm);
+  transition: background-color 0.15s, transform 0.15s;
+}
+
+[data-theme='uyshik-anim'] .btn-primary {
+  display: inline-flex;
+}
+
+[data-theme='uyshik-anim'] .btn-primary:hover,
+[data-theme='uyshik-anim'] .uyshik-anim-cta:hover {
+  background: rgb(var(--ink));
+  transform: translateY(-1px);
+}
+
+[data-theme='uyshik-anim'] .btn-secondary {
+  border: 1.5px solid rgb(var(--ink));
+  border-radius: 999px;
+  background: transparent;
+  color: rgb(var(--ink));
+  font-weight: 600;
+}
+
+/* ── Шапка ── */
+
+[data-theme='uyshik-anim'] .uyshik-anim-header {
+  background: rgb(var(--card));
+  border-bottom: 1px solid rgb(var(--line));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-topbar {
+  background: rgb(var(--uyshik-anim-aubergine));
+  color: rgb(255 255 255 / 0.88);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-topbar a {
+  color: rgb(255 255 255);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: rgb(var(--ink));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-tagline {
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  color: rgb(var(--muted));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-nav nav > ul > li > a,
+[data-theme='uyshik-anim'] .uyshik-anim-nav nav > ul > li > span > a,
+[data-theme='uyshik-anim'] .uyshik-anim-nav nav > ul > li > span > button {
+  border-radius: 999px;
+  color: rgb(var(--ink));
+  font-weight: 500;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-nav nav > ul > li > a:hover,
+[data-theme='uyshik-anim'] .uyshik-anim-nav nav > ul > li > span > a:hover,
+[data-theme='uyshik-anim'] .uyshik-anim-nav nav > ul > li > span > button:hover {
+  background: rgb(var(--uyshik-anim-sand));
+  color: rgb(var(--ink));
+}
+
+/* ── Сцена: небо, дом, земля ── */
+
+[data-theme='uyshik-anim'] .uyshik-anim-home {
+  overflow-x: clip;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-scene {
+  position: relative;
+  padding-top: clamp(3.5rem, 7vw, 5.5rem);
+}
+
+/* Слои пейзажа: небо — градиент, остальное — вырезки. */
+[data-theme='uyshik-anim'] .uyshik-anim-layers {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-layers > * {
+  position: absolute;
+  display: block;
+  max-width: none;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-sky {
+  inset: 0;
+  background: linear-gradient(180deg, rgb(104 186 238) 0%, rgb(160 213 244) 45%, rgb(220 240 250) 78%);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-sun {
+  top: 3%;
+  left: 6%;
+  width: clamp(5.5rem, 12vw, 11rem);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-cloud-a {
+  top: 9%;
+  right: 5%;
+  width: clamp(9rem, 21vw, 19rem);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-cloud-b {
+  top: 24%;
+  left: 18%;
+  width: clamp(8rem, 17vw, 16rem);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-cloud-c {
+  top: 5%;
+  left: 48%;
+  width: clamp(5rem, 9vw, 9rem);
+  scale: -1 1;
+  opacity: 0.9;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-hills {
+  bottom: 8%;
+  left: 0;
+  width: 100%;
+  height: clamp(7rem, 20vw, 17rem);
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-trees {
+  bottom: 5%;
+  width: clamp(8rem, 21vw, 20rem);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-trees-left {
+  left: -1.5%;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-trees-right {
+  right: -1.5%;
+}
+
+/* Луг целиком, сдвинут вниз на половину своей высоты: обрезанный сверху
+   (object-fit) он открывал небо сквозь просветы между травинками. */
+[data-theme='uyshik-anim'] .uyshik-anim-meadow {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  translate: 0 50%;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-building {
+  position: relative;
+  z-index: 1;
+}
+
+/* Подсказка «листайте» — только в режиме ролика. */
+[data-theme='uyshik-anim'] .uyshik-anim-hint {
+  display: none;
+}
+
+/* Белая кромка-фестон между лугом и двором. */
+[data-theme='uyshik-anim'] .uyshik-anim-scene::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 -1px;
+  height: 18px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='18' viewBox='0 0 48 18'%3E%3Cpath d='M0 18V10Q12 -2 24 10T48 10V18z' fill='%23ffffff'/%3E%3C/svg%3E") repeat-x bottom / 48px 18px;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-house {
+  position: relative;
+  max-width: 62rem;
+  margin-inline: auto;
+  filter: drop-shadow(0 26px 30px rgb(43 33 41 / 0.18));
+}
+
+/* Крыша: трапеция с черепицей, на ней название сада. */
+[data-theme='uyshik-anim'] .uyshik-anim-roof {
+  position: relative;
+  z-index: 1;
+  padding: clamp(2.75rem, 6vw, 4.5rem) 14% clamp(1.5rem, 3vw, 2.25rem);
+  text-align: center;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-roof::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 2.2rem, rgb(0 0 0 / 0.07) 2.2rem calc(2.2rem + 1px)),
+    repeating-linear-gradient(180deg, transparent 0 1.6rem, rgb(0 0 0 / 0.08) 1.6rem calc(1.6rem + 1px)),
+    linear-gradient(rgb(var(--uyshik-anim-roof)), rgb(var(--uyshik-anim-roof-deep)));
+  clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-chimney {
+  position: absolute;
+  top: -1.9rem;
+  right: 16%;
+  z-index: -2;
+  width: 2.6rem;
+  height: 3.4rem;
+  border-radius: 0.2rem 0.2rem 0 0;
+  background: rgb(var(--uyshik-anim-roof-deep));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-flag {
+  position: absolute;
+  top: -3.2rem;
+  left: 11%;
+  z-index: -2;
+  width: 2.4rem;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-h1 {
+  font-size: clamp(1.8rem, 4.6vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  color: rgb(255 255 255);
+  text-wrap: balance;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-roof .hero-highlight {
+  background: none;
+  color: rgb(255 232 184);
+  font-style: italic;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-lead {
+  max-width: 34rem;
+  margin: 0.9rem auto 0;
+  font-size: clamp(0.95rem, 1.6vw, 1.08rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: rgb(255 255 255 / 0.95);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-roof-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.4rem;
+}
+
+/* Стены дома: тёплый песок, зазор между комнатами = толщина внутренних стен. */
+[data-theme='uyshik-anim'] .uyshik-anim-rooms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-inline: 1.4%;
+  border-radius: 0 0 0.4rem 0.4rem;
+  background: rgb(var(--uyshik-anim-sand));
+  padding: 0.6rem;
+}
+
+@media (min-width: 768px) {
+  [data-theme='uyshik-anim'] .uyshik-anim-rooms {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-room {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  background: rgb(var(--uyshik-anim-cream));
+  box-shadow: inset 0 0 0 1px rgb(43 33 41 / 0.08);
+}
+
+/* «Свет выключен»: комната чуть приглушена, на наведение и фокус загорается. */
+[data-theme='uyshik-anim'] .uyshik-anim-room-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  filter: brightness(0.95) saturate(0.78);
+  transition: filter 0.25s, transform 0.4s;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-room:hover .uyshik-anim-room-img,
+[data-theme='uyshik-anim'] .uyshik-anim-room:focus-visible .uyshik-anim-room-img {
+  filter: brightness(1.05) saturate(0.95);
+  transform: scale(1.03);
+}
+
+/* Табличка на шнурках. */
+[data-theme='uyshik-anim'] .uyshik-anim-sign {
+  position: absolute;
+  top: 0.9rem;
+  left: 0.7rem;
+  max-width: calc(100% - 1.4rem);
+  border-radius: 0.35rem;
+  background: rgb(var(--card));
+  padding: 0.3rem 0.75rem;
+  font-family: var(--font-hand);
+  font-size: clamp(0.82rem, 1.5vw, 0.98rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgb(var(--ink));
+  box-shadow: 0 6px 12px -6px rgb(43 33 41 / 0.45);
+  transform: rotate(-1.5deg);
+  transform-origin: 50% 0;
+  transition: transform 0.2s;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-sign::before,
+[data-theme='uyshik-anim'] .uyshik-anim-sign::after {
+  content: '';
+  position: absolute;
+  top: -0.7rem;
+  width: 1.5px;
+  height: 0.7rem;
+  background: rgb(var(--uyshik-anim-gold));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-sign::before { left: 18%; }
+[data-theme='uyshik-anim'] .uyshik-anim-sign::after { right: 18%; }
+
+[data-theme='uyshik-anim'] .uyshik-anim-room:hover .uyshik-anim-sign,
+[data-theme='uyshik-anim'] .uyshik-anim-room:focus-visible .uyshik-anim-sign {
+  transform: rotate(1.5deg);
+}
+
+/* Дверь — запись. Стоит на траве и чуть залезает на дом. */
+[data-theme='uyshik-anim'] .uyshik-anim-ground {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  margin-top: -0.6rem;
+  padding-bottom: 0;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-door {
+  position: relative;
+  display: flex;
+  width: 8.5rem;
+  height: 9.5rem;
+  align-items: flex-end;
+  justify-content: center;
+  border: 0.5rem solid rgb(var(--uyshik-anim-sand));
+  border-bottom: 0;
+  border-radius: 4rem 4rem 0 0;
+  background: linear-gradient(rgb(var(--uyshik-anim-roof)), rgb(var(--uyshik-anim-roof-deep)));
+  padding-bottom: 1.2rem;
+  color: rgb(255 255 255);
+  transition: filter 0.15s;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-door:hover {
+  filter: brightness(0.92);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-door-label {
+  /* «Экскурсияға» — самое длинное слово надписи — должно помещаться в дверь. */
+  max-width: 6.6rem;
+  text-align: center;
+  font-family: var(--font-hand);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-door-knob {
+  position: absolute;
+  top: 55%;
+  right: 0.7rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: rgb(var(--uyshik-anim-gold-light));
+}
+
+/* ── Двор ── */
+
+/* Двор: белый, гирлянда флажков вверху и редкий узор — звёздочки,
+   сердечки, кружки. */
+[data-theme='uyshik-anim'] .uyshik-anim-yard {
+  background-color: rgb(255 255 255);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='46' viewBox='0 0 200 46'%3E%3Cpath d='M0 6Q100 38 200 6' fill='none' stroke='%23b8925a' stroke-width='1.5'/%3E%3Cpath d='M8 9h24l-12 26z' fill='%23f2846e'/%3E%3Cpath d='M48 13h24l-12 26z' fill='%23f6c445'/%3E%3Cpath d='M88 14h24l-12 26z' fill='%2378bfe8'/%3E%3Cpath d='M128 13h24l-12 26z' fill='%238ccb7a'/%3E%3Cpath d='M168 9h24l-12 26z' fill='%23c4a0d8'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg opacity='.32'%3E%3Cpath d='M40 22l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z' fill='%23f6c445'/%3E%3Cpath d='M160 70c-4-6-14-3-13 5 1 6 13 13 13 13s12-7 13-13c1-8-9-11-13-5z' fill='%23f2846e'/%3E%3Ccircle cx='70' cy='140' r='6' fill='%2378bfe8'/%3E%3Ccircle cx='190' cy='180' r='4' fill='%238ccb7a'/%3E%3Cpath d='M120 170l3 7 7 1-5 5 1 7-6-4-6 4 1-7-5-5 7-1z' fill='%23c4a0d8'/%3E%3Ccircle cx='20' cy='200' r='3' fill='%23f2846e'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat-x, repeat;
+  background-position: center top, 0 3rem;
+  background-size: 200px 46px, 220px 220px;
+  padding-block: 2.5rem 4.5rem;
+  color: rgb(var(--ink));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-block {
+  padding-top: clamp(3.25rem, 7vw, 5.5rem);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+}
+
+/* Заголовок секции: антиква и короткая золотая черта над ним. */
+[data-theme='uyshik-anim'] .uyshik-anim-title {
+  margin-bottom: 1.5rem;
+  font-size: clamp(1.75rem, 3.4vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: rgb(var(--ink));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-title::before {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 4px;
+  margin-bottom: 0.9rem;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgb(242 132 110) 0 33%, rgb(246 196 69) 33% 66%, rgb(120 191 232) 66%);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-link {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgb(var(--brand));
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--uyshik-anim-gold));
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 6px;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-link:hover {
+  color: rgb(var(--brand-ink));
+}
+
+/* Бельевая верёвка с новостями. */
+[data-theme='uyshik-anim'] .uyshik-anim-line {
+  height: 2.4rem;
+  margin-inline: 1%;
+  border-bottom: 1.5px solid rgb(var(--muted) / 0.45);
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-flags {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+  gap: 1.25rem;
+  margin-top: -1.2rem;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-flag-item:nth-child(odd) { transform: rotate(-0.8deg); }
+[data-theme='uyshik-anim'] .uyshik-anim-flag-item:nth-child(even) { transform: rotate(0.7deg); }
+[data-theme='uyshik-anim'] .uyshik-anim-flag-item { transform-origin: 50% 0; transition: transform 0.3s; }
+[data-theme='uyshik-anim'] .uyshik-anim-flag-item:hover { transform: rotate(0deg) translateY(4px); }
+
+[data-theme='uyshik-anim'] .uyshik-anim-paper {
+  position: relative;
+  display: block;
+  border: 1px solid rgb(var(--line));
+  border-radius: 0.75rem;
+  background: rgb(var(--card));
+  padding: 0.55rem 0.55rem 1.1rem;
+  box-shadow: var(--uyshik-anim-shadow);
+}
+
+/* Прищепка. */
+[data-theme='uyshik-anim'] .uyshik-anim-paper::before {
+  content: '';
+  position: absolute;
+  top: -0.6rem;
+  left: 50%;
+  width: 0.8rem;
+  height: 1.4rem;
+  border-radius: 0.2rem;
+  background: linear-gradient(rgb(var(--uyshik-anim-gold-light)), rgb(var(--uyshik-anim-gold)));
+  transform: translateX(-50%);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-paper-img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.45rem;
+  object-fit: cover;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-paper-date {
+  display: block;
+  margin-top: 0.8rem;
+  padding-inline: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-paper-title {
+  display: block;
+  margin-top: 0.3rem;
+  padding-inline: 0.3rem;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgb(var(--ink));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-paper:hover .uyshik-anim-paper-title {
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--uyshik-anim-gold));
+  text-underline-offset: 3px;
+}
+
+/* Объявления и «полароиды». */
+[data-theme='uyshik-anim'] .uyshik-anim-duo {
+  display: grid;
+  gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+  [data-theme='uyshik-anim'] .uyshik-anim-duo {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 3.5rem;
+  }
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-post {
+  position: relative;
+  border: 1px solid rgb(var(--line));
+  border-left: 4px solid rgb(var(--uyshik-anim-roof));
+  border-radius: 0.75rem;
+  background: rgb(var(--card));
+  padding: 1.5rem 1.6rem;
+  box-shadow: var(--uyshik-anim-shadow);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-post .kit-ann {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-post .kit-ann-date {
+  color: rgb(var(--accent-ink));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-polaroids .kit-photos {
+  gap: 1.1rem;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-polaroids .kit-photo {
+  border: 0.5rem solid rgb(255 255 255);
+  border-bottom-width: 1.1rem;
+  border-radius: 0.25rem;
+  box-shadow: var(--uyshik-anim-shadow);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-polaroids .kit-photos li:nth-child(odd) { transform: rotate(-1.2deg); }
+[data-theme='uyshik-anim'] .uyshik-anim-polaroids .kit-photos li:nth-child(even) { transform: rotate(1deg); }
+
+[data-theme='uyshik-anim'] .uyshik-anim-polaroids .kit-block-more a,
+[data-theme='uyshik-anim'] .uyshik-anim-polaroids a:not(.kit-photo) {
+  color: rgb(var(--brand));
+}
+
+/* Группы — домики: песок, шалфей, румянец; тёмный текст. */
+[data-theme='uyshik-anim'] .uyshik-anim-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1.25rem;
+  filter: drop-shadow(0 16px 20px rgb(43 33 41 / 0.12));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-card {
+  display: flex;
+  min-height: 11rem;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  padding: 3.6rem 1.1rem 1.25rem;
+  clip-path: polygon(50% 0, 100% 24%, 100% 100%, 0 100%, 0 24%);
+  background: rgb(var(--uyshik-anim-sun-light));
+  color: rgb(var(--ink));
+  text-align: center;
+  align-items: center;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-card:nth-child(4n + 2) { background: rgb(var(--uyshik-anim-sky-light)); }
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-card:nth-child(4n + 3) { background: rgb(var(--uyshik-anim-mint-light)); }
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-card:nth-child(4n + 4) { background: rgb(var(--uyshik-anim-coral-light)); }
+
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-name,
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-age,
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-free {
+  color: inherit;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-age,
+[data-theme='uyshik-anim'] .uyshik-anim-groups .hb-group-free {
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+/* Педагоги — портреты в арочных рамках. */
+[data-theme='uyshik-anim'] .uyshik-anim-staff {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+  gap: 2.25rem 1.25rem;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-staff .hb-staff-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-staff .hb-staff-photo {
+  width: 9rem;
+  height: 10.5rem;
+  margin-bottom: 0.8rem;
+  border: 3px solid rgb(var(--uyshik-anim-gold-light));
+  border-radius: 4.5rem 4.5rem 0.5rem 0.5rem;
+  background: rgb(var(--uyshik-anim-sand));
+  object-fit: cover;
+  box-shadow: 0 0 0 6px rgb(var(--card)), var(--uyshik-anim-shadow);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-staff .hb-staff-photo-empty {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: rgb(var(--uyshik-anim-aubergine));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-staff .hb-staff-name {
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: rgb(var(--ink));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-staff .hb-staff-role,
+[data-theme='uyshik-anim'] .uyshik-anim-staff .hb-staff-meta {
+  font-size: 0.86rem;
+  font-weight: 400;
+  color: rgb(var(--muted));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-staff .hb-staff-role {
+  font-weight: 600;
+  color: rgb(var(--brand));
+}
+
+/* Кромка подвала: пологая волна цвета баклажана над подвалом. */
+[data-theme='uyshik-anim'] .uyshik-anim-soil {
+  height: 24px;
+  background-color: rgb(255 255 255);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24' viewBox='0 0 120 24'%3E%3Cpath d='M0 24V14Q30 2 60 13T120 13V24z' fill='%23402e44'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-position: bottom;
+}
+
+/* ── Подвал ── */
+
+[data-theme='uyshik-anim'] .uyshik-anim-footer {
+  background: rgb(var(--uyshik-anim-aubergine));
+  color: rgb(255 255 255 / 0.86);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-footer a {
+  color: inherit;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-footer a:hover {
+  color: rgb(255 255 255);
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--uyshik-anim-gold-light));
+  text-underline-offset: 3px;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-footer :focus-visible {
+  outline-color: rgb(255 255 255);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-footer-name {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgb(255 255 255);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-footer-title {
+  margin-bottom: 0.8rem;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(var(--uyshik-anim-gold-light));
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-footer-social a {
+  border-color: rgb(255 255 255 / 0.4);
+  background: transparent;
+  color: rgb(255 255 255);
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-footer-social a:hover {
+  background: rgb(255 255 255 / 0.1);
+  text-decoration: none;
+}
+
+[data-theme='uyshik-anim'] .uyshik-anim-footer-bottom {
+  border-top: 1px solid rgb(255 255 255 / 0.15);
+  color: rgb(255 255 255 / 0.75);
+}
+
+/* ── Ролик: сцена залипает, прокрутка ведёт камеру ──
+   Отрезок прокрутки — высота .stage (чем больше комнат, тем длиннее).
+   Диапазон contain 0–100 % — ровно то время, пока сцена залипла. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 900px) and (min-height: 620px) and (prefers-reduced-motion: no-preference) {
+    [data-theme='uyshik-anim'] .uyshik-anim-stage {
+      height: calc(220vh + var(--uyshik-anim-rooms, 6) * 10vh);
+      view-timeline-name: --uyshik-anim-stage;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-scene {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      padding-top: 0;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-stage :is(.uyshik-anim-layers > *, .uyshik-anim-building, .uyshik-anim-room-img, .uyshik-anim-sign, .uyshik-anim-door, .uyshik-anim-hint) {
+      animation-timeline: --uyshik-anim-stage;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+    }
+
+    /* Дом под шапкой сайта: сначала издалека, потом камера едет вниз,
+       пока низ дома с дверью не встанет у нижнего края экрана. */
+    [data-theme='uyshik-anim'] .uyshik-anim-building {
+      position: absolute;
+      inset: 9rem 0 auto;
+      /* Дом «вырастает» от земли: неподвижна точка у нижнего края экрана
+         (у невысокого дома — его низ с дверью). */
+      transform-origin: 50% min(100%, calc(100vh - 10rem));
+      animation-name: uyshik-anim-approach, uyshik-anim-pan;
+      animation-range: contain 0% contain 28%, contain 30% contain 92%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-sun {
+      animation-name: uyshik-anim-sunrise, uyshik-anim-away;
+      animation-range: contain 0% contain 30%, contain 30% contain 100%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-cloud-a {
+      animation-name: uyshik-anim-drift-right, uyshik-anim-away;
+      animation-range: contain 0% contain 35%, contain 30% contain 100%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-cloud-b {
+      animation-name: uyshik-anim-drift-left, uyshik-anim-away;
+      animation-range: contain 0% contain 35%, contain 30% contain 100%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-cloud-c {
+      animation-name: uyshik-anim-drift-right, uyshik-anim-away;
+      animation-range: contain 0% contain 45%, contain 30% contain 100%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-hills {
+      animation-name: uyshik-anim-hills;
+      animation-range: contain 0% contain 100%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-trees-left {
+      animation-name: uyshik-anim-part-left;
+      animation-range: contain 0% contain 32%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-trees-right {
+      animation-name: uyshik-anim-part-right;
+      animation-range: contain 0% contain 32%;
+    }
+
+    /* Свет в комнатах загорается по очереди, таблички спускаются. */
+    [data-theme='uyshik-anim'] .uyshik-anim-room-img {
+      animation-name: uyshik-anim-light;
+      animation-range: contain 80% contain 88%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-sign {
+      animation-name: uyshik-anim-sign;
+      animation-range: contain 80% contain 88%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-rooms > li:nth-child(1) :is(.uyshik-anim-room-img, .uyshik-anim-sign) {
+      animation-range: contain 36% contain 43%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-rooms > li:nth-child(2) :is(.uyshik-anim-room-img, .uyshik-anim-sign) {
+      animation-range: contain 42% contain 49%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-rooms > li:nth-child(3) :is(.uyshik-anim-room-img, .uyshik-anim-sign) {
+      animation-range: contain 48% contain 55%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-rooms > li:nth-child(4) :is(.uyshik-anim-room-img, .uyshik-anim-sign) {
+      animation-range: contain 54% contain 61%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-rooms > li:nth-child(5) :is(.uyshik-anim-room-img, .uyshik-anim-sign) {
+      animation-range: contain 60% contain 67%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-rooms > li:nth-child(6) :is(.uyshik-anim-room-img, .uyshik-anim-sign) {
+      animation-range: contain 66% contain 73%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-rooms > li:nth-child(7) :is(.uyshik-anim-room-img, .uyshik-anim-sign) {
+      animation-range: contain 72% contain 79%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-rooms > li:nth-child(8) :is(.uyshik-anim-room-img, .uyshik-anim-sign) {
+      animation-range: contain 78% contain 85%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-rooms > li:nth-child(9) :is(.uyshik-anim-room-img, .uyshik-anim-sign) {
+      animation-range: contain 84% contain 91%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-room:hover .uyshik-anim-room-img,
+    [data-theme='uyshik-anim'] .uyshik-anim-room:focus-visible .uyshik-anim-room-img {
+      filter: brightness(1.05) saturate(0.95) !important;
+    }
+
+    /* С клавиатуры комната видна сразу, не дожидаясь прокрутки. */
+    [data-theme='uyshik-anim'] .uyshik-anim-room:focus-visible .uyshik-anim-sign {
+      opacity: 1 !important;
+      translate: 0 0 !important;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-door {
+      animation-name: uyshik-anim-door;
+      animation-range: contain 86% contain 100%;
+    }
+
+    [data-theme='uyshik-anim'] .uyshik-anim-hint {
+      position: absolute;
+      z-index: 3;
+      /* Пока сцена не залипла, её низ под шапкой сайта — подсказка выше. */
+      bottom: 10rem;
+      left: 50%;
+      display: block;
+      translate: -50% 0;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.9);
+      padding: 0.45rem 1.1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: rgb(var(--ink));
+      box-shadow: var(--uyshik-anim-shadow-sm);
+      animation-name: uyshik-anim-hint;
+      animation-range: contain 0% contain 8%;
+    }
+  }
+}
+
+@keyframes uyshik-anim-approach {
+  from { scale: 0.7; }
+  to { scale: 1; }
+}
+
+@keyframes uyshik-anim-pan {
+  from { translate: 0 0; }
+  to { translate: 0 min(0px, calc(100vh - 100% - 10rem)); }
+}
+
+@keyframes uyshik-anim-sunrise {
+  from { translate: 0 35vh; }
+  to { translate: 0 0; }
+}
+
+@keyframes uyshik-anim-away {
+  to { transform: translateY(-30vh); }
+}
+
+@keyframes uyshik-anim-drift-right {
+  from { translate: -18vw 0; }
+  to { translate: 8vw 0; }
+}
+
+@keyframes uyshik-anim-drift-left {
+  from { translate: 18vw 0; }
+  to { translate: -14vw 0; }
+}
+
+@keyframes uyshik-anim-hills {
+  from { translate: 0 6vh; }
+  to { translate: 0 0; }
+}
+
+@keyframes uyshik-anim-part-left {
+  from { translate: 14vw 0; scale: 0.85; }
+  to { translate: -6vw 0; scale: 1; }
+}
+
+@keyframes uyshik-anim-part-right {
+  from { translate: -14vw 0; scale: 0.85; }
+  to { translate: 6vw 0; scale: 1; }
+}
+
+@keyframes uyshik-anim-light {
+  from { filter: brightness(0.35) saturate(0.45); }
+  to { filter: brightness(1) saturate(0.9); }
+}
+
+@keyframes uyshik-anim-sign {
+  from { opacity: 0; translate: 0 -0.9rem; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes uyshik-anim-door {
+  from { box-shadow: 0 0 0 0 rgb(255 214 140 / 0); }
+  to { box-shadow: 0 0 0 0.5rem rgb(255 226 168 / 0.7), 0 0 3rem 0.75rem rgb(255 206 120 / 0.65); }
+}
+
+@keyframes uyshik-anim-hint {
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='uyshik-anim'] .uyshik-anim-room-img,
+  [data-theme='uyshik-anim'] .uyshik-anim-sign,
+  [data-theme='uyshik-anim'] .uyshik-anim-flag-item,
+  [data-theme='uyshik-anim'] .btn-primary,
+  [data-theme='uyshik-anim'] .uyshik-anim-cta,
+  [data-theme='uyshik-anim'] .uyshik-anim-door {
+    transition: none;
+  }
+
+  [data-theme='uyshik-anim'] .uyshik-anim-room:hover .uyshik-anim-room-img,
+  [data-theme='uyshik-anim'] .uyshik-anim-room:focus-visible .uyshik-anim-room-img {
+    transform: none;
+  }
+}
