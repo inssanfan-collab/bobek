@@ -65,7 +65,7 @@ export const TENANT_FIELDS: TemplateField[] = [
   },
   {
     key: 'addressRu', labelRu: 'Адрес по-русски', kind: 'text', required: true,
-    hintRu: 'Улица и дом: г. Актобе, пр. Санкибай батыра, 74',
+    hintRu: 'Город, улица и дом — с городом сад точно встанет на карту: г. Шымкент, ул. Абая, 12',
   },
   { key: 'addressKk', labelRu: 'Мекенжайы қазақша', kind: 'text', hintRu: 'Адрес по-казахски.' },
   {

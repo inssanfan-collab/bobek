@@ -184,7 +184,7 @@ export function NewTenantForm({
             <input name="district" className="field" defaultValue={f.district ?? ''} placeholder="Астана" />
           </Field>
           <Field label={T.address[locale]}>
-            <input name="addressRu" className="field" defaultValue={f.addressRu ?? ''} placeholder="г. Актобе, ул. Абая, 12" />
+            <input name="addressRu" className="field" defaultValue={f.addressRu ?? ''} placeholder="г. Шымкент, ул. Абая, 12" />
           </Field>
           <Field label={T.phone[locale]}>
             <input name="phone" className="field" defaultValue={f.phone ?? ''} placeholder="+7 (7132) 00-00-00" />

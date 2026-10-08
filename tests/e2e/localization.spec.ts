@@ -92,11 +92,11 @@ test.describe('Двуязычие сайта сада', () => {
 test.describe('Двуязычие портала', () => {
   test('портал переключается на казахский и запоминает язык в ссылках', async ({ page }) => {
     await page.goto(`${PORTAL}/catalog`);
-    await expect(page.getByRole('heading', { name: 'Детские сады Актобе' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Каталог детских садов' })).toBeVisible();
 
     await page.getByRole('link', { name: 'ҚАЗ' }).click();
     await expect(page).toHaveURL(/lang=kk/);
-    await expect(page.getByRole('heading', { name: 'Ақтөбе балабақшалары' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Балабақшалар каталогы' })).toBeVisible();
 
     // Язык должен ехать по ссылкам дальше, иначе посетитель вываливается в русский.
     await page.getByRole('link', { name: 'Жаңалықтар' }).first().click();

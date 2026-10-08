@@ -60,7 +60,7 @@ export function RouteMap({
 
       <div className="flex flex-wrap gap-2 p-6 pt-4">
         <a
-          href={`https://2gis.kz/aktobe/geo/${lng},${lat}`}
+          href={`https://2gis.kz/geo/${lng},${lat}`}
           target="_blank"
           rel="noopener noreferrer"
           className="btn-secondary text-sm"

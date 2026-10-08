@@ -52,7 +52,7 @@ test.describe('Публичная часть', () => {
 
   test('каталог фильтрует сады по названию', async ({ page }) => {
     await page.goto(`${PORTAL}/catalog`);
-    await expect(page.getByRole('heading', { name: 'Детские сады Актобе' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Каталог детских садов' })).toBeVisible();
 
     await page.getByLabel('Название, адрес или район').fill('Күншуақ');
     await page.getByRole('button', { name: 'Найти' }).click();

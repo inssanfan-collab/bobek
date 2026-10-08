@@ -5,11 +5,11 @@ import { formatMoney } from '@/lib/labels';
 
 export const metadata: Metadata = {
   title: {
-    default: 'EduSad — сайты для детских садов Актюбинской области',
+    default: 'EduSad — сайты для детских садов',
     template: '%s · EduSad',
   },
   description:
-    `Готовый сайт для детского сада Актобе от ${formatMoney(env.planPrices.BASIC)} в год: своя админка, новости, галерея, документы и меню питания. Наполняете сами или доверяете нам. Каталог садов города.`,
+    `Готовый сайт для детского сада от ${formatMoney(env.planPrices.BASIC)} в год: своя админка, новости, галерея, документы и меню питания. Наполняете сами или доверяете нам.`,
   robots: { index: true, follow: true },
   metadataBase: new URL(`https://${env.portalDomain}`),
   // Значок вкладки — бумажный самолётик из шапки, без пунктирного шлейфа:

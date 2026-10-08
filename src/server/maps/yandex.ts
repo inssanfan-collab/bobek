@@ -12,8 +12,11 @@ import { parseYandexPoint, type MapPoint } from '@/lib/map';
 
 const ENDPOINT = 'https://geocode-maps.yandex.ru/1.x/';
 
-/** Актюбинская область целиком — сад может стоять и в райцентре, не только в Актобе. */
-const REGION_BBOX = '53.0,46.0~62.5,51.5';
+/**
+ * Весь Казахстан: сады бывают не только в Актобе. Город в адресе обязателен —
+ * без него «ул. Абая, 12» найдётся в любом городе (подсказка в анкете сада).
+ */
+const COUNTRY_BBOX = '46.4,40.5~87.4,55.5';
 
 /**
  * Точность хуже уличной — это «где-то в городе». Ставить такую точку на карту
@@ -54,9 +57,9 @@ export async function geocodeAddress(address: string): Promise<MapPoint | null> 
   url.searchParams.set('format', 'json');
   url.searchParams.set('results', '1');
   url.searchParams.set('lang', 'ru_RU');
-  // rspn=1 — не искать за пределами области: иначе «улица Абая, 12»
+  // rspn=1 — не искать за пределами Казахстана: иначе «улица Абая, 12»
   // находится где-нибудь в Калифорнии.
-  url.searchParams.set('bbox', REGION_BBOX);
+  url.searchParams.set('bbox', COUNTRY_BBOX);
   url.searchParams.set('rspn', '1');
 
   try {

@@ -92,7 +92,7 @@ function page(desk: string, mob: string): string {
     <p class="ru">Сайт для детского сада</p>
     <p class="hand">қазақша және орысша · на двух языках</p>
   </div>
-  <div class="foot"><span class="pill">edusad.kz</span><span>Ақтөбе облысы · Актюбинская область</span></div>
+  <div class="foot"><span class="pill">edusad.kz</span><span>Балабақша сайттары · Сайты детских садов</span></div>
   <div class="browser"><div class="bar"><i></i><i></i><i></i><span>balapan.edusad.kz</span></div><img src="${desk}"></div>
   <div class="phone"><img src="${mob}"></div>
 </body></html>`;

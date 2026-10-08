@@ -52,7 +52,7 @@ function WidgetMap({ gardens }: { gardens: MapGarden[] }) {
   return (
     <iframe
       src={src.toString()}
-      title="Детские сады Актобе на карте"
+      title="Детские сады на карте"
       loading="lazy"
       className="h-72 w-full border-0 sm:h-96"
     />

@@ -118,7 +118,7 @@ export default async function TenantLayout({
               telephone: profile?.phone ?? undefined,
               email: profile?.email ?? undefined,
               address: profile?.addressRu
-                ? { '@type': 'PostalAddress', streetAddress: profile.addressRu, addressLocality: 'Актобе', addressCountry: 'KZ' }
+                ? { '@type': 'PostalAddress', streetAddress: profile.addressRu, addressCountry: 'KZ' }
                 : undefined,
               geo:
                 profile?.lat && profile?.lng
