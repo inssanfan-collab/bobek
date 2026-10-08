@@ -12,7 +12,8 @@ import { parseAnketa, AnketaError, type Anketa } from '@/server/import/anketa';
 import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { generatePassword, hashPassword } from '@/server/auth/password';
 import { destroyAllSessions, createSession, requestMeta } from '@/server/auth/session';
-import { extendSubscription } from '@/server/subscription';
+import { applyPayment, setSubscriptionEnd } from '@/server/subscription';
+import { periodIsOver } from '@/lib/subscription-period';
 import { ContractNumberTaken, MAX_SEQUENCE, createContract, renumberContract } from '@/server/docs/contract';
 import { isPlanCode } from '@/lib/plans';
 import { isTemplateCode, isPaletteCode } from '@/lib/templates';
@@ -354,17 +355,12 @@ export async function recordPayment(formData: FormData) {
 
   if (!Number.isFinite(amount) || amount <= 0) throw new ActionError({ kk: 'Сома дұрыс емес', ru: 'Некорректная сумма' });
 
-  const periodEnd = await extendSubscription(tenantId, Number.isFinite(months) ? months : 12, { plan, amount });
-
-  const subscription = await prisma.subscription.findFirst({
-    where: { tenantId, isCurrent: true },
-    orderBy: { periodEnd: 'desc' },
-  });
+  const { subscriptionId, periodEnd, extended } = await applyPayment(tenantId, Number.isFinite(months) ? months : 12, { plan, amount });
 
   await prisma.payment.create({
     data: {
       tenantId,
-      subscriptionId: subscription?.id ?? null,
+      subscriptionId,
       amount,
       paidAt: new Date(),
       method,
@@ -382,9 +378,27 @@ export async function recordPayment(formData: FormData) {
   await audit(admin, 'payment.record', {
     tenantId,
     entity: 'subscription',
-    meta: { amount, plan, method, invoiceNo, periodEnd: periodEnd.toISOString() },
+    meta: { amount, plan, method, invoiceNo, periodEnd: periodEnd.toISOString(), extended },
   });
 
+  revalidatePath(`/admin/tenants/${tenantId}`);
+  revalidatePath('/admin/subscriptions');
+}
+
+/** «Оплачено до» вручную. */
+export async function setSubscriptionEndAction(formData: FormData) {
+  const admin = await requireSuperadmin();
+  await assertCsrf(formData);
+  const tenantId = String(formData.get('tenantId'));
+  const day = String(formData.get('lastPaidDay') ?? '').trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) throw new ActionError({ kk: 'Күнді көрсетіңіз', ru: 'Укажите дату' });
+  const { from, to } = await setSubscriptionEnd(tenantId, day);
+  // Дата в будущем — сад снова может работать, как после оплаты.
+  if (!periodIsOver(to)) {
+    await prisma.tenant.updateMany({ where: { id: tenantId, status: 'SUSPENDED' }, data: { status: 'ACTIVE' } });
+    await invalidateTenantCacheById(tenantId);
+  }
+  await audit(admin, 'subscription.extend', { tenantId, entity: 'subscription', meta: { manual: true, from: from?.toISOString() ?? null, to: to.toISOString() } });
   revalidatePath(`/admin/tenants/${tenantId}`);
   revalidatePath('/admin/subscriptions');
 }

@@ -1,4 +1,5 @@
 import 'server-only';
+import { periodEndFrom } from '@/server/subscription';
 import { prisma } from '@/server/db';
 import { env } from '@/lib/env';
 import { subdomainFor, isValidSlug } from '@/lib/host';
@@ -66,8 +67,7 @@ export async function createTenant(input: CreateTenantInput): Promise<CreateTena
   const passwordHash = await hashPassword(password);
 
   const periodStart = new Date();
-  const periodEnd = new Date(periodStart);
-  periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+  const periodEnd = periodEndFrom(periodStart, 12);
 
   const tenantId = await prisma.$transaction(async (tx) => {
     const tenant = await tx.tenant.create({

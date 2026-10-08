@@ -13,7 +13,7 @@ import {
 } from '@/lib/labels';
 import { pick } from '@/lib/i18n';
 import {
-  addDomain, createContractAction, deleteDomain, impersonate, markContractSigned, renumberContractAction,
+  addDomain, createContractAction, deleteDomain, impersonate, markContractSigned, renumberContractAction, setSubscriptionEndAction,
   recordPayment, resetUserPassword, setPrimaryDomain, setTenantStatus, setTenantTheme, verifyDomain,
 } from '../actions';
 import { findThemeInfo, THEME_CATALOG } from '@/themes/catalog';
@@ -51,6 +51,12 @@ const T = {
   statusBlock: { kk: 'Мәртебе және жазылым', ru: 'Статус и подписка' },
   currentStatus: { kk: 'Ағымдағы мәртебе', ru: 'Текущий статус' },
   subscriptionUntil: { kk: 'Жазылым мерзімі', ru: 'Подписка до' },
+  paidUntil: { kk: 'Төленген соңғы күн', ru: 'Оплачено до (последний день)' },
+  change: { kk: 'Өзгерту', ru: 'Изменить' },
+  paymentLead: {
+    kk: 'Ағымдағы кезең әлі төленбесе, төлем соған есептеледі. Төленген болса — жазылымды көрсетілген айға ұзартады. Тоқтатуды алады.',
+    ru: 'Если текущий период ещё не оплачен, оплата засчитывается за него. Если оплачен — продлевает подписку на указанное число месяцев. Снимает приостановку.',
+  },
   plan: { kk: 'Тариф', ru: 'Тариф' },
   byPlan: { kk: 'тариф бойынша', ru: 'по тарифу' },
   amountHint: {
@@ -222,6 +228,24 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             </div>
           ) : null}
 
+          <form action={setSubscriptionEndAction} className="mt-5 flex flex-wrap items-end gap-3 border-t border-line pt-5">
+            <input type="hidden" name={CSRF_FIELD} value={csrf} />
+            <input type="hidden" name="tenantId" value={tenant.id} />
+            <div>
+              <label className="field-label" htmlFor="lastPaidDay">{T.paidUntil[locale]}</label>
+              <input
+                id="lastPaidDay"
+                name="lastPaidDay"
+                type="date"
+                required
+                // Дата по Казахстану: конец периода хранится как полночь +05:00.
+                defaultValue={subscription.periodEnd ? new Date(subscription.periodEnd.getTime() + 5 * 3600_000).toISOString().slice(0, 10) : undefined}
+                className="field"
+              />
+            </div>
+            <button type="submit" className="btn-secondary">{T.change[locale]}</button>
+          </form>
+
           <form action={setTenantStatus} className="mt-5 flex flex-wrap items-end gap-3 border-t border-line pt-5">
             <input type="hidden" name={CSRF_FIELD} value={csrf} />
             <input type="hidden" name="tenantId" value={tenant.id} />
@@ -239,9 +263,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
 
         <section className="card p-6">
           <h2 className="font-display text-lg font-bold">{T.recordPayment[locale]}</h2>
-          <p className="mt-1 text-sm text-muted">
-            Оплата продлевает подписку и снимает приостановку, если она была.
-          </p>
+          <p className="mt-1 text-sm text-muted">{T.paymentLead[locale]}</p>
           <form action={recordPayment} className="mt-4 grid gap-3 sm:grid-cols-2">
             <input type="hidden" name={CSRF_FIELD} value={csrf} />
             <input type="hidden" name="tenantId" value={tenant.id} />

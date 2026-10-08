@@ -1,5 +1,7 @@
 import 'server-only';
 import { prisma } from '@/server/db';
+import { periodIsOver } from '@/lib/subscription-period';
+import { dayAfter, isPaid, periodEndFrom } from '@/server/subscription';
 import { env } from '@/lib/env';
 import type { PlanCode } from '@/lib/plans';
 import type { DocData } from './documents';
@@ -90,12 +92,13 @@ export async function suggestedPeriod(tenantId: string): Promise<{ start: Date; 
     orderBy: { periodEnd: 'desc' },
   });
 
-  const start = current && current.periodEnd > new Date() ? new Date(current.periodEnd) : new Date();
-  const end = new Date(start);
-  end.setFullYear(end.getFullYear() + 1);
-  end.setDate(end.getDate() - 1);
-
-  return { start, end };
+  // Текущий период ещё не оплачен — договор на него же (первый договор нового
+  // сада). Оплачен — на следующий, со дня после его окончания.
+  if (current && !periodIsOver(current.periodEnd) && !(await isPaid(current.id))) {
+    return { start: current.periodStart, end: current.periodEnd };
+  }
+  const start = current && !periodIsOver(current.periodEnd) ? dayAfter(current.periodEnd) : new Date();
+  return { start, end: periodEndFrom(start, 12) };
 }
 
 /** Данные для печати одного документа. */

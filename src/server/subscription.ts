@@ -20,6 +20,29 @@ export type SubscriptionState = {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Конец периода «включительно»: год с 8 октября — до 7 октября следующего
+ * года (последний оплаченный день сад работает, см. periodIsOver), а
+ * следующий год начинается 8 октября. Раньше год шёл до 8 октября, и концы
+ * соседних периодов наезжали друг на друга на день.
+ */
+export function periodEndFrom(start: Date, months: number): Date {
+  const end = new Date(start);
+  end.setMonth(end.getMonth() + months);
+  end.setDate(end.getDate() - 1);
+  return end;
+}
+
+/** День после конца периода — начало следующего. */
+export function dayAfter(date: Date): Date {
+  return new Date(date.getTime() + DAY_MS);
+}
+
+/** Оплачен ли период: к нему привязана хотя бы одна оплата. */
+export async function isPaid(subscriptionId: string): Promise<boolean> {
+  return (await prisma.payment.count({ where: { subscriptionId } })) > 0;
+}
+
 export async function subscriptionState(tenantId: string): Promise<SubscriptionState> {
   const current = await prisma.subscription.findFirst({
     where: { tenantId, isCurrent: true },
@@ -60,9 +83,8 @@ export async function extendSubscription(
     orderBy: { periodEnd: 'desc' },
   });
 
-  const start = current && current.periodEnd > new Date() ? current.periodEnd : new Date();
-  const end = new Date(start);
-  end.setMonth(end.getMonth() + months);
+  const start = current && !periodIsOver(current.periodEnd) ? dayAfter(current.periodEnd) : new Date();
+  const end = periodEndFrom(start, months);
 
   await prisma.$transaction([
     prisma.subscription.updateMany({ where: { tenantId, isCurrent: true }, data: { isCurrent: false } }),
@@ -80,6 +102,49 @@ export async function extendSubscription(
   ]);
 
   return end;
+}
+
+/**
+ * Оплата. Сад при создании сразу получает год подписки — без оплаты, чтобы
+ * успеть наполнить сайт. Первая оплата засчитывается за этот самый период,
+ * а не продлевает его ещё на год (так было: создал сад, отметил оплату —
+ * и подписка оказывалась на два года). Продлевает только оплата сверх
+ * уже оплаченного периода или после его окончания.
+ */
+export async function applyPayment(
+  tenantId: string,
+  months: number,
+  options: { plan: PlanCode; amount: number },
+): Promise<{ subscriptionId: string; periodEnd: Date; extended: boolean }> {
+  const current = await prisma.subscription.findFirst({
+    where: { tenantId, isCurrent: true },
+    orderBy: { periodEnd: 'desc' },
+  });
+  if (current && !periodIsOver(current.periodEnd) && !(await isPaid(current.id))) {
+    await prisma.subscription.update({ where: { id: current.id }, data: { plan: options.plan, amount: options.amount } });
+    return { subscriptionId: current.id, periodEnd: current.periodEnd, extended: false };
+  }
+  const periodEnd = await extendSubscription(tenantId, months, options);
+  const fresh = await prisma.subscription.findFirstOrThrow({ where: { tenantId, isCurrent: true }, orderBy: { periodEnd: 'desc' } });
+  return { subscriptionId: fresh.id, periodEnd, extended: true };
+}
+
+/**
+ * Дата «оплачено до» вручную — исправить ошибку или договорённость с садом.
+ * Дата — последний оплаченный день (по Казахстану, полночь +05:00).
+ */
+export async function setSubscriptionEnd(tenantId: string, lastPaidDay: string): Promise<{ from: Date | null; to: Date }> {
+  const to = new Date(`${lastPaidDay}T00:00:00+05:00`);
+  if (Number.isNaN(to.valueOf())) throw new Error('bad date');
+  const current = await prisma.subscription.findFirst({ where: { tenantId, isCurrent: true }, orderBy: { periodEnd: 'desc' } });
+  if (current) {
+    await prisma.subscription.update({ where: { id: current.id }, data: { periodEnd: to } });
+    return { from: current.periodEnd, to };
+  }
+  await prisma.subscription.create({
+    data: { tenantId, periodStart: new Date(), periodEnd: to, amount: env.planPrices.BASIC, plan: 'BASIC', isCurrent: true },
+  });
+  return { from: null, to };
 }
 
 /** Сады, у которых подписка истекает в ближайшие N дней — для дашборда и напоминаний. */
