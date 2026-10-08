@@ -158,8 +158,15 @@ export function albumPhotos(albums: AlbumWithCover[], locale: Locale, limit: num
 }
 
 /** Раздел меню нужного типа — для кнопок «Записаться», «Все фото» и т.п. */
+/**
+ * Раздел нужного типа — в верхнем уровне меню, а если сад вложил его в другой
+ * («Педагоги» внутри «О саде»), то среди вложенных. Раньше искали только
+ * наверху, и у таких садов пропадали ссылки «Весь состав», «Все объявления».
+ */
 export function findSection(menu: Section[] | undefined, type: Section['type']): Section | undefined {
-  return menu?.find((section) => section.type === type);
+  if (!menu) return undefined;
+  return menu.find((section) => section.type === type)
+    ?? menu.flatMap((section) => (section as Section & { children?: Section[] }).children ?? []).find((child) => child.type === type);
 }
 
 /** Раздел «О нас»: по адресу about, а если сад его переименовал — первая текстовая страница. */
