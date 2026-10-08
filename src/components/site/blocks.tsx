@@ -155,16 +155,19 @@ export function GalleryStrip({
   albums,
   locale,
   basePath = '/gallery',
+  heading,
 }: {
   albums: AlbumWithCover[];
   locale: Locale;
   basePath?: string;
+  /** Свой заголовок (в стиле темы, со ссылкой «Вся фотогалерея») вместо обычного. */
+  heading?: ReactNode;
 }) {
   if (albums.length === 0) return null;
 
   return (
     <section>
-      <h2 className="font-display text-2xl font-extrabold">{T.gallery[locale]}</h2>
+      {heading ?? <h2 className="font-display text-2xl font-extrabold">{T.gallery[locale]}</h2>}
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {albums.map((album) => {
           const cover = mediaUrl(album.items[0]?.media);

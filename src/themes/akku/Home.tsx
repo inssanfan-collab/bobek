@@ -2,9 +2,17 @@ import {
   ContactCard, GalleryStrip, NewsCard, PlacesBadge, SectionTiles, SiteLink, T,
 } from '@/components/site/blocks';
 import { HeroButtons, HeroTitle } from '@/components/site/Hero';
+import { StaffCards } from '@/components/site/home-blocks';
+import { findSection } from '@/components/site/theme-kit';
 import { pick } from '@/lib/i18n';
 import type { HomeProps } from '@/templates/types';
 import { Cloud, Feather, Ripple, Sparkle, Swan } from './Doodles';
+
+const LT = {
+  staff: { kk: 'Педагогтар', ru: 'Педагоги' },
+  allStaff: { kk: 'Барлық педагогтар құрамы', ru: 'Весь педагогический состав' },
+  allGallery: { kk: 'Барлық фотогалерея', ru: 'Вся фотогалерея' },
+};
 
 /**
  * Главная «Аққу» — лебединое озеро на рассвете (дизайн-система из Stitch).
@@ -13,7 +21,9 @@ import { Cloud, Feather, Ripple, Sparkle, Swan } from './Doodles';
  * справа — плашка с названием сада. Разделы
  * секций — рябь на воде, по краям летают пёрышки.
  */
-export function AkkuHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
+export function AkkuHome({ profile, sections, news, announcements, albums, staff = [], menu, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
+  const staffSection = findSection(menu, 'STAFF');
+  const gallerySection = findSection(menu, 'GALLERY');
   // Плашка у фото — короткое название сада, как подпись к снимку.
   const badge = pick(locale, profile?.shortNameKk || profile?.nameKk, profile?.shortNameRu || profile?.nameRu);
 
@@ -93,15 +103,35 @@ export function AkkuHome({ profile, sections, news, announcements, albums, local
               <SiteLink href="/news" locale={locale} className="akku-more">{T.allNews[locale]} →</SiteLink>
             </div>
             <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {news.slice(0, 3).map((post) => (
+              {news.slice(0, 6).map((post) => (
                 <NewsCard key={post.id} post={post} locale={locale} />
               ))}
             </div>
           </section>
         ) : null}
 
+        {staff.length > 0 ? (
+          <section>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <h2 className="akku-heading font-display">{LT.staff[locale]}</h2>
+              {staffSection ? <SiteLink href={`/${staffSection.slug}`} locale={locale} className="akku-more">{LT.allStaff[locale]} →</SiteLink> : null}
+            </div>
+            <StaffCards staff={staff} locale={locale} limit={3} className="akku-staff mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" />
+          </section>
+        ) : null}
+
         <div className="akku-gallery">
-          <GalleryStrip albums={albums.slice(0, 3)} locale={locale} />
+          <GalleryStrip
+            albums={albums.slice(0, 3)}
+            locale={locale}
+            basePath={gallerySection ? `/${gallerySection.slug}` : '/gallery'}
+            heading={
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <h2 className="akku-heading font-display">{T.gallery[locale]}</h2>
+                <SiteLink href={gallerySection ? `/${gallerySection.slug}` : '/gallery'} locale={locale} className="akku-more">{LT.allGallery[locale]} →</SiteLink>
+              </div>
+            }
+          />
         </div>
 
         {showContacts ? (

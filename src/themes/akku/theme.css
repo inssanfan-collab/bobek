@@ -344,6 +344,16 @@
   overflow: hidden;
 }
 
+/* Педагоги на главной — как карточки новостей и альбомов: круглые углы, без рамки. */
+[data-theme='akku'] .akku-staff .hb-staff-card {
+  border-radius: 2rem;
+  background: rgb(255 255 255);
+}
+
+[data-theme='akku'] .akku-staff .hb-staff-photo {
+  box-shadow: 0 0 0 4px rgb(255 255 255), 0 0 0 6px rgb(var(--akku-lilac));
+}
+
 [data-theme='akku'] .akku-contacts .card {
   border: 0;
   background: linear-gradient(135deg, rgb(var(--akku-sky)), rgb(var(--akku-lilac)));
