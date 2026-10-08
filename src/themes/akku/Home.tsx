@@ -49,7 +49,13 @@ export function AkkuHome({ profile, sections, news, announcements, albums, local
             <Swan className="akku-doodle akku-pond-swan" />
             {badge ? (
               <p className="akku-pond-badge">
-                <Swan round className="h-10 w-10 shrink-0" />
+                {/* Логотип сада, а без него — лебедь темы (как в шапке). */}
+                {profile?.logoMediaId ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- файл отдаёт /api/media
+                  <img src={`/api/media/${profile.logoMediaId}`} alt="" className="akku-logo h-10 w-10 shrink-0 bg-white object-contain" />
+                ) : (
+                  <Swan round className="h-10 w-10 shrink-0" />
+                )}
                 <span>{badge}</span>
               </p>
             ) : null}

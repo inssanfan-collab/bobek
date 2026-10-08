@@ -21,7 +21,12 @@ export function AkkuFooter({ profile, sections, locale, portalDomain }: ThemeFoo
         <Cloud className="akku-doodle akku-footer-cloud" />
         <div className="container-page relative grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <Swan round className="mb-3 h-16 w-16" />
+            {profile?.logoMediaId ? (
+              // eslint-disable-next-line @next/next/no-img-element -- файл отдаёт /api/media
+              <img src={`/api/media/${profile.logoMediaId}`} alt="" className="akku-logo mb-3 h-16 w-16 bg-white object-contain" />
+            ) : (
+              <Swan round className="mb-3 h-16 w-16" />
+            )}
             <p className="akku-footer-name font-display">{pick(locale, profile?.nameKk, profile?.nameRu)}</p>
             {address ? <p className="mt-2 text-sm">{address}</p> : null}
             {profile?.workHours ? <p className="mt-1 text-sm">{profile.workHours}</p> : null}
