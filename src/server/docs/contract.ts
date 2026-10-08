@@ -19,9 +19,30 @@ export async function portalSettings() {
   return prisma.portalSettings.create({ data: { id: 'singleton' } });
 }
 
-/** Год в номере — чтобы нумерация начиналась заново каждый январь. */
-function numberFor(year: number, sequence: number): string {
+/**
+ * Номер договора: EDU-<год заключения>-<порядковый номер>. Год — когда
+ * договор заключён (оформлен), а не когда начинается оплаченный период:
+ * договор, подписанный в декабре на следующий год, — договор этого года.
+ * Порядковый номер владелец может вписать сам (сверка с бухгалтерией),
+ * по умолчанию — следующий свободный в году. Нумерация каждый январь заново.
+ */
+export function numberFor(year: number, sequence: number): string {
   return `EDU-${year}-${String(sequence).padStart(4, '0')}`;
+}
+
+export const MAX_SEQUENCE = 9999;
+
+/** Следующий свободный порядковый номер года: наибольший + 1, а не «сколько есть + 1» — номера бывают вписаны руками. */
+export async function nextSequence(year: number): Promise<number> {
+  const numbers = await prisma.contract.findMany({ where: { number: { startsWith: `EDU-${year}-` } }, select: { number: true } });
+  const used = numbers.map((c) => Number.parseInt(c.number.slice(`EDU-${year}-`.length), 10)).filter(Number.isFinite);
+  return Math.max(0, ...used) + 1;
+}
+
+export class ContractNumberTaken extends Error {
+  constructor(readonly number: string) {
+    super(`Номер ${number} уже занят`);
+  }
 }
 
 export async function createContract(input: {
@@ -30,27 +51,36 @@ export async function createContract(input: {
   periodEnd: Date;
   amount: number;
   plan: PlanCode;
+  /** Порядковый номер в году; не задан — следующий свободный. */
+  sequence?: number | null;
 }) {
-  const year = input.periodStart.getFullYear();
+  const issuedAt = new Date();
+  const year = issuedAt.getFullYear();
+  const number = numberFor(year, input.sequence ?? (await nextSequence(year)));
 
-  // Считаем в транзакции: два договора, созданные в одну секунду,
-  // иначе получили бы один номер, а он уникален в базе.
-  return prisma.$transaction(async (tx) => {
-    const issued = await tx.contract.count({
-      where: { number: { startsWith: `EDU-${year}-` } },
-    });
-
-    return tx.contract.create({
-      data: {
-        tenantId: input.tenantId,
-        number: numberFor(year, issued + 1),
-        periodStart: input.periodStart,
-        periodEnd: input.periodEnd,
-        amount: input.amount,
-        plan: input.plan,
-      },
-    });
+  // Номер уникален в базе: занятый (вписанный руками или созданный в ту же
+  // секунду) — понятная ошибка вместо падения на ограничении.
+  if (await prisma.contract.findUnique({ where: { number } })) throw new ContractNumberTaken(number);
+  return prisma.contract.create({
+    data: {
+      tenantId: input.tenantId,
+      number,
+      issuedAt,
+      periodStart: input.periodStart,
+      periodEnd: input.periodEnd,
+      amount: input.amount,
+      plan: input.plan,
+    },
   });
+}
+
+/** Поменять порядковый номер уже оформленного договора; год — года заключения. */
+export async function renumberContract(id: string, sequence: number) {
+  const contract = await prisma.contract.findUniqueOrThrow({ where: { id } });
+  const number = numberFor(contract.issuedAt.getFullYear(), sequence);
+  if (number === contract.number) return contract;
+  if (await prisma.contract.findUnique({ where: { number } })) throw new ContractNumberTaken(number);
+  return prisma.contract.update({ where: { id }, data: { number } });
 }
 
 /** Период по умолчанию — год с сегодняшнего дня или со дня окончания текущей подписки. */

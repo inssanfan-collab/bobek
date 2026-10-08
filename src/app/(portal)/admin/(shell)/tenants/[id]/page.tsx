@@ -13,11 +13,11 @@ import {
 } from '@/lib/labels';
 import { pick } from '@/lib/i18n';
 import {
-  addDomain, createContractAction, deleteDomain, impersonate, markContractSigned,
+  addDomain, createContractAction, deleteDomain, impersonate, markContractSigned, renumberContractAction,
   recordPayment, resetUserPassword, setPrimaryDomain, setTenantStatus, setTenantTheme, verifyDomain,
 } from '../actions';
 import { findThemeInfo, THEME_CATALOG } from '@/themes/catalog';
-import { suggestedPeriod, portalSettings } from '@/server/docs/contract';
+import { nextSequence, numberFor, suggestedPeriod, portalSettings } from '@/server/docs/contract';
 import { isPlanCode, PLAN_CODES, PLAN_INFO } from '@/lib/plans';
 
 export const dynamic = 'force-dynamic';
@@ -30,6 +30,9 @@ const T = {
     ru: 'Договор, счёт и акт — все три под одним номером. Без них государственный сад не проведёт расход.',
   },
   newContract: { kk: 'Шарт жасау', ru: 'Сформировать договор' },
+  sequence: { kk: 'Реттік №', ru: '№ по порядку' },
+  sequenceHint: { kk: 'Нөмір: %s. Жыл — шарт жасалған жыл.', ru: 'Номер будет %s. Год — год заключения договора.' },
+  renumber: { kk: 'Нөмірді өзгерту', ru: 'Изменить номер' },
   periodStart: { kk: 'Кезеңнің басы', ru: 'Начало периода' },
   periodEnd: { kk: 'Кезеңнің соңы', ru: 'Конец периода' },
   contractFile: { kk: 'Шарт', ru: 'Договор' },
@@ -151,10 +154,12 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
   const currentTheme = findThemeInfo(tenant.themeCode);
   const primary = tenant.domains.find((d) => d.isPrimary) ?? tenant.domains[0];
 
-  const [contracts, period, settings] = await Promise.all([
+  const thisYear = new Date().getFullYear();
+  const [contracts, period, settings, sequence] = await Promise.all([
     prisma.contract.findMany({ where: { tenantId: tenant.id }, orderBy: { issuedAt: 'desc' } }),
     suggestedPeriod(tenant.id),
     portalSettings(),
+    nextSequence(thisYear),
   ]);
   // Без реквизитов документы печатаются с пустыми полями — предупреждаем заранее.
   const requisitesReady = Boolean(settings.companyNameRu && settings.iban && settings.taxId);
@@ -302,7 +307,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             </Alert>
           )}
 
-          <form action={createContractAction} className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <form action={createContractAction} className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
             <input type="hidden" name={CSRF_FIELD} value={csrf} />
             <input type="hidden" name="tenantId" value={tenant.id} />
             <div>
@@ -346,9 +351,14 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                 className="field"
               />
             </div>
+            <div>
+              <label className="field-label" htmlFor="contractSequence">{T.sequence[locale]}</label>
+              <input id="contractSequence" name="sequence" type="number" min={1} max={9999} defaultValue={sequence} className="field" />
+            </div>
             <div className="flex items-end">
               <button type="submit" className="btn-primary w-full">{T.newContract[locale]}</button>
             </div>
+            <p className="field-hint sm:col-span-2 lg:col-span-6">{T.sequenceHint[locale].replace('%s', numberFor(thisYear, sequence))}</p>
           </form>
 
           {contracts.length === 0 ? (
@@ -378,6 +388,22 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                     <a href={`/admin/contracts/${contract.id}/act`} target="_blank" rel="noopener noreferrer" className="btn-secondary text-sm">
                       {T.actFile[locale]} PDF
                     </a>
+
+                    <form action={renumberContractAction} className="inline-flex items-center gap-1.5">
+                      <input type="hidden" name={CSRF_FIELD} value={csrf} />
+                      <input type="hidden" name="contractId" value={contract.id} />
+                      <label className="sr-only" htmlFor={`seq-${contract.id}`}>{T.sequence[locale]}</label>
+                      <input
+                        id={`seq-${contract.id}`}
+                        name="sequence"
+                        type="number"
+                        min={1}
+                        max={9999}
+                        defaultValue={Number.parseInt(contract.number.split('-').pop() ?? '', 10) || undefined}
+                        className="field w-24 py-1.5 text-sm"
+                      />
+                      <button type="submit" className="btn-secondary text-sm">{T.renumber[locale]}</button>
+                    </form>
 
                     <form action={markContractSigned} className="inline">
                       <input type="hidden" name={CSRF_FIELD} value={csrf} />

@@ -13,7 +13,7 @@ import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { generatePassword, hashPassword } from '@/server/auth/password';
 import { destroyAllSessions, createSession, requestMeta } from '@/server/auth/session';
 import { extendSubscription } from '@/server/subscription';
-import { createContract } from '@/server/docs/contract';
+import { ContractNumberTaken, MAX_SEQUENCE, createContract, renumberContract } from '@/server/docs/contract';
 import { isPlanCode } from '@/lib/plans';
 import { isTemplateCode, isPaletteCode } from '@/lib/templates';
 import { env } from '@/lib/env';
@@ -571,9 +571,28 @@ export async function impersonate(formData: FormData) {
   redirect(`${proto}://${targetHost}/admin/enter?t=${encodeURIComponent(token)}`);
 }
 
+/** Порядковый номер из формы: пусто — следующий свободный, иначе 1…9999. */
+function sequenceFrom(formData: FormData): number | null {
+  const raw = String(formData.get('sequence') ?? '').trim();
+  if (!raw) return null;
+  const value = Number.parseInt(raw, 10);
+  if (!/^\d+$/.test(raw) || value < 1 || value > MAX_SEQUENCE) {
+    throw new ActionError({ kk: 'Реттік нөмір — 1-ден 9999-ға дейін', ru: 'Порядковый номер — от 1 до 9999' });
+  }
+  return value;
+}
+
+function takenError(error: unknown): never {
+  if (error instanceof ContractNumberTaken) {
+    throw new ActionError({ kk: `${error.number} нөмірі бос емес`, ru: `Номер ${error.number} уже занят другим договором` });
+  }
+  throw error;
+}
+
 /**
- * Договор на новый период. Номер присваивается здесь и больше не меняется:
- * в бухгалтерии сада останется тот, что напечатали первым.
+ * Договор на новый период. Порядковый номер владелец может вписать сам,
+ * год — года заключения. Номер потом меняют только намеренно
+ * (renumberContractAction): в бухгалтерии сада он уже мог остаться.
  */
 export async function createContractAction(formData: FormData) {
   const admin = await requireSuperadmin();
@@ -597,7 +616,8 @@ export async function createContractAction(formData: FormData) {
     throw new ActionError({ kk: 'Кезең дұрыс емес', ru: 'Некорректный период' });
   }
 
-  const contract = await createContract({ tenantId, periodStart, periodEnd, amount, plan });
+  const sequence = sequenceFrom(formData);
+  const contract = await createContract({ tenantId, periodStart, periodEnd, amount, plan, sequence }).catch(takenError);
 
   await audit(admin, 'contract.create', {
     tenantId,
@@ -607,6 +627,22 @@ export async function createContractAction(formData: FormData) {
   });
 
   revalidatePath(`/admin/tenants/${tenantId}`);
+}
+
+/** Исправить порядковый номер оформленного договора. */
+export async function renumberContractAction(formData: FormData) {
+  const admin = await requireSuperadmin();
+  await assertCsrf(formData);
+  const id = String(formData.get('contractId'));
+  const sequence = sequenceFrom(formData);
+  if (!sequence) throw new ActionError({ kk: 'Реттік нөмірді жазыңыз', ru: 'Впишите порядковый номер' });
+  const before = await prisma.contract.findUnique({ where: { id } });
+  if (!before) throw new ActionError({ kk: 'Шарт табылмады', ru: 'Договор не найден' });
+  const after = await renumberContract(id, sequence).catch(takenError);
+  if (after.number !== before.number) {
+    await audit(admin, 'contract.update', { tenantId: before.tenantId, entity: 'contract', entityId: id, meta: { field: 'number', from: before.number, to: after.number } });
+  }
+  revalidatePath(`/admin/tenants/${before.tenantId}`);
 }
 
 /** Отметка, что подписанный экземпляр вернулся от сада. */
