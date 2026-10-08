@@ -10,7 +10,6 @@ const T = {
   address: { kk: 'Мекенжайымыз:', ru: 'Наш адрес:' },
   schedule: { kk: 'Жұмыс кестесі:', ru: 'Режим работы:' },
   sections: { kk: 'Бөлімдер:', ru: 'Разделы:' },
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
 } as const;
@@ -56,7 +55,6 @@ export function JasylFooter({ profile, sections, locale, portalDomain }: ThemeFo
               {profile?.phone ? (
                 <li className="flex items-center gap-3"><span className="jasyl-footer-dot"><Phone /></span><a href={`tel:${profile.phone.replace(/[^\d+]/g, '')}`} className="font-bold">{profile.phone}</a></li>
               ) : null}
-              <li><a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.queue[locale]}</a></li>
             </ul>
           </div>
           <div>

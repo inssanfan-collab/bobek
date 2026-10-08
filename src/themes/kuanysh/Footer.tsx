@@ -10,9 +10,8 @@ const T = {
   phone: { kk: 'Телефон', ru: 'Телефон' },
   info: { kk: 'Ақпарат', ru: 'Информация' },
   nav: { kk: 'Навигация', ru: 'Навигация' },
-  queueTitle: { kk: 'Балабақшаға кезек', ru: 'Очередь в детский сад' },
-  queueText: { kk: 'Кезекке Darabala.kz порталы арқылы тұрады.', ru: 'В очередь встают через портал Darabala.kz.' },
-  queue: { kk: 'Darabala.kz', ru: 'Darabala.kz' },
+  callTitle: { kk: 'Бізбен байланыс', ru: 'Связаться с нами' },
+  call: { kk: 'Қоңырау шалу', ru: 'Позвонить' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
 } as const;
@@ -60,11 +59,15 @@ export function KuanyshFooter({ profile, sections, locale, portalDomain }: Theme
             <p className="kuanysh-footer-title">{T.nav[locale]}</p>
             <SectionLinkList sections={sections} locale={locale} limit={12} className="kuanysh-footer-links text-sm" />
           </div>
-          <div className="kuanysh-footer-box">
-            <p className="kuanysh-footer-box-title">{T.queueTitle[locale]}</p>
-            <p className="mt-2 text-sm">{T.queueText[locale]}</p>
-            <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer" className="kuanysh-footer-box-btn">{T.queue[locale]}</a>
-          </div>
+          {/* Очередь в сад в каждой области своя (Darabala.kz — не везде), поэтому
+              в плашке — связь с самим садом. */}
+          {profile?.phone ? (
+            <div className="kuanysh-footer-box">
+              <p className="kuanysh-footer-box-title">{T.callTitle[locale]}</p>
+              <p className="mt-2 text-sm">{profile.phone}</p>
+              <a href={`tel:${profile.phone.replace(/[^\d+]/g, '')}`} className="kuanysh-footer-box-btn">{T.call[locale]}</a>
+            </div>
+          ) : null}
         </div>
         <div className="kuanysh-footer-bottom">
           <div className="container-page flex flex-wrap items-center justify-between gap-3 py-3 text-sm">

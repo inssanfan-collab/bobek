@@ -7,7 +7,6 @@ import { Cloud, Wave } from './Doodles';
 const T = {
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
   sections: { kk: 'Бөлімдер', ru: 'Разделы' },
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
 } as const;
 
@@ -35,9 +34,6 @@ export function AkvarelFooter({ profile, sections, locale, portalDomain }: Theme
               ) : null}
               {profile?.phoneExtra ? <li>{profile.phoneExtra}</li> : null}
               {profile?.email ? <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li> : null}
-              <li>
-                <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.queue[locale]}</a>
-              </li>
             </ul>
             <div className="mt-4">
               <SocialLinks profile={profile} locale={locale} withTitle={false} />

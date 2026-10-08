@@ -3,7 +3,6 @@ import { pick } from '@/lib/i18n';
 import type { ThemeFooterProps } from '../types';
 
 const T = {
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
 } as const;
@@ -19,9 +18,6 @@ export function ErekshFooter({ profile, sections, locale, portalDomain }: ThemeF
     <footer className="erekshe-footer">
       <div className="container-page py-8 text-center">
         <SectionLinkList sections={sections} locale={locale} limit={12} className="erekshe-footer-links text-sm" />
-        <p className="mt-5 text-sm">
-          <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.queue[locale]}</a>
-        </p>
         <p className="mt-3 text-sm">
           © {new Date().getFullYear()} {name} · {T.poweredBy[locale]}{' '}
           <a href={`https://${portalDomain}`} target="_blank" rel="noopener noreferrer" className="erekshe-footer-portal">{portalDomain}</a>

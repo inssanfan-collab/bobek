@@ -36,8 +36,8 @@ const T = {
   },
   url: { kk: 'Сілтеме мекенжайы', ru: 'Адрес ссылки' },
   urlHint: {
-    kk: 'Мысалы: darabala.kz немесе https://instagram.com/…',
-    ru: 'Например: darabala.kz или https://instagram.com/…',
+    kk: 'Мысалы: egov.kz немесе https://instagram.com/…',
+    ru: 'Например: egov.kz или https://instagram.com/…',
   },
   create: { kk: 'Құру', ru: 'Создать' },
 } as const;
@@ -132,7 +132,7 @@ export function NewSectionForm({
         {kind === 'link' ? (
           <div>
             <label className="field-label" htmlFor="new-url">{T.url[locale]} *</label>
-            <input id="new-url" name="url" required inputMode="url" className="field" placeholder="darabala.kz" />
+            <input id="new-url" name="url" required inputMode="url" className="field" placeholder="egov.kz" />
             <p className="mt-1 text-xs text-muted">{T.urlHint[locale]}</p>
           </div>
         ) : null}

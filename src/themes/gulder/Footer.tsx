@@ -4,7 +4,6 @@ import { pick } from '@/lib/i18n';
 import type { ThemeFooterProps } from '../types';
 
 const T = {
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
 } as const;
@@ -26,7 +25,6 @@ export function GulderFooter({ profile, sections, locale, portalDomain }: ThemeF
           {address ? <li>{address}</li> : null}
           {profile?.phone ? <li><a href={`tel:${profile.phone.replace(/[^\d+]/g, '')}`} className="font-bold">{profile.phone}</a></li> : null}
           {profile?.email ? <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li> : null}
-          <li><a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.queue[locale]}</a></li>
         </ul>
       </div>
       <div className="container-page flex flex-wrap items-center justify-between gap-4 pb-8">

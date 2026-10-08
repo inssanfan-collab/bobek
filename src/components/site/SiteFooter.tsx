@@ -9,7 +9,6 @@ const T = {
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
   sections: { kk: 'Бөлімдер', ru: 'Разделы' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
 } as const;
 
 export function SiteFooter({
@@ -45,11 +44,6 @@ export function SiteFooter({
             ) : null}
             {profile?.phoneExtra ? <li>{profile.phoneExtra}</li> : null}
             {profile?.email ? <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li> : null}
-            <li>
-              <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">
-                {T.queue[locale]}
-              </a>
-            </li>
           </ul>
 
           <div className="mt-4">

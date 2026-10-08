@@ -21,7 +21,6 @@ const T = {
     kk: 'Өтінім қалдырыңыз — балабақша қызметкері хабарласып, ыңғайлы уақытты келіседі.',
     ru: 'Оставьте заявку — сотрудник сада перезвонит и договорится об удобном времени.',
   },
-  queue: { kk: 'Балабақшаға кезек — Darabala.kz', ru: 'Очередь в сад — Darabala.kz' },
 } as const;
 
 export type StaffWithPhoto = StaffMember & { photo: Media | null };
@@ -124,20 +123,18 @@ export function GroupCards({ groups, locale, className }: { groups: Group[]; loc
 
 /**
  * Полоса «Записаться на экскурсию»: ведёт на виртуальную приёмную сада —
- * там форма с защитой от спама. Без приёмной — на очередь Darabala.kz.
+ * там форма с защитой от спама. Без приёмной полосы нет (на Darabala.kz
+ * не ведём: очередь в каждой области своя).
  */
 export function EnrollBand({ feedbackSlug, locale, className }: { feedbackSlug?: string | null; locale: Locale; className?: string }) {
+  if (!feedbackSlug) return null;
   return (
     <section data-block="enroll" className={className ?? 'card flex flex-wrap items-center justify-between gap-4 p-6'}>
       <div className="max-w-xl">
         <h2 className="hb-enroll-title">{T.enroll[locale]}</h2>
         <p className="hb-enroll-lead">{T.enrollLead[locale]}</p>
       </div>
-      {feedbackSlug ? (
-        <SiteLink href={`/${feedbackSlug}`} locale={locale} className="btn-primary hb-enroll-button">{T.enroll[locale]}</SiteLink>
-      ) : (
-        <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer" className="btn-primary hb-enroll-button">{T.queue[locale]}</a>
-      )}
+      <SiteLink href={`/${feedbackSlug}`} locale={locale} className="btn-primary hb-enroll-button">{T.enroll[locale]}</SiteLink>
     </section>
   );
 }

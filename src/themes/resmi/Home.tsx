@@ -10,7 +10,6 @@ const T = {
   latest: { kk: 'Соңғы жаңалықтар', ru: 'Последние новости' },
   more: { kk: 'Толығырақ', ru: 'Подробнее' },
   important: { kk: 'Маңызды', ru: 'Важно' },
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   egov: { kk: 'Мемлекеттік қызметтер (eGov.kz)', ru: 'Государственные услуги (eGov.kz)' },
   newTab: { kk: 'жаңа терезеде ашылады', ru: 'откроется в новой вкладке' },
   docs: { kk: 'Соңғы құжаттар', ru: 'Последние документы' },
@@ -139,12 +138,6 @@ export function ResmiHome({ profile, news, announcements, albums, locale, docume
         <section aria-labelledby="resmi-important" className="resmi-card resmi-panel">
           <h2 id="resmi-important" className="resmi-panel-title">{T.important[locale]}</h2>
           <ul className="space-y-1">
-            <li>
-              <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer" className="resmi-important resmi-important-main">
-                <Icon d={ICON.queue} />
-                <span>{T.queue[locale]}<span className="sr-only"> ({T.newTab[locale]})</span></span>
-              </a>
-            </li>
             <li>
               <a href="https://egov.kz" target="_blank" rel="noopener noreferrer" className="resmi-important">
                 <Icon d={ICON.egov} />

@@ -313,7 +313,7 @@ async function readSectionForm(
   }
   if (options.type === 'LINK') {
     url = normalizeLinkUrl(str(formData, 'url'));
-    if (!url) sectionError('Сілтеме мекенжайын тексеріңіз', 'Проверьте адрес ссылки — например, darabala.kz или https://…');
+    if (!url) sectionError('Сілтеме мекенжайын тексеріңіз', 'Проверьте адрес ссылки — например, egov.kz или https://…');
   }
 
   return { titleRu, titleKk, slug, parentId, folderId, url };

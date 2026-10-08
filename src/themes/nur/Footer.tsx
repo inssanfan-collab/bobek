@@ -4,7 +4,6 @@ import { pick } from '@/lib/i18n';
 import type { ThemeFooterProps } from '../types';
 
 const T = {
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
 } as const;
@@ -24,8 +23,6 @@ export function NurFooter({ profile, sections, locale, portalDomain }: ThemeFoot
         <p>
           © {new Date().getFullYear()} {name} · {T.poweredBy[locale]}{' '}
           <a href={`https://${portalDomain}`} target="_blank" rel="noopener noreferrer" className="nur-footer-portal">{portalDomain}</a>
-          {' · '}
-          <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.queue[locale]}</a>
           {' · '}
           <a href="#" className="font-bold">↑ {T.top[locale]}</a>
         </p>

@@ -9,7 +9,6 @@ const T = {
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
   call: { kk: 'Қоңырау шалу', ru: 'Позвонить' },
   social: { kk: 'Әлеуметтік желі', ru: 'Соцсети' },
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
 } as const;
@@ -50,7 +49,6 @@ export function ShuaqFooter({ profile, sections, locale, portalDomain }: ThemeFo
             <ul className="space-y-1.5 break-words text-sm">
               {profile?.email ? <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li> : null}
               {profile?.phoneExtra ? <li>{profile.phoneExtra}</li> : null}
-              <li><a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.queue[locale]}</a></li>
             </ul>
             <div className="shuaq-footer-social mt-4">
               <SocialLinks profile={profile} locale={locale} withTitle={false} />

@@ -8,7 +8,6 @@ const T = {
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
   address: { kk: 'Мекенжайымыз', ru: 'Наш адрес' },
   sections: { kk: 'Бөлімдер', ru: 'Разделы' },
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
 } as const;
@@ -51,8 +50,6 @@ export function MamyqFooter({ profile, sections, locale, portalDomain }: ThemeFo
         <p className="mt-5">
           © {new Date().getFullYear()} {name} · {T.poweredBy[locale]}{' '}
           <a href={`https://${portalDomain}`} target="_blank" rel="noopener noreferrer" className="mamyq-footer-portal">{portalDomain}</a>
-          {' · '}
-          <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.queue[locale]}</a>
           {' · '}
           <a href="#" className="font-bold">↑ {T.top[locale]}</a>
         </p>

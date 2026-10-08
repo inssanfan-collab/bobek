@@ -8,7 +8,6 @@ const LETTERS = ['#FCA5A5', '#FDBA74', '#86EFAC', '#93C5FD', '#D8B4FE', '#F9A8D4
 const T = {
   sections: { kk: 'Бөлімдер', ru: 'Разделы' },
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
 } as const;
@@ -52,7 +51,6 @@ export function KosaqFooter({ profile, sections, locale, portalDomain }: ThemeFo
             {profile?.workHours ? <li>{profile.workHours}</li> : null}
             {profile?.phone ? <li><a href={`tel:${profile.phone.replace(/[^\d+]/g, '')}`} className="font-bold">{profile.phone}</a></li> : null}
             {profile?.email ? <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li> : null}
-            <li><a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.queue[locale]}</a></li>
           </ul>
           <div className="kosaq-footer-social mt-4"><SocialLinks profile={profile} locale={locale} withTitle={false} /></div>
         </div>

@@ -2,7 +2,6 @@ import { pick } from '@/lib/i18n';
 import type { ThemeFooterProps } from '../types';
 
 const T = {
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
 } as const;
 
@@ -20,11 +19,6 @@ export function ObrazecFooter({ profile, locale, portalDomain }: ThemeFooterProp
             <a href={`tel:${profile.phone.replace(/\s/g, '')}`} className="font-semibold">{profile.phone}</a>
           </p>
         ) : null}
-        <p>
-          <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer" className="underline">
-            {T.queue[locale]}
-          </a>
-        </p>
         <p className="pt-4 opacity-70">
           {T.poweredBy[locale]}{' '}
           <a href={`https://${portalDomain}`} target="_blank" rel="noopener noreferrer" className="font-semibold">

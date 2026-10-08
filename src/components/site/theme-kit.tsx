@@ -17,10 +17,8 @@ import { pick, type Locale } from '@/lib/i18n';
 
 const T = {
   enroll: { kk: 'Экскурсияға жазылу', ru: 'Записаться на экскурсию' },
-  queue: { kk: 'Кезекке тұру', ru: 'Встать в очередь' },
   sections: { kk: 'Бөлімдер', ru: 'Разделы' },
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
-  darabala: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
 } as const;
@@ -169,14 +167,16 @@ export function aboutSection(menu: Section[] | undefined): Section | undefined {
   return menu?.find((section) => section.slug === 'about') ?? findSection(menu, 'PAGE');
 }
 
-/** Кнопка записи: на виртуальную приёмную сада, а без неё — на очередь Darabala.kz. */
+/**
+ * Кнопка записи: на виртуальную приёмную сада, без неё — в «Контакты», а нет
+ * и их — кнопки нет. На Darabala.kz не ведём: очередь в каждой области своя,
+ * и сад из другой области на чужой портал родителей не отправляет.
+ */
 export function EnrollLink({ menu, locale, className, children }: { menu?: Section[]; locale: Locale; className?: string; children?: ReactNode }) {
-  const feedback = findSection(menu, 'FEEDBACK');
-  return feedback ? (
-    <SiteLink href={`/${feedback.slug}`} locale={locale} className={className}>{children ?? T.enroll[locale]}</SiteLink>
-  ) : (
-    <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer" className={className}>{children ?? T.queue[locale]}</a>
-  );
+  const target = findSection(menu, 'FEEDBACK') ?? findSection(menu, 'CONTACTS');
+  return target ? (
+    <SiteLink href={`/${target.slug}`} locale={locale} className={className}>{children ?? T.enroll[locale]}</SiteLink>
+  ) : null;
 }
 
 function telHref(phone: string): string {
@@ -287,7 +287,6 @@ export function KitFooter({
               {profile?.phone ? <li><a href={telHref(profile.phone)} className="font-bold">{profile.phone}</a></li> : null}
               {profile?.phoneExtra ? <li>{profile.phoneExtra}</li> : null}
               {profile?.email ? <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li> : null}
-              <li><a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.darabala[locale]}</a></li>
             </ul>
             <div className={`${prefix}-footer-social mt-4`}>
               <SocialLinks profile={profile} locale={locale} withTitle={false} />

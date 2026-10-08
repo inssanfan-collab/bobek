@@ -8,7 +8,6 @@ const T = {
   find: { kk: 'Іздеу', ru: 'Найти' },
   sections: { kk: 'Сайт бөлімдері', ru: 'Разделы сайта' },
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   newTab: { kk: 'жаңа терезеде ашылады', ru: 'откроется в новой вкладке' },
   news: { kk: 'Жаңалықтар', ru: 'Новости' },
   year: { kk: 'жыл', ru: 'год' },
@@ -57,11 +56,6 @@ export function AkordaFooter({ profile, sections, locale, portalDomain }: ThemeF
                 {profile?.phoneExtra ? <li><span>{profile.phoneExtra}</span></li> : null}
                 {profile?.email ? <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li> : null}
                 {profile?.workHours ? <li><span>{profile.workHours}</span></li> : null}
-                <li>
-                  <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">
-                    {T.queue[locale]}<span className="sr-only"> ({T.newTab[locale]})</span>
-                  </a>
-                </li>
               </ul>
               <p className="akorda-map-title akorda-map-title-link"><SiteLink href="/news" locale={locale}>{T.news[locale]}</SiteLink></p>
             </div>

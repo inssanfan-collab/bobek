@@ -8,7 +8,6 @@ const T = {
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
   bin: { kk: 'БСН', ru: 'БИН' },
   license: { kk: 'Лицензия', ru: 'Лицензия' },
-  queue: { kk: 'Балабақшаға кезек (Darabala.kz)', ru: 'Очередь в детский сад (Darabala.kz)' },
   languages: { kk: 'Сайт қазақ және орыс тілдерінде жүргізіледі.', ru: 'Сайт ведётся на казахском и русском языках.' },
   top: { kk: 'Жоғары', ru: 'Наверх' },
   poweredBy: { kk: 'Сайт жасалған', ru: 'Сайт работает на платформе' },
@@ -43,7 +42,6 @@ export function ResmiFooter({ profile, sections, locale, portalDomain }: ThemeFo
             {profile?.phoneExtra ? <li>{profile.phoneExtra}</li> : null}
             {profile?.email ? <li><a href={`mailto:${profile.email}`}>{profile.email}</a></li> : null}
             {profile?.workHours ? <li>{profile.workHours}</li> : null}
-            <li><a href="https://darabala.kz" target="_blank" rel="noopener noreferrer">{T.queue[locale]}</a></li>
           </ul>
           <div className="resmi-footer-social mt-4">
             <SocialLinks profile={profile} locale={locale} withTitle={false} />

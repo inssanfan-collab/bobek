@@ -489,19 +489,6 @@ export function VacanciesBlock({
       <div className="card p-6">
         <p className="text-sm text-muted">{locale === 'kk' ? 'Барлығы бос орын' : 'Всего свободных мест'}</p>
         <p className="font-display text-4xl font-extrabold">{profile?.placesFree ?? 0}</p>
-        <p className="mt-2 text-sm text-muted">
-          {locale === 'kk'
-            ? 'Кезекке тұру — Darabala.kz порталы арқылы.'
-            : 'Постановка в очередь — через портал Darabala.kz.'}
-        </p>
-        <a
-          href="https://darabala.kz"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-secondary mt-4 text-sm"
-        >
-          {locale === 'kk' ? 'Нұсқаулық' : 'Как встать в очередь'} →
-        </a>
       </div>
 
       {withFree.length > 0 ? <GroupList groups={withFree} locale={locale} /> : null}
