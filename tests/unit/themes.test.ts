@@ -137,3 +137,23 @@ describe('главная темы показывает то, что публик
     });
   }
 });
+
+describe('пометка uses в каталоге совпадает с главной темы', () => {
+  // По ней админка сада решает, какие настройки «Внешнего вида» показывать:
+  // соврала пометка — заведующая либо не найдёт обложку, либо будет менять
+  // то, что на сайте ни на что не влияет.
+  for (const theme of THEMES) {
+    const home = path.join(ROOT, theme.code, 'Home.tsx');
+    try {
+      statSync(home);
+    } catch {
+      continue;
+    }
+    it(theme.code, () => {
+      const source = readFileSync(home, 'utf8');
+      const uses = theme.uses ?? [];
+      expect(uses.includes('cover'), 'обложка (coverUrl)').toBe(/\bcoverUrl\b/.test(source));
+      expect(uses.includes('homeBlocks'), 'блоки главной (showContacts)').toBe(/\bshowContacts\b/.test(source));
+    });
+  }
+});

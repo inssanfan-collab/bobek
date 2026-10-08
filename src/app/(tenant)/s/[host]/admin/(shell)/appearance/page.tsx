@@ -99,8 +99,16 @@ const T = {
   },
   headerTextsLink: { kk: 'Тақырыпша мәтіндері →', ru: 'Тексты и кнопка шапки →' },
   customTheme: {
-    kk: 'Сайтыңыз «%s» жеке дизайнымен көрсетіледі. Төмендегі шаблон мен түстер ол өшірілгенде ғана қолданылады. Логотип пен мұқаба жеке дизайнда да жұмыс істейді.',
-    ru: 'Ваш сайт показывается в индивидуальном дизайне «%s». Шаблон и цвета ниже применятся, только если его отключить. Логотип и обложка работают и в индивидуальном дизайне.',
+    kk: 'Сайтыңыз «%s» жеке дизайнымен безендірілген: түстерді, қаріптерді, тақырыпшаны және басты бетті сол салады, сондықтан олардың баптаулары мұнда көрсетілмейді. Бұрынғы баптауларыңыз сақталған — дизайн өшірілсе, қайта қолданылады.',
+    ru: 'Ваш сайт оформлен в индивидуальном дизайне «%s»: цвета, шрифты, шапку и главную страницу рисует он, поэтому их настроек здесь нет. Прежние настройки сохранены — они вернутся, если дизайн отключат.',
+  },
+  leadTheme: {
+    kk: 'Логотип, сайттың тілі және тақырыпшаны бекіту. Қалған безендіруді жеке дизайн белгілейді.',
+    ru: 'Логотип, язык сайта и закрепление шапки. Остальное оформление задаёт индивидуальный дизайн.',
+  },
+  headerBlockHintTheme: {
+    kk: 'Тақырыпшаның түрі мен түсі — жеке дизайнда. Атау астындағы жазу, телефон мен батырма — «Басты бет» бөлімінде.',
+    ru: 'Вид и цвет шапки задаёт индивидуальный дизайн. Подпись под названием, телефон и кнопка — на странице «Главная страница».',
   },
 } as const;
 
@@ -117,6 +125,12 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
   const ctx = await tenantAdmin(host);
   const locale = ctx.user.locale;
   const theme = findThemeInfo(ctx.themeCode);
+  // При индивидуальном дизайне видно только то, что на сайте действует.
+  // Остальное не удаляем, а прячем (hidden): значения уходят с формой
+  // и сохраняются, и при отключении дизайна у сада вернутся его настройки.
+  const own = !theme;
+  const showCover = own || Boolean(theme?.uses?.includes('cover'));
+  const showHomeBlocks = own || Boolean(theme?.uses?.includes('homeBlocks'));
 
   const [profile, csrf, layout, rootSections] = await Promise.all([
     prisma.tenantProfile.findUnique({ where: { tenantId: ctx.tenantId } }),
@@ -150,7 +164,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
     <>
       <PageHeader
         title={T.title[locale]}
-        description={T.lead[locale]}
+        description={own ? T.lead[locale] : T.leadTheme[locale]}
       />
 
       {theme ? (
@@ -165,7 +179,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
         <input type="hidden" name="coverMediaId" defaultValue={profile?.coverMediaId ?? ''} />
         <input type="hidden" name="logoMediaId" defaultValue={profile?.logoMediaId ?? ''} />
 
-        <section className="card p-6">
+        <section className="card p-6" hidden={!own}>
           <h2 className="font-display text-lg font-bold">{T.presets[locale]}</h2>
           <div className="mt-2">
             <PresetPicker locale={locale} />
@@ -178,12 +192,12 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="font-display text-lg font-bold">{T.headerBlock[locale]}</h2>
-              <p className="mt-1 text-sm text-muted">{T.headerBlockHint[locale]}</p>
+              <p className="mt-1 text-sm text-muted">{own ? T.headerBlockHint[locale] : T.headerBlockHintTheme[locale]}</p>
             </div>
             <Link href="/admin/homepage" className="btn-secondary text-sm">{T.headerTextsLink[locale]}</Link>
           </div>
 
-          <fieldset>
+          <fieldset hidden={!own}>
             <legend className="font-semibold">{T.headerLayout[locale]}</legend>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               {HEADER_LAYOUTS.map((item) => (
@@ -216,7 +230,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
             </div>
           </fieldset>
 
-          <fieldset>
+          <fieldset hidden={!own}>
             <legend className="font-semibold">{T.headerStyle[locale]}</legend>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               {HEADER_STYLES.map((style) => (
@@ -270,7 +284,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
           </div>
         </fieldset>
 
-        <fieldset className="card p-6">
+        <fieldset className="card p-6" hidden={!own}>
           <legend className="font-display text-lg font-bold">{T.template[locale]}</legend>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {TEMPLATES.map((template) => (
@@ -292,7 +306,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
           </div>
         </fieldset>
 
-        <fieldset className="card p-6">
+        <fieldset className="card p-6" hidden={!own}>
           <legend className="font-display text-lg font-bold">{T.palette[locale]}</legend>
           <div className="mt-4 flex flex-wrap gap-2">
             {PALETTES.map((palette) => (
@@ -343,7 +357,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
           </div>
         </fieldset>
 
-        <fieldset className="card p-6">
+        <fieldset className="card p-6" hidden={!own}>
           <legend className="font-display text-lg font-bold">{T.fonts[locale]}</legend>
           <p className="mt-1 text-sm text-muted">{T.fontsHint[locale]}</p>
           {/* Все пары — только здесь, чтобы образцы были в своих шрифтах. На сайт грузится одна. */}
@@ -369,7 +383,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
           </div>
         </fieldset>
 
-        <fieldset className="card p-6">
+        <fieldset className="card p-6" hidden={!own}>
           <legend className="font-display text-lg font-bold">{T.shape[locale]}</legend>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {SHAPES.map((shape) => (
@@ -390,7 +404,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
           </div>
         </fieldset>
 
-        <fieldset className="card p-6">
+        <fieldset className="card p-6" hidden={!own}>
           <legend className="font-display text-lg font-bold">{T.pattern[locale]}</legend>
           <p className="mt-1 text-sm text-muted">{T.patternHint[locale]}</p>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -412,7 +426,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
           </div>
         </fieldset>
 
-        <fieldset className="card p-6">
+        <fieldset className="card p-6" hidden={!showCover}>
           <legend className="font-display text-lg font-bold">{T.focus[locale]}</legend>
           <p className="mt-1 text-sm text-muted">{T.focusHint[locale]}</p>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -439,7 +453,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
             <h2 className="font-display text-lg font-bold">{T.images[locale]}</h2>
           </div>
 
-          <div>
+          <div hidden={!showCover}>
             <label className="field-label" htmlFor="cover">{T.cover[locale]}</label>
             {profile?.coverMediaId ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -459,7 +473,7 @@ export default async function AppearancePage({ params }: { params: Promise<{ hos
           </div>
         </section>
 
-        <fieldset className="card space-y-5 p-6">
+        <fieldset className="card space-y-5 p-6" hidden={!showHomeBlocks}>
           <legend className="font-display text-lg font-bold">{T.layout[locale]}</legend>
 
           <div>
