@@ -37,6 +37,7 @@ const ACTION_LABEL: Record<string, { kk: string; ru: string }> = {
   'user.reset_password': { kk: 'Құпия сөз тасталды', ru: 'Сброшен пароль' },
   'user.deactivate': { kk: 'Пайдаланушы өшірілді', ru: 'Пользователь отключён' },
   'user.activate': { kk: 'Пайдаланушы қосылды', ru: 'Пользователь включён' },
+  'user.rename': { kk: 'Пайдаланушының аты-жөні өзгертілді', ru: 'Изменено ФИО пользователя' },
   'subscription.extend': { kk: 'Жазылым ұзартылды', ru: 'Продлена подписка' },
   'payment.record': { kk: 'Төлем белгіленді', ru: 'Отмечена оплата' },
   'content.create': { kk: 'Материал құрылды', ru: 'Создан материал' },

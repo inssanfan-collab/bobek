@@ -23,6 +23,7 @@ export type AuditAction =
   | 'user.reset_password'
   | 'user.deactivate'
   | 'user.activate'
+  | 'user.rename'
   | 'subscription.extend'
   | 'payment.record'
   | 'contract.create'

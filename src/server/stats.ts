@@ -5,6 +5,19 @@ import { prisma } from '@/server/db';
 const BOT = /bot|crawler|spider|crawling|slurp|facebookexternalhit|preview|monitor|curl|wget|headless/i;
 
 /**
+ * Не посещение: бот, превью ссылки или заранее подгруженная страница. Next
+ * подгружает страницы по ссылкам, видным на экране (меню, плитки, карточки),
+ * — запрос с заголовком Next-Router-Prefetch. Их считали, и сайт с двадцатью
+ * пунктами меню «посещали» в десятки раз чаще, чем открывали на самом деле.
+ * Переход по ссылке (запрос RSC без этого заголовка) — настоящее посещение.
+ */
+async function notAVisit(): Promise<boolean> {
+  const list = await headers();
+  const userAgent = list.get('user-agent') ?? '';
+  return !userAgent || BOT.test(userAgent) || list.has('next-router-prefetch') || list.get('purpose') === 'prefetch';
+}
+
+/**
  * Учёт посещаемости по дням.
  *
  * Зачем: сад не видит, читает ли кто-нибудь его сайт, и через год не понимает,
@@ -16,8 +29,7 @@ const BOT = /bot|crawler|spider|crawling|slurp|facebookexternalhit|preview|monit
  */
 export async function recordVisit(tenantId: string): Promise<void> {
   try {
-    const userAgent = (await headers()).get('user-agent') ?? '';
-    if (!userAgent || BOT.test(userAgent)) return;
+    if (await notAVisit()) return;
 
     const now = new Date();
     const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -36,8 +48,7 @@ export async function recordVisit(tenantId: string): Promise<void> {
 /** Просмотры конкретной публикации — сад видит, какая новость зашла. */
 export async function recordPostView(postId: string): Promise<void> {
   try {
-    const userAgent = (await headers()).get('user-agent') ?? '';
-    if (!userAgent || BOT.test(userAgent)) return;
+    if (await notAVisit()) return;
     await prisma.post.update({ where: { id: postId }, data: { viewCount: { increment: 1 } } });
   } catch {
     /* не критично */

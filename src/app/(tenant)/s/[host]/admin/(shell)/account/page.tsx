@@ -6,12 +6,21 @@ import { Alert } from '@/components/ui/Alert';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { ROLE } from '@/lib/labels';
 import { ActionForm } from '@/components/ActionForm';
-import { changeOwnPassword } from '../actions';
+import { changeOwnName, changeOwnPassword } from '../actions';
 
 export const dynamic = 'force-dynamic';
 
 const T = {
-  title: { kk: 'Құпия сөзім', ru: 'Мой пароль' },
+  title: { kk: 'Менің профилім', ru: 'Мой профиль' },
+  nameTitle: { kk: 'Сізге қалай жүгінеміз', ru: 'Как к вам обращаться' },
+  nameLabel: { kk: 'Тегі, аты, әкесінің аты', ru: 'Фамилия, имя, отчество' },
+  nameHint: {
+    kk: 'Әкімші бөлімі сізбен осылай амандасады. Лауазымды мұнда жазудың қажеті жоқ.',
+    ru: 'Так к вам обращается админка. Должность сюда писать не нужно.',
+  },
+  nameSave: { kk: 'Сақтау', ru: 'Сохранить' },
+  nameSaved: { kk: 'Аты-жөні сақталды.', ru: 'ФИО сохранено.' },
+  passwordTitle: { kk: 'Құпия сөз', ru: 'Пароль' },
   setOwn: { kk: 'Өз құпия сөзіңізді қойыңыз', ru: 'Задайте свой пароль' },
   setOwnHint: {
     kk: 'Қазір портал әкімшісі берген уақытша құпия сөз қолданылып тұр.',
@@ -36,8 +45,15 @@ const T = {
   },
 } as const;
 
-export default async function AccountPage({ params }: { params: Promise<{ host: string }> }) {
+export default async function AccountPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ host: string }>;
+  searchParams: Promise<{ saved?: string }>;
+}) {
   const { host } = await params;
+  const saved = (await searchParams).saved === 'name';
   const ctx = await tenantAdmin(host);
   const csrf = await csrfToken();
   const locale = ctx.user.locale;
@@ -54,7 +70,21 @@ export default async function AccountPage({ params }: { params: Promise<{ host: 
         </div>
       ) : null}
 
+      <ActionForm action={changeOwnName} className="card mb-6 max-w-md space-y-4 p-6">
+        <input type="hidden" name={CSRF_FIELD} value={csrf} />
+        <input type="hidden" name="host" value={host} />
+        <h2 className="font-display text-lg font-bold">{T.nameTitle[locale]}</h2>
+        {saved ? <Alert tone="success">{T.nameSaved[locale]}</Alert> : null}
+        <div>
+          <label className="field-label" htmlFor="fullName">{T.nameLabel[locale]}</label>
+          <input id="fullName" name="fullName" required minLength={3} maxLength={120} autoComplete="name" defaultValue={ctx.user.fullName} className="field" />
+          <p className="field-hint">{T.nameHint[locale]}</p>
+        </div>
+        <SubmitButton>{T.nameSave[locale]}</SubmitButton>
+      </ActionForm>
+
       <ActionForm action={changeOwnPassword} className="card max-w-md space-y-4 p-6">
+        <h2 className="font-display text-lg font-bold">{T.passwordTitle[locale]}</h2>
         <input type="hidden" name={CSRF_FIELD} value={csrf} />
         <input type="hidden" name="host" value={host} />
 

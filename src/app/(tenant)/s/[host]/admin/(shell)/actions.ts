@@ -1257,6 +1257,31 @@ export async function changeOwnPassword(_prev: ActionState, formData: FormData):
   }
 }
 
+/**
+ * Своё ФИО. Им админка здоровается («Здравствуйте, Елена Николаевна»)
+ * и подписывает действия в журнале. Должность сюда не пишут — при создании
+ * учётной записи её иногда вписывали перед фамилией, и приветствие выходило
+ * «Здравствуйте, Методист». Как и пароль, доступно и в режиме только чтения.
+ */
+export async function changeOwnName(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  try {
+    const host = String(formData.get('host') ?? '');
+    const ctx = await tenantAdmin(host);
+    await assertCsrf(formData);
+    const fullName = String(formData.get('fullName') ?? '').replace(/\s+/g, ' ').trim();
+    if (fullName.length < 3 || fullName.length > 120) {
+      throw new ActionError({ kk: 'Аты-жөніңізді толық жазыңыз', ru: 'Укажите фамилию, имя и отчество полностью' });
+    }
+    if (fullName !== ctx.user.fullName) {
+      await prisma.user.update({ where: { id: ctx.user.id }, data: { fullName } });
+      await audit(ctx.user, 'user.rename', { tenantId: ctx.tenantId, entity: 'user', entityId: ctx.user.id, meta: { from: ctx.user.fullName, to: fullName } });
+    }
+    return { redirectTo: await hostUrl('/admin/account?saved=name') };
+  } catch (error) {
+    return toActionError(error, (await getCurrentUser())?.locale);
+  }
+}
+
 // ─────────────────────────── Кружки и услуги ───────────────────────────
 
 export async function saveClub(formData: FormData) {
