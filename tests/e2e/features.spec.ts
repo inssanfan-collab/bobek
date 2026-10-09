@@ -93,6 +93,8 @@ test.describe('Посещаемость', () => {
     await page.request.get(site('sad12'), {
       headers: { 'user-agent': 'Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)' },
     });
+    // Наш сторож на сервере проверяет главную раз в 5 минут — это тоже не посетитель.
+    await page.request.get(site('sad12'), { headers: { 'user-agent': 'EduSad-watchdog' } });
 
     expect(await todayViews(page)).toBe(before);
   });

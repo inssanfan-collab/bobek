@@ -3,7 +3,10 @@ import { createHash } from 'node:crypto';
 import { headers } from 'next/headers';
 import { prisma } from '@/server/db';
 
-const BOT = /bot|crawler|spider|crawling|slurp|facebookexternalhit|preview|monitor|curl|wget|headless/i;
+// watchdog — наш собственный сторож (EduSad-watchdog): раз в 5 минут открывает
+// главную каждого сада и до 09.10.2026 считался посетителем — 288 «заходов»
+// в сутки на каждый адрес сайта.
+const BOT = /bot|crawler|spider|crawling|slurp|facebookexternalhit|preview|monitor|watchdog|curl|wget|headless/i;
 
 /**
  * Не посещение: бот, превью ссылки или заранее подгруженная страница. Next
