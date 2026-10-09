@@ -19,7 +19,8 @@
 
 Итог пишется в /var/lib/edusad/backup.json — его показывает админка
 портала, раздел «Сервер». Не получилось — письмо на NOTIFY_EMAIL из .env
-в обход приложения, через sendmail, как у сторожа.
+в обход приложения, через sendmail, как у сторожа, и push на телефон
+(pnpm push:owner).
 
 Восстановление — vsesad-restore <файл>.
 """
@@ -50,7 +51,24 @@ def env_value(name: str) -> str:
     return ''
 
 
+def push(subject: str, body: str) -> None:
+    """Push на телефон владельца (админка портала, раздел «Уведомления»).
+
+    Через pnpm push:owner — тот работает с базой напрямую и не зависит от того,
+    живо ли приложение. Не вышло — не беда: письмо уходит всё равно.
+    """
+    try:
+        subprocess.run(
+            ['/usr/bin/node', '/usr/lib/node_modules/corepack/dist/pnpm.js', 'push:owner',
+             subject[:1].upper() + subject[1:], body, '/admin/system'],
+            cwd='/var/www/vsesad', capture_output=True, check=False, timeout=90,
+        )
+    except Exception:
+        pass
+
+
 def send(subject: str, body: str) -> None:
+    push(subject, body)
     to = env_value('NOTIFY_EMAIL')
     if not to:
         return
