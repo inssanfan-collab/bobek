@@ -47,6 +47,14 @@ function Submit({ locale }: { locale: Locale }) {
 export function SalesApplyForm({ csrf, locale, plan }: { csrf: string; locale: Locale; plan: PlanCode | null }) {
   const [state, action] = useActionState(submitLead, initial);
 
+  // Заявка ушла — сообщаем Google Рекламе (тег и метка — GoogleAdsTag;
+  // нет тега — ничего не происходит).
+  useEffect(() => {
+    if (!state.ok) return;
+    const w = window as typeof window & { gtag?: (...args: unknown[]) => void; __edusadLeadConversion?: string };
+    if (w.gtag && w.__edusadLeadConversion) w.gtag('event', 'conversion', { send_to: w.__edusadLeadConversion });
+  }, [state.ok]);
+
   // Конфетти после отправки — пастельное, как шарики шагов.
   useEffect(() => {
     if (!state.ok || matchMedia('(prefers-reduced-motion: reduce)').matches) return;

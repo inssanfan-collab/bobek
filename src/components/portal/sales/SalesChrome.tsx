@@ -1,6 +1,7 @@
 import { withLocale, type Locale } from '@/lib/i18n';
 import { formatPhone, phoneHref } from '@/lib/labels';
 import { portalSettings } from '@/server/docs/contract';
+import { GoogleAdsTag } from './GoogleAdsTag';
 import './sales.css';
 
 /**
@@ -65,38 +66,42 @@ const section = (locale: Locale, onHome: boolean, id: string) => (onHome ? `#${i
 export function SalesHeader({ locale, pathname, onHome = false }: { locale: Locale; pathname: string; onHome?: boolean }) {
   const kk = pathname === '/' ? '/?lang=kk' : `${pathname}?lang=kk`;
   return (
-    <header className="top">
-      <div className="wrap top-in">
-        <a className="logo" href={withLocale('/', locale)} aria-label={T.home[locale]}>
-          <PlaneLogo />
-          <b>EduSad</b>
-        </a>
-        <nav className="nav" aria-label={T.sections[locale]}>
-          <a href={section(locale, onHome, 'vid')}>{T.navLook[locale]}</a>
-          <a href={withLocale('/designs', locale)} aria-current={pathname.startsWith('/designs') ? 'page' : undefined}>{T.navDesigns[locale]}</a>
-          <a href={section(locale, onHome, 'adminka')}>{T.navFeatures[locale]}</a>
-          <a href={section(locale, onHome, 'tarify')}>{T.navPlans[locale]}</a>
-          {/* «Как подключиться» — только в подвале: по-казахски «Қалай
-              қосылуға болады» не помещался в строку меню. */}
-          <a href={section(locale, onHome, 'voprosy')}>{T.navFaq[locale]}</a>
-        </nav>
-        <div className="top-right">
-          {/* Отдельной страницей, а не разделом главной, поэтому не в меню слева:
-              меню на узком экране прячется, а инструкция нужна и там. */}
-          <a className="top-link" href={withLocale('/guide', locale)} aria-current={pathname === '/guide' ? 'page' : undefined}>
-            {T.navGuide[locale]}
+    <>
+      {/* Тег Google Рекламы — только здесь, на продающих страницах. */}
+      <GoogleAdsTag />
+      <header className="top">
+        <div className="wrap top-in">
+          <a className="logo" href={withLocale('/', locale)} aria-label={T.home[locale]}>
+            <PlaneLogo />
+            <b>EduSad</b>
           </a>
-          <div className="lang" role="group" aria-label={T.langGroup[locale]}>
-            <a href={kk} hrefLang="kk" className={locale === 'kk' ? 'on' : undefined} aria-current={locale === 'kk' ? 'true' : undefined}>Қаз</a>
-            <a href={pathname} hrefLang="ru" className={locale === 'ru' ? 'on' : undefined} aria-current={locale === 'ru' ? 'true' : undefined}>Рус</a>
+          <nav className="nav" aria-label={T.sections[locale]}>
+            <a href={section(locale, onHome, 'vid')}>{T.navLook[locale]}</a>
+            <a href={withLocale('/designs', locale)} aria-current={pathname.startsWith('/designs') ? 'page' : undefined}>{T.navDesigns[locale]}</a>
+            <a href={section(locale, onHome, 'adminka')}>{T.navFeatures[locale]}</a>
+            <a href={section(locale, onHome, 'tarify')}>{T.navPlans[locale]}</a>
+            {/* «Как подключиться» — только в подвале: по-казахски «Қалай
+                қосылуға болады» не помещался в строку меню. */}
+            <a href={section(locale, onHome, 'voprosy')}>{T.navFaq[locale]}</a>
+          </nav>
+          <div className="top-right">
+            {/* Отдельной страницей, а не разделом главной, поэтому не в меню слева:
+                меню на узком экране прячется, а инструкция нужна и там. */}
+            <a className="top-link" href={withLocale('/guide', locale)} aria-current={pathname === '/guide' ? 'page' : undefined}>
+              {T.navGuide[locale]}
+            </a>
+            <div className="lang" role="group" aria-label={T.langGroup[locale]}>
+              <a href={kk} hrefLang="kk" className={locale === 'kk' ? 'on' : undefined} aria-current={locale === 'kk' ? 'true' : undefined}>Қаз</a>
+              <a href={pathname} hrefLang="ru" className={locale === 'ru' ? 'on' : undefined} aria-current={locale === 'ru' ? 'true' : undefined}>Рус</a>
+            </div>
+            <a className="sbtn sbtn-top" href={section(locale, onHome, 'zayavka')}>
+              <span className="long">{T.apply[locale]}</span>
+              <span className="short">{T.applyShort[locale]}</span>
+            </a>
           </div>
-          <a className="sbtn sbtn-top" href={section(locale, onHome, 'zayavka')}>
-            <span className="long">{T.apply[locale]}</span>
-            <span className="short">{T.applyShort[locale]}</span>
-          </a>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
 

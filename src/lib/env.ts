@@ -35,6 +35,14 @@ export const env = {
    */
   yandexMapsKey: process.env.YANDEX_MAPS_KEY ?? '',
   /**
+   * Google Реклама: идентификатор тега (AW-…) и метка конверсии «заявка с сайта».
+   * Не секрет — оба уходят в браузер, но живут в .env: на машине разработчика
+   * и в тестах тега нет. Тег — только на продающих страницах портала
+   * (GoogleAdsTag), на сайтах садов и в админках его нет.
+   */
+  googleAdsId: (process.env.GOOGLE_ADS_ID ?? '').trim(),
+  googleAdsLeadLabel: (process.env.GOOGLE_ADS_LEAD_LABEL ?? '').trim(),
+  /**
    * Цены тарифов за год. Базовый раньше был единственным и назывался
    * SUBSCRIPTION_PRICE_KZT — эта переменная по-прежнему стоит в .env на сервере,
    * поэтому читаем её, если новая не задана.
