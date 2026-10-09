@@ -15,4 +15,5 @@ test('админку портала можно поставить как при�
   await expect(page.getByRole('heading', { level: 1, name: 'Уведомления' })).toBeVisible();
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/admin.webmanifest');
   await expect(page.getByRole('heading', { name: 'Устройства' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Журнал уведомлений' })).toBeVisible();
 });

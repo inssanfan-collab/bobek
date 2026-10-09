@@ -63,14 +63,27 @@ const T = {
   never: { kk: 'әлі болған жоқ', ru: 'ещё не было' },
   remove: { kk: 'Өшіру', ru: 'Удалить' },
   test: { kk: 'Тексеру хабарламасын жіберу', ru: 'Отправить проверочное' },
+  log: { kk: 'Хабарламалар журналы', ru: 'Журнал уведомлений' },
+  logHint: { kk: 'Соңғы 30 күн. Журнал 90 күн сақталады.', ru: 'Последние 30 дней. Журнал хранится 90 дней.' },
+  logEmpty: { kk: 'Соңғы 30 күнде хабарлама болған жоқ.', ru: 'За последние 30 дней уведомлений не было.' },
+  open: { kk: 'Бөлімді ашу →', ru: 'Открыть раздел →' },
+  sentTo: { kk: '%s құрылғыға жіберілді', ru: 'отправлено на %s устр.' },
+  notSent: { kk: 'push жіберілмеді', ru: 'push не отправлялся' },
 } as const;
 
-export default async function NotificationsPage() {
+export default async function NotificationsPage({ searchParams }: { searchParams: Promise<{ n?: string }> }) {
   const user = await requireSuperadmin();
   const locale = user.locale;
-  const [devices, csrf] = await Promise.all([
+  // ?n= — запись, на уведомление о которой нажали в телефоне: её подсвечиваем.
+  const { n: opened } = await searchParams;
+  const [devices, csrf, log] = await Promise.all([
     prisma.pushSubscription.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' } }),
     csrfToken(),
+    prisma.notificationLog.findMany({
+      where: { createdAt: { gt: new Date(Date.now() - 30 * 86_400_000) } },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+    }),
   ]);
 
   return (
@@ -82,6 +95,38 @@ export default async function NotificationsPage() {
           {T.notConfiguredText[locale]}
         </Alert>
       ) : null}
+
+      <section className="card mb-5 p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-lg font-bold">{T.log[locale]}</h2>
+          <span className="text-xs text-muted">{T.logHint[locale]}</span>
+        </div>
+        {log.length === 0 ? (
+          <p className="mt-3 text-sm text-muted">{T.logEmpty[locale]}</p>
+        ) : (
+          <ul className="mt-3 divide-y divide-line">
+            {log.map((entry) => (
+              <li
+                key={entry.id}
+                id={`n-${entry.id}`}
+                className={`scroll-mt-24 py-3 ${entry.id === opened ? '-mx-3 rounded-xl bg-brand-soft px-3' : ''}`}
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                  <p className="font-semibold">{entry.title}</p>
+                  <span className="text-xs text-muted">
+                    {formatDateTime(entry.createdAt, locale)} ·{' '}
+                    {entry.delivered > 0 ? T.sentTo[locale].replace('%s', String(entry.delivered)) : T.notSent[locale]}
+                  </span>
+                </div>
+                {entry.body ? <p className="mt-1 whitespace-pre-line break-words text-sm text-muted">{entry.body}</p> : null}
+                {entry.url && !entry.url.startsWith('/admin/notifications') ? (
+                  <a href={entry.url} className="mt-1 inline-block text-sm font-semibold text-brand">{T.open[locale]}</a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="card p-6">

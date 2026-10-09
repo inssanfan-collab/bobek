@@ -40,12 +40,35 @@ export function vapidFromEnv(source: NodeJS.ProcessEnv = process.env): VapidKeys
 /** Тело уведомления — не длиннее этого: у служб push предел около 4 КБ. */
 const MAX_BODY = 900;
 
+/** Сколько дней хранится журнал уведомлений. */
+const LOG_DAYS = 90;
+
 /**
- * Отправляет уведомление на все устройства активных главных админов.
- * Никогда не бросает: уведомление — побочное действие. Устройства,
- * которые служба push больше не знает (404, 410), удаляет.
+ * Запись в журнал уведомлений (раздел «Уведомления» админки портала) —
+ * до отправки и независимо от неё: push может быть не настроен, телефон
+ * выключен, шторку смахнули, а прочитать, что было, всё равно нужно.
+ * Заодно убирает записи старше LOG_DAYS.
+ */
+async function logNotification(prisma: PrismaClient, message: PushMessage): Promise<string | null> {
+  try {
+    const entry = await prisma.notificationLog.create({
+      data: { title: message.title.slice(0, 200), body: (message.body ?? '').slice(0, 5000), url: message.url ?? '/admin' },
+    });
+    await prisma.notificationLog.deleteMany({ where: { createdAt: { lt: new Date(Date.now() - LOG_DAYS * 86_400_000) } } });
+    return entry.id;
+  } catch (error) {
+    console.error('[push] журнал не записан:', (error as Error).message);
+    return null;
+  }
+}
+
+/**
+ * Отправляет уведомление на все устройства активных главных админов
+ * и записывает его в журнал. Никогда не бросает: уведомление — побочное
+ * действие. Устройства, которые служба push больше не знает (404, 410), удаляет.
  */
 export async function sendPushToOwners(prisma: PrismaClient, keys: VapidKeys | null, message: PushMessage): Promise<number> {
+  const entryId = await logNotification(prisma, message);
   if (!keys) return 0;
   try {
     const devices = await prisma.pushSubscription.findMany({
@@ -56,7 +79,8 @@ export async function sendPushToOwners(prisma: PrismaClient, keys: VapidKeys | n
     const payload = JSON.stringify({
       title: message.title.slice(0, 120),
       body: (message.body ?? '').slice(0, MAX_BODY),
-      url: message.url ?? '/admin',
+      // Нажатие открывает запись в журнале — там полный текст и ссылка на раздел.
+      url: entryId ? `/admin/notifications?n=${entryId}#n-${entryId}` : (message.url ?? '/admin'),
       tag: message.tag,
     });
 
@@ -86,6 +110,7 @@ export async function sendPushToOwners(prisma: PrismaClient, keys: VapidKeys | n
         }
       }),
     );
+    if (entryId) await prisma.notificationLog.update({ where: { id: entryId }, data: { delivered } }).catch(() => undefined);
     return delivered;
   } catch (error) {
     console.error('[push] сбой отправки:', (error as Error).message);
