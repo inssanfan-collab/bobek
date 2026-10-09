@@ -5,7 +5,7 @@ import './sales.css';
 
 /**
  * Шапка и подвал продающей части портала: главная, оферта, контакты,
- * инструкция. На главной пункты меню — якоря той же страницы, на остальных —
+ * инструкция, сайт для аттестации. На главной пункты меню — якоря той же страницы, на остальных —
  * ссылки на разделы главной (`/#tarify`), с языком.
  *
  * Каталог садов и новости портала — в том же оформлении, но ссылок на них
@@ -34,6 +34,7 @@ const T = {
   navGuide: { kk: 'Нұсқаулық', ru: 'Инструкция' },
   offer: { kk: 'Жария оферта', ru: 'Публичная оферта' },
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
+  attestation: { kk: 'Аттестаттауға арналған сайт', ru: 'Сайт для аттестации' },
 } as const;
 
 /** Знак EduSad — бумажный самолётик. Цвета линий задаёт фон (.lm в sales.css). */
@@ -116,6 +117,7 @@ export async function SalesFooter({ locale, onHome = false }: { locale: Locale; 
           <b>{T.sections[locale]}</b>
           <a href={section(locale, onHome, 'tarify')}>{T.navPlans[locale]}</a>
           <a href={section(locale, onHome, 'podkluchenie')}>{T.navSteps[locale]}</a>
+          <a href={withLocale('/attestaciya', locale)}>{T.attestation[locale]}</a>
           <a href={withLocale('/contacts', locale)}>{T.contacts[locale]}</a>
           <a href={withLocale('/designs', locale)}>{T.navDesigns[locale]}</a>
           <a href={withLocale('/guide', locale)}>{T.guide[locale]}</a>

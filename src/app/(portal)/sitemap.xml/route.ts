@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 /** Страницы, которые есть всегда. Заявка и оферта — тоже точки входа из поиска. */
 // /connect, /pricing, /apply и /parents ведут на главную — в карте сайта им не место.
-const STATIC_PATHS = ['/', '/designs', '/guide', '/catalog', '/news', '/contacts', '/offer'];
+const STATIC_PATHS = ['/', '/attestaciya', '/designs', '/guide', '/catalog', '/news', '/contacts', '/offer'];
 
 /** & в адресе — сущностью: иначе XML карты не разберётся. */
 const xml = (url: string) => url.replace(/&/g, '&amp;');
