@@ -226,6 +226,54 @@
 }
 
 /*
+ * Админка портала — строже (09.10.2026, PortalAdminShell). Нейтральная
+ * серая база вместо тёплой бумаги скина портала, белые карточки с тонкой
+ * рамкой без теней, небольшие скругления, тёмная бирюза вместо яркой
+ * (белый текст на ней — контраст выше 5:1). Только внутри data-admin:
+ * продающие страницы портала и админки садов не задевает.
+ */
+[data-admin='strict'] {
+  --surface: 244 245 247;
+  --card: 255 255 255;
+  --ink: 17 24 39;
+  --muted: 92 99 112;
+  --line: 226 229 234;
+
+  --brand: 14 110 133;
+  --brand-soft: 230 242 245;
+  --brand-ink: 10 82 100;
+
+  --accent: 180 120 0;
+  --accent-soft: 252 243 222;
+  --accent-ink: 120 80 0;
+
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --font-sans: 'Onest', system-ui;
+  --font-display: 'Onest', system-ui;
+}
+[data-admin='strict'] .card {
+  box-shadow: none;
+}
+[data-admin='strict'] :is(.font-extrabold, .font-black) {
+  font-weight: 700;
+}
+[data-admin='strict'] main h1.font-display {
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+}
+[data-admin='strict'] .btn {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+/* Перетянутая на телефоне страница показывает фон body — тот же серый. */
+body:has([data-admin='strict']) {
+  background: rgb(244 245 247);
+}
+
+/*
  * Узоры фона. Выбираются отдельно от палитры: одна и та же гамма с разным
  * узором даёт непохожие сайты, а 3 шаблона × 6 палитр × 8 узоров закрывают
  * запрос «хотим не как у соседнего сада» без отдельной вёрстки под каждый.

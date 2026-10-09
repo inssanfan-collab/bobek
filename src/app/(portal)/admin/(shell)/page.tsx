@@ -65,7 +65,7 @@ export default async function PortalAdminDashboard() {
         action={<Link href="/admin/tenants/new" className="btn-primary">{T.newTenant[locale]}</Link>}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard label={T.totalGardens[locale]} value={total} />
         <StatCard
           label={T.working[locale]}

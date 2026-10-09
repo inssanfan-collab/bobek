@@ -127,10 +127,10 @@ export default async function TenantsPage({
             <thead className="border-b border-line text-left text-muted">
               <tr>
                 <th className="px-4 py-3 font-semibold">{T.garden[locale]}</th>
-                <th className="px-4 py-3 font-semibold">{T.address[locale]}</th>
+                <th className="hidden px-4 py-3 font-semibold sm:table-cell">{T.address[locale]}</th>
                 <th className="px-4 py-3 font-semibold">{T.status[locale]}</th>
-                <th className="px-4 py-3 font-semibold">{T.subscriptionUntil[locale]}</th>
-                <th className="px-4 py-3 font-semibold">{T.posts[locale]}</th>
+                <th className="hidden px-4 py-3 font-semibold sm:table-cell">{T.subscriptionUntil[locale]}</th>
+                <th className="hidden px-4 py-3 font-semibold md:table-cell">{T.posts[locale]}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -147,8 +147,13 @@ export default async function TenantsPage({
                       {tenant.profile?.kind ? (
                         <p className="text-xs text-muted">{KIND[tenant.profile.kind][locale]}</p>
                       ) : null}
+                      {/* На телефоне колонки адреса и срока спрятаны — они здесь, под названием. */}
+                      <p className="mt-0.5 text-xs text-muted sm:hidden">
+                        {primary?.host ?? '—'}
+                        {sub ? <span className={expired ? 'font-semibold text-red-600' : ''}> · {formatDate(sub.periodEnd, locale)}</span> : null}
+                      </p>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="hidden px-4 py-3 sm:table-cell">
                       {primary ? (
                         <a href={`https://${primary.host}`} target="_blank" rel="noopener noreferrer" className="text-brand">
                           {primary.host}
@@ -160,10 +165,10 @@ export default async function TenantsPage({
                     <td className="px-4 py-3">
                       <span className={`badge ${STATUS_TONE[tenant.status]}`}>{STATUS[tenant.status][locale]}</span>
                     </td>
-                    <td className={`px-4 py-3 ${expired ? 'font-semibold text-red-600' : ''}`}>
+                    <td className={`hidden px-4 py-3 sm:table-cell ${expired ? 'font-semibold text-red-600' : ''}`}>
                       {sub ? formatDate(sub.periodEnd, locale) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-muted">{tenant._count.posts}</td>
+                    <td className="hidden px-4 py-3 text-muted md:table-cell">{tenant._count.posts}</td>
                   </tr>
                 );
               })}

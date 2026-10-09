@@ -17,7 +17,7 @@ test('«Онлайн» показывает, кто сейчас в админк
   await ownerPage.goto(`${PORTAL}/admin/online`);
   // Других сессий этого сотрудника в списке может быть несколько (прошлые тесты
   // тоже входили) — ищем ту, где открыты «Кружки».
-  const row = ownerPage.getByRole('row').filter({ hasText: SAD12_ADMIN.login }).filter({ hasText: 'Кружки и услуги' });
+  const row = ownerPage.getByRole('listitem').filter({ hasText: SAD12_ADMIN.login }).filter({ hasText: 'Кружки и услуги' });
   await expect(row.first()).toBeVisible();
   await expect(ownerPage.getByText(/Сейчас в админках работают/)).toBeVisible();
 

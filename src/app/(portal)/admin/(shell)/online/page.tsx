@@ -23,17 +23,12 @@ const T = {
   },
   staff: { kk: 'Әкімші бөлімдерінде', ru: 'В админках' },
   nobody: { kk: 'Соңғы 10 минутта ешкім болған жоқ.', ru: 'За последние 10 минут никого не было.' },
-  who: { kk: 'Кім', ru: 'Кто' },
-  garden: { kk: 'Балабақша', ru: 'Сад' },
-  where: { kk: 'Не ашық', ru: 'Что открыто' },
-  state: { kk: 'Күйі', ru: 'Состояние' },
-  device: { kk: 'Құрылғы', ru: 'Устройство' },
   you: { kk: 'сіз', ru: 'вы' },
   asGarden: { kk: 'балабақша атынан', ru: 'под садом' },
   portal: { kk: 'Портал әкімшісі', ru: 'Админка портала' },
-  active: { kk: '🟢 жұмыс істеп жатыр', ru: '🟢 работает' },
-  idle: { kk: '🟡 бет ашық, %s мин әрекетсіз', ru: '🟡 вкладка открыта, %s мин без действий' },
-  gone: { kk: '⚪ %s мин бұрын болды', ru: '⚪ был %s мин назад' },
+  active: { kk: 'жұмыс істеп жатыр', ru: 'работает' },
+  idle: { kk: 'бет ашық, %s мин әрекетсіз', ru: 'вкладка открыта, %s мин без действий' },
+  gone: { kk: '%s мин бұрын болды', ru: 'был %s мин назад' },
   visitors: { kk: 'Сайттарда (соңғы 5 минут)', ru: 'На сайтах (последние 5 минут)' },
   noVisitors: { kk: 'Соңғы 5 минутта сайттарға ешкім кірмеген.', ru: 'За последние 5 минут на сайты никто не заходил.' },
   people: { kk: '%s адам', ru: '%s чел.' },
@@ -45,10 +40,13 @@ const T = {
 
 const minutesAgo = (date: Date, now: number) => Math.max(1, Math.round((now - date.getTime()) / 60_000));
 
-function stateOf(lastSeenAt: Date, lastActiveAt: Date | null, now: number, locale: Locale): string {
-  if (now - lastSeenAt.getTime() > ONLINE_MS) return T.gone[locale].replace('%s', String(minutesAgo(lastSeenAt, now)));
-  if (lastActiveAt && now - lastActiveAt.getTime() < 2 * 60_000) return T.active[locale];
-  return T.idle[locale].replace('%s', String(minutesAgo(lastActiveAt ?? lastSeenAt, now)));
+/** Состояние строкой и цветом точки: зелёная — работает, жёлтая — вкладка открыта, серая — ушёл. */
+function stateOf(lastSeenAt: Date, lastActiveAt: Date | null, now: number, locale: Locale): { dot: string; text: string } {
+  if (now - lastSeenAt.getTime() > ONLINE_MS) {
+    return { dot: 'bg-slate-300', text: T.gone[locale].replace('%s', String(minutesAgo(lastSeenAt, now))) };
+  }
+  if (lastActiveAt && now - lastActiveAt.getTime() < 2 * 60_000) return { dot: 'bg-emerald-500', text: T.active[locale] };
+  return { dot: 'bg-amber-400', text: T.idle[locale].replace('%s', String(minutesAgo(lastActiveAt ?? lastSeenAt, now))) };
 }
 
 export default async function OnlinePage() {
@@ -85,44 +83,39 @@ export default async function OnlinePage() {
         </Alert>
       )}
 
-      <section className="card mb-5 overflow-x-auto p-6">
+      <section className="card mb-5 p-5 sm:p-6">
         <h2 className="font-display text-lg font-bold">{T.staff[locale]}</h2>
         {sessions.length === 0 ? (
           <p className="mt-3 text-sm text-muted">{T.nobody[locale]}</p>
         ) : (
-          <table className="mt-3 w-full min-w-[40rem] text-left text-sm">
-            <thead className="text-xs text-muted">
-              <tr>
-                <th className="py-2 pr-4 font-semibold">{T.who[locale]}</th>
-                <th className="py-2 pr-4 font-semibold">{T.garden[locale]}</th>
-                <th className="py-2 pr-4 font-semibold">{T.where[locale]}</th>
-                <th className="py-2 pr-4 font-semibold">{T.state[locale]}</th>
-                <th className="py-2 font-semibold">{T.device[locale]}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {sessions.map((session) => {
-                const { user } = session;
-                const garden = user.tenant ? pick(locale, user.tenant.profile?.nameKk, user.tenant.profile?.nameRu) || user.tenant.slug : T.portal[locale];
-                return (
-                  <tr key={session.id}>
-                    <td className="py-2 pr-4">
-                      <span className="font-semibold">{user.fullName}</span>
-                      <span className="block text-xs text-muted">
-                        {user.login}
-                        {user.id === me.id ? ` · ${T.you[locale]}` : ''}
-                        {session.impersonatedBy ? ` · ${T.asGarden[locale]}` : ''}
-                      </span>
-                    </td>
-                    <td className="py-2 pr-4">{garden}</td>
-                    <td className="py-2 pr-4">{adminPlace(session.lastPath, locale)}</td>
-                    <td className="py-2 pr-4">{stateOf(session.lastSeenAt!, session.lastActiveAt, now, locale)}</td>
-                    <td className="py-2 text-xs text-muted">{deviceName(session.userAgent)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <ul className="mt-3 divide-y divide-line">
+            {sessions.map((session) => {
+              const { user } = session;
+              const state = stateOf(session.lastSeenAt!, session.lastActiveAt, now, locale);
+              const garden = user.tenant ? pick(locale, user.tenant.profile?.nameKk, user.tenant.profile?.nameRu) || user.tenant.slug : T.portal[locale];
+              return (
+                <li key={session.id} className="grid gap-x-6 gap-y-1 py-3 text-sm sm:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1.7fr)]">
+                  <div>
+                    <p className="font-semibold">{user.fullName}</p>
+                    <p className="text-xs text-muted">
+                      {user.login}
+                      {user.id === me.id ? ` · ${T.you[locale]}` : ''}
+                      {session.impersonatedBy ? ` · ${T.asGarden[locale]}` : ''}
+                    </p>
+                  </div>
+                  <p>{garden}</p>
+                  <p>{adminPlace(session.lastPath, locale)}</p>
+                  <div className="sm:text-right">
+                    <p className="flex items-center gap-1.5 sm:justify-end">
+                      <span className={`h-2 w-2 shrink-0 rounded-full ${state.dot}`} aria-hidden />
+                      {state.text}
+                    </p>
+                    <p className="text-xs text-muted">{deviceName(session.userAgent)}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </section>
 
