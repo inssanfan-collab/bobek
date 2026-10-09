@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Каркас портала. Шапка и подвал живут в PortalChrome и вставляются самими
+ * Каркас портала. Шапка и подвал (SalesChrome) вставляются самими
  * страницами: layout не получает searchParams, а язык портала берётся из
  * адреса. Тот же приём, что на сайтах садов с SiteHeader / SiteFooter.
  *

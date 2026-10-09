@@ -1,13 +1,14 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import { prisma } from '@/server/db';
 import { formatDate } from '@/lib/labels';
 import { toPlainText } from '@/lib/sanitize';
-import { PortalPage } from '@/components/portal/PortalChrome';
+import { SalesPage } from '@/components/portal/sales/SalesChrome';
+import { portalUrl } from '@/lib/seo';
 import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 import { portalAlternates } from '@/lib/seo';
+import { env } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,7 @@ export async function generateMetadata({
     title: pick(locale, post.titleKk, post.titleRu),
     description: pick(locale, post.excerptKk, post.excerptRu) || toPlainText(pick(locale, post.bodyKk, post.bodyRu), 160),
     alternates: portalAlternates(`/news/${slug}`, locale),
+    openGraph: { type: 'article', publishedTime: post.publishedAt?.toISOString(), url: portalUrl(`/news/${slug}`, locale) },
   };
 }
 
@@ -54,21 +56,38 @@ export default async function PortalNewsItem({
   if (!post) notFound();
 
   const body = pick(locale, post.bodyKk, post.bodyRu);
+  const title = pick(locale, post.titleKk, post.titleRu);
+  // Разметка статьи для поисковика: дата, автор, издатель.
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: title,
+    datePublished: post.publishedAt?.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    inLanguage: locale,
+    mainEntityOfPage: portalUrl(`/news/${slug}`, locale),
+    author: { '@type': 'Organization', name: 'EduSad', url: `https://${env.portalDomain}` },
+    publisher: { '@type': 'Organization', name: 'EduSad', logo: { '@type': 'ImageObject', url: `https://${env.portalDomain}/apple-touch-icon.png` } },
+  };
 
   return (
-    <PortalPage locale={locale} pathname={`/news/${slug}`}>
-      <article className="container-page max-w-3xl py-12">
-        <Link href={withLocale('/news', locale)} className="text-sm font-semibold text-brand">
-          {T.allNews[locale]}
-        </Link>
-        <p className="mt-4 text-sm text-muted">{formatDate(post.publishedAt, locale)}</p>
-        <h1 className="mt-1 font-display text-4xl font-extrabold">{pick(locale, post.titleKk, post.titleRu)}</h1>
-        {body ? (
-          <PhotoZoom locale={locale}>
-            <div className="prose-content mt-6" dangerouslySetInnerHTML={{ __html: body }} />
-          </PhotoZoom>
-        ) : null}
-      </article>
-    </PortalPage>
+    <SalesPage
+      locale={locale}
+      pathname={`/news/${slug}`}
+      title={title}
+      lead={
+        <>
+          <a href={withLocale('/news', locale)} className="nw-back">{T.allNews[locale]}</a>
+          <time dateTime={post.publishedAt?.toISOString()} className="nw-date">{formatDate(post.publishedAt, locale)}</time>
+        </>
+      }
+    >
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld).replace(/</g, '\\u003c') }} />
+      {body ? (
+        <PhotoZoom locale={locale}>
+          <div className="prose-content nw-body" dangerouslySetInnerHTML={{ __html: body }} />
+        </PhotoZoom>
+      ) : null}
+    </SalesPage>
   );
 }

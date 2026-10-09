@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { prisma } from '@/server/db';
 import { formatDate } from '@/lib/labels';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { PortalPage } from '@/components/portal/PortalChrome';
+import { SalesPage } from '@/components/portal/sales/SalesChrome';
 import { localeFromParam, pick, withLocale } from '@/lib/i18n';
 import { portalAlternates } from '@/lib/seo';
 
@@ -16,17 +14,21 @@ export async function generateMetadata({
   const locale = localeFromParam((await searchParams).lang);
   return {
     alternates: portalAlternates('/news', locale),
-    title: locale === 'kk' ? 'Портал жаңалықтары' : 'Новости портала',
+    title: locale === 'kk' ? 'Жаңалықтар' : 'Новости',
+    description: locale === 'kk'
+      ? 'EduSad жаңалықтары: жаңа дизайндар, әкімші бөлімінің мүмкіндіктері және балабақша сайттарына қатысты өзгерістер.'
+      : 'Новости EduSad: новые дизайны, возможности админки и изменения, которые касаются сайтов детских садов.',
   };
 }
 
 const T = {
   title: { kk: 'Жаңалықтар', ru: 'Новости' },
-  empty: { kk: 'Әзірге жаңалықтар жоқ', ru: 'Новостей пока нет' },
-  emptyHint: {
-    kk: 'Мұнда портал мен облыстың мектепке дейінгі білім жүйесінің жаңалықтары шығады.',
-    ru: 'Здесь будут появляться новости портала и системы дошкольного образования области.',
+  lead: {
+    kk: 'Жаңа дизайндар, әкімші бөлімінің мүмкіндіктері және балабақша сайттарына қатысты өзгерістер.',
+    ru: 'Новые дизайны, возможности админки и изменения, которые касаются сайтов детских садов.',
   },
+  empty: { kk: 'Әзірге жаңалықтар жоқ', ru: 'Новостей пока нет' },
+  read: { kk: 'Оқу →', ru: 'Читать →' },
 } as const;
 
 export default async function PortalNewsPage({
@@ -43,32 +45,25 @@ export default async function PortalNewsPage({
   });
 
   return (
-    <PortalPage locale={locale} pathname="/news">
-      <div className="container-page py-12">
-        <h1 className="font-display text-4xl font-extrabold">{T.title[locale]}</h1>
-
-        {posts.length === 0 ? (
-          <div className="mt-8">
-            <EmptyState icon="📰" title={T.empty[locale]} description={T.emptyHint[locale]} />
-          </div>
-        ) : (
-          <div className="mt-8 space-y-4">
-            {posts.map((post) => (
-              <article key={post.id} className="card p-6">
-                <p className="text-sm text-muted">{formatDate(post.publishedAt, locale)}</p>
-                <h2 className="mt-1 font-display text-xl font-bold">
-                  <Link href={withLocale(`/news/${post.slug}`, locale)} className="hover:text-brand">
-                    {pick(locale, post.titleKk, post.titleRu)}
-                  </Link>
-                </h2>
-                {pick(locale, post.excerptKk, post.excerptRu) ? (
-                  <p className="mt-2 text-muted">{pick(locale, post.excerptKk, post.excerptRu)}</p>
-                ) : null}
+    <SalesPage locale={locale} pathname="/news" title={T.title[locale]} lead={T.lead[locale]}>
+      {posts.length === 0 ? (
+        <p className="note">{T.empty[locale]}</p>
+      ) : (
+        <div className="nw-list">
+          {posts.map((post) => {
+            const href = withLocale(`/news/${post.slug}`, locale);
+            const excerpt = pick(locale, post.excerptKk, post.excerptRu);
+            return (
+              <article key={post.id} className="nw-item">
+                <time dateTime={post.publishedAt?.toISOString()}>{formatDate(post.publishedAt, locale)}</time>
+                <h2><a href={href}>{pick(locale, post.titleKk, post.titleRu)}</a></h2>
+                {excerpt ? <p>{excerpt}</p> : null}
+                <a href={href} className="nw-more" aria-hidden="true" tabIndex={-1}>{T.read[locale]}</a>
               </article>
-            ))}
-          </div>
-        )}
-      </div>
-    </PortalPage>
+            );
+          })}
+        </div>
+      )}
+    </SalesPage>
   );
 }

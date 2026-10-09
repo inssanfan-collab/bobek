@@ -94,13 +94,13 @@ test.describe('Двуязычие портала', () => {
     await page.goto(`${PORTAL}/catalog`);
     await expect(page.getByRole('heading', { name: 'Каталог детских садов' })).toBeVisible();
 
-    await page.getByRole('link', { name: 'ҚАЗ' }).click();
+    await page.getByRole('link', { name: 'Қаз', exact: true }).click();
     await expect(page).toHaveURL(/lang=kk/);
     await expect(page.getByRole('heading', { name: 'Балабақшалар каталогы' })).toBeVisible();
 
     // Язык должен ехать по ссылкам дальше, иначе посетитель вываливается в русский.
-    await page.getByRole('link', { name: 'Жаңалықтар' }).first().click();
-    await expect(page).toHaveURL(/news.*lang=kk/);
+    await page.getByRole('link', { name: 'Нұсқаулық' }).first().click();
+    await expect(page).toHaveURL(/guide.*lang=kk/);
 
     // И на главную, у которой своё оформление.
     await page.goto(`${PORTAL}/?lang=kk`);

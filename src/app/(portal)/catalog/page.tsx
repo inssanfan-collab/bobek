@@ -2,9 +2,8 @@ import type { Metadata } from 'next';
 import { prisma } from '@/server/db';
 import { searchTenantIds } from '@/server/db/search';
 import { env } from '@/lib/env';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { CatalogMap } from '@/components/portal/CatalogMap';
-import { PortalPage } from '@/components/portal/PortalChrome';
+import { SalesPage } from '@/components/portal/sales/SalesChrome';
 import { localeFromParam, pick } from '@/lib/i18n';
 import { KIND } from '@/lib/labels';
 import type { Prisma } from '@prisma/client';
@@ -27,11 +26,10 @@ export async function generateMetadata({
 
 const T = {
   title: { kk: 'Балабақшалар каталогы', ru: 'Каталог детских садов' },
-  leadBefore: {
-    kk: 'Порталдағы балабақшалардың ресми сайттары. Кезекке тұру үшін ',
-    ru: 'Официальные сайты садов на портале. Чтобы встать в очередь, воспользуйтесь ',
+  lead: {
+    kk: 'EduSad-тағы балабақшалардың ресми сайттары: мекенжайы, телефоны, оқыту тілі және бос орындар.',
+    ru: 'Официальные сайты детских садов на EduSad: адрес, телефон, язык обучения и свободные места.',
   },
-  queueLink: { kk: 'Darabala.kz қызметін пайдаланыңыз', ru: 'услугой на Darabala.kz' },
   searchLabel: { kk: 'Атауы, мекенжайы немесе ауданы', ru: 'Название, адрес или район' },
   searchExample: { kk: 'Мысалы: Балдырған', ru: 'Например: Балдырған' },
   district: { kk: 'Аудан', ru: 'Район' },
@@ -126,25 +124,15 @@ export default async function CatalogPage({
   });
 
   return (
-    <PortalPage locale={locale} pathname="/catalog">
-      <div className="container-page py-12">
-      <h1 className="font-display text-4xl font-extrabold">{T.title[locale]}</h1>
-      <p className="mt-2 max-w-2xl text-muted">
-        {T.leadBefore[locale]}
-        <a href="https://darabala.kz" target="_blank" rel="noopener noreferrer" className="font-semibold text-brand underline">
-          {T.queueLink[locale]}
-        </a>
-        .
-      </p>
-
-      <form className="card mt-8 grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4" role="search">
+    <SalesPage locale={locale} pathname="/catalog" title={T.title[locale]} lead={T.lead[locale]}>
+      <form className="ct-search" role="search">
         <div>
-          <label className="field-label" htmlFor="q">{T.searchLabel[locale]}</label>
-          <input id="q" name="q" defaultValue={query} className="field" placeholder={T.searchExample[locale]} />
+          <label htmlFor="q">{T.searchLabel[locale]}</label>
+          <input id="q" name="q" defaultValue={query} placeholder={T.searchExample[locale]} />
         </div>
         <div>
-          <label className="field-label" htmlFor="district">{T.district[locale]}</label>
-          <select id="district" name="district" defaultValue={params.district ?? ''} className="field">
+          <label htmlFor="district">{T.district[locale]}</label>
+          <select id="district" name="district" defaultValue={params.district ?? ''}>
             <option value="">{T.allDistricts[locale]}</option>
             {districts.map((d) => (
               <option key={d.district} value={d.district ?? ''}>{d.district}</option>
@@ -152,85 +140,71 @@ export default async function CatalogPage({
           </select>
         </div>
         <div>
-          <label className="field-label" htmlFor="kind">{T.kind[locale]}</label>
-          <select id="kind" name="kind" defaultValue={params.kind ?? ''} className="field">
+          <label htmlFor="kind">{T.kind[locale]}</label>
+          <select id="kind" name="kind" defaultValue={params.kind ?? ''}>
             <option value="">{T.anyKind[locale]}</option>
             {Object.entries(KIND).map(([value, phrase]) => (
               <option key={value} value={value}>{phrase[locale]}</option>
             ))}
           </select>
         </div>
-        <div className="flex items-end gap-3">
-          <label className="flex flex-1 items-center gap-2 text-sm font-semibold">
-            <input type="checkbox" name="free" value="1" defaultChecked={params.free === '1'} className="h-4 w-4" />
+        <div className="ct-search-go">
+          <label className="ct-check">
+            <input type="checkbox" name="free" value="1" defaultChecked={params.free === '1'} />
             {T.hasPlaces[locale]}
           </label>
-          <button type="submit" className="btn-primary">{T.find[locale]}</button>
+          {locale === 'kk' ? <input type="hidden" name="lang" value="kk" /> : null}
+          <button type="submit" className="sbtn sbtn-primary">{T.find[locale]}</button>
         </div>
       </form>
 
-      <CatalogMap gardens={mapGardens} />
+      <div className="ct-map">
+        <CatalogMap gardens={mapGardens} />
+      </div>
 
       {gardens.length === 0 ? (
-        <div className="mt-8">
-          <EmptyState
-            icon="🔍"
-            title={T.nothing[locale]}
-            description={T.nothingHint[locale]}
-          />
+        <div className="ct-empty">
+          <h2>{T.nothing[locale]}</h2>
+          <p>{T.nothingHint[locale]}</p>
         </div>
       ) : (
         <>
-          <p className="mt-8 text-sm text-muted">{T.found[locale].replace('%s', String(gardens.length))}</p>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <p className="note">{T.found[locale].replace('%s', String(gardens.length))}</p>
+          <div className="ct-grid">
             {gardens.map((tenant) => {
               const p = tenant.profile;
               const host = siteHost(tenant);
               const number = numbers.get(tenant.id);
+              const address = pick(locale, p?.addressKk, p?.addressRu);
               return (
-                <article key={tenant.id} className="card flex flex-col overflow-hidden p-0">
+                <article key={tenant.id} className="ct-card">
                   {p?.coverMediaId ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={`/api/media/${p.coverMediaId}`} alt="" className="h-36 w-full object-cover" />
+                    <img src={`/api/media/${p.coverMediaId}`} alt="" loading="lazy" className="ct-cover" />
                   ) : null}
-                  <div className="flex flex-1 flex-col p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <h2 className="font-display text-lg font-bold">
-                      {number ? (
-                        <span
-                          className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand text-sm text-white"
-                          title={T.markTitle[locale]}
-                        >
-                          {number}
-                        </span>
-                      ) : null}
-                      {p?.nameRu ?? tenant.slug}
-                    </h2>
-                    {p?.isPrivate ? (
-                      <span className="badge bg-accent/15 text-accent">{T.private[locale]}</span>
-                    ) : (
-                      <span className="badge bg-brand-soft text-brand-ink">{T.state[locale]}</span>
-                    )}
-                  </div>
-                  {p?.kind ? <p className="mt-1 text-sm text-muted">{KIND[p.kind][locale]}</p> : null}
-                  {pick(locale, p?.addressKk, p?.addressRu) ? (
-                    <p className="mt-2 text-sm">{pick(locale, p?.addressKk, p?.addressRu)}</p>
-                  ) : null}
-                  {p?.phone ? (
-                    <p className="mt-1 text-sm">
-                      <a href={`tel:${p.phone.replace(/\s/g, '')}`} className="font-semibold text-brand">{p.phone}</a>
-                    </p>
-                  ) : null}
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                    {p?.langKk ? <span className="badge bg-brand-soft text-brand-ink">Қазақша</span> : null}
-                    {p?.langRu ? <span className="badge bg-brand-soft text-brand-ink">Русский</span> : null}
-                    {p?.placesFree ? (
-                      <span className="badge bg-emerald-100 text-emerald-800">{T.freePlaces[locale].replace('%s', String(p.placesFree))}</span>
+                  <div className="ct-body">
+                    <div className="ct-head">
+                      <h2>
+                        {number ? <span className="ct-num" title={T.markTitle[locale]}>{number}</span> : null}
+                        {pick(locale, p?.nameKk, p?.nameRu) || tenant.slug}
+                      </h2>
+                      <span className={p?.isPrivate ? 'ct-badge ct-private' : 'ct-badge'}>
+                        {p?.isPrivate ? T.private[locale] : T.state[locale]}
+                      </span>
+                    </div>
+                    {p?.kind ? <p className="ct-kind">{KIND[p.kind][locale]}</p> : null}
+                    {address ? <p>{address}</p> : null}
+                    {p?.phone ? (
+                      <p><a href={`tel:${p.phone.replace(/\s/g, '')}`} className="ct-phone">{p.phone}</a></p>
                     ) : null}
-                  </div>
-                  <a href={`https://${host}`} className="btn-secondary mt-4 self-start text-sm">
-                    {T.openSite[locale]}
-                  </a>
+                    <div className="ct-tags">
+                      {p?.langKk ? <span className="ct-badge">Қазақша</span> : null}
+                      {p?.langRu ? <span className="ct-badge">Русский</span> : null}
+                      {p?.placesFree ? (
+                        <span className="ct-badge ct-free">{T.freePlaces[locale].replace('%s', String(p.placesFree))}</span>
+                      ) : null}
+                    </div>
+                    <a href={`https://${host}`} className="sbtn sbtn-secondary">{T.openSite[locale]}</a>
                   </div>
                 </article>
               );
@@ -238,7 +212,6 @@ export default async function CatalogPage({
           </div>
         </>
       )}
-      </div>
-    </PortalPage>
+    </SalesPage>
   );
 }

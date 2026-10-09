@@ -13,7 +13,7 @@ import { AdminDemo, type DemoTask } from '@/components/portal/sales/AdminDemo';
 import { readGuideManifest } from '@/server/guide/manifest';
 import { SalesApplyForm } from '@/components/portal/sales/SalesApplyForm';
 import { SalesFooter, SalesHeader } from '@/components/portal/sales/SalesChrome';
-import { portalAlternateLinks } from '@/lib/seo';
+import { portalAlternateLinks, portalUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -183,6 +183,54 @@ function faq(locale: Locale): [string, string][] {
       ];
 }
 
+/**
+ * Микроразметка главной для поисковиков: кто мы (Organization), что
+ * продаём и почём (Service с ценами тарифов — для частных садов) и частые
+ * вопросы (FAQPage). Тексты — те же, что на странице: разметка, которая
+ * расходится с видимым текстом, поисковик считает обманом.
+ */
+function structuredData(locale: Locale, phone: string | null) {
+  const site = `https://${env.portalDomain}`;
+  const org = {
+    '@type': 'Organization',
+    '@id': `${site}/#org`,
+    name: 'EduSad',
+    url: site,
+    logo: `${site}/apple-touch-icon.png`,
+    areaServed: { '@type': 'Country', name: 'Kazakhstan' },
+    ...(phone ? { telephone: phone } : {}),
+  };
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      org,
+      { '@type': 'WebSite', '@id': `${site}/#site`, url: site, name: 'EduSad', inLanguage: ['ru', 'kk'], publisher: { '@id': `${site}/#org` } },
+      {
+        '@type': 'Service',
+        name: T.label[locale],
+        serviceType: locale === 'kk' ? 'Балабақша сайтын жасау және жүргізу' : 'Создание и ведение сайта детского сада',
+        provider: { '@id': `${site}/#org` },
+        areaServed: { '@type': 'Country', name: 'Kazakhstan' },
+        offers: PLAN_CODES.map((code) => ({
+          '@type': 'Offer',
+          name: PLAN_INFO[code].name[locale],
+          price: env.planPrices[code],
+          priceCurrency: 'KZT',
+          url: `${portalUrl('/', locale)}#tarify`,
+        })),
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faq(locale).map(([question, answer]) => ({
+          '@type': 'Question',
+          name: question,
+          acceptedAnswer: { '@type': 'Answer', text: answer },
+        })),
+      },
+    ],
+  };
+}
+
 const ICONS = {
   shield: '<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3Z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
   lang: '<path d="M4 5h9M8.5 3v2M6 5c.8 3.5 3 6 6 7.5M11 5c-.8 3.8-3.2 6.8-7 8.5M13 21l4.5-10 4.5 10M14.6 17.5h5.8"/>',
@@ -245,14 +293,16 @@ export async function generateMetadata({
   searchParams: Promise<{ lang?: string }>;
 }): Promise<Metadata> {
   const locale = localeFromParam((await searchParams).lang);
+  // Заголовок начинается с того, что ищут: «сайт для детского сада» и страна —
+  // клиенты по всему Казахстану, а не в одном городе.
   // Цены в описании нет: оно же — текст карточки ссылки в WhatsApp, а цена
   // «от 90 000 ₸» — для частных садов и путает государственные.
   return {
     title: {
       absolute:
         locale === 'kk'
-          ? 'EduSad — балабақшаға арналған сайт бір жұмыс күнінде'
-          : 'EduSad — сайт для детского сада за один рабочий день',
+          ? 'Қазақстандағы балабақшаға арналған сайт бір күнде — EduSad'
+          : 'Сайт для детского сада в Казахстане за один день — EduSad',
     },
     description:
       locale === 'kk'
@@ -311,6 +361,10 @@ export default async function PortalHome({
       {portalAlternateLinks('/', locale).map((link) => (
         <link key={link.hrefLang ?? link.rel} rel={link.rel} hrefLang={link.hrefLang} href={link.href} />
       ))}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData(locale, settings.phone || null)).replace(/</g, '\\u003c') }}
+      />
       <a className="skip" href="#main">{T.skip[locale]}</a>
       {/* Прячет первый экран до вступления (SalesMotion) ещё до отрисовки,
           чтобы он не мигнул. Сценарий не дошёл — через 3 с всё видно само. */}
