@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { AdminPresence } from './AdminPresence';
 
 export type NavItem = { href: string; label: string; icon: string; badge?: number };
 
@@ -29,6 +30,8 @@ export function AdminShell({
 }) {
   return (
     <div className="min-h-screen bg-surface">
+      {/* Отметка «в админке сейчас» — для раздела «Онлайн» админки портала. */}
+      <AdminPresence />
       <header className="border-b border-line bg-card">
         <div className="mx-auto flex w-full max-w-[100rem] items-center gap-4 px-4 py-3 sm:px-6">
           <Link href={homeHref} className="flex min-w-0 items-center gap-2">

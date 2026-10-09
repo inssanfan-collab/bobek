@@ -289,8 +289,16 @@ model Session {
   userAgent      String?
   expiresAt      DateTime
   createdAt      DateTime @default(now())
+  /// Присутствие (раздел «Онлайн» админки портала): открытая вкладка админки
+  /// раз в 30 секунд сообщает, где она. Закрыли вкладку — null.
+  lastSeenAt     DateTime?
+  /// Какой раздел админки открыт: путь с параметрами, например /admin/clubs.
+  lastPath       String?
+  /// Когда человек последний раз что-то делал (клик, ввод), а не просто держал вкладку.
+  lastActiveAt   DateTime?
 
   @@index([userId])
+  @@index([lastSeenAt])
   @@index([expiresAt])
 }
 

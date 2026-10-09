@@ -1,4 +1,5 @@
 import 'server-only';
+import { createHash } from 'node:crypto';
 import { headers } from 'next/headers';
 import { prisma } from '@/server/db';
 
@@ -30,6 +31,7 @@ async function notAVisit(): Promise<boolean> {
 export async function recordVisit(tenantId: string): Promise<void> {
   try {
     if (await notAVisit()) return;
+    await markOnline(tenantId);
 
     const now = new Date();
     const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -91,4 +93,36 @@ export async function statsSummary(tenantId: string, days = 30): Promise<StatsSu
   );
 
   return { days: series, total30, total7, today: series.at(-1)?.views ?? 0, best };
+}
+
+/**
+ * Кто сейчас на сайтах садов — для раздела «Онлайн» админки портала.
+ * Только в памяти и только на несколько минут: посетитель — хеш адреса
+ * и браузера, сами адреса нигде не хранятся. Перезапуск сайта счётчик
+ * обнуляет — для «есть ли сейчас кто-нибудь» этого достаточно.
+ */
+const ONLINE_KEEP_MS = 10 * 60 * 1000;
+const online = ((globalThis as { __edusadOnline?: Map<string, Map<string, number>> }).__edusadOnline ??= new Map());
+
+async function markOnline(tenantId: string): Promise<void> {
+  const list = await headers();
+  const ip = list.get('x-forwarded-for')?.split(',')[0]?.trim() ?? list.get('x-real-ip') ?? '';
+  const visitor = createHash('sha256').update(`${ip}|${list.get('user-agent') ?? ''}`).digest('base64url').slice(0, 16);
+  const now = Date.now();
+  let site = online.get(tenantId);
+  if (!site) online.set(tenantId, (site = new Map()));
+  site.set(visitor, now);
+  for (const [key, at] of site) if (now - at > ONLINE_KEEP_MS) site.delete(key);
+}
+
+/** Сколько разных посетителей открывали сайт каждого сада за последние `minutes` минут. */
+export function onlineVisitors(minutes = 5): Map<string, number> {
+  const since = Date.now() - minutes * 60 * 1000;
+  const result = new Map<string, number>();
+  for (const [tenantId, site] of online) {
+    let count = 0;
+    for (const at of site.values()) if (at >= since) count += 1;
+    if (count > 0) result.set(tenantId, count);
+  }
+  return result;
 }

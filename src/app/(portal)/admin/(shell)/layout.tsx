@@ -5,6 +5,7 @@ import { AdminShell, type NavItem } from '@/components/admin/AdminShell';
 import { AdminLocaleSwitch } from '@/components/admin/AdminLocaleSwitch';
 import { LogoutButton } from '@/components/admin/LogoutButton';
 import { AdminPwa } from '@/components/admin/AdminPwa';
+import { ONLINE_MS } from '@/lib/presence';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Админка портала', robots: { index: false } };
@@ -26,6 +27,7 @@ const T = {
     requisites: { kk: 'Деректемелер', ru: 'Реквизиты' },
     system: { kk: 'Сервер', ru: 'Сервер' },
     notifications: { kk: 'Хабарламалар', ru: 'Уведомления' },
+    online: { kk: 'Онлайн', ru: 'Онлайн' },
   },
 } as const;
 
@@ -33,7 +35,13 @@ export default async function PortalAdminLayout({ children }: { children: React.
   const user = await requireSuperadmin();
   const locale = user.locale;
 
-  const newLeads = await prisma.lead.count({ where: { isHandled: false } });
+  // «Онлайн» со счётчиком: сколько человек, кроме вас, сейчас в админках.
+  const [newLeads, online] = await Promise.all([
+    prisma.lead.count({ where: { isHandled: false } }),
+    prisma.session.count({
+      where: { lastSeenAt: { gt: new Date(Date.now() - ONLINE_MS) }, userId: { not: user.id }, impersonatedBy: null },
+    }),
+  ]);
 
   const n = T.nav;
   const nav: NavItem[] = [
@@ -51,6 +59,7 @@ export default async function PortalAdminLayout({ children }: { children: React.
     { href: '/admin/audit', label: n.audit[locale], icon: '🧾' },
     { href: '/admin/requisites', label: n.requisites[locale], icon: '🏦' },
     { href: '/admin/system', label: n.system[locale], icon: '🖥️' },
+    { href: '/admin/online', label: n.online[locale], icon: '🟢', badge: online || undefined },
     { href: '/admin/notifications', label: n.notifications[locale], icon: '🔔' },
   ];
 

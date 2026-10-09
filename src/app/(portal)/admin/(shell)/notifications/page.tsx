@@ -7,6 +7,7 @@ import { csrfToken } from '@/server/auth/csrf';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { vapidPublicKey } from '@/server/notify/push';
 import { formatDateTime } from '@/lib/labels';
+import { deviceName } from '@/lib/presence';
 import { deletePushDevice, sendTestPush } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -63,16 +64,6 @@ const T = {
   remove: { kk: 'Өшіру', ru: 'Удалить' },
   test: { kk: 'Тексеру хабарламасын жіберу', ru: 'Отправить проверочное' },
 } as const;
-
-/** Что за устройство — по строке браузера, коротко: «iPhone · Safari». */
-function deviceName(userAgent: string | null): string {
-  const ua = userAgent ?? '';
-  const system = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) ? 'iPad' : /Android/.test(ua) ? 'Android'
-    : /Windows/.test(ua) ? 'Windows' : /Mac OS/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : '—';
-  const browser = /Edg\//.test(ua) ? 'Edge' : /YaBrowser/.test(ua) ? 'Яндекс' : /Firefox\//.test(ua) ? 'Firefox'
-    : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '';
-  return browser ? `${system} · ${browser}` : system;
-}
 
 export default async function NotificationsPage() {
   const user = await requireSuperadmin();
