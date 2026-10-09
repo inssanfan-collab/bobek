@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import nodemailer from 'nodemailer';
 import { periodIsOver } from '../src/lib/subscription-period';
+import { sendPushToOwners, vapidFromEnv } from '../src/server/notify/push-send';
 
 const prisma = new PrismaClient();
 
@@ -25,8 +26,15 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  * Запускается таймером edusad-subscriptions.timer раз в сутки.
  */
 
-/** Сводка владельцу. Ошибка почты не должна отменять приостановку садов. */
+/** Сводка владельцу — письмом и push. Ошибка почты не должна отменять приостановку садов. */
 async function mailOwner(subject: string, text: string) {
+  await sendPushToOwners(prisma, vapidFromEnv(), {
+    title: subject.charAt(0).toUpperCase() + subject.slice(1),
+    body: text,
+    url: '/admin/subscriptions',
+    tag: 'subscriptions',
+  });
+
   const to = (process.env.NOTIFY_EMAIL ?? '').trim();
   if (!to) return;
 

@@ -20,6 +20,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "subscriptions:check": "tsx scripts/subscription-reminders.ts",
+    "push:owner": "tsx scripts/push-owner.ts",
     "maps:geocode": "tsx scripts/geocode-tenants.ts",
     "template:xlsx": "tsx scripts/make-tenant-template.ts",
     "guide:shots": "tsx scripts/guide-shots.ts",
@@ -46,6 +47,7 @@
     "sanitize-html": "^2.17.7",
     "server-only": "^0.0.1",
     "sharp": "^0.33.5",
+    "web-push": "3.6.7",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -58,6 +60,7 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@types/sanitize-html": "^2.16.1",
+    "@types/web-push": "3.6.4",
     "autoprefixer": "^10.4.20",
     "dotenv": "^16.6.1",
     "eslint": "^9.19.0",

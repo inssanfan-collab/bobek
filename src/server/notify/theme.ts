@@ -33,7 +33,7 @@ export async function notifyThemeFailure(theme: string, part: string, message: s
       '',
       'Посетители видят стандартную версию этой части сайта, сам сайт работает.',
       'Следующее письмо про эту тему — не раньше чем через час.',
-    ]);
+    ], '/admin/system');
   } catch {
     /* notifyOwner сам не бросает, но страховка не должна зависеть и от этого */
   }

@@ -1,6 +1,7 @@
 import 'server-only';
 import nodemailer, { type Transporter } from 'nodemailer';
 import { env } from '@/lib/env';
+import { pushToOwners } from '@/server/notify/push';
 
 /**
  * Служебные письма владельцу портала.
@@ -30,10 +31,18 @@ function transport(): Transporter {
   return transporter;
 }
 
-export async function notifyOwner(subject: string, lines: (string | null | undefined | false)[]): Promise<void> {
-  if (!env.notifyEmail) return;
-
+/**
+ * Письмо владельцу и push на его устройства (админка, установленная как
+ * приложение, раздел «Уведомления»). `url` — какую страницу админки открыть
+ * по нажатию на уведомление.
+ */
+export async function notifyOwner(subject: string, lines: (string | null | undefined | false)[], url = '/admin'): Promise<void> {
   const text = lines.filter((line): line is string => typeof line === 'string').join('\n');
+
+  // Push — первым и независимо от почты: его владелец увидит сразу.
+  await pushToOwners({ title: subject.charAt(0).toUpperCase() + subject.slice(1), body: text, url });
+
+  if (!env.notifyEmail) return;
 
   try {
     await transport().sendMail({

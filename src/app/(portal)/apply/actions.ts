@@ -81,7 +81,7 @@ export async function submitLead(_prev: LeadState, formData: FormData): Promise<
     parsed.data.comment ? `\nКомментарий:\n${parsed.data.comment}` : null,
     '',
     `Все заявки: https://${env.portalDomain}/admin/leads`,
-  ]);
+  ], '/admin/leads');
 
   return { ok: true };
 }

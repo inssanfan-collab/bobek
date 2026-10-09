@@ -4,6 +4,7 @@ import { requireSuperadmin } from '@/server/auth/guards';
 import { AdminShell, type NavItem } from '@/components/admin/AdminShell';
 import { AdminLocaleSwitch } from '@/components/admin/AdminLocaleSwitch';
 import { LogoutButton } from '@/components/admin/LogoutButton';
+import { AdminPwa } from '@/components/admin/AdminPwa';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Админка портала', robots: { index: false } };
@@ -24,6 +25,7 @@ const T = {
     audit: { kk: 'Әрекеттер журналы', ru: 'Журнал действий' },
     requisites: { kk: 'Деректемелер', ru: 'Реквизиты' },
     system: { kk: 'Сервер', ru: 'Сервер' },
+    notifications: { kk: 'Хабарламалар', ru: 'Уведомления' },
   },
 } as const;
 
@@ -49,6 +51,7 @@ export default async function PortalAdminLayout({ children }: { children: React.
     { href: '/admin/audit', label: n.audit[locale], icon: '🧾' },
     { href: '/admin/requisites', label: n.requisites[locale], icon: '🏦' },
     { href: '/admin/system', label: n.system[locale], icon: '🖥️' },
+    { href: '/admin/notifications', label: n.notifications[locale], icon: '🔔' },
   ];
 
   return (
@@ -65,6 +68,7 @@ export default async function PortalAdminLayout({ children }: { children: React.
         </>
       }
     >
+      <AdminPwa />
       {children}
     </AdminShell>
   );

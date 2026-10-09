@@ -252,8 +252,29 @@ model User {
   updatedAt          DateTime  @updatedAt
 
   sessions Session[]
+  pushSubscriptions PushSubscription[]
 
   @@index([tenantId])
+}
+
+/// Устройство, на которое владелец портала получает push-уведомления
+/// (админка, установленная на телефон или компьютер как приложение).
+/// Ключи — от браузера, по ним шифруется сообщение; endpoint — адрес
+/// службы push этого браузера. Устройство, которое служба забыла
+/// (ответ 404 или 410), удаляется при следующей отправке.
+model PushSubscription {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint    String    @unique
+  p256dh      String
+  auth        String
+  /// Что за устройство — чтобы в списке было понятно, какое удалять.
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+  lastSentAt  DateTime?
+
+  @@index([userId])
 }
 
 /// Серверные сессии, а не чистый JWT: главный админ должен уметь разлогинить сад мгновенно.

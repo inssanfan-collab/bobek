@@ -91,6 +91,7 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
             ? 'Если это были не вы — кто-то подбирает пароль к админке портала.'
             : 'Скорее всего, сотрудник забыл пароль. Сбросить его можно в карточке сада.',
         ],
+        '/admin/audit',
       );
     }
 
