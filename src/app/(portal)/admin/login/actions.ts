@@ -10,8 +10,10 @@ import { hit, reset, LOGIN_LIMIT, LOGIN_WINDOW_MS } from '@/server/auth/rate-lim
 import { audit } from '@/server/audit';
 import { notifyOwner } from '@/server/notify/mail';
 import { DEFAULT_LOCALE, isLocale } from '@/lib/i18n';
+import { completeCodeChallenge, createLoginChallenge } from '@/server/auth/two-factor';
 
-export type LoginState = { error?: string; redirectTo?: string };
+/** challenge — пароль верный, код ушёл в Telegram, ждём его (второй шаг формы). */
+export type LoginState = { error?: string; redirectTo?: string; challenge?: string; expired?: boolean };
 
 const LOCK_MINUTES = 15;
 const GENERIC_ERROR = 'Неверный логин или пароль.';
@@ -100,15 +102,60 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
 
   await prisma.user.update({
     where: { id: user.id },
-    data: { failedAttempts: 0, lockedUntil: null, lastLoginAt: new Date() },
+    data: { failedAttempts: 0, lockedUntil: null },
   });
   reset(`login:${ip ?? 'unknown'}:${loginValue}`);
 
-  await createSession(user.id, { ip, userAgent });
+  // Включён вход с кодом в Telegram — сессию не создаём, пока не введён код.
+  // Telegram не ответил — не пускаем по одному паролю: иначе второй фактор
+  // снимался бы простым сбоем связи.
+  if (user.telegramChatId) {
+    const challenge = await createLoginChallenge({ id: user.id, login: user.login, telegramChatId: user.telegramChatId }, next || null, ip);
+    return challenge ? { challenge } : { error: 'Не удалось отправить код в Telegram. Попробуйте ещё раз через минуту.' };
+  }
+
+  return finishLogin(user.id, next, { ip, userAgent }, {});
+}
+
+/** Второй шаг: код, который бот прислал в Telegram. */
+export async function loginCode(_prev: LoginState, formData: FormData): Promise<LoginState> {
+  try {
+    await assertCsrf(formData);
+  } catch (error) {
+    return { error: (error as Error).message };
+  }
+  const token = String(formData.get('challenge') ?? '');
+  const code = String(formData.get('code') ?? '').trim();
+  if (!token) return { error: 'Войдите заново.' };
+  if (!code) return { challenge: token, error: 'Введите код из Telegram.' };
+
+  const result = await completeCodeChallenge(token, code, 'login');
+  if (!result.ok) {
+    if (result.reason === 'wrong') return { challenge: token, error: 'Код не подошёл. Проверьте и введите ещё раз.' };
+    return {
+      challenge: token,
+      expired: true,
+      error: result.reason === 'too_many' ? 'Слишком много неверных кодов. Войдите заново.' : 'Время на ввод кода вышло. Войдите заново.',
+    };
+  }
+
+  const meta = await requestMeta();
+  return finishLogin(result.userId, result.next ?? '', meta, { mfa: 'telegram' });
+}
+
+/** Сессия, запись в журнал и адрес, куда перейти. Общее для входа с кодом и без. */
+async function finishLogin(
+  userId: string,
+  next: string,
+  meta: { ip: string | null; userAgent: string | null },
+  auditMeta: Record<string, unknown>,
+): Promise<LoginState> {
+  const user = await prisma.user.update({ where: { id: userId }, data: { lastLoginAt: new Date() } });
+  await createSession(user.id, meta);
   await audit(
     { id: user.id, login: user.login, fullName: user.fullName, role: user.role, tenantId: user.tenantId, mustChangePassword: user.mustChangePassword, email: user.email, phone: user.phone, impersonatedBy: null, locale: isLocale(user.locale) ? user.locale : DEFAULT_LOCALE },
     'auth.login',
-    { tenantId: user.tenantId },
+    { tenantId: user.tenantId, meta: auditMeta },
   );
 
   // Открытый редирект недопустим: принимаем только внутренние пути.

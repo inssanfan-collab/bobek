@@ -8,6 +8,8 @@ export type AuditAction =
   | 'auth.login_failed'
   | 'auth.logout'
   | 'auth.password_changed'
+  | 'auth.2fa_enabled'
+  | 'auth.2fa_disabled'
   | 'tenant.create'
   | 'tenant.anketa_import'
   | 'tenant.update'

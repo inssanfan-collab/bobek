@@ -1,0 +1,27 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "telegramChatId" TEXT;
+
+-- CreateTable
+CREATE TABLE "LoginChallenge" (
+    "id" TEXT NOT NULL,
+    "tokenHash" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "codeHash" TEXT NOT NULL,
+    "purpose" TEXT NOT NULL DEFAULT 'login',
+    "chatId" TEXT,
+    "next" TEXT,
+    "attempts" INTEGER NOT NULL DEFAULT 0,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "LoginChallenge_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "LoginChallenge_tokenHash_key" ON "LoginChallenge"("tokenHash");
+
+-- CreateIndex
+CREATE INDEX "LoginChallenge_userId_idx" ON "LoginChallenge"("userId");
+
+-- AddForeignKey
+ALTER TABLE "LoginChallenge" ADD CONSTRAINT "LoginChallenge_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

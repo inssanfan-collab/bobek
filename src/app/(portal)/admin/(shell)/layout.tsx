@@ -29,6 +29,7 @@ const T = {
     system: { kk: 'Сервер', ru: 'Сервер' },
     notifications: { kk: 'Хабарламалар', ru: 'Уведомления' },
     online: { kk: 'Онлайн', ru: 'Онлайн' },
+    security: { kk: 'Қауіпсіздік', ru: 'Безопасность' },
   },
   // Короткие подписи для нижней панели на телефоне: там на пункт ~75 px.
   tab: {
@@ -84,6 +85,7 @@ export default async function PortalAdminLayout({ children }: { children: React.
       items: [
         { href: '/admin/online', label: n.online[locale], icon: 'online', badge: online || undefined, tab: true },
         { href: '/admin/notifications', label: n.notifications[locale], icon: 'bell' },
+        { href: '/admin/security', label: n.security[locale], icon: 'shield' },
         { href: '/admin/users', label: n.users[locale], icon: 'users' },
         { href: '/admin/audit', label: n.audit[locale], icon: 'log' },
         { href: '/admin/requisites', label: n.requisites[locale], icon: 'bank' },

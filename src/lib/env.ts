@@ -40,6 +40,11 @@ export const env = {
    * и в тестах тега нет. Тег — только на продающих страницах портала
    * (GoogleAdsTag), на сайтах садов и в админках его нет.
    */
+  /**
+   * Бот Telegram для кодов входа (двухфакторный вход). Общий с e04.kz.
+   * Только в .env на сервере; пусто — вход с кодом включить нельзя.
+   */
+  telegramBotToken: (process.env.TELEGRAM_BOT_TOKEN ?? '').trim(),
   googleAdsId: (process.env.GOOGLE_ADS_ID ?? '').trim(),
   googleAdsLeadLabel: (process.env.GOOGLE_ADS_LEAD_LABEL ?? '').trim(),
   /**

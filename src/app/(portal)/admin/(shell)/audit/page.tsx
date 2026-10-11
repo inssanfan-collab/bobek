@@ -22,6 +22,8 @@ const T = {
 
 const ACTION_LABEL: Record<string, { kk: string; ru: string }> = {
   'auth.login': { kk: 'Кіру', ru: 'Вход' },
+  'auth.2fa_enabled': { kk: 'Telegram арқылы кіру қосылды', ru: 'Включён вход с кодом в Telegram' },
+  'auth.2fa_disabled': { kk: 'Telegram арқылы кіру өшірілді', ru: 'Отключён вход с кодом в Telegram' },
   'auth.login_failed': { kk: 'Сәтсіз кіру әрекеті', ru: 'Неудачная попытка входа' },
   'auth.logout': { kk: 'Шығу', ru: 'Выход' },
   'auth.password_changed': { kk: 'Құпия сөзді ауыстыру', ru: 'Смена пароля' },

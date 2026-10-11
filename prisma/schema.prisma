@@ -248,11 +248,15 @@ model User {
   /// Язык админки: заведующая выбирает его один раз, и он едет за ней
   /// на любое устройство. Значения — те же 'kk' / 'ru', что у контента.
   locale             String    @default("ru")
+  /// Вход с кодом в Telegram (двухфакторный): после пароля бот присылает
+  /// шестизначный код в этот чат. Пусто — вход только по паролю.
+  telegramChatId     String?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
   sessions Session[]
   pushSubscriptions PushSubscription[]
+  loginChallenges LoginChallenge[]
 
   @@index([tenantId])
 }
@@ -289,6 +293,28 @@ model PushSubscription {
   userAgent   String?
   createdAt   DateTime  @default(now())
   lastSentAt  DateTime?
+
+  @@index([userId])
+}
+
+/// Второй шаг входа: пароль верный, код ушёл в Telegram, ждём его.
+/// Живёт 5 минут и даёт 5 попыток — потом вход заново с паролем.
+model LoginChallenge {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Хеш отправленного кода (сам код — только в Telegram).
+  codeHash  String
+  /// login — вход (код ушёл в chatId); link — подключение в «Безопасности»:
+  /// tokenHash — хеш одноразовой метки из ссылки t.me/<бот>?start=<метка>.
+  purpose   String   @default("login")
+  chatId    String?
+  /// Куда вести после входа (тот же next, что у формы пароля).
+  next      String?
+  attempts  Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 
   @@index([userId])
 }
