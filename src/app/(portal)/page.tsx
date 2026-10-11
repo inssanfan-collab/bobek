@@ -378,9 +378,6 @@ export default async function PortalHome({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData(locale, settings.phone || null)).replace(/</g, '\\u003c') }}
       />
       <a className="skip" href="#main">{T.skip[locale]}</a>
-      {/* Прячет первый экран до вступления (SalesMotion) ещё до отрисовки,
-          чтобы он не мигнул. Сценарий не дошёл — через 3 с всё видно само. */}
-      <script dangerouslySetInnerHTML={{ __html: "if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('sales-intro')" }} />
       <SalesHeader locale={locale} pathname="/" onHome />
 
       <main id="main">

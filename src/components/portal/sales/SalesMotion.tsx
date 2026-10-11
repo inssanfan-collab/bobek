@@ -5,10 +5,10 @@ import { useEffect } from 'react';
 /**
  * Движение главной под нежную манеру.
  *
- * - Вступление первого экрана: слова заголовка выезжают по одному, маркер
- *   прорисовывается, кнопки и макет подплывают, рукописная строчка «пишется». До сценария первый экран спрятан классом
- *   `sales-intro` на <html> (его ставит строчка в разметке главной, ещё до
- *   отрисовки) — так он не мигает; сценарий не пришёл — CSS покажет всё сам.
+ * - Первый экран виден сразу (11.10.2026): раньше он прятался до прихода
+ *   этого сценария, и на телефоне с мобильным интернетом заголовок появлялся
+ *   через 5 секунд — Google считал главную медленной. Теперь лёгкое всплытие
+ *   делает CSS (sales-rise в sales.css) с первой отрисовки, без прозрачности.
  * - Макет первого экрана чуть наклоняется за мышью; радуга и макет смещаются
  *   при прокрутке.
  * - Плавная прокрутка (Lenis), якоря меню — с поправкой на шапку.
@@ -22,20 +22,15 @@ import { useEffect } from 'react';
  */
 export function SalesMotion() {
   useEffect(() => {
-    const html = document.documentElement;
     const root = document.querySelector<HTMLElement>('.sales');
-    if (!root || matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      html.classList.remove('sales-intro');
-      return;
-    }
+    if (!root || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let cleanup: (() => void) | null = null;
     let cancelled = false;
 
-    // Шрифт — дождаться: слова заголовка делятся по готовым строкам.
-    Promise.all([import('gsap'), import('gsap/ScrollTrigger'), import('gsap/SplitText'), import('lenis'), document.fonts.ready])
-      .then(([{ gsap }, { ScrollTrigger }, { SplitText }, { default: Lenis }]) => {
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger'), import('lenis')])
+      .then(([{ gsap }, { ScrollTrigger }, { default: Lenis }]) => {
         if (cancelled) return;
-        gsap.registerPlugin(ScrollTrigger, SplitText);
+        gsap.registerPlugin(ScrollTrigger);
 
         const lenis = new Lenis({ anchors: { offset: -84 } });
         lenis.on('scroll', ScrollTrigger.update);
@@ -48,25 +43,9 @@ export function SalesMotion() {
         const $ = (s: string) => gsap.utils.toArray<HTMLElement>(s, root);
 
         const ctx = gsap.context(() => {
-          // ── вступление ──
+          // ── первый экран: вступление — в CSS, здесь только наклон и параллакс ──
           const hero = root.querySelector<HTMLElement>('.hero');
-          const title = hero?.querySelector('h1');
-          if (hero && title) {
-            const words = SplitText.create(title, { type: 'words', wordsClass: 'w' });
-            const intro = gsap.timeline({ defaults: { ease: 'power3.out' } });
-            intro
-              .from('.hero .label', { y: -18, opacity: 0, duration: 0.6 })
-              .from(words.words, { y: 42, rotate: 4, opacity: 0, duration: 0.8, stagger: 0.07 }, '-=0.3')
-              .from('.hero .hl', { backgroundSize: '0% 100%', duration: 0.9, ease: 'power2.inOut' }, '-=0.35')
-              .from('.hero .lead', { y: 22, opacity: 0, duration: 0.7 }, '-=0.7')
-              .from('.hero .cta > *', { y: 22, opacity: 0, duration: 0.6, stagger: 0.1 }, '-=0.5')
-              .from('.hero .facts li', { y: 12, opacity: 0, duration: 0.5, stagger: 0.08 }, '-=0.4')
-              .from('.hero-stage .frame', { y: 70, rotate: -3, scale: 0.95, opacity: 0, duration: 1.1 }, 0.35)
-              .from('.hero-stage .phone', { x: -60, y: 40, rotate: -8, opacity: 0, duration: 1 }, 0.6)
-              .from('.hero-hand', { clipPath: 'inset(0 100% 0 0)', duration: 1.1, ease: 'power1.inOut' }, 1.5);
-            // Начальные положения уже выставлены — снимаем прятку.
-            html.classList.remove('sales-intro');
-
+          if (hero) {
             // Макет чуть наклоняется за мышью.
             const stage = hero.querySelector<HTMLElement>('.hero-stage');
             if (stage && matchMedia('(hover: hover)').matches) {
@@ -83,8 +62,6 @@ export function SalesMotion() {
 
             gsap.to('.rainbow', { y: 140, rotate: 6, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
             gsap.to('.hero-stage', { y: -50, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
-          } else {
-            html.classList.remove('sales-intro');
           }
 
           // ── ниже первого экрана ──
@@ -173,12 +150,11 @@ export function SalesMotion() {
           lenis.destroy();
         };
       })
-      .catch(() => html.classList.remove('sales-intro'));
+      .catch(() => undefined);
 
     return () => {
       cancelled = true;
       cleanup?.();
-      html.classList.remove('sales-intro');
     };
   }, []);
 
