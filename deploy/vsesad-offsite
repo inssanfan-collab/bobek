@@ -120,6 +120,11 @@ def main() -> int:
     if not dumps:
         return fail(f'в {DUMPS} нет ни одной копии базы — не отработал vsesad-backup?')
     latest = dumps[-1]
+    # Свежей копии нет — значит, не отработал vsesad-backup (так было 10–11.10:
+    # скрипт падал на первой строке). Молча слать вчерашнюю нельзя.
+    age_hours = (datetime.now().timestamp() - latest.stat().st_mtime) / 3600
+    if age_hours > 30:
+        return fail(f'самой свежей копии базы {latest.name} уже {age_hours:.0f} ч — ночная копия (vsesad-backup) не делается')
 
     sent = rclone('copy', str(latest), f'{REMOTE}/db')
     if sent.returncode != 0:
