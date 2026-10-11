@@ -1,0 +1,52 @@
+#!/bin/bash
+# Выкладка EduSad на боевой сервер (/usr/local/bin/vsesad-deploy, запускать от root).
+#
+# Собирает от root, но работает сайт от пользователя vsesad (с 11.10.2026):
+# если в приложении найдут уязвимость, атакующий получит только папку сайта,
+# а не весь сервер с почтой, копиями базы и чужими сайтами. Поэтому после
+# сборки файлы отдаются vsesad, а .env — только на чтение (root:vsesad 640).
+#
+# Перед выкладкой смотрите «Онлайн» в админке портала: у того, кто держит
+# админку открытой, первое сохранение после перезапуска может не пройти.
+#
+# Скрипт в репозитории, на сервер копируется руками — как vsesad-certs.
+set -euo pipefail
+
+APP=/var/www/vsesad
+cd "$APP"
+
+before=$(git rev-parse HEAD)
+git pull -q --ff-only
+after=$(git rev-parse HEAD)
+
+# Зависимости ставим, только если они поменялись: это самое долгое.
+if [ "$before" != "$after" ] && ! git diff --quiet "$before" "$after" -- package.json pnpm-lock.yaml; then
+  echo "Зависимости поменялись — pnpm install"
+  pnpm install --frozen-lockfile
+fi
+
+pnpm exec prisma migrate deploy
+
+if ! pnpm build > /tmp/vsesad-build.log 2>&1; then
+  echo "Сборка упала, сайт не перезапускался (работает прежняя версия):"
+  tail -30 /tmp/vsesad-build.log
+  exit 1
+fi
+
+if id vsesad > /dev/null 2>&1; then
+  chown -R vsesad:vsesad "$APP"
+  chown root:vsesad "$APP/.env"
+  chmod 640 "$APP/.env"
+fi
+
+systemctl restart vsesad
+
+for _ in $(seq 1 30); do
+  sleep 1
+  if curl -fsS -o /dev/null http://127.0.0.1:3100/api/health; then
+    echo "Сайт отвечает: $(git log --oneline -1)"
+    exit 0
+  fi
+done
+echo "Сайт не ответил за 30 секунд — смотрите: journalctl -u vsesad -n 50; tail -50 /var/log/vsesad.log"
+exit 1

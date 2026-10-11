@@ -109,6 +109,17 @@ PostgreSQL на 5432, и Prisma молча подключается к нему.
 открыт `/.well-known/acme-challenge/` из `/var/www/acme`: сертификат для
 нового домена сада выпускается ещё до того, как у домена есть свой блок.
 
+**Сайт работает от пользователя `vsesad`, а не root** (11.10.2026).
+Выкладка — только `/usr/local/bin/vsesad-deploy` (в репозитории
+`deploy/vsesad-deploy`): собирает от root и отдаёт файлы `vsesad`, иначе
+сайт не сможет писать в `storage` и `.next/cache`. Скрипты, которые пишут
+в `storage` (импорт сайта, Instagram, документы), запускать через
+`runuser -u vsesad --` или после них `chown -R vsesad:vsesad storage`.
+Служба — `deploy/vsesad-app-user.conf` (дополнение к vsesad.service).
+Ключ `next start -H 127.0.0.1` нельзя: сайты садов падают с 500 (EPROTO).
+На сервере файрвол ufw (22, 80, 443, 25, 587 и 36327/udp — VPN владельца),
+SSH — только по ключу.
+
 **`.env` вне репозитория.** `git pull` его не обновляет — после изменения
 `.env.local.example` файл нужно перезаписать вручную.
 
