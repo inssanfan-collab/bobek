@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 import { localeFromParam, withLocale } from '@/lib/i18n';
 
 /**
@@ -8,5 +8,5 @@ import { localeFromParam, withLocale } from '@/lib/i18n';
  */
 export default async function ParentsPage({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   const locale = localeFromParam((await searchParams).lang);
-  redirect(withLocale('/', locale));
+  permanentRedirect(withLocale('/', locale));
 }
