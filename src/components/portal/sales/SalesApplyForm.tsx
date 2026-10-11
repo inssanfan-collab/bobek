@@ -53,6 +53,8 @@ export function SalesApplyForm({ csrf, locale, plan }: { csrf: string; locale: L
     if (!state.ok) return;
     const w = window as typeof window & { gtag?: (...args: unknown[]) => void; __edusadLeadConversion?: string };
     if (w.gtag && w.__edusadLeadConversion) w.gtag('event', 'conversion', { send_to: w.__edusadLeadConversion });
+    // И в сводку посещения владельцу: «оставил заявку».
+    window.__edusadVisit?.('lead');
   }, [state.ok]);
 
   // Конфетти после отправки — пастельное, как шарики шагов.

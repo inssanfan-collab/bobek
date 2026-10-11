@@ -1,0 +1,9 @@
+-- CreateTable
+CREATE TABLE "PortalVisitor" (
+    "id" TEXT NOT NULL,
+    "firstSeenAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "lastSeenAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "visits" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "PortalVisitor_pkey" PRIMARY KEY ("id")
+);

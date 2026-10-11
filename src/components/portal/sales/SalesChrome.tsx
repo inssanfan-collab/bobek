@@ -2,6 +2,7 @@ import { withLocale, type Locale } from '@/lib/i18n';
 import { formatPhone, phoneHref } from '@/lib/labels';
 import { portalSettings } from '@/server/docs/contract';
 import { GoogleAdsTag } from './GoogleAdsTag';
+import { VisitTracker } from './VisitTracker';
 import './sales.css';
 
 /**
@@ -35,6 +36,7 @@ const T = {
   navGuide: { kk: 'Нұсқаулық', ru: 'Инструкция' },
   offer: { kk: 'Жария оферта', ru: 'Публичная оферта' },
   contacts: { kk: 'Байланыс', ru: 'Контакты' },
+  privacy: { kk: 'Құпиялылық саясаты', ru: 'Политика конфиденциальности' },
   attestation: { kk: 'Аттестаттауға арналған сайт', ru: 'Сайт для аттестации' },
 } as const;
 
@@ -67,8 +69,9 @@ export function SalesHeader({ locale, pathname, onHome = false }: { locale: Loca
   const kk = pathname === '/' ? '/?lang=kk' : `${pathname}?lang=kk`;
   return (
     <>
-      {/* Тег Google Рекламы — только здесь, на продающих страницах. */}
+      {/* Тег Google Рекламы и сводка посещений владельцу — только здесь, на продающих страницах. */}
       <GoogleAdsTag />
+      <VisitTracker />
       <header className="top">
         <div className="wrap top-in">
           <a className="logo" href={withLocale('/', locale)} aria-label={T.home[locale]}>
@@ -127,6 +130,7 @@ export async function SalesFooter({ locale, onHome = false }: { locale: Locale; 
           <a href={withLocale('/designs', locale)}>{T.navDesigns[locale]}</a>
           <a href={withLocale('/guide', locale)}>{T.guide[locale]}</a>
           <a href={withLocale('/offer', locale)}>{T.offer[locale]}</a>
+          <a href={withLocale('/privacy', locale)}>{T.privacy[locale]}</a>
         </nav>
       </div>
       <div className="wrap copy">© {new Date().getFullYear()} EduSad. Кудайбергенов Асет</div>

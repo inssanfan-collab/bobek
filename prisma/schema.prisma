@@ -912,3 +912,14 @@ model Contract {
 
   @@index([tenantId, issuedAt])
 }
+
+/// Посетитель портала (продающие страницы edusad.kz) — для сообщения
+/// владельцу в Telegram «заходит уже 3-й раз». id — случайная метка
+/// из localStorage браузера посетителя; ни имени, ни IP здесь нет.
+model PortalVisitor {
+  id          String   @id
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  /// Сколько заинтересованных посещений (о которых ушло сообщение).
+  visits      Int      @default(0)
+}
