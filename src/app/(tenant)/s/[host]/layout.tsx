@@ -3,6 +3,7 @@ import '../../../globals.css';
 // После globals: токены темы должны перекрывать палитру сада.
 import '@/themes/themes.css';
 import { siteContext } from '@/server/tenant/context';
+import { isIndexable } from '@/server/tenant/resolve';
 import { pick } from '@/lib/i18n';
 import { env } from '@/lib/env';
 import { fontPair, isHeaderStyleCode, isPaletteCode, isPatternCode, isShapeCode } from '@/lib/templates';
@@ -20,11 +21,13 @@ export async function generateMetadata({
 }: {
   params: Promise<{ host: string }>;
 }): Promise<Metadata> {
-  const { profile, primaryHost } = await siteContext((await params).host);
+  const { profile, primaryHost, tenant } = await siteContext((await params).host);
   const name = profile?.nameRu ?? profile?.nameKk ?? 'Балабақша';
 
   return {
     metadataBase: new URL(`https://${primaryHost}`),
+    // Демо, черновики и скрытые владельцем сады — не в поиск (вдобавок к robots.txt).
+    ...(isIndexable(tenant) ? {} : { robots: { index: false, follow: false } }),
     title: { default: name, template: `%s · ${name}` },
     description: profile?.aboutRu?.slice(0, 200) ?? `Официальный сайт: ${name}`,
     openGraph: {

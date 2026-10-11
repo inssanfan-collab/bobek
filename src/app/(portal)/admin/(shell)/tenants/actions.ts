@@ -693,6 +693,18 @@ export async function markContractSigned(formData: FormData) {
  * сделана под конкретный сад, и в выборе шаблонов у садов её нет.
  * Пустое значение возвращает обычный шаблон — данные сада не трогаются.
  */
+/** Скрыть сад из поисковиков и каталога (тестовые сады) или вернуть. */
+export async function setSearchHidden(formData: FormData) {
+  const admin = await requireSuperadmin();
+  await assertCsrf(formData);
+  const tenantId = String(formData.get('tenantId'));
+  const hidden = formData.get('hidden') === '1';
+  await prisma.tenant.update({ where: { id: tenantId }, data: { hideFromSearch: hidden } });
+  await invalidateTenantCacheById(tenantId);
+  await audit(admin, 'tenant.update', { tenantId, meta: { field: 'hideFromSearch', to: hidden } });
+  revalidatePath(`/admin/tenants/${tenantId}`);
+}
+
 export async function setTenantTheme(formData: FormData) {
   const admin = await requireSuperadmin();
   await assertCsrf(formData);

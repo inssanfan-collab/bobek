@@ -75,6 +75,7 @@ export default async function CatalogPage({
   const where: Prisma.TenantWhereInput = {
     status: 'ACTIVE',
     isDemo: false,
+    hideFromSearch: false,
     ...(ranked ? { id: { in: ranked } } : {}),
     profile: {
       ...(params.district ? { district: params.district } : {}),
@@ -91,7 +92,7 @@ export default async function CatalogPage({
       take: 200,
     }),
     prisma.tenantProfile.findMany({
-      where: { district: { not: null }, tenant: { status: 'ACTIVE', isDemo: false } },
+      where: { district: { not: null }, tenant: { status: 'ACTIVE', isDemo: false, hideFromSearch: false } },
       select: { district: true },
       distinct: ['district'],
       orderBy: { district: 'asc' },

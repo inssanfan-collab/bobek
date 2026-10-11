@@ -27,7 +27,7 @@ export async function GET() {
     }),
     // Каталог меняется, когда появляется или обновляется сад.
     prisma.tenantProfile.findFirst({
-      where: { tenant: { status: 'ACTIVE', isDemo: false } },
+      where: { tenant: { status: 'ACTIVE', isDemo: false, hideFromSearch: false } },
       orderBy: { updatedAt: 'desc' },
       select: { updatedAt: true },
     }),

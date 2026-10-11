@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { publicSiteContext } from '@/server/tenant/context';
+import { isIndexable } from '@/server/tenant/resolve';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,12 @@ export async function GET(
 ) {
   const { host } = await params;
   const { db, primaryHost, tenant } = await publicSiteContext(host);
+  // Сад закрыт от поисковиков — и карта сайта пустая.
+  if (!isIndexable(tenant)) {
+    return new NextResponse('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n', {
+      headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+    });
+  }
   const main = tenant.defaultLocale === 'ru' ? 'ru' : 'kk';
   const other = main === 'ru' ? 'kk' : 'ru';
   const base = `https://${primaryHost}`;

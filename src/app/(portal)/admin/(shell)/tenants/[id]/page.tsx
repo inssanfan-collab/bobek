@@ -14,7 +14,7 @@ import {
 import { pick } from '@/lib/i18n';
 import {
   addDomain, createContractAction, deleteDomain, impersonate, markContractSigned, renumberContractAction, setSubscriptionEndAction,
-  recordPayment, resetUserPassword, setPrimaryDomain, setTenantStatus, setTenantTheme, verifyDomain,
+  recordPayment, resetUserPassword, setPrimaryDomain, setSearchHidden, setTenantStatus, setTenantTheme, verifyDomain,
 } from '../actions';
 import { findThemeInfo, THEME_CATALOG } from '@/themes/catalog';
 import { nextSequence, numberFor, suggestedPeriod, portalSettings } from '@/server/docs/contract';
@@ -72,6 +72,11 @@ const T = {
     ru: 'Админка только на просмотр. На ближайшей утренней проверке сад будет приостановлен, а сайт закрыт. Отметьте оплату ниже — всё сразу вернётся.',
   },
   changeStatus: { kk: 'Мәртебені өзгерту', ru: 'Изменить статус' },
+  searchVisible: { kk: 'Сайт іздеу жүйелерінде және каталогта көрінеді.', ru: 'Сайт виден в поисковиках и каталоге.' },
+  searchHidden: { kk: 'Сайт іздеу жүйелерінен және каталогтан жасырылған.', ru: 'Сайт скрыт из поисковиков и каталога.' },
+  searchDemo: { kk: 'Демо-бақша — іздеу жүйелерінен әрқашан жасырылған.', ru: 'Демо-сад — всегда скрыт из поисковиков.' },
+  searchHide: { kk: 'Іздеуден жасыру', ru: 'Скрыть из поисковиков' },
+  searchShow: { kk: 'Іздеуде көрсету', ru: 'Показывать в поиске' },
   apply: { kk: 'Қолдану', ru: 'Применить' },
   recordPayment: { kk: 'Төлемді белгілеу', ru: 'Отметить оплату' },
   amount: { kk: 'Сомасы, ₸', ru: 'Сумма, ₸' },
@@ -258,6 +263,20 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
               </select>
             </div>
             <button type="submit" className="btn-secondary">{T.apply[locale]}</button>
+          </form>
+
+          <form action={setSearchHidden} className="mt-5 flex flex-wrap items-center gap-3 border-t border-line pt-5">
+            <input type="hidden" name={CSRF_FIELD} value={csrf} />
+            <input type="hidden" name="tenantId" value={tenant.id} />
+            <input type="hidden" name="hidden" value={tenant.hideFromSearch ? '0' : '1'} />
+            <p className="text-sm">
+              {tenant.isDemo ? T.searchDemo[locale] : tenant.hideFromSearch ? T.searchHidden[locale] : T.searchVisible[locale]}
+            </p>
+            {tenant.isDemo ? null : (
+              <button type="submit" className="btn-secondary text-sm">
+                {tenant.hideFromSearch ? T.searchShow[locale] : T.searchHide[locale]}
+              </button>
+            )}
           </form>
         </section>
 

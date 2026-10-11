@@ -92,3 +92,11 @@ export async function invalidateTenantCacheById(tenantId: string) {
 export function isPubliclyVisible(status: TenantStatus): boolean {
   return status === 'ACTIVE';
 }
+
+/**
+ * Можно ли поисковикам индексировать сайт сада: работает, не демо
+ * (выдуманные данные) и не скрыт владельцем портала (тестовые сады).
+ */
+export function isIndexable(tenant: { status: TenantStatus; isDemo: boolean; hideFromSearch: boolean }): boolean {
+  return isPubliclyVisible(tenant.status) && !tenant.isDemo && !tenant.hideFromSearch;
+}

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { siteContext } from '@/server/tenant/context';
-import { isPubliclyVisible } from '@/server/tenant/resolve';
+import { isIndexable } from '@/server/tenant/resolve';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +13,8 @@ export async function GET(
 
   // Черновик сада индексировать нельзя: сайт ещё пустой и испортит выдачу.
   // Демо-сад тоже: его данные выдуманы, и родитель не должен найти его в поиске.
-  const body = isPubliclyVisible(tenant.status) && !tenant.isDemo
+  // И тестовые сады, которые владелец скрыл в карточке (hideFromSearch).
+  const body = isIndexable(tenant)
     ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://${primaryHost}/sitemap.xml\n`
     : 'User-agent: *\nDisallow: /\n';
 
