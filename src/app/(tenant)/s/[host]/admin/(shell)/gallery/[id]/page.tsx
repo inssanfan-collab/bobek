@@ -9,6 +9,7 @@ import { ActionForm } from '@/components/ActionForm';
 import { deleteAlbum, removeAlbumItem, saveAlbum, uploadMedia } from '../../actions';
 import { pick } from '@/lib/i18n';
 import { FileInput } from '@/components/admin/FileInput';
+import { DeleteButton } from '@/components/admin/DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,7 +118,7 @@ export default async function AlbumPage({
                 <input type="hidden" name="host" value={host} />
                 <input type="hidden" name="albumId" value={album.id} />
                 <input type="hidden" name="mediaId" value={item.media.id} />
-                <button type="submit" className="btn-ghost w-full px-2 py-1 text-xs text-red-600">{T.removePhoto[locale]}</button>
+                <DeleteButton className="btn-ghost w-full px-2 py-1 text-xs text-red-600">{T.removePhoto[locale]}</DeleteButton>
               </form>
             ) : null}
           </figure>

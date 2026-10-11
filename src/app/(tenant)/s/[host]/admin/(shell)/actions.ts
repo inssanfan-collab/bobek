@@ -8,7 +8,7 @@ import { prisma } from '@/server/db';
 import { tenantAdmin } from '@/server/tenant/admin-context';
 import { assertCanEdit } from '@/server/auth/guards';
 import { assertCsrf } from '@/server/auth/csrf';
-import { assertOwned } from '@/server/db/scope';
+import { assertOwned, ownedOrGone } from '@/server/db/scope';
 import { audit } from '@/server/audit';
 import { sanitizeContent, toPlainText } from '@/lib/sanitize';
 import { isVideoUrl } from '@/lib/video';
@@ -156,9 +156,11 @@ export async function savePost(_prev: ActionState, formData: FormData): Promise<
 export async function deletePost(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('post', id, ctx.tenantId);
-  await prisma.post.delete({ where: { id } });
-  await audit(ctx.user, 'content.delete', { tenantId: ctx.tenantId, entity: 'post', entityId: id });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('post', id, ctx.tenantId)) {
+    await prisma.post.deleteMany({ where: { id } });
+    await audit(ctx.user, 'content.delete', { tenantId: ctx.tenantId, entity: 'post', entityId: id });
+  }
   revalidatePath('/admin/posts');
 }
 
@@ -582,8 +584,8 @@ export async function deleteAlbum(_prev: ActionState, formData: FormData): Promi
   try {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('album', id, ctx.tenantId);
-  await prisma.album.delete({ where: { id } });
+  // Уже удалён (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('album', id, ctx.tenantId)) await prisma.album.deleteMany({ where: { id } });
   revalidatePath('/admin/gallery');
   return { redirectTo: await hostUrl('/admin/gallery') };
   } catch (error) {
@@ -595,8 +597,7 @@ export async function removeAlbumItem(formData: FormData) {
   const ctx = await gate(formData);
   const albumId = str(formData, 'albumId');
   const mediaId = str(formData, 'mediaId');
-  await assertOwned('album', albumId, ctx.tenantId);
-  await prisma.albumItem.deleteMany({ where: { albumId, mediaId } });
+  if (await ownedOrGone('album', albumId, ctx.tenantId)) await prisma.albumItem.deleteMany({ where: { albumId, mediaId } });
   revalidatePath(`/admin/gallery/${albumId}`);
 }
 
@@ -687,7 +688,11 @@ export async function renameDocFolder(formData: FormData) {
 export async function deleteDocFolder(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('documentFolder', id, ctx.tenantId);
+  // Папки уже нет (повторное нажатие) — молча «готово».
+  if (!(await ownedOrGone('documentFolder', id, ctx.tenantId))) {
+    revalidatePath('/admin/documents');
+    return;
+  }
   const folder = await prisma.documentFolder.findUniqueOrThrow({ where: { id }, select: { parentId: true } });
 
   const [children, start] = await Promise.all([
@@ -795,8 +800,8 @@ export async function saveDocument(formData: FormData) {
 export async function deleteDocument(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('document', id, ctx.tenantId);
-  await prisma.document.delete({ where: { id } });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('document', id, ctx.tenantId)) await prisma.document.deleteMany({ where: { id } });
   revalidatePath('/admin/documents');
 }
 
@@ -848,8 +853,8 @@ export async function saveStaff(formData: FormData) {
 export async function deleteStaff(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('staffMember', id, ctx.tenantId);
-  await prisma.staffMember.delete({ where: { id } });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('staffMember', id, ctx.tenantId)) await prisma.staffMember.deleteMany({ where: { id } });
   revalidatePath('/admin/staff');
 }
 
@@ -921,8 +926,8 @@ export async function setGroupPlaces(_prev: ActionState, formData: FormData): Pr
 export async function deleteGroup(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('group', id, ctx.tenantId);
-  await prisma.group.delete({ where: { id } });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('group', id, ctx.tenantId)) await prisma.group.deleteMany({ where: { id } });
   await syncFreePlaces(ctx.tenantId);
   revalidatePath('/admin/groups');
 }
@@ -980,8 +985,8 @@ export async function saveMenuDay(formData: FormData) {
 export async function deleteMenuDay(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('menuDay', id, ctx.tenantId);
-  await prisma.menuDay.delete({ where: { id } });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('menuDay', id, ctx.tenantId)) await prisma.menuDay.deleteMany({ where: { id } });
   revalidatePath('/admin/menu');
 }
 
@@ -1318,8 +1323,8 @@ export async function saveClub(formData: FormData) {
 export async function deleteClub(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('club', id, ctx.tenantId);
-  await prisma.club.delete({ where: { id } });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('club', id, ctx.tenantId)) await prisma.club.deleteMany({ where: { id } });
   revalidatePath('/admin/clubs');
 }
 
@@ -1352,8 +1357,8 @@ export async function saveFaq(formData: FormData) {
 export async function deleteFaq(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('faqItem', id, ctx.tenantId);
-  await prisma.faqItem.delete({ where: { id } });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('faqItem', id, ctx.tenantId)) await prisma.faqItem.deleteMany({ where: { id } });
   revalidatePath('/admin/faq');
 }
 
@@ -1392,8 +1397,8 @@ export async function saveReview(formData: FormData) {
 export async function deleteReview(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('review', id, ctx.tenantId);
-  await prisma.review.delete({ where: { id } });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('review', id, ctx.tenantId)) await prisma.review.deleteMany({ where: { id } });
   revalidatePath('/admin/reviews');
 }
 
@@ -1425,8 +1430,8 @@ export async function savePricePlan(formData: FormData) {
 export async function deletePricePlan(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('pricePlan', id, ctx.tenantId);
-  await prisma.pricePlan.delete({ where: { id } });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('pricePlan', id, ctx.tenantId)) await prisma.pricePlan.deleteMany({ where: { id } });
   revalidatePath('/admin/prices');
 }
 
@@ -1453,8 +1458,8 @@ export async function saveRoutineItem(formData: FormData) {
 export async function deleteRoutineItem(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
-  await assertOwned('routineItem', id, ctx.tenantId);
-  await prisma.routineItem.delete({ where: { id } });
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('routineItem', id, ctx.tenantId)) await prisma.routineItem.deleteMany({ where: { id } });
   revalidatePath('/admin/routine');
 }
 

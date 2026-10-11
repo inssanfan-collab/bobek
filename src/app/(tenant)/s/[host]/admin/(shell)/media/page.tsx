@@ -7,6 +7,7 @@ import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { formatDate } from '@/lib/labels';
 import { deleteMediaAction, uploadMedia } from '../actions';
 import { FileInput } from '@/components/admin/FileInput';
+import { DeleteButton } from '@/components/admin/DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -127,9 +128,9 @@ export default async function MediaPage({
                       <input type="hidden" name={CSRF_FIELD} value={csrf} />
                       <input type="hidden" name="host" value={host} />
                       <input type="hidden" name="mediaId" value={file.id} />
-                      <button type="submit" className="btn-ghost w-full px-2 py-1 text-xs text-red-600">
+                      <DeleteButton className="btn-ghost w-full px-2 py-1 text-xs text-red-600">
                         {T.remove[locale]}
-                      </button>
+                      </DeleteButton>
                     </form>
                   ) : null}
                 </figcaption>

@@ -16,6 +16,7 @@ import {
   createDocFolder, deleteDocFolder, deleteDocument, moveDocFolder, renameDocFolder, saveDocument,
 } from '../actions';
 import { FileInput } from '@/components/admin/FileInput';
+import { DeleteButton } from '@/components/admin/DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -153,7 +154,7 @@ export default async function DocumentsPage({
             <form action={deleteDocument}>
               {hidden}
               <input type="hidden" name="id" value={doc.id} />
-              <button type="submit" className="btn-ghost px-3 py-1.5 text-xs text-red-600">{T.remove[locale]}</button>
+              <DeleteButton className="btn-ghost px-3 py-1.5 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
             </form>
           ) : null}
         </div>
@@ -313,12 +314,12 @@ export default async function DocumentsPage({
                             <form action={deleteDocFolder}>
                               {hidden}
                               <input type="hidden" name="id" value={folder.id} />
-                              <button
-                                type="submit" className="btn-ghost px-3 py-1.5 text-xs text-red-600"
+                              <DeleteButton
+                                className="btn-ghost px-3 py-1.5 text-xs text-red-600"
                                 title={T.removeFolderHint[locale]}
                               >
                                 {T.removeFolder[locale]}
-                              </button>
+                              </DeleteButton>
                             </form>
                           </div>
                         ) : null}

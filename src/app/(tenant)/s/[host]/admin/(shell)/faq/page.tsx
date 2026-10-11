@@ -7,6 +7,7 @@ import { SubmitButton } from '@/components/ui/SubmitButton';
 import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { pick } from '@/lib/i18n';
 import { deleteFaq, saveFaq } from '../actions';
+import { DeleteButton } from '@/components/admin/DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,7 +107,7 @@ export default async function FaqPage({ params }: { params: Promise<{ host: stri
                     <input type="hidden" name={CSRF_FIELD} value={csrf} />
                     <input type="hidden" name="host" value={host} />
                     <input type="hidden" name="id" value={item.id} />
-                    <button type="submit" className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</button>
+                    <DeleteButton className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
                   </form>
                 ) : null}
               </div>

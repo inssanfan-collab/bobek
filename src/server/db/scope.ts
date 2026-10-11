@@ -1,4 +1,5 @@
 import { prisma } from '@/server/db';
+import { ActionError } from '@/lib/action-state';
 import { searchSite } from '@/server/db/search';
 import type { Prisma } from '@prisma/client';
 
@@ -151,10 +152,23 @@ type OwnedModel =
   | 'club' | 'faqItem' | 'review' | 'pricePlan' | 'routineItem';
 
 /**
- * Проверка владения перед update/delete: Prisma не умеет составной where по id+tenantId
- * в операциях, возвращающих запись, поэтому владение подтверждаем явным запросом.
+ * Записи уже нет — её удалили (часто тем же сотрудником секундой раньше:
+ * двойное нажатие или кнопка в ещё не обновившемся списке). Это не сбой
+ * и не взлом: сотрудник видит «уже удалена, обновите страницу», уведомления
+ * владельцу нет (ActionError не считается ошибкой сервера).
  */
-export async function assertOwned(model: OwnedModel, id: string, tenantId: string): Promise<void> {
+export class GoneError extends ActionError {
+  constructor() {
+    super({ kk: 'Бұл жазба жойылып қойған — бетті жаңартыңыз.', ru: 'Эта запись уже удалена — обновите страницу.' });
+  }
+}
+
+type OwnerLookup = {
+  findUnique: (a: { where: { id: string }; select: { tenantId: true } }) => Promise<{ tenantId: string } | null>;
+};
+
+/** Чей это объект: null — записи нет; иначе — id сада-владельца. */
+async function ownerOf(model: OwnedModel, id: string): Promise<string | null> {
   const delegates = {
     post: prisma.post, section: prisma.section, media: prisma.media, album: prisma.album,
     document: prisma.document, documentFolder: prisma.documentFolder,
@@ -164,16 +178,37 @@ export async function assertOwned(model: OwnedModel, id: string, tenantId: strin
     review: prisma.review, pricePlan: prisma.pricePlan, routineItem: prisma.routineItem,
   } as const;
 
-  type OwnerLookup = {
-    findUnique: (a: { where: { id: string }; select: { tenantId: true } }) => Promise<{ tenantId: string } | null>;
-  };
-
   const row = await (delegates[model] as unknown as OwnerLookup).findUnique({
     where: { id },
     select: { tenantId: true },
   });
+  return row?.tenantId ?? null;
+}
 
-  if (!row || row.tenantId !== tenantId) {
-    throw new NotFoundError(`${model}:${id} не принадлежит саду ${tenantId}`);
-  }
+function foreign(model: OwnedModel, id: string, tenantId: string): never {
+  // Чужая запись — это уже не случайность: сотрудник подставил номер
+  // объекта другого сада. Ошибка уходит владельцу (instrumentation → push).
+  throw new NotFoundError(`Попытка изменить запись другого сада: ${model} ${id}, запрос от сада ${tenantId}`);
+}
+
+/**
+ * Проверка владения перед update/delete: Prisma не умеет составной where по id+tenantId
+ * в операциях, возвращающих запись, поэтому владение подтверждаем явным запросом.
+ * Записи нет — GoneError (понятное сотруднику сообщение), чужая — тревога.
+ */
+export async function assertOwned(model: OwnedModel, id: string, tenantId: string): Promise<void> {
+  const owner = await ownerOf(model, id);
+  if (owner === null) throw new GoneError();
+  if (owner !== tenantId) foreign(model, id, tenantId);
+}
+
+/**
+ * Для удаления: true — запись этого сада, удаляйте; false — её уже нет,
+ * удалять нечего, и это не ошибка (повторное «Удалить»). Чужая — тревога.
+ */
+export async function ownedOrGone(model: OwnedModel, id: string, tenantId: string): Promise<boolean> {
+  const owner = await ownerOf(model, id);
+  if (owner === null) return false;
+  if (owner !== tenantId) foreign(model, id, tenantId);
+  return true;
 }

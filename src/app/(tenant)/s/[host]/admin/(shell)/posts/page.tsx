@@ -8,6 +8,7 @@ import { formatDate } from '@/lib/labels';
 import { pick } from '@/lib/i18n';
 import { deletePost } from '../actions';
 import type { SectionType } from '@prisma/client';
+import { DeleteButton } from '@/components/admin/DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,7 +117,7 @@ export default async function PostsPage({
                   <input type="hidden" name={CSRF_FIELD} value={csrf} />
                   <input type="hidden" name="host" value={host} />
                   <input type="hidden" name="id" value={post.id} />
-                  <button type="submit" className="btn-ghost px-3 py-1.5 text-xs text-red-600">{T.remove[locale]}</button>
+                  <DeleteButton className="btn-ghost px-3 py-1.5 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
                 </form>
               ) : null}
             </div>
