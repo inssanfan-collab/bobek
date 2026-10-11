@@ -106,3 +106,36 @@ export function backupProblem(status: BackupStatus | null): 'none' | 'stale' | '
   const age = Date.now() - new Date(status.lastSuccessAt).getTime();
   return age > BACKUP_STALE_HOURS * 3_600_000 ? 'stale' : null;
 }
+
+/**
+ * Копия на Google Диск (deploy/vsesad-offsite, каждую ночь в 04:15):
+ * база за 14 дней и все загруженные файлы садов. Итог пишет скрипт.
+ */
+export type OffsiteStatus = {
+  lastSuccessAt?: string;
+  lastDbFile?: string;
+  remote?: string;
+  remoteBytes?: number | null;
+  keepDays?: number;
+  lastError?: string | null;
+  lastErrorAt?: string;
+};
+
+const OFFSITE_PATH = process.env.OFFSITE_STATUS_PATH ?? '/var/lib/edusad/offsite.json';
+
+export async function readOffsiteStatus(): Promise<OffsiteStatus | null> {
+  try {
+    return JSON.parse(await fs.readFile(OFFSITE_PATH, 'utf8')) as OffsiteStatus;
+  } catch {
+    return null;
+  }
+}
+
+/** Что не так с копией на Диске: null — всё в порядке или её ещё не настраивали. */
+export function offsiteProblem(status: OffsiteStatus | null): 'stale' | 'error' | null {
+  if (!status) return null;
+  if (status.lastError && (!status.lastSuccessAt || (status.lastErrorAt ?? '') > status.lastSuccessAt)) return 'error';
+  if (!status.lastSuccessAt) return null;
+  const age = Date.now() - new Date(status.lastSuccessAt).getTime();
+  return age > BACKUP_STALE_HOURS * 3_600_000 ? 'stale' : null;
+}

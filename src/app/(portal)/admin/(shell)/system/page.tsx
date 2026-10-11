@@ -3,7 +3,7 @@ import { Alert } from '@/components/ui/Alert';
 import { requireSuperadmin } from '@/server/auth/guards';
 import { formatDateTime } from '@/lib/labels';
 import {
-  backupProblem, isStale, readBackupStatus, readSystemReport, reportPath, type BackupStatus, type CertificateInfo,
+  backupProblem, isStale, offsiteProblem, readBackupStatus, readOffsiteStatus, type OffsiteStatus, readSystemReport, reportPath, type BackupStatus, type CertificateInfo,
 } from '@/server/system/report';
 import { Runbook } from './Runbook';
 
@@ -70,8 +70,20 @@ const T = {
   backup: { kk: 'Базаның сақтық көшірмесі', ru: 'Резервная копия базы' },
   backupNone: { kk: 'Көшірме әлі жасалмаған', ru: 'Копий ещё не было' },
   backupHint: {
-    kk: '%n көшірме · %d күн сақталады · тек база, файлдарсыз',
-    ru: 'копий: %n · храним %d дн. · только база, без файлов',
+    kk: '%n көшірме · %d күн сақталады · осы серверде, тек база',
+    ru: 'копий: %n · храним %d дн. · на этом сервере, только база',
+  },
+  offsite: { kk: 'Google Дискідегі көшірме', ru: 'Копия на Google Диске' },
+  offsiteHint: {
+    kk: 'база %d күн + балабақшалардың барлық файлдары · Дискіде %s',
+    ru: 'база за %d дн. + все файлы садов · на Диске %s',
+  },
+  offsiteNone: { kk: 'Әлі жіберілмеген', ru: 'Ещё не отправлялась' },
+  offsiteError: { kk: 'Google Дискіге көшірме жіберілмеді', ru: 'Копия на Google Диск не отправлена' },
+  offsiteStale: { kk: 'Google Дискідегі көшірме ескірген', ru: 'Копия на Google Диске устарела' },
+  offsiteStaleText: {
+    kk: 'Соңғы жіберуден бір жарым тәуліктен астам уақыт өтті — vsesad-offsite.timer таймерін тексеріңіз.',
+    ru: 'С последней отправки прошло больше полутора суток — проверьте таймер vsesad-offsite.timer.',
   },
   backupStale: { kk: 'Сақтық көшірме ескірген', ru: 'Резервная копия устарела' },
   backupStaleText: {
@@ -108,6 +120,21 @@ function BackupCard({ backup, locale }: { backup: BackupStatus | null; locale: '
   );
 }
 
+function OffsiteCard({ offsite, locale }: { offsite: OffsiteStatus | null; locale: 'kk' | 'ru' }) {
+  if (!offsite?.lastSuccessAt) {
+    return <StatCard label={T.offsite[locale]} value="—" hint={T.offsiteNone[locale]} />;
+  }
+  const bytes = offsite.remoteBytes ?? 0;
+  const size = bytes < 1024 ** 3 ? `${Math.max(1, Math.round(bytes / 1024 ** 2))} МБ` : `${(bytes / 1024 ** 3).toFixed(1)} ГБ`;
+  return (
+    <StatCard
+      label={T.offsite[locale]}
+      value={<span className="text-base">{formatDateTime(new Date(offsite.lastSuccessAt), locale)}</span>}
+      hint={T.offsiteHint[locale].replace('%d', String(offsite.keepDays ?? 14)).replace('%s', size)}
+    />
+  );
+}
+
 function certTone(cert: CertificateInfo): string {
   if (cert.daysLeft === null) return 'bg-slate-100 text-slate-700';
   if (cert.daysLeft < 20) return 'bg-red-100 text-red-800';
@@ -118,7 +145,7 @@ function certTone(cert: CertificateInfo): string {
 export default async function SystemPage() {
   const user = await requireSuperadmin();
   const locale = user.locale;
-  const [report, backup] = await Promise.all([readSystemReport(), readBackupStatus()]);
+  const [report, backup, offsite] = await Promise.all([readSystemReport(), readBackupStatus(), readOffsiteStatus()]);
 
   if (!report) {
     return (
@@ -135,6 +162,7 @@ export default async function SystemPage() {
 
   const alerts = report.certificates.filter((cert) => cert.alert);
   const backupIssue = backupProblem(backup);
+  const offsiteIssue = offsiteProblem(offsite);
 
   return (
     <>
@@ -169,6 +197,12 @@ export default async function SystemPage() {
         </Alert>
       ) : null}
 
+      {offsiteIssue ? (
+        <Alert tone="danger" title={offsiteIssue === 'error' ? T.offsiteError[locale] : T.offsiteStale[locale]} className="mb-5">
+          {offsiteIssue === 'error' ? offsite?.lastError : T.offsiteStaleText[locale]}
+        </Alert>
+      ) : null}
+
       {report.disk.percent >= 85 ? (
         <Alert tone="warn" title={T.diskWarn[locale]} className="mb-5">
           {T.diskWarnText[locale]}
@@ -187,6 +221,7 @@ export default async function SystemPage() {
           hint={fill(T.usedMb[locale], report.memory.totalMb)}
         />
         <BackupCard backup={backup} locale={locale} />
+        <OffsiteCard offsite={offsite} locale={locale} />
         <StatCard
           label={T.version[locale]}
           value={<span className="font-mono text-base">{report.app.commit.split(' ')[0]}</span>}

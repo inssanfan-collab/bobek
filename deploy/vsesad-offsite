@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""Копия EduSad вне сервера — на Google Диск (решение владельца 11.10.2026).
+
+Ночная копия базы (vsesad-backup, 03:30) лежит на том же сервере: пропадёт
+диск — пропадёт и она, а загруженные файлы садов (фото, документы) не
+копировались вовсе. Этот скрипт в 04:15 (vsesad-offsite.timer) отправляет
+на Google Диск отдельного аккаунта (edusad.backup@gmail.com):
+
+  edusad-backups/db/       — свежая копия базы, хранятся 14 последних дней;
+  edusad-backups/storage/  — все загруженные файлы садов. Только досылаются
+                             новые: файл после загрузки не меняется, а удалённый
+                             в админке на Диске остаётся — с него и восстановим.
+
+Без шифрования — решение владельца. .env не отправляем: в нём ключи,
+а для восстановления на новом сервере они выпускаются заново.
+
+Доступ к Диску — rclone, remote «gdrive» (/root/.config/rclone/rclone.conf,
+выдан владельцем через вход в Google). Не получилось — письмо и push, как
+у vsesad-backup; итог — в /var/lib/edusad/offsite.json для раздела «Сервер».
+
+Восстановить: rclone copy gdrive:edusad-backups/storage /var/www/vsesad/storage
+и vsesad-restore <скачанный .dump>. Скрипт копируется на сервер руками.
+"""
+import json
+import re
+import subprocess
+from datetime import datetime, timezone
+from email.message import EmailMessage
+from pathlib import Path
+
+REMOTE = 'gdrive:edusad-backups'
+DUMPS = Path('/var/backups/vsesad')
+STORAGE = Path('/var/www/vsesad/storage')
+KEEP_DAYS = 14
+STATUS = Path('/var/lib/edusad/offsite.json')
+ENV_FILE = Path('/var/www/vsesad/.env')
+
+
+def env_value(name: str) -> str:
+    try:
+        for line in ENV_FILE.read_text(encoding='utf-8').splitlines():
+            match = re.match(rf'^{name}=(.*)$', line.strip())
+            if match:
+                return match.group(1).strip().strip('"').strip("'")
+    except OSError:
+        pass
+    return ''
+
+
+def push(subject: str, body: str) -> None:
+    """Push на телефон владельца — через pnpm push:owner, как у сторожа."""
+    try:
+        subprocess.run(
+            ['/usr/bin/node', '/usr/lib/node_modules/corepack/dist/pnpm.js', 'push:owner',
+             subject[:1].upper() + subject[1:], body, '/admin/system'],
+            cwd='/var/www/vsesad', capture_output=True, check=False, timeout=90,
+        )
+    except Exception:
+        pass
+
+
+def send(subject: str, body: str) -> None:
+    push(subject, body)
+    to = env_value('NOTIFY_EMAIL')
+    if not to:
+        return
+    sender = env_value('MAIL_FROM') or 'EduSad <edusad@e04.kz>'
+    message = EmailMessage()
+    message['From'] = sender
+    message['To'] = to
+    message['Subject'] = f'EduSad: {subject}'
+    message.set_content(body)
+    envelope = re.search(r'<([^>]+)>', sender)
+    subprocess.run(['/usr/sbin/sendmail', '-f', envelope.group(1) if envelope else sender, to],
+                   input=message.as_bytes(), check=False, timeout=60)
+
+
+def rclone(*args: str, timeout: int = 7200) -> subprocess.CompletedProcess:
+    # use-trash=false: старые копии удаляются насовсем, а не копятся
+    # в корзине Диска и не съедают бесплатные 15 ГБ.
+    return subprocess.run(['rclone', '--drive-use-trash=false', '--stats-one-line', '--stats=0', *args],
+                          capture_output=True, text=True, timeout=timeout)
+
+
+def now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec='seconds')
+
+
+def load_status() -> dict:
+    try:
+        return json.loads(STATUS.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return {}
+
+
+def save_status(status: dict) -> None:
+    STATUS.parent.mkdir(parents=True, exist_ok=True)
+    tmp = STATUS.with_suffix('.tmp')
+    tmp.write_text(json.dumps(status, ensure_ascii=False, indent=1), encoding='utf-8')
+    tmp.replace(STATUS)
+    STATUS.chmod(0o644)
+
+
+def main() -> int:
+    status = load_status()
+
+    def fail(reason: str) -> int:
+        status.update({'lastError': reason[:500], 'lastErrorAt': now_iso()})
+        save_status(status)
+        send('копия на Google Диск не отправлена',
+             f'Ночная отправка копии EduSad на Google Диск не получилась.\n\n{reason}\n\n'
+             f'Прошлая удачная отправка: {status.get("lastSuccessAt") or "нет"}.\n'
+             f'Проверить вручную: /usr/local/bin/vsesad-offsite; журнал — journalctl -u vsesad-offsite.')
+        return 1
+
+    dumps = sorted(DUMPS.glob('vsesad_*.dump'), key=lambda f: f.stat().st_mtime)
+    if not dumps:
+        return fail(f'в {DUMPS} нет ни одной копии базы — не отработал vsesad-backup?')
+    latest = dumps[-1]
+
+    sent = rclone('copy', str(latest), f'{REMOTE}/db')
+    if sent.returncode != 0:
+        return fail(f'копия базы: {sent.stderr.strip()[-400:]}')
+    rclone('delete', f'{REMOTE}/db', '--min-age', f'{KEEP_DAYS}d')
+
+    files = rclone('copy', str(STORAGE), f'{REMOTE}/storage', '--transfers', '4')
+    if files.returncode != 0:
+        return fail(f'файлы садов: {files.stderr.strip()[-400:]}')
+
+    size = rclone('size', REMOTE, '--json', timeout=600)
+    total = None
+    try:
+        total = json.loads(size.stdout).get('bytes')
+    except ValueError:
+        pass
+    status.update({
+        'lastSuccessAt': now_iso(),
+        'lastDbFile': latest.name,
+        'remote': REMOTE,
+        'remoteBytes': total,
+        'keepDays': KEEP_DAYS,
+        'lastError': None,
+    })
+    save_status(status)
+    print(f'Отправлено: {latest.name} и файлы садов, на Диске {total or "?"} байт')
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

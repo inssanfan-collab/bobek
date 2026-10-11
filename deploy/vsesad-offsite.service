@@ -1,0 +1,12 @@
+# Копия EduSad на Google Диск. Копировать в /etc/systemd/system/ вместе с .timer,
+# затем: systemctl daemon-reload && systemctl enable --now vsesad-offsite.timer
+[Unit]
+Description=Копия EduSad на Google Диск (база и файлы садов)
+After=network-online.target vsesad-backup.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/vsesad-offsite
+Nice=10
+IOSchedulingClass=idle

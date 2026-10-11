@@ -1,0 +1,9 @@
+[Unit]
+Description=Копия EduSad на Google Диск каждую ночь в 04:15 (после копии базы в 03:30)
+
+[Timer]
+OnCalendar=*-*-* 04:15:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
