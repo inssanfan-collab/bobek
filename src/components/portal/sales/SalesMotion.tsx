@@ -23,7 +23,11 @@ import { useEffect } from 'react';
 export function SalesMotion() {
   useEffect(() => {
     const root = document.querySelector<HTMLElement>('.sales');
-    if (!root || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // Телефоны (без мыши) — без сценария: на них gsap, ScrollTrigger и Lenis
+    // занимали процессор больше секунды при открытии (TBT 1,3 с при норме
+    // 0,2), а Google оценивает сайт именно по телефону. Первый экран и там
+    // всплывает — это делает CSS; ниже блоки просто стоят на месте.
+    if (!root || matchMedia('(prefers-reduced-motion: reduce)').matches || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     let cleanup: (() => void) | null = null;
     let cancelled = false;
 
