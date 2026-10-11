@@ -15,6 +15,25 @@ const nextConfig = {
     // «Unexpected end of form», хотя serverActions разрешал больше.
     middlewareClientMaxBodySize: '55mb',
   },
+  // Заголовки защиты для всех страниц портала и садов (11.10.2026).
+  // HTTPS (HSTS) ставит nginx. Встраивать наши страницы можно только
+  // самим себе: админку нельзя спрятать в рамку чужого сайта и подсунуть
+  // под клик. Предпросмотр в редакторе — srcDoc, просмотрщик документов
+  // встраивает сайт Microsoft, а не нас, — их это не задевает.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
