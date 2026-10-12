@@ -1,0 +1,9 @@
+[Unit]
+Description=База городов DB-IP Lite — 3-го числа каждого месяца
+
+[Timer]
+OnCalendar=*-*-03 05:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

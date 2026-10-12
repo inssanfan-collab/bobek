@@ -1,0 +1,21 @@
+#!/bin/bash
+# Обновление базы «IP → город» DB-IP Lite (CC BY 4.0) для сводки посетителей
+# портала (src/server/geo.ts). Таймер vsesad-geoip.timer — 3-го числа каждого
+# месяца (база выходит в начале месяца). Сайт подхватит новый файл сам
+# (maxmind следит за файлом). Не скачалось — остаётся прежняя база.
+# Копируется на сервер руками, как остальные скрипты из deploy/.
+set -euo pipefail
+DIR=/var/lib/edusad/geo
+mkdir -p "$DIR"
+cd "$DIR"
+month=$(date +%Y-%m)
+tmp=$(mktemp -p "$DIR" dbip.XXXXXX)
+trap 'rm -f "$tmp" "$tmp.gz"' EXIT
+curl -fsSL -o "$tmp.gz" "https://download.db-ip.com/free/dbip-city-lite-$month.mmdb.gz"
+gunzip -c "$tmp.gz" > "$tmp"
+# Битый или пустой файл не подкладываем вместо рабочего.
+[ "$(stat -c %s "$tmp")" -gt 50000000 ] || { echo "Файл подозрительно мал — оставляю прежнюю базу"; exit 1; }
+chmod 644 "$tmp"
+mv "$tmp" dbip-city-lite.mmdb
+echo "$month" > version
+echo "База городов обновлена: $month"

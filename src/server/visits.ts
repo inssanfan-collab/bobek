@@ -3,6 +3,7 @@ import { prisma } from '@/server/db';
 import { sendTelegram } from '@/server/notify/telegram';
 import { deviceName } from '@/lib/presence';
 import { sourceOf } from '@/lib/visit-source';
+import { cityOf } from '@/server/geo';
 
 /**
  * Посетители продающих страниц портала — сообщение владельцу в Telegram
@@ -40,6 +41,8 @@ type Visit = {
   landing: string;
   lang: string;
   userAgent: string;
+  /** Город по IP — сам адрес не храним. */
+  city: string;
 };
 
 const IDLE_MS = 2 * 60_000;
@@ -63,7 +66,7 @@ const MARK_LABEL: Record<string, string> = {
   live: 'открыл дизайн вживую',
 };
 
-export function recordVisit(event: VisitEvent, userAgent: string): void {
+export function recordVisit(event: VisitEvent, userAgent: string, ip: string | null): void {
   const now = Date.now();
   let visit = visits.get(event.sid);
   if (!visit) {
@@ -78,8 +81,11 @@ export function recordVisit(event: VisitEvent, userAgent: string): void {
       landing: (event.landing ?? event.path ?? '').slice(0, 300),
       lang: event.lang === 'kk' ? 'kk' : 'ru',
       userAgent: userAgent.slice(0, 300),
+      city: '',
     };
     visits.set(event.sid, visit);
+    const created = visit;
+    void cityOf(ip).then((city) => { created.city = city; }).catch(() => undefined);
   }
   visit.last = now;
   if (event.type === 'page' && event.path && visit.pages.length < MAX_PAGES) {
@@ -144,6 +150,7 @@ async function report(visit: Visit): Promise<void> {
   const lead = visit.marks.has('lead');
   const lines = [
     `${lead ? '✅' : '🟢'} <b>Посетитель на edusad.kz</b> — ${duration(visit.last - visit.start)}`,
+    ...(visit.city ? [`📍 ${escapeHtml(visit.city)}`] : []),
     `📱 ${escapeHtml(deviceName(visit.userAgent))} · язык: ${visit.lang === 'kk' ? 'казахский' : 'русский'}`,
     `🔎 Откуда: ${escapeHtml(sourceOf(visit.referrer, visit.landing))}`,
     `👣 ${escapeHtml(visit.pages.map(pageLabel).join(' → ') || 'главная')}`,

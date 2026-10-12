@@ -30,6 +30,8 @@ export async function POST(request: NextRequest) {
   if (!id.test(String(event.sid)) || !id.test(String(event.vid)) || !['page', 'ping', 'mark'].includes(event.type)) {
     return new NextResponse(null, { status: 400 });
   }
-  recordVisit(event, userAgent);
+  // IP — только чтобы определить город; в памяти и в сводке его нет.
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? request.headers.get('x-real-ip');
+  recordVisit(event, userAgent, ip);
   return new NextResponse(null, { status: 204 });
 }

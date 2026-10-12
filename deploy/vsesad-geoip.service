@@ -1,0 +1,11 @@
+# Обновление базы городов DB-IP Lite. Копировать в /etc/systemd/system/ вместе с .timer,
+# затем: systemctl daemon-reload && systemctl enable --now vsesad-geoip.timer
+[Unit]
+Description=Обновление базы «IP → город» (DB-IP Lite)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/vsesad-geoip
+Nice=10
