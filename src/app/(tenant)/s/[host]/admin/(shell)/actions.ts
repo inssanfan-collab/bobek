@@ -130,7 +130,7 @@ export async function savePost(_prev: ActionState, formData: FormData): Promise<
       where: { id },
       data: { ...data, sectionId, publishedAt: publish ? publishedAt : null },
     });
-    await audit(ctx.user, 'content.update', { tenantId: ctx.tenantId, entity: 'post', entityId: id });
+    await audit(ctx.user, 'content.update', { tenantId: ctx.tenantId, entity: 'post', entityId: id, meta: { title: data.titleRu } });
   } else {
     const slug = await uniqueSlug(parsed.data.titleRu, async (candidate) =>
       Boolean(await prisma.post.findFirst({ where: { tenantId: ctx.tenantId, slug: candidate }, select: { id: true } })),
@@ -144,7 +144,7 @@ export async function savePost(_prev: ActionState, formData: FormData): Promise<
         publishedAt: publish ? publishedAt : null,
       },
     });
-    await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'post', entityId: created.id });
+    await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'post', entityId: created.id, meta: { title: data.titleRu } });
   }
 
   revalidatePath('/admin/posts');
@@ -159,8 +159,10 @@ export async function deletePost(formData: FormData) {
   const id = str(formData, 'id');
   // Уже удалена (повторное нажатие) — молча «готово».
   if (await ownedOrGone('post', id, ctx.tenantId)) {
+    // Название — до удаления: потом в журнале его уже не узнать.
+    const post = await prisma.post.findUnique({ where: { id }, select: { titleRu: true } });
     await prisma.post.deleteMany({ where: { id } });
-    await audit(ctx.user, 'content.delete', { tenantId: ctx.tenantId, entity: 'post', entityId: id });
+    await audit(ctx.user, 'content.delete', { tenantId: ctx.tenantId, entity: 'post', entityId: id, meta: { title: post?.titleRu } });
   }
   revalidatePath('/admin/posts');
 }
@@ -207,7 +209,7 @@ export async function uploadEditorFile(formData: FormData): Promise<EditorUpload
       throw new ActionError({ kk: 'Файл таңдалмады', ru: 'Файл не выбран' });
     }
     const media = await saveUpload(file, ctx.tenantId);
-    await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'media', entityId: media.id });
+    await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'media', entityId: media.id, meta: { title: media.origName } });
     return {
       url: `/api/media/${media.id}`,
       name: media.origName,
@@ -366,7 +368,7 @@ export async function createSection(_prev: ActionState, formData: FormData): Pro
       await prisma.page.create({ data: { tenantId: ctx.tenantId, sectionId: section.id } });
     }
 
-    await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'section', entityId: section.id });
+    await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'section', entityId: section.id, meta: { title: form.titleRu } });
     revalidatePath('/admin', 'layout');
     return { redirectTo: await hostUrl(type === 'PAGE' ? `/admin/pages/${section.id}` : '/admin/sections') };
   } catch (error) {
@@ -412,7 +414,7 @@ export async function updateSection(_prev: ActionState, formData: FormData): Pro
       },
     });
 
-    await audit(ctx.user, 'content.update', { tenantId: ctx.tenantId, entity: 'section', entityId: id });
+    await audit(ctx.user, 'content.update', { tenantId: ctx.tenantId, entity: 'section', entityId: id, meta: { title: form.titleRu } });
     revalidatePath('/admin', 'layout');
     return { redirectTo: await hostUrl('/admin/sections') };
   } catch (error) {
@@ -450,7 +452,7 @@ export async function deleteSection(_prev: ActionState, formData: FormData): Pro
       prisma.section.delete({ where: { id } }),
     ]);
 
-    await audit(ctx.user, 'content.delete', { tenantId: ctx.tenantId, entity: 'section', entityId: id });
+    await audit(ctx.user, 'content.delete', { tenantId: ctx.tenantId, entity: 'section', entityId: id, meta: { title: section.titleRu } });
     revalidatePath('/admin', 'layout');
     return { redirectTo: await hostUrl('/admin/sections') };
   } catch (error) {

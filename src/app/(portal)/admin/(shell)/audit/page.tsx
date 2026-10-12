@@ -2,14 +2,16 @@ import { prisma } from '@/server/db';
 import { requireSuperadmin } from '@/server/auth/guards';
 import { PageHeader } from '@/components/admin/AdminShell';
 import { formatDateTime } from '@/lib/labels';
+import { auditDetails } from '@/lib/audit-details';
+import { deviceName } from '@/lib/presence';
 
 export const dynamic = 'force-dynamic';
 
 const T = {
   title: { kk: 'Әрекеттер журналы', ru: 'Журнал действий' },
   lead: {
-    kk: 'Құпия сөзді тастау, балабақша атынан кіру және мәртебе өзгерістері осында тіркеледі.',
-    ru: 'Сбросы паролей, входы под садом и изменения статусов фиксируются здесь.',
+    kk: 'Кірулер, балабақшалар мен материалдардағы өзгерістер: кім, қашан, қай құрылғыдан және нақты не істеді.',
+    ru: 'Входы, изменения садов и материалов: кто, когда, с какого устройства и что именно сделал.',
   },
   when: { kk: 'Қашан', ru: 'Когда' },
   who: { kk: 'Кім', ru: 'Кто' },
@@ -18,6 +20,7 @@ const T = {
   details: { kk: 'Егжей-тегжейі', ru: 'Детали' },
   prev: { kk: '← Артқа', ru: '← Назад' },
   next: { kk: 'Алға →', ru: 'Вперёд →' },
+  pageOf: { kk: '{n}-бет, барлығы {total}', ru: 'Страница {n} из {total}' },
 } as const;
 
 const ACTION_LABEL: Record<string, { kk: string; ru: string }> = {
@@ -45,6 +48,11 @@ const ACTION_LABEL: Record<string, { kk: string; ru: string }> = {
   'content.create': { kk: 'Материал құрылды', ru: 'Создан материал' },
   'content.update': { kk: 'Материал өзгертілді', ru: 'Изменён материал' },
   'content.delete': { kk: 'Материал жойылды', ru: 'Удалён материал' },
+  'tenant.theme': { kk: 'Тақырып ауыстырылды', ru: 'Сменена тема сайта' },
+  'tenant.anketa_import': { kk: 'Сауалнамадан жүктелді', ru: 'Загружена анкета сада' },
+  'contract.create': { kk: 'Шарт құрылды', ru: 'Создан договор' },
+  'contract.update': { kk: 'Шарт өзгертілді', ru: 'Изменён договор' },
+  'settings.update': { kk: 'Деректемелер өзгертілді', ru: 'Изменены реквизиты' },
 };
 
 const SENSITIVE = new Set(['user.reset_password', 'tenant.impersonate', 'auth.login_failed', 'tenant.status_change']);
@@ -71,6 +79,20 @@ export default async function AuditPage({
 
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
+  // Нынешние названия — для записей журнала до 12.10.2026, где названия ещё не писали.
+  const idsOf = (...entities: string[]) =>
+    entries.filter((e) => e.entityId && entities.includes(e.entity ?? '')).map((e) => e.entityId!);
+  const [posts, media, sections] = await Promise.all([
+    prisma.post.findMany({ where: { id: { in: idsOf('post') } }, select: { id: true, titleRu: true, titleKk: true } }),
+    prisma.media.findMany({ where: { id: { in: idsOf('media') } }, select: { id: true, origName: true } }),
+    prisma.section.findMany({ where: { id: { in: idsOf('section', 'page') } }, select: { id: true, titleRu: true, titleKk: true } }),
+  ]);
+  const titles = new Map<string, string>([
+    ...posts.map((r) => [r.id, (locale === 'kk' ? r.titleKk : r.titleRu) || r.titleRu] as const),
+    ...media.map((r) => [r.id, r.origName] as const),
+    ...sections.map((r) => [r.id, (locale === 'kk' ? r.titleKk : r.titleRu) || r.titleRu] as const),
+  ]);
+
   return (
     <>
       <PageHeader
@@ -92,12 +114,18 @@ export default async function AuditPage({
           <tbody className="divide-y divide-line">
             {entries.map((entry) => (
               <tr key={entry.id} className={SENSITIVE.has(entry.action) ? 'bg-amber-50/60' : ''}>
-                <td className="whitespace-nowrap px-4 py-2.5 text-muted">{formatDateTime(entry.createdAt)}</td>
-                <td className="px-4 py-2.5 font-mono">{entry.userLogin ?? '—'}</td>
+                <td className="whitespace-nowrap px-4 py-2.5 text-muted">{formatDateTime(entry.createdAt, locale)}</td>
+                <td className="px-4 py-2.5">
+                  <span className="block font-mono">{entry.userLogin ?? '—'}</span>
+                  {entry.userAgent ? <span className="block text-xs text-muted">{deviceName(entry.userAgent)}</span> : null}
+                </td>
                 <td className="px-4 py-2.5 font-semibold">{ACTION_LABEL[entry.action]?.[locale] ?? entry.action}</td>
                 <td className="px-4 py-2.5 text-muted">{entry.tenant?.profile?.nameRu ?? entry.tenant?.slug ?? '—'}</td>
-                <td className="px-4 py-2.5 font-mono text-xs text-muted">
-                  {Object.keys(entry.meta as object).length ? JSON.stringify(entry.meta) : ''}
+                <td className="px-4 py-2.5">
+                  {auditDetails(
+                    { action: entry.action, entity: entry.entity, meta: entry.meta, currentTitle: entry.entityId ? titles.get(entry.entityId) : null },
+                    locale,
+                  )}
                 </td>
               </tr>
             ))}
@@ -108,7 +136,7 @@ export default async function AuditPage({
       {pages > 1 ? (
         <div className="mt-4 flex items-center gap-2 text-sm">
           {page > 1 ? <a href={`?page=${page - 1}`} className="btn-secondary">{T.prev[locale]}</a> : null}
-          <span className="text-muted">Страница {page} из {pages}</span>
+          <span className="text-muted">{T.pageOf[locale].replace('{n}', String(page)).replace('{total}', String(pages))}</span>
           {page < pages ? <a href={`?page=${page + 1}`} className="btn-secondary">{T.next[locale]}</a> : null}
         </div>
       ) : null}
