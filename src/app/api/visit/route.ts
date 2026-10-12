@@ -31,7 +31,8 @@ export async function POST(request: NextRequest) {
     return new NextResponse(null, { status: 400 });
   }
   // IP — только чтобы определить город; в памяти и в сводке его нет.
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? request.headers.get('x-real-ip');
+  // X-Real-IP ставит nginx; первый адрес в X-Forwarded-For присылает сам браузер.
+  const ip = request.headers.get('x-real-ip') ?? request.headers.get('x-forwarded-for')?.split(',').pop()?.trim() ?? null;
   recordVisit(event, userAgent, ip);
   return new NextResponse(null, { status: 204 });
 }

@@ -132,11 +132,18 @@ export async function purgeExpiredSessions(): Promise<number> {
   return count;
 }
 
+/**
+ * Адрес и браузер запроса. Адрес — из X-Real-IP: его ставит nginx по
+ * настоящему подключению. Первый адрес в X-Forwarded-For присылает сам
+ * браузер — по нему можно было подделать адрес в журнале и обойти
+ * ограничение попыток входа «адрес + логин». Без nginx (разработка) —
+ * последний адрес X-Forwarded-For, его добавил ближайший прокси.
+ */
 export async function requestMeta(): Promise<{ ip: string | null; userAgent: string | null }> {
   const h = await headers();
   const forwarded = h.get('x-forwarded-for');
   return {
-    ip: forwarded?.split(',')[0]?.trim() ?? h.get('x-real-ip') ?? null,
+    ip: h.get('x-real-ip') ?? forwarded?.split(',').pop()?.trim() ?? null,
     userAgent: h.get('user-agent'),
   };
 }

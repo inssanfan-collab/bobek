@@ -109,7 +109,7 @@ const online = ((globalThis as { __edusadOnline?: Map<string, Map<string, number
 
 async function markOnline(tenantId: string): Promise<void> {
   const list = await headers();
-  const ip = list.get('x-forwarded-for')?.split(',')[0]?.trim() ?? list.get('x-real-ip') ?? '';
+  const ip = list.get('x-real-ip') ?? list.get('x-forwarded-for')?.split(',').pop()?.trim() ?? '';
   const visitor = createHash('sha256').update(`${ip}|${list.get('user-agent') ?? ''}`).digest('base64url').slice(0, 16);
   const now = Date.now();
   let site = online.get(tenantId);

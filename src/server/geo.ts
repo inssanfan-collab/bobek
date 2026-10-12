@@ -29,11 +29,32 @@ function open(): Promise<Reader<CityResponse> | null> {
 type Names = Record<string, string> | undefined;
 const name = (names: Names) => names?.ru ?? names?.en ?? '';
 
+/**
+ * В бесплатной базе города только по-английски. Крупные города Казахстана
+ * переводим, остальные — как есть. Уточнение района в скобках убираем:
+ * «Almaty (Almaly Audany)» → «Алматы».
+ */
+const CITY_RU: Record<string, string> = {
+  Almaty: 'Алматы', Astana: 'Астана', 'Nur-Sultan': 'Астана', Shymkent: 'Шымкент', Aktobe: 'Актобе',
+  Karaganda: 'Караганда', Qaraghandy: 'Караганда', Taraz: 'Тараз', Pavlodar: 'Павлодар',
+  'Ust-Kamenogorsk': 'Усть-Каменогорск', Oskemen: 'Усть-Каменогорск', Semey: 'Семей', Atyrau: 'Атырау',
+  Kostanay: 'Костанай', Qostanay: 'Костанай', Kyzylorda: 'Кызылорда', Oral: 'Уральск', Uralsk: 'Уральск',
+  Petropavl: 'Петропавловск', Petropavlovsk: 'Петропавловск', Aktau: 'Актау', Temirtau: 'Темиртау',
+  Turkistan: 'Туркестан', Kokshetau: 'Кокшетау', Taldykorgan: 'Талдыкорган', Ekibastuz: 'Экибастуз',
+  Rudnyy: 'Рудный', Rudny: 'Рудный', Zhezkazgan: 'Жезказган', Balkhash: 'Балхаш', Zhitikara: 'Житикара',
+  Kaskelen: 'Каскелен', Konayev: 'Конаев', Kapchagay: 'Конаев', Satpayev: 'Сатпаев', Stepnogorsk: 'Степногорск',
+  Zhanaozen: 'Жанаозен', Kandyagash: 'Кандыагаш', Khromtau: 'Хромтау', Shchuchinsk: 'Щучинск',
+};
+const cityName = (names: Names) => {
+  const raw = name(names).replace(/\s*\(.*\)\s*$/, '');
+  return CITY_RU[raw] ?? raw;
+};
+
 /** «Шымкент, Казахстан»; пусто — не определить. */
 export async function cityOf(ip: string | null): Promise<string> {
   if (!ip || !maxmind.validate(ip)) return '';
   const db = await open();
   const found = db?.get(ip);
   if (!found) return '';
-  return [name(found.city?.names as Names), name(found.country?.names as Names)].filter(Boolean).join(', ');
+  return [cityName(found.city?.names as Names), name(found.country?.names as Names)].filter(Boolean).join(', ');
 }
