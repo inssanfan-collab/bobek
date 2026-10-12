@@ -10,6 +10,7 @@ import { FileInput } from '@/components/admin/FileInput';
 import type { Locale } from '@/lib/i18n';
 import type { StaffMember } from '@prisma/client';
 import { DeleteButton } from '@/components/admin/DeleteButton';
+import { SortableList, SortHandle } from '@/components/admin/SortableList';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,48 +73,60 @@ export default async function StaffPage({ params }: { params: Promise<{ host: st
       {staff.length === 0 ? (
         <EmptyState icon="👩‍🏫" title={T.empty[locale]} />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {staff.map((member) => (
-            <article key={member.id} className="card p-5 text-center">
-              {member.photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={`/api/media/${member.photo.id}`} alt="" className="mx-auto h-24 w-24 rounded-full object-cover" />
-              ) : (
-                <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-brand-soft text-3xl" aria-hidden>👩‍🏫</div>
-              )}
-              <p className="mt-3 font-display font-bold">{member.fullName}</p>
-              <p className="text-sm text-brand">{pick(locale, member.positionKk, member.positionRu)}</p>
-              {member.experience ? (
-                <p className="mt-1 text-xs text-muted">{T.experience[locale]}: {member.experience}</p>
-              ) : null}
-              {ctx.canEdit ? (
-                <details className="group mt-3">
-                  <summary className="flex cursor-pointer list-none items-center justify-center gap-2 [&::-webkit-details-marker]:hidden">
-                    <span className="btn-secondary px-3 py-1 text-xs">{T.edit[locale]}</span>
-                  </summary>
-                  <form action={saveStaff} className="mt-4 grid gap-3 text-left">
+        <SortableList
+          kind="staff"
+          host={host}
+          csrf={csrf}
+          locale={locale}
+          layout="grid"
+          onHome
+          disabled={!ctx.canEdit}
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          items={staff.map((member) => ({
+            id: member.id,
+            content: (
+              <article className="card h-full p-5 text-center">
+                <SortHandle className="-mr-2 -mt-2 mb-1 justify-end" />
+                {member.photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={`/api/media/${member.photo.id}`} alt="" className="mx-auto h-24 w-24 rounded-full object-cover" />
+                ) : (
+                  <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-brand-soft text-3xl" aria-hidden>👩‍🏫</div>
+                )}
+                <p className="mt-3 font-display font-bold">{member.fullName}</p>
+                <p className="text-sm text-brand">{pick(locale, member.positionKk, member.positionRu)}</p>
+                {member.experience ? (
+                  <p className="mt-1 text-xs text-muted">{T.experience[locale]}: {member.experience}</p>
+                ) : null}
+                {ctx.canEdit ? (
+                  <details className="group mt-3">
+                    <summary className="flex cursor-pointer list-none items-center justify-center gap-2 [&::-webkit-details-marker]:hidden">
+                      <span className="btn-secondary px-3 py-1 text-xs">{T.edit[locale]}</span>
+                    </summary>
+                    <form action={saveStaff} className="mt-4 grid gap-3 text-left">
+                      <input type="hidden" name={CSRF_FIELD} value={csrf} />
+                      <input type="hidden" name="host" value={host} />
+                      <input type="hidden" name="id" value={member.id} />
+                      <StaffFields locale={locale} member={member} />
+                      <p className="text-xs text-muted sm:col-span-2">{T.photoKeep[locale]}</p>
+                      <div className="sm:col-span-2">
+                        <SubmitButton>{T.save[locale]}</SubmitButton>
+                      </div>
+                    </form>
+                  </details>
+                ) : null}
+                {ctx.canEdit ? (
+                  <form action={deleteStaff} className="mt-2">
                     <input type="hidden" name={CSRF_FIELD} value={csrf} />
                     <input type="hidden" name="host" value={host} />
                     <input type="hidden" name="id" value={member.id} />
-                    <StaffFields locale={locale} member={member} />
-                    <p className="text-xs text-muted sm:col-span-2">{T.photoKeep[locale]}</p>
-                    <div className="sm:col-span-2">
-                      <SubmitButton>{T.save[locale]}</SubmitButton>
-                    </div>
+                    <DeleteButton className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
                   </form>
-                </details>
-              ) : null}
-              {ctx.canEdit ? (
-                <form action={deleteStaff} className="mt-2">
-                  <input type="hidden" name={CSRF_FIELD} value={csrf} />
-                  <input type="hidden" name="host" value={host} />
-                  <input type="hidden" name="id" value={member.id} />
-                  <DeleteButton className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
-                </form>
-              ) : null}
-            </article>
-          ))}
-        </div>
+                ) : null}
+              </article>
+            ),
+          }))}
+        />
       )}
     </>
   );

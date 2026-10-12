@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 import { tenantAdmin } from '@/server/tenant/admin-context';
 import { csrfToken } from '@/server/auth/csrf';
 import { PageHeader } from '@/components/admin/AdminShell';
@@ -10,6 +9,7 @@ import { formatAgeRange } from '@/lib/labels';
 import { pick } from '@/lib/i18n';
 import { deleteGroup, saveGroup, setGroupPlaces } from '../actions';
 import { DeleteButton } from '@/components/admin/DeleteButton';
+import { SortableList, SortHandle } from '@/components/admin/SortableList';
 
 export const dynamic = 'force-dynamic';
 
@@ -125,8 +125,18 @@ export default async function GroupsPage({ params }: { params: Promise<{ host: s
       {groups.length === 0 ? (
         <EmptyState icon="🧸" title={T.empty[locale]} />
       ) : (
-        <div className="card overflow-x-auto">
-          <table className="w-full text-sm">
+        <SortableList
+          kind="groups"
+          host={host}
+          csrf={csrf}
+          locale={locale}
+          layout="table"
+          onHome
+          disabled={!ctx.canEdit}
+          className="card overflow-x-auto"
+          // Каждая группа — свой tbody (строка и форма правки двигаются вместе).
+          tableClassName="w-full text-sm [&>tbody+tbody]:border-t [&>tbody+tbody]:border-line"
+          head={
             <thead className="border-b border-line text-left text-muted">
               <tr>
                 <th className="px-4 py-3 font-semibold">{T.th.group[locale]}</th>
@@ -137,193 +147,199 @@ export default async function GroupsPage({ params }: { params: Promise<{ host: s
                 <th className="px-4 py-3 font-semibold" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
-              {groups.map((group) => (
-                <Fragment key={group.id}>
+          }
+          items={groups.map((group) => ({
+            id: group.id,
+            content: (
+              <>
+                <tr>
+                  <td className="px-4 py-3 font-semibold">
+                    <div className="flex items-center gap-2">
+                      <SortHandle className="-my-1.5 -ml-2 shrink-0" />
+                      <span>{pick(locale, group.nameKk, group.nameRu)}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-muted">{formatAgeRange(group.ageFrom, group.ageTo, locale) ?? '—'}</td>
+                  <td className="px-4 py-3 text-muted">{languageLabel(group.language, locale)}</td>
+                  <td className="px-4 py-3">{group.placesTotal ?? '—'}</td>
+                  <td className="px-4 py-3">
+                    {ctx.canEdit ? (
+                      // Свободные места правятся прямо здесь: это единственное,
+                      // что меняется в группе каждую неделю.
+                      <ActionForm
+                        action={setGroupPlaces}
+                        className="min-w-[11rem]"
+                        errorClassName="mb-1.5 text-xs"
+                      >
+                        <input type="hidden" name={CSRF_FIELD} value={csrf} />
+                        <input type="hidden" name="host" value={host} />
+                        <input type="hidden" name="id" value={group.id} />
+                        <label className="sr-only" htmlFor={`free-${group.id}`}>
+                          {T.freeLabel[locale]}
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            id={`free-${group.id}`}
+                            name="placesFree"
+                            type="number"
+                            min={0}
+                            max={group.placesTotal ?? undefined}
+                            defaultValue={group.placesFree}
+                            className="field w-20 px-2.5 py-1.5 text-sm"
+                          />
+                          <SubmitButton className="btn-secondary px-3 py-1.5 text-xs">
+                            {T.savePlaces[locale]}
+                          </SubmitButton>
+                        </div>
+                      </ActionForm>
+                    ) : (
+                      <span
+                        className={`badge ${group.placesFree > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}
+                      >
+                        {group.placesFree}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {ctx.canEdit ? (
+                      <form action={deleteGroup}>
+                        <input type="hidden" name={CSRF_FIELD} value={csrf} />
+                        <input type="hidden" name="host" value={host} />
+                        <input type="hidden" name="id" value={group.id} />
+                        <DeleteButton className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
+                      </form>
+                    ) : null}
+                  </td>
+                </tr>
+
+                {ctx.canEdit ? (
                   <tr>
-                    <td className="px-4 py-3 font-semibold">{pick(locale, group.nameKk, group.nameRu)}</td>
-                    <td className="px-4 py-3 text-muted">{formatAgeRange(group.ageFrom, group.ageTo, locale) ?? '—'}</td>
-                    <td className="px-4 py-3 text-muted">{languageLabel(group.language, locale)}</td>
-                    <td className="px-4 py-3">{group.placesTotal ?? '—'}</td>
-                    <td className="px-4 py-3">
-                      {ctx.canEdit ? (
-                        // Свободные места правятся прямо здесь: это единственное,
-                        // что меняется в группе каждую неделю.
-                        <ActionForm
-                          action={setGroupPlaces}
-                          className="min-w-[11rem]"
-                          errorClassName="mb-1.5 text-xs"
-                        >
+                    <td colSpan={6} className="px-4 pb-4">
+                      {/* <details> вместо скрипта: раскрывается без JavaScript
+                          и доступно с клавиатуры — как в разделе вопросов на сайте. */}
+                      <details className="rounded-2xl border border-line">
+                        <summary className="cursor-pointer px-4 py-2.5 text-sm font-semibold text-brand-ink">
+                          {T.editGroup[locale]}
+                        </summary>
+                        <form action={saveGroup} className="grid gap-4 border-t border-line p-4 sm:grid-cols-3">
                           <input type="hidden" name={CSRF_FIELD} value={csrf} />
                           <input type="hidden" name="host" value={host} />
                           <input type="hidden" name="id" value={group.id} />
-                          <label className="sr-only" htmlFor={`free-${group.id}`}>
-                            {T.freeLabel[locale]}
-                          </label>
-                          <div className="flex items-center gap-2">
+                          <div>
+                            <label className="field-label" htmlFor={`nameRu-${group.id}`}>
+                              {T.name[locale]} {T.inRu[locale]} *
+                            </label>
                             <input
-                              id={`free-${group.id}`}
+                              id={`nameRu-${group.id}`}
+                              name="nameRu"
+                              required
+                              defaultValue={group.nameRu}
+                              className="field"
+                            />
+                          </div>
+                          <div>
+                            <label className="field-label" htmlFor={`nameKk-${group.id}`}>
+                              {T.name[locale]} {T.inKk[locale]}
+                            </label>
+                            <input
+                              id={`nameKk-${group.id}`}
+                              name="nameKk"
+                              defaultValue={group.nameKk ?? ''}
+                              className="field"
+                            />
+                          </div>
+                          <div>
+                            <label className="field-label" htmlFor={`language-${group.id}`}>
+                              {T.language[locale]}
+                            </label>
+                            <select
+                              id={`language-${group.id}`}
+                              name="language"
+                              defaultValue={group.language}
+                              className="field"
+                            >
+                              <option value="kk">{GROUP_LANGUAGE.kk[locale]}</option>
+                              <option value="ru">{GROUP_LANGUAGE.ru[locale]}</option>
+                              <option value="mixed">{GROUP_LANGUAGE.mixed[locale]}</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="field-label" htmlFor={`ageFrom-${group.id}`}>
+                              {T.ageFrom[locale]}
+                            </label>
+                            <input
+                              id={`ageFrom-${group.id}`}
+                              name="ageFrom"
+                              type="number"
+                              min={0}
+                              max={96}
+                              defaultValue={group.ageFrom ?? ''}
+                              className="field"
+                            />
+                          </div>
+                          <div>
+                            <label className="field-label" htmlFor={`ageTo-${group.id}`}>
+                              {T.ageTo[locale]}
+                            </label>
+                            <input
+                              id={`ageTo-${group.id}`}
+                              name="ageTo"
+                              type="number"
+                              min={0}
+                              max={96}
+                              defaultValue={group.ageTo ?? ''}
+                              className="field"
+                            />
+                          </div>
+                          <div>
+                            <label className="field-label" htmlFor={`teachers-${group.id}`}>
+                              {T.teachers[locale]}
+                            </label>
+                            <input
+                              id={`teachers-${group.id}`}
+                              name="teachers"
+                              defaultValue={group.teachers ?? ''}
+                              className="field"
+                            />
+                          </div>
+                          <div>
+                            <label className="field-label" htmlFor={`total-${group.id}`}>
+                              {T.placesTotal[locale]}
+                            </label>
+                            <input
+                              id={`total-${group.id}`}
+                              name="placesTotal"
+                              type="number"
+                              min={0}
+                              defaultValue={group.placesTotal ?? ''}
+                              className="field"
+                            />
+                          </div>
+                          <div>
+                            <label className="field-label" htmlFor={`freeFull-${group.id}`}>
+                              {T.placesFree[locale]}
+                            </label>
+                            <input
+                              id={`freeFull-${group.id}`}
                               name="placesFree"
                               type="number"
                               min={0}
-                              max={group.placesTotal ?? undefined}
                               defaultValue={group.placesFree}
-                              className="field w-20 px-2.5 py-1.5 text-sm"
+                              className="field"
                             />
-                            <SubmitButton className="btn-secondary px-3 py-1.5 text-xs">
-                              {T.savePlaces[locale]}
-                            </SubmitButton>
                           </div>
-                        </ActionForm>
-                      ) : (
-                        <span
-                          className={`badge ${group.placesFree > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}
-                        >
-                          {group.placesFree}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {ctx.canEdit ? (
-                        <form action={deleteGroup}>
-                          <input type="hidden" name={CSRF_FIELD} value={csrf} />
-                          <input type="hidden" name="host" value={host} />
-                          <input type="hidden" name="id" value={group.id} />
-                          <DeleteButton className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
+                          <div className="flex items-end">
+                            <SubmitButton>{T.saveGroupBtn[locale]}</SubmitButton>
+                          </div>
                         </form>
-                      ) : null}
+                      </details>
                     </td>
                   </tr>
-
-                  {ctx.canEdit ? (
-                    <tr>
-                      <td colSpan={6} className="px-4 pb-4">
-                        {/* <details> вместо скрипта: раскрывается без JavaScript
-                            и доступно с клавиатуры — как в разделе вопросов на сайте. */}
-                        <details className="rounded-2xl border border-line">
-                          <summary className="cursor-pointer px-4 py-2.5 text-sm font-semibold text-brand-ink">
-                            {T.editGroup[locale]}
-                          </summary>
-                          <form action={saveGroup} className="grid gap-4 border-t border-line p-4 sm:grid-cols-3">
-                            <input type="hidden" name={CSRF_FIELD} value={csrf} />
-                            <input type="hidden" name="host" value={host} />
-                            <input type="hidden" name="id" value={group.id} />
-                            <div>
-                              <label className="field-label" htmlFor={`nameRu-${group.id}`}>
-                                {T.name[locale]} {T.inRu[locale]} *
-                              </label>
-                              <input
-                                id={`nameRu-${group.id}`}
-                                name="nameRu"
-                                required
-                                defaultValue={group.nameRu}
-                                className="field"
-                              />
-                            </div>
-                            <div>
-                              <label className="field-label" htmlFor={`nameKk-${group.id}`}>
-                                {T.name[locale]} {T.inKk[locale]}
-                              </label>
-                              <input
-                                id={`nameKk-${group.id}`}
-                                name="nameKk"
-                                defaultValue={group.nameKk ?? ''}
-                                className="field"
-                              />
-                            </div>
-                            <div>
-                              <label className="field-label" htmlFor={`language-${group.id}`}>
-                                {T.language[locale]}
-                              </label>
-                              <select
-                                id={`language-${group.id}`}
-                                name="language"
-                                defaultValue={group.language}
-                                className="field"
-                              >
-                                <option value="kk">{GROUP_LANGUAGE.kk[locale]}</option>
-                                <option value="ru">{GROUP_LANGUAGE.ru[locale]}</option>
-                                <option value="mixed">{GROUP_LANGUAGE.mixed[locale]}</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="field-label" htmlFor={`ageFrom-${group.id}`}>
-                                {T.ageFrom[locale]}
-                              </label>
-                              <input
-                                id={`ageFrom-${group.id}`}
-                                name="ageFrom"
-                                type="number"
-                                min={0}
-                                max={96}
-                                defaultValue={group.ageFrom ?? ''}
-                                className="field"
-                              />
-                            </div>
-                            <div>
-                              <label className="field-label" htmlFor={`ageTo-${group.id}`}>
-                                {T.ageTo[locale]}
-                              </label>
-                              <input
-                                id={`ageTo-${group.id}`}
-                                name="ageTo"
-                                type="number"
-                                min={0}
-                                max={96}
-                                defaultValue={group.ageTo ?? ''}
-                                className="field"
-                              />
-                            </div>
-                            <div>
-                              <label className="field-label" htmlFor={`teachers-${group.id}`}>
-                                {T.teachers[locale]}
-                              </label>
-                              <input
-                                id={`teachers-${group.id}`}
-                                name="teachers"
-                                defaultValue={group.teachers ?? ''}
-                                className="field"
-                              />
-                            </div>
-                            <div>
-                              <label className="field-label" htmlFor={`total-${group.id}`}>
-                                {T.placesTotal[locale]}
-                              </label>
-                              <input
-                                id={`total-${group.id}`}
-                                name="placesTotal"
-                                type="number"
-                                min={0}
-                                defaultValue={group.placesTotal ?? ''}
-                                className="field"
-                              />
-                            </div>
-                            <div>
-                              <label className="field-label" htmlFor={`freeFull-${group.id}`}>
-                                {T.placesFree[locale]}
-                              </label>
-                              <input
-                                id={`freeFull-${group.id}`}
-                                name="placesFree"
-                                type="number"
-                                min={0}
-                                defaultValue={group.placesFree}
-                                className="field"
-                              />
-                            </div>
-                            <div className="flex items-end">
-                              <SubmitButton>{T.saveGroupBtn[locale]}</SubmitButton>
-                            </div>
-                          </form>
-                        </details>
-                      </td>
-                    </tr>
-                  ) : null}
-                </Fragment>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                ) : null}
+              </>
+            ),
+          }))}
+        />
       )}
     </>
   );

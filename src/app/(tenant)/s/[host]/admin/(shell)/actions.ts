@@ -20,6 +20,7 @@ import {
 } from '@/lib/sections';
 import type { Prisma, SectionType } from '@prisma/client';
 import { canMoveFolder, titleFromFileName } from '@/lib/doc-tree';
+import { mergeOrder } from '@/lib/reorder';
 import { saveUpload, deleteMedia, UploadError } from '@/server/media';
 import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { geocodeAddress } from '@/server/maps/yandex';
@@ -526,15 +527,21 @@ export async function uploadMedia(formData: FormData): Promise<void> {
 
   if (albumId) await assertOwned('album', albumId, ctx.tenantId);
 
+  // Новые фото — первыми, как в новостях: вся пачка встаёт перед прежними
+  // (номера уходят в минус), а внутри пачки остаётся порядок выбора файлов.
+  const first = albumId
+    ? await prisma.albumItem.findFirst({ where: { albumId }, orderBy: { position: 'asc' }, select: { position: true } })
+    : null;
+  let position = (first?.position ?? 0) - files.length;
+
   for (const file of files) {
     try {
       const media = await saveUpload(file, ctx.tenantId);
       if (albumId) {
-        const last = await prisma.albumItem.findFirst({ where: { albumId }, orderBy: { position: 'desc' } });
         await prisma.albumItem.upsert({
           where: { albumId_mediaId: { albumId, mediaId: media.id } },
           update: {},
-          create: { albumId, mediaId: media.id, position: (last?.position ?? -1) + 1 },
+          create: { albumId, mediaId: media.id, position: position++ },
         });
       }
     } catch (error) {
@@ -573,7 +580,16 @@ export async function saveAlbum(_prev: ActionState, formData: FormData): Promise
   const slug = await uniqueSlug(titleRu, async (candidate) =>
     Boolean(await prisma.album.findFirst({ where: { tenantId: ctx.tenantId, slug: candidate }, select: { id: true } })),
   );
-  const album = await prisma.album.create({ data: { ...data, slug, tenantId: ctx.tenantId } });
+  // Новый альбом — первым, как свежая новость. Альбомы, перенесённые со старого
+  // сайта, пронумерованы с нуля, поэтому номер — на единицу меньше самого первого.
+  const firstAlbum = await prisma.album.findFirst({
+    where: { tenantId: ctx.tenantId },
+    orderBy: { position: 'asc' },
+    select: { position: true },
+  });
+  const album = await prisma.album.create({
+    data: { ...data, slug, tenantId: ctx.tenantId, position: (firstAlbum?.position ?? 0) - 1 },
+  });
   return { redirectTo: await hostUrl(`/admin/gallery/${album.id}`) };
   } catch (error) {
     return toActionError(error, (await getCurrentUser())?.locale);
@@ -856,6 +872,62 @@ export async function deleteStaff(formData: FormData) {
   // Уже удалена (повторное нажатие) — молча «готово».
   if (await ownedOrGone('staffMember', id, ctx.tenantId)) await prisma.staffMember.deleteMany({ where: { id } });
   revalidatePath('/admin/staff');
+}
+
+// ─────────────────────────── Ручной порядок списков ───────────────────────────
+
+/** Списки, которые заведующая выстраивает сама: первые из них стоят на главной. */
+const SORTABLE_LISTS = {
+  staff: '/admin/staff',
+  groups: '/admin/groups',
+  clubs: '/admin/clubs',
+  faq: '/admin/faq',
+} as const;
+
+export type SortableKind = keyof typeof SORTABLE_LISTS;
+
+function isSortableKind(value: string): value is SortableKind {
+  return Object.hasOwn(SORTABLE_LISTS, value);
+}
+
+/**
+ * Новый порядок списка — целиком, после каждого перетаскивания или стрелки.
+ * Переставляются только записи этого сада (`mergeOrder`), и номера идут
+ * подряд с нуля: так новая запись (последний номер + 1) встаёт в конец.
+ */
+export async function reorderList(formData: FormData): Promise<ActionState> {
+  try {
+    const ctx = await gate(formData);
+    const kind = str(formData, 'kind');
+    if (!isSortableKind(kind)) throw new Error(`Неизвестный список: ${kind}`);
+    const requested = formData.getAll('ids').map(String);
+    const tenantId = ctx.tenantId;
+    const byPosition = { where: { tenantId }, orderBy: { position: 'asc' as const }, select: { id: true } };
+
+    const existing = (
+      kind === 'staff' ? await prisma.staffMember.findMany(byPosition)
+        : kind === 'groups' ? await prisma.group.findMany(byPosition)
+          : kind === 'clubs' ? await prisma.club.findMany(byPosition)
+            : await prisma.faqItem.findMany(byPosition)
+    ).map((row) => row.id);
+
+    const ordered = mergeOrder(existing, requested);
+    await prisma.$transaction(
+      ordered.map((id, position) => {
+        // tenantId в условии — вторая защита: чужую запись не тронет, даже если она сюда попадёт.
+        const args = { where: { id, tenantId }, data: { position } };
+        if (kind === 'staff') return prisma.staffMember.updateMany(args);
+        if (kind === 'groups') return prisma.group.updateMany(args);
+        if (kind === 'clubs') return prisma.club.updateMany(args);
+        return prisma.faqItem.updateMany(args);
+      }),
+    );
+
+    revalidatePath(SORTABLE_LISTS[kind]);
+    return EMPTY_ACTION_STATE;
+  } catch (error) {
+    return toActionError(error, (await getCurrentUser())?.locale);
+  }
 }
 
 // ─────────────────────────── Группы ───────────────────────────

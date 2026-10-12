@@ -8,6 +8,7 @@ import { CSRF_FIELD } from '@/server/auth/csrf.client';
 import { pick } from '@/lib/i18n';
 import { deleteFaq, saveFaq } from '../actions';
 import { DeleteButton } from '@/components/admin/DeleteButton';
+import { SortableList, SortHandle } from '@/components/admin/SortableList';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,26 +98,39 @@ export default async function FaqPage({ params }: { params: Promise<{ host: stri
       {items.length === 0 ? (
         <EmptyState icon="❓" title={T.empty[locale]} />
       ) : (
-        <div className="card divide-y divide-line">
-          {items.map((item) => (
-            <div key={item.id} className="px-5 py-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <p className="font-semibold">{pick(locale, item.questionKk, item.questionRu)}</p>
-                {ctx.canEdit ? (
-                  <form action={deleteFaq}>
-                    <input type="hidden" name={CSRF_FIELD} value={csrf} />
-                    <input type="hidden" name="host" value={host} />
-                    <input type="hidden" name="id" value={item.id} />
-                    <DeleteButton className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
-                  </form>
+        <SortableList
+          kind="faq"
+          host={host}
+          csrf={csrf}
+          locale={locale}
+          layout="list"
+          disabled={!ctx.canEdit}
+          className="card divide-y divide-line overflow-hidden"
+          items={items.map((item) => ({
+            id: item.id,
+            content: (
+              <div className="bg-card px-5 py-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-start gap-2">
+                    <SortHandle className="-my-1.5 -ml-2 shrink-0" />
+                    <p className="font-semibold">{pick(locale, item.questionKk, item.questionRu)}</p>
+                  </div>
+                  {ctx.canEdit ? (
+                    <form action={deleteFaq}>
+                      <input type="hidden" name={CSRF_FIELD} value={csrf} />
+                      <input type="hidden" name="host" value={host} />
+                      <input type="hidden" name="id" value={item.id} />
+                      <DeleteButton className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
+                    </form>
+                  ) : null}
+                </div>
+                {pick(locale, item.answerKk, item.answerRu) ? (
+                  <p className="mt-1 text-sm text-muted">{pick(locale, item.answerKk, item.answerRu)}</p>
                 ) : null}
               </div>
-              {pick(locale, item.answerKk, item.answerRu) ? (
-                <p className="mt-1 text-sm text-muted">{pick(locale, item.answerKk, item.answerRu)}</p>
-              ) : null}
-            </div>
-          ))}
-        </div>
+            ),
+          }))}
+        />
       )}
     </>
   );

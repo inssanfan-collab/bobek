@@ -33,6 +33,9 @@
     "guide:record": "node --conditions=react-server --import tsx scripts/guide/record.ts"
   },
   "dependencies": {
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@dnd-kit/utilities": "3.2.2",
     "@node-rs/argon2": "^2.0.2",
     "@prisma/client": "^6.3.1",
     "canvas-confetti": "1.9.3",

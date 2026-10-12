@@ -9,6 +9,7 @@ import { formatMoney } from '@/lib/labels';
 import { pick } from '@/lib/i18n';
 import { deleteClub, saveClub } from '../actions';
 import { DeleteButton } from '@/components/admin/DeleteButton';
+import { SortableList, SortHandle } from '@/components/admin/SortableList';
 
 export const dynamic = 'force-dynamic';
 
@@ -113,34 +114,46 @@ export default async function ClubsPage({ params }: { params: Promise<{ host: st
           description={T.emptyHint[locale]}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {clubs.map((club) => (
-            <article key={club.id} className="card p-5">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <h2 className="font-display text-lg font-bold">{pick(locale, club.nameKk, club.nameRu)}</h2>
-                <span className={`badge ${club.isFree || club.priceKzt == null ? 'bg-emerald-100 text-emerald-800' : 'bg-brand-soft text-brand-ink'}`}>
-                  {club.isFree || club.priceKzt == null
-                    ? T.free[locale]
-                    : `${formatMoney(club.priceKzt)} ${T.perMonth[locale]}`}
-                </span>
-              </div>
-              {pick(locale, club.descKk, club.descRu) ? (
-                <p className="mt-2 text-sm text-muted">{pick(locale, club.descKk, club.descRu)}</p>
-              ) : null}
-              <p className="mt-2 text-sm text-muted">
-                {[club.teacher, club.schedule, club.ageRange].filter(Boolean).join(' · ')}
-              </p>
-              {ctx.canEdit ? (
-                <form action={deleteClub} className="mt-3">
-                  <input type="hidden" name={CSRF_FIELD} value={csrf} />
-                  <input type="hidden" name="host" value={host} />
-                  <input type="hidden" name="id" value={club.id} />
-                  <DeleteButton className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
-                </form>
-              ) : null}
-            </article>
-          ))}
-        </div>
+        <SortableList
+          kind="clubs"
+          host={host}
+          csrf={csrf}
+          locale={locale}
+          layout="grid"
+          onHome
+          disabled={!ctx.canEdit}
+          className="grid gap-4 sm:grid-cols-2"
+          items={clubs.map((club) => ({
+            id: club.id,
+            content: (
+              <article className="card h-full p-5">
+                <SortHandle className="-mr-2 -mt-2 mb-1 justify-end" />
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h2 className="font-display text-lg font-bold">{pick(locale, club.nameKk, club.nameRu)}</h2>
+                  <span className={`badge ${club.isFree || club.priceKzt == null ? 'bg-emerald-100 text-emerald-800' : 'bg-brand-soft text-brand-ink'}`}>
+                    {club.isFree || club.priceKzt == null
+                      ? T.free[locale]
+                      : `${formatMoney(club.priceKzt)} ${T.perMonth[locale]}`}
+                  </span>
+                </div>
+                {pick(locale, club.descKk, club.descRu) ? (
+                  <p className="mt-2 text-sm text-muted">{pick(locale, club.descKk, club.descRu)}</p>
+                ) : null}
+                <p className="mt-2 text-sm text-muted">
+                  {[club.teacher, club.schedule, club.ageRange].filter(Boolean).join(' · ')}
+                </p>
+                {ctx.canEdit ? (
+                  <form action={deleteClub} className="mt-3">
+                    <input type="hidden" name={CSRF_FIELD} value={csrf} />
+                    <input type="hidden" name="host" value={host} />
+                    <input type="hidden" name="id" value={club.id} />
+                    <DeleteButton className="btn-ghost px-3 py-1 text-xs text-red-600">{T.remove[locale]}</DeleteButton>
+                  </form>
+                ) : null}
+              </article>
+            ),
+          }))}
+        />
       )}
     </>
   );

@@ -100,6 +100,33 @@ test.describe('Посещаемость', () => {
   });
 });
 
+test.describe('Ручной порядок', () => {
+  test('педагог, поднятый стрелкой, первым и на сайте', async ({ page }) => {
+    await login(page, site('sad12'), SAD12_ADMIN);
+    await page.goto(`${site('sad12')}/admin/staff`);
+    const names = page.locator('article p.font-display');
+    const before = await names.allInnerTexts();
+    expect(before.length).toBeGreaterThan(1);
+
+    // Второго — наверх. Порядок сохраняется сразу, без кнопки «Сохранить».
+    await page.getByRole('button', { name: 'Выше' }).nth(1).click();
+    await expect(page.getByText('Порядок сохранён')).toBeVisible();
+    await page.reload();
+    await expect(names.first()).toHaveText(before[1]!);
+
+    await page.goto(`${site('sad12')}/staff?lang=ru`);
+    const html = await page.content();
+    expect(html.indexOf(before[1]!)).toBeLessThan(html.indexOf(before[0]!));
+
+    // Вернуть как было: от этого порядка зависят другие проверки.
+    await page.goto(`${site('sad12')}/admin/staff`);
+    await page.getByRole('button', { name: 'Выше' }).nth(1).click();
+    await expect(page.getByText('Порядок сохранён')).toBeVisible();
+    await page.reload();
+    await expect(names).toHaveText(before);
+  });
+});
+
 /** Число из карточки «Сегодня» на странице статистики сада. */
 async function todayViews(page: Page): Promise<number> {
   await page.goto(`${site('sad12')}/admin/stats`);
