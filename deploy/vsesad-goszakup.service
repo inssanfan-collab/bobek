@@ -1,0 +1,11 @@
+# Закупки сайтов садами на госзакупках → Telegram владельцу. Копировать
+# в /etc/systemd/system/ вместе с .timer, затем:
+# systemctl daemon-reload && systemctl enable --now vsesad-goszakup.timer
+[Unit]
+Description=Госзакупки: есть ли открытые лоты «сайт» у садов
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/vsesad-goszakup

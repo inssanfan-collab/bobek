@@ -1,0 +1,9 @@
+[Unit]
+Description=Госзакупки каждый час с 10:00 до 18:00 (за день отправляет не больше одного итога)
+
+[Timer]
+OnCalendar=*-*-* 10..18:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
