@@ -1,0 +1,8 @@
+# Состояние сервера для раздела «Сервер». Копировать в /etc/systemd/system/
+# вместе с .timer, затем: systemctl daemon-reload && systemctl enable --now edusad-system-report.timer
+[Unit]
+Description=Сбор состояния сервера для системного раздела админки
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/edusad-system-report

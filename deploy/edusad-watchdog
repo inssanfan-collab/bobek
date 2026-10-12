@@ -1,0 +1,274 @@
+#!/usr/bin/env python3
+"""Сторож EduSad: сообщает владельцу, если что-то сломалось.
+
+Работает отдельно от приложения и шлёт почту в обход него, через sendmail:
+упавший сайт о своём падении не расскажет.
+
+Раз в пять минут (таймер edusad-watchdog.timer) проверяет:
+  - открываются ли портал и сайты всех работающих садов;
+  - работают ли nginx, приложение, база и почта.
+Раз в сутки дополнительно:
+  - не истекает ли какой-нибудь сертификат;
+  - не заканчивается ли место на диске.
+
+Письмо о сбое уходит после двух неудачных проверок подряд, то есть через
+десять минут: при выкладке обновления приложение перезапускается, и будить
+владельца из-за полуминутного перерыва незачем. Когда всё починится —
+приходит второе письмо, с длительностью простоя. Одна и та же суточная
+проблема напоминает о себе не чаще раза в сутки.
+
+Не спасает от одного: если лёг весь сервер, писать тоже некому. Для этого
+нужен внешний мониторинг.
+
+Скрипт копируется на сервер руками (в /usr/local/bin), как vsesad-offsite.
+"""
+import json
+import re
+import ssl
+import subprocess
+import time
+import urllib.error
+import urllib.request
+from datetime import datetime, timezone
+from email.message import EmailMessage
+from pathlib import Path
+
+ENV_FILE = Path('/var/www/vsesad/.env')
+STATE = Path('/var/lib/edusad/watchdog.json')
+REPORT = Path('/var/lib/edusad/system.json')
+
+SERVICES = ['nginx', 'vsesad', 'postgresql', 'postfix']
+FAILS_BEFORE_ALERT = 2
+DAILY_SECONDS = 24 * 3600
+CERT_ALERT_DAYS = 20
+DISK_ALERT_PERCENT = 85
+
+
+def env_value(name: str) -> str:
+    try:
+        for line in ENV_FILE.read_text(encoding='utf-8').splitlines():
+            match = re.match(rf'^{name}=(.*)$', line.strip())
+            if match:
+                return match.group(1).strip().strip('"').strip("'")
+    except OSError:
+        pass
+    return ''
+
+
+def push(subject: str, body: str) -> None:
+    """Push на телефон владельца (админка портала, раздел «Уведомления»).
+
+    Через pnpm push:owner — тот работает с базой напрямую и не зависит от того,
+    живо ли приложение. Не вышло — не беда: письмо уходит всё равно.
+    """
+    try:
+        subprocess.run(
+            ['/usr/bin/node', '/usr/lib/node_modules/corepack/dist/pnpm.js', 'push:owner',
+             subject[:1].upper() + subject[1:], body, '/admin/system'],
+            cwd='/var/www/vsesad', capture_output=True, check=False, timeout=90,
+        )
+    except Exception:
+        pass
+
+
+def send(subject: str, body: str) -> None:
+    push(subject, body)
+    to = env_value('NOTIFY_EMAIL')
+    if not to:
+        return
+    sender = env_value('MAIL_FROM') or 'EduSad <edusad@e04.kz>'
+
+    message = EmailMessage()
+    message['From'] = sender
+    message['To'] = to
+    message['Subject'] = f'EduSad: {subject}'
+    message.set_content(body)
+
+    envelope = re.search(r'<([^>]+)>', sender)
+    subprocess.run(
+        ['/usr/sbin/sendmail', '-f', envelope.group(1) if envelope else sender, to],
+        input=message.as_bytes(),
+        check=False,
+        timeout=60,
+    )
+
+
+def load_state() -> dict:
+    try:
+        return json.loads(STATE.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return {}
+
+
+def save_state(state: dict) -> None:
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = STATE.with_suffix('.tmp')
+    tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding='utf-8')
+    tmp.replace(STATE)
+
+
+def tenant_hosts() -> list[str]:
+    """Домены работающих садов. Приостановленный сад закрыт намеренно — это не сбой."""
+    portal = env_value('PORTAL_DOMAIN') or 'edusad.kz'
+    try:
+        out = subprocess.run(
+            ['sudo', '-u', 'postgres', 'psql', '-d', 'vsesad', '-tAc',
+             'select d.host from "Domain" d join "Tenant" t on t.id = d."tenantId" '
+             "where t.status = 'ACTIVE' order by d.host;"],
+            capture_output=True, text=True, timeout=30,
+        ).stdout
+        hosts = [line.strip() for line in out.splitlines() if line.strip()]
+    except Exception:
+        hosts = []
+    return [portal] + hosts
+
+
+def check_site(host: str) -> str | None:
+    """None — сайт открывается; иначе — что именно не так, человеческими словами."""
+    request = urllib.request.Request(f'https://{host}/', headers={'User-Agent': 'EduSad-watchdog'})
+    try:
+        with urllib.request.urlopen(request, timeout=20, context=ssl.create_default_context()) as response:
+            if response.status >= 500:
+                return f'сервер ответил ошибкой {response.status}'
+            return None
+    except urllib.error.HTTPError as error:
+        # 4xx у главной страницы — это не падение, а, скорее, закрытый сайт.
+        return f'сервер ответил ошибкой {error.code}' if error.code >= 500 else None
+    except ssl.SSLError as error:
+        return f'ошибка сертификата: {error.reason or error}'
+    except urllib.error.URLError as error:
+        reason = error.reason
+        if isinstance(reason, ssl.SSLCertVerificationError):
+            return f'сертификат не принят браузером: {reason.verify_message}'
+        return f'не открывается: {reason}'
+    except Exception as error:  # таймаут и прочее
+        return f'не открывается: {error}'
+
+
+def check_service(name: str) -> str | None:
+    state = subprocess.run(['systemctl', 'is-active', name], capture_output=True, text=True).stdout.strip()
+    return None if state == 'active' else f'служба в состоянии «{state or "неизвестно"}»'
+
+
+def minutes_between(start: float, end: float) -> str:
+    minutes = max(1, round((end - start) / 60))
+    if minutes < 60:
+        return f'{minutes} мин.'
+    return f'{minutes // 60} ч {minutes % 60} мин.'
+
+
+def main() -> None:
+    now = time.time()
+    state = load_state()
+    checks: dict = state.setdefault('checks', {})
+
+    current: dict[str, str | None] = {}
+    for host in tenant_hosts():
+        current[f'сайт {host}'] = check_site(host)
+    for service in SERVICES:
+        current[f'служба {service}'] = check_service(service)
+
+    went_down: list[str] = []
+    came_up: list[str] = []
+
+    for key, problem in current.items():
+        entry = checks.setdefault(key, {'fails': 0, 'alerted': False, 'since': None})
+        if problem:
+            entry['fails'] += 1
+            entry['since'] = entry['since'] or now
+            entry['problem'] = problem
+            if entry['fails'] >= FAILS_BEFORE_ALERT and not entry['alerted']:
+                went_down.append(f'• {key}: {problem}')
+                entry['alerted'] = True
+        else:
+            if entry['alerted']:
+                came_up.append(f'• {key} — не работало {minutes_between(entry["since"], now)}')
+            checks[key] = {'fails': 0, 'alerted': False, 'since': None}
+
+    # Сайт сада, который больше не активен, из проверок уходит молча.
+    for key in list(checks):
+        if key not in current:
+            del checks[key]
+
+    stamp = datetime.now().strftime('%d.%m.%Y %H:%M')
+
+    if went_down:
+        send(
+            'что-то сломалось' if len(went_down) > 1 else went_down[0][2:].split(':')[0] + ' — сбой',
+            f'{stamp}. Две проверки подряд, с интервалом пять минут, закончились неудачей:\n\n'
+            + '\n'.join(went_down)
+            + '\n\nКуда смотреть: админка портала, раздел «Сервер» — там же команды для журналов.'
+            + '\nКогда заработает, придёт отдельное письмо.',
+        )
+
+    if came_up:
+        send(
+            'снова работает',
+            f'{stamp}. Починилось:\n\n' + '\n'.join(came_up),
+        )
+
+    # ── раз в сутки: сертификаты и диск ─────────────────────────────────────
+    daily: dict = state.setdefault('daily', {})
+    try:
+        report = json.loads(REPORT.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        report = None
+
+    if report:
+        warnings: list[str] = []
+        keys: list[str] = []
+
+        for cert in report.get('certificates', []):
+            days = cert.get('daysLeft')
+            if days is not None and days < CERT_ALERT_DAYS:
+                key = f'cert:{cert["name"]}'
+                keys.append(key)
+                if now - daily.get(key, 0) > DAILY_SECONDS:
+                    warnings.append(
+                        f'• сертификат {", ".join(cert.get("domains", [cert["name"]]))} истекает через {days} дн. — '
+                        'автоматическое обновление, судя по всему, не проходит'
+                    )
+                    daily[key] = now
+
+        # Копии: ночная копия базы и отправка на Google Диск. Скрипт копии
+        # может упасть, не успев ничего сообщить (так было 10–11.10.2026),
+        # поэтому сторож сам смотрит, когда была последняя удачная.
+        for name, label in (('backup.json', 'копия базы на сервере'), ('offsite.json', 'копия на Google Диске')):
+            try:
+                status = json.loads((REPORT.parent / name).read_text(encoding='utf-8'))
+                last = datetime.fromisoformat(status.get('lastSuccessAt', '')).timestamp()
+            except (OSError, ValueError, TypeError):
+                continue
+            hours = (now - last) / 3600
+            if hours > 36:
+                key = f'stale:{name}'
+                keys.append(key)
+                if now - daily.get(key, 0) > DAILY_SECONDS:
+                    warnings.append(f'• {label}: последняя удачная {int(hours)} ч назад — ночная копия не делается')
+                    daily[key] = now
+
+        disk = report.get('disk', {})
+        if disk.get('percent', 0) >= DISK_ALERT_PERCENT:
+            keys.append('disk')
+            if now - daily.get('disk', 0) > DAILY_SECONDS:
+                warnings.append(f'• на диске занято {disk["percent"]}%, свободно {disk.get("freeGb")} ГБ')
+                daily['disk'] = now
+
+        # Проблема ушла — забываем о ней, чтобы при повторе письмо пришло сразу.
+        for key in list(daily):
+            if key not in keys:
+                del daily[key]
+
+        if warnings:
+            send(
+                'требуется внимание',
+                f'{stamp}. Пока ничего не сломалось, но скоро может:\n\n' + '\n'.join(warnings)
+                + '\n\nПодробности — в админке портала, раздел «Сервер».',
+            )
+
+    state['lastRun'] = datetime.now(timezone.utc).isoformat()
+    save_state(state)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,8 @@
+# Сторож EduSad. Копировать в /etc/systemd/system/ вместе с .timer, затем:
+# systemctl daemon-reload && systemctl enable --now edusad-watchdog.timer
+[Unit]
+Description=Сторож EduSad: сообщает о сбоях на почту
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/edusad-watchdog

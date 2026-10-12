@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+"""Состояние сервера для системного раздела админки.
+
+Админка не выполняет команд на сервере: веб-приложение, умеющее запускать
+systemctl, — это дыра размером с сервер. Поэтому состояние собирает этот
+скрипт по таймеру и складывает в файл, а админка файл только читает.
+
+Пишет /var/lib/edusad/system.json. Таймер edusad-system-report.timer —
+каждые 15 минут. Скрипт копируется на сервер руками, как vsesad-offsite.
+"""
+import json
+import os
+import re
+import shutil
+import subprocess
+from datetime import datetime, timezone
+from pathlib import Path
+
+LIVE = Path('/etc/letsencrypt/live')
+RENEWAL = Path('/etc/letsencrypt/renewal')
+OUT = Path('/var/lib/edusad/system.json')
+HOOK = Path('/etc/letsencrypt/renewal-hooks/deploy/reload-services.sh')
+
+# Меньше этого срока сертификат считается тревожным: certbot начинает
+# обновлять за 30 дней, и если за 20 ничего не произошло — что-то сломано.
+ALERT_DAYS = 20
+
+
+def run(*args: str) -> str:
+    try:
+        return subprocess.run(args, capture_output=True, text=True, timeout=20).stdout.strip()
+    except Exception:
+        return ''
+
+
+def certificates() -> list[dict]:
+    items = []
+    if not LIVE.is_dir():
+        return items
+
+    for folder in sorted(LIVE.iterdir()):
+        cert = folder / 'cert.pem'
+        if not cert.is_file():
+            continue
+
+        raw = run('openssl', 'x509', '-in', str(cert), '-noout', '-enddate', '-subject', '-ext', 'subjectAltName')
+
+        expires = None
+        match = re.search(r'notAfter=(.+)', raw)
+        if match:
+            try:
+                expires = datetime.strptime(match.group(1).strip(), '%b %d %H:%M:%S %Y %Z').replace(tzinfo=timezone.utc)
+            except ValueError:
+                expires = None
+
+        domains = sorted(set(re.findall(r'DNS:([^\s,]+)', raw)))
+        days = (expires - datetime.now(timezone.utc)).days if expires else None
+
+        # Способ проверки владения доменом: webroot не трогает nginx,
+        # standalone требует свободный 80-й порт и поэтому ломается.
+        method = ''
+        conf = RENEWAL / f'{folder.name}.conf'
+        if conf.is_file():
+            found = re.search(r'authenticator\s*=\s*(\S+)', conf.read_text(encoding='utf-8', errors='ignore'))
+            method = found.group(1) if found else ''
+
+        items.append({
+            'name': folder.name,
+            'domains': domains or [folder.name],
+            'expiresAt': expires.isoformat() if expires else None,
+            'daysLeft': days,
+            'method': method,
+            'alert': days is not None and days < ALERT_DAYS,
+        })
+
+    return items
+
+
+def services() -> list[dict]:
+    names = ['nginx', 'vsesad', 'postgresql', 'postfix', 'fail2ban']
+    out = []
+    for name in names:
+        state = run('systemctl', 'is-active', name)
+        if not state:
+            continue
+        enabled = run('systemctl', 'is-enabled', name)
+        since = run('systemctl', 'show', name, '-p', 'ActiveEnterTimestamp', '--value')
+        out.append({'name': name, 'active': state == 'active', 'enabled': enabled == 'enabled', 'since': since})
+    return out
+
+
+def timer() -> dict:
+    # Не list-timers: при одной строке systemd ставит между колонками по одному
+    # пробелу, и разбор по двум пробелам отдавал пустые даты (до 12.10.2026).
+    next_run = run('systemctl', 'show', 'certbot.timer', '-p', 'NextElapseUSecRealtime', '--value')
+    last_run = run('systemctl', 'show', 'certbot.timer', '-p', 'LastTriggerUSec', '--value')
+    return {
+        'active': run('systemctl', 'is-active', 'certbot.timer') == 'active',
+        'schedule': 'дважды в сутки (00:00 и 12:00) со случайной задержкой до 12 часов',
+        'nextRun': next_run,
+        'lastRun': last_run,
+        'reloadHook': HOOK.is_file() and os.access(HOOK, os.X_OK),
+    }
+
+
+def disk() -> dict:
+    usage = shutil.disk_usage('/')
+    return {
+        'totalGb': round(usage.total / 1024 ** 3, 1),
+        'usedGb': round(usage.used / 1024 ** 3, 1),
+        'freeGb': round(usage.free / 1024 ** 3, 1),
+        'percent': round(usage.used / usage.total * 100),
+    }
+
+
+def memory() -> dict:
+    values = {}
+    for row in Path('/proc/meminfo').read_text().splitlines():
+        key, _, rest = row.partition(':')
+        values[key] = int(rest.strip().split()[0])
+    total = values.get('MemTotal', 0)
+    available = values.get('MemAvailable', 0)
+    return {
+        'totalMb': round(total / 1024),
+        'freeMb': round(available / 1024),
+        'percent': round((total - available) / total * 100) if total else 0,
+    }
+
+
+def app() -> dict:
+    # Папка принадлежит vsesad, а скрипт идёт от root без HOME: git читает её
+    # только с исключением в системных настройках
+    # (git config --system --add safe.directory /var/www/vsesad), иначе
+    # «dubious ownership» и пустая «Версия сайта» (так было 11–12.10.2026).
+    repo = Path('/var/www/vsesad')
+    return {
+        'commit': run('git', '-C', str(repo), 'log', '-1', '--format=%h %s'),
+        'commitAt': run('git', '-C', str(repo), 'log', '-1', '--format=%cI'),
+    }
+
+
+def main() -> None:
+    report = {
+        'collectedAt': datetime.now(timezone.utc).isoformat(),
+        'certificates': certificates(),
+        'services': services(),
+        'certbot': timer(),
+        'disk': disk(),
+        'memory': memory(),
+        'app': app(),
+    }
+
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    tmp = OUT.with_suffix('.tmp')
+    tmp.write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding='utf-8')
+    tmp.replace(OUT)
+    OUT.chmod(0o644)
+
+    for cert in report['certificates']:
+        if cert['alert']:
+            print(f"ВНИМАНИЕ: сертификат {cert['name']} истекает через {cert['daysLeft']} дн.")
+
+
+if __name__ == '__main__':
+    main()

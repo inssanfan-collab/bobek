@@ -118,8 +118,8 @@ Amnezia в Docker — трогать только по отдельной про
 
 | Что | Когда | Скрипт |
 |---|---|---|
-| Сторож: сайт жив, копии свежие | каждые 5 мин | `/usr/local/bin/edusad-watchdog` (только на сервере, не в git) |
-| Состояние сервера для админки | каждые 15 мин | `edusad-system-report` → `/var/lib/edusad/system.json` |
+| Сторож: сайт жив, копии свежие | каждые 5 мин | `deploy/edusad-watchdog` |
+| Состояние сервера для админки | каждые 15 мин | `deploy/edusad-system-report` → `/var/lib/edusad/system.json` |
 | Сертификаты и nginx для доменов садов | каждые 10 мин | `deploy/vsesad-certs.sh` |
 | Подписки: блокировка и сводка | 09:00 | `pnpm subscriptions:check` |
 | Копия базы | 03:30 | `deploy/vsesad-backup` |
