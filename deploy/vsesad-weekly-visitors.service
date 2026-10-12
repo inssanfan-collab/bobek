@@ -1,0 +1,12 @@
+# Посетители портала за неделю → Telegram владельцу. Копировать
+# в /etc/systemd/system/ вместе с .timer, затем:
+# systemctl daemon-reload && systemctl enable --now vsesad-weekly-visitors.timer
+[Unit]
+Description=Сводка посетителей edusad.kz за неделю в Telegram
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/vsesad-weekly-visitors
+Nice=10

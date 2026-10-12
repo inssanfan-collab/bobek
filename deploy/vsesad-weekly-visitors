@@ -1,0 +1,157 @@
+#!/usr/bin/env python3
+"""Посетители портала за неделю → Telegram владельцу (12.10.2026).
+
+Каждый понедельник в 10:00 (vsesad-weekly-visitors.timer) — сводка
+за прошлую неделю, с понедельника по воскресенье: сколько людей смотрели
+edusad.kz, по дням, откуда пришли, какие страницы, сколько заявок, и
+сравнение с позапрошлой неделей.
+
+Считается по журналу nginx (хранится 14 дней), строк с хостом в нём нет,
+поэтому портал узнаём по Referer: страница edusad.kz грузит стили,
+картинки и /api/visit с Referer https://edusad.kz/… Посетитель — адрес
+и браузер; роботы, сторож и все, кто заходил в /admin (владелец,
+сотрудники садов), не считаются. Наружу уходит только сводка, без адресов —
+как и обещано на /privacy («в обобщённом виде»).
+
+Токен бота — TELEGRAM_BOT_TOKEN из .env, чат — того, кто подключил Telegram
+в админке портала. Пробный запуск без отправки: vsesad-weekly-visitors --dry-run.
+Скрипт копируется на сервер руками, как vsesad-goszakup.
+"""
+import collections
+import glob
+import gzip
+import html
+import json
+import re
+import subprocess
+import sys
+import urllib.request
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from urllib.parse import parse_qs, urlparse
+
+ENV_FILE = Path('/var/www/vsesad/.env')
+LINE = re.compile(r'^(\S+) \S+ \S+ \[([^\]]+)\] "(\S+) (\S+)[^"]*" (\d+) \S+ "([^"]*)" "([^"]*)"')
+BOT = re.compile(r'bot|crawl|spider|slurp|facebookexternalhit|preview|monitor|watchdog|curl|wget|headless|'
+                 r'lighthouse|pagespeed|python|go-http|java|scan|http-client|okhttp|axios|node', re.I)
+PORTAL = re.compile(r'^https://(www\.)?edusad\.kz(/|$)')
+STATIC = re.compile(r'\.(png|jpe?g|gif|webp|svg|ico|css|js|woff2?|mp4|webm|txt|xml|json|webmanifest|map|pdf)(\?|$)'
+                    r'|^/_next/|^/api/', re.I)
+SOURCES = [('google', 'Google'), ('yandex', 'Яндекс'), ('instagram', 'Instagram'), ('facebook', 'Facebook'),
+           ('t.me', 'Telegram'), ('telegram', 'Telegram'), ('whatsapp', 'WhatsApp'), ('wa.me', 'WhatsApp'),
+           ('2gis', '2ГИС'), ('bing', 'Bing'), ('mail.ru', 'Mail.ru'), ('youtube', 'YouTube'), ('tiktok', 'TikTok')]
+PAGES = {'/': 'главная', '/designs': 'витрина дизайнов', '/attestaciya': 'аттестация', '/guide': 'инструкция',
+         '/offer': 'оферта', '/contacts': 'контакты', '/privacy': 'конфиденциальность', '/catalog': 'каталог',
+         '/news': 'новости'}
+DAYS = ['пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс']
+
+
+def env_value(name: str) -> str:
+    for line in ENV_FILE.read_text(encoding='utf-8').splitlines():
+        match = re.match(rf'^{name}=(.*)$', line.strip())
+        if match:
+            return match.group(1).strip().strip('"').strip("'")
+    return ''
+
+
+def sql(query: str) -> str:
+    url = env_value('DATABASE_URL').split('?')[0]
+    return subprocess.run(['psql', url, '-Atc', query], capture_output=True, text=True, check=True, timeout=30).stdout.strip()
+
+
+def send(text: str) -> None:
+    chat = sql('select "telegramChatId" from "User" where "telegramChatId" is not null order by "createdAt" limit 1')
+    body = json.dumps({'chat_id': chat, 'text': text, 'parse_mode': 'HTML', 'disable_web_page_preview': True}).encode()
+    request = urllib.request.Request(
+        f'https://api.telegram.org/bot{env_value("TELEGRAM_BOT_TOKEN")}/sendMessage',
+        data=body, headers={'Content-Type': 'application/json'})
+    urllib.request.urlopen(request, timeout=30).read()
+
+
+def source_of(path: str, ref: str) -> str:
+    if 'gclid' in parse_qs(urlparse(path).query):
+        return 'Google Реклама'
+    if not ref or ref == '-':
+        return 'прямой заход, мессенджер, закладка'
+    host = urlparse(ref).netloc.lower().removeprefix('www.')
+    if 'edusad.kz' in host:
+        return ''
+    return next((label for word, label in SOURCES if word in host), host)
+
+
+def visitors(rows, start: date, end: date):
+    """Посетители портала с первым днём, страницами и источником за [start, end]."""
+    admins = {(ip, ua) for ip, _, _, path, _, ref, ua in rows if '/admin' in path or '/admin' in ref}
+    found = {}
+    docs = collections.defaultdict(list)
+    for ip, t, method, path, status, ref, ua in rows:
+        key = (ip, ua)
+        if key in admins or not ua or BOT.search(ua) or not start <= t.date() <= end:
+            continue
+        if method == 'GET' and not STATIC.search(path) and status.startswith(('2', '3')):
+            docs[key].append((t, path, ref))
+        if PORTAL.match(ref):
+            page = urlparse(ref).path.rstrip('/') or '/'
+            v = found.setdefault(key, {'first': t, 'days': set(), 'pages': set()})
+            v['first'] = min(v['first'], t)
+            v['days'].add(t.date())
+            v['pages'].add('/designs' if page.startswith('/designs') else page)
+    for key, v in found.items():
+        v['source'] = 'не определить'
+        for t, path, ref in sorted(docs.get(key, [])):
+            if abs((t - v['first']).total_seconds()) < 120:
+                s = source_of(path, ref)
+                if s:
+                    v['source'] = s
+                    break
+    return found
+
+
+def main() -> None:
+    dry = '--dry-run' in sys.argv
+    today = date.today()
+    start = today - timedelta(days=today.weekday() + 7)  # прошлый понедельник
+    end = start + timedelta(days=6)
+    prev_start, prev_end = start - timedelta(days=7), start - timedelta(days=1)
+
+    rows = []
+    for name in glob.glob('/var/log/nginx/access.log*'):
+        opener = gzip.open if name.endswith('.gz') else open
+        with opener(name, 'rt', encoding='utf-8', errors='replace') as f:
+            for line in f:
+                m = LINE.match(line)
+                if m:
+                    ip, ts, method, path, status, ref, ua = m.groups()
+                    rows.append((ip, datetime.strptime(ts, '%d/%b/%Y:%H:%M:%S %z'), method, path, status, ref, ua))
+
+    week = visitors(rows, start, end)
+    prev = visitors(rows, prev_start, prev_end)
+    leads = sql(f"select count(*) from \"Lead\" where \"createdAt\" >= '{start}' and \"createdAt\" < '{end + timedelta(days=1)}'")
+
+    by_day = collections.Counter(d for v in week.values() for d in v['days'])
+    sources = collections.Counter(v['source'] for v in week.values())
+    pages = collections.Counter(p for v in week.values() for p in v['pages'])
+    e = html.escape
+
+    diff = len(week) - len(prev)
+    trend = f' ({"+" if diff >= 0 else ""}{diff} к прошлой неделе)' if prev else ''
+    lines = [f'📊 <b>edusad.kz за неделю {start:%d.%m}–{end:%d.%m}</b>', '',
+             f'Посетителей: <b>{len(week)}</b>{trend}', f'Заявок: <b>{leads}</b>', '']
+    lines.append('По дням: ' + ' · '.join(f'{DAYS[(start + timedelta(days=i)).weekday()]} {by_day[start + timedelta(days=i)]}'
+                                         for i in range(7)))
+    if sources:
+        lines += ['', '<b>Откуда</b>'] + [f'{n} — {e(s)}' for s, n in sources.most_common(6)]
+    if pages:
+        lines += ['', '<b>Что смотрели</b>'] + [f'{n} — {e(PAGES.get(p, p))}' for p, n in pages.most_common(6)]
+    lines += ['', '<i>Посетитель — адрес и браузер; роботы и админка не считаются. '
+                  'Мессенджеры не сообщают, откуда человек, поэтому ссылки из WhatsApp и Telegram — в «прямом заходе».</i>']
+    text = '\n'.join(lines)
+
+    if dry:
+        print(text)
+        return
+    send(text)
+
+
+if __name__ == '__main__':
+    main()
