@@ -40,7 +40,8 @@ export function PortalAdminShell({
       <div className="flex">
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line bg-card lg:flex">
           <div className="flex items-center gap-2.5 px-5 py-5">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-bold text-white" aria-hidden>E</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/admin-icon.svg" alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-lg" />
             <span className="min-w-0">
               <span className="block truncate text-sm font-bold leading-tight">{title}</span>
               <span className="block truncate text-xs text-muted">{subtitle}</span>

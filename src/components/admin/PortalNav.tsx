@@ -108,7 +108,8 @@ export function PortalMobileNav({
   return (
     <>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-card/95 px-4 backdrop-blur lg:hidden">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand text-sm font-bold text-white" aria-hidden>E</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/admin-icon.svg" alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-lg" />
         <span className="min-w-0 truncate text-base font-semibold">{title}</span>
       </header>
 

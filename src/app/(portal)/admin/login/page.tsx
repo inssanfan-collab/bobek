@@ -33,7 +33,11 @@ export default async function AdminLoginPage({
     <div className="container-page flex min-h-[70vh] items-center justify-center py-12">
       <div className="card w-full max-w-md p-8">
         <div className="flex items-start justify-between gap-3">
-          <h1 className="font-display text-2xl font-extrabold">{T.title[locale]}</h1>
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/admin-icon.svg" alt="" width={40} height={40} className="h-10 w-10 shrink-0 rounded-xl" />
+            <h1 className="font-display text-2xl font-extrabold">{T.title[locale]}</h1>
+          </div>
           <div className="flex overflow-hidden rounded-xl border border-line">
             {LOCALES.map((code) => (
               <Link
