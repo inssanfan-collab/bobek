@@ -63,7 +63,9 @@ export function PostFeed({
       {posts.map((post) => {
         const cover = mediaUrl(post.coverMedia);
         return (
-          <article key={post.id} className="card flex flex-col gap-4 p-5 sm:flex-row">
+          // Открывается вся карточка, а не только заголовок: родители жмут на фото
+          // с ▶. Ссылка одна — заголовок, её after растянут на карточку.
+          <article key={post.id} className="card group relative flex flex-col gap-4 p-5 sm:flex-row">
             {cover ? (
               // Кружок на обложке: в списке должно быть видно, что внутри ролик,
               // а не только текст.
@@ -87,7 +89,10 @@ export function PostFeed({
                 {formatDate(post.publishedAt, locale)}
               </p>
               <h2 className="mt-1 font-display text-xl font-bold">
-                <Link href={withLocale(`${basePath}/${post.slug}`, locale)} className="hover:text-brand">
+                <Link
+                  href={withLocale(`${basePath}/${post.slug}`, locale)}
+                  className="after:absolute after:inset-0 after:rounded-[inherit] group-hover:text-brand"
+                >
                   {pick(locale, post.titleKk, post.titleRu)}
                 </Link>
               </h2>
