@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
 import { ThemedFooter, ThemedHeader } from '@/components/site/ThemedChrome';
+import { UsefulLinks } from '@/components/site/UsefulLinks';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { VideoEmbed } from '@/components/site/VideoEmbed';
@@ -150,6 +151,7 @@ export default async function EntryPage({
         </PhotoZoom>
       </main>
 
+      <UsefulLinks db={context.db} place={context.tenant.usefulLinksPlace} locale={locale} where="page" />
       <ThemedFooter themeCode={context.tenant.themeCode} profile={context.profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
     </>
   );

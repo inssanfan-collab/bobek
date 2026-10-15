@@ -1,6 +1,7 @@
 import { publicSiteContext, localeFrom } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
 import { ThemedFooter, ThemedHeader, ThemedHome } from '@/components/site/ThemedChrome';
+import { UsefulLinks } from '@/components/site/UsefulLinks';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { recordVisit } from '@/server/stats';
 import { coverPosition } from '@/lib/templates';
@@ -96,6 +97,7 @@ export default async function TenantHome({
           counts={{ staff: staff.length, groups: groups.length }}
         />
       </main>
+      <UsefulLinks db={db} place={tenant.usefulLinksPlace} locale={locale} where="home" />
       <ThemedFooter themeCode={tenant.themeCode} profile={profile} sections={sections} locale={locale} portalDomain={env.portalDomain} />
     </>
   );

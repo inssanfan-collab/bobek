@@ -53,6 +53,9 @@ model Tenant {
   homeSectionIds   String[]     @default([])
   /// Блок «Контакты» на главной.
   homeShowContacts Boolean      @default(true)
+  /// Где показывать «Полезные ссылки» (UsefulLink): home — только на главной,
+  /// all — перед подвалом на всех страницах.
+  usefulLinksPlace String       @default("home")
   palette          String       @default("mandarin")
   /// «Свой цвет» (#rrggbb) — для палитры custom; остальное строит src/lib/colors.ts.
   brandColor       String?
@@ -89,6 +92,7 @@ model Tenant {
   reviews       Review[]
   pricePlans    PricePlan[]
   routine       RoutineItem[]
+  usefulLinks   UsefulLink[]
   stats         DailyStat[]
   feedback      FeedbackMessage[]
   contracts     Contract[]
@@ -488,6 +492,7 @@ model Media {
   documents  Document[]
   staff      StaffMember[]
   postCovers Post[]        @relation("PostCover")
+  usefulLinks UsefulLink[]
 
   @@unique([tenantId, sha256])
   @@index([tenantId, createdAt])
@@ -728,6 +733,30 @@ model RoutineItem {
   titleRu  String
   position Int    @default(0)
 
+  @@index([tenantId, position])
+}
+
+/// «Полезные ссылки» сада — плитки госресурсов перед подвалом (15.10.2026).
+/// catalogKey — плитка из каталога src/lib/useful-links.ts: название и адрес
+/// берутся оттуда, чтобы поправить их один раз для всех садов. Без catalogKey —
+/// свой баннер сада: название, адрес и картинка свои. У плитки «Управление
+/// образования региона» адрес свой (url), остальное — из каталога.
+model UsefulLink {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  catalogKey String?
+  titleKk    String?
+  titleRu    String?
+  noteKk     String?
+  noteRu     String?
+  url        String?
+  mediaId    String?
+  media      Media?   @relation(fields: [mediaId], references: [id], onDelete: SetNull)
+  position   Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@unique([tenantId, catalogKey])
   @@index([tenantId, position])
 }
 

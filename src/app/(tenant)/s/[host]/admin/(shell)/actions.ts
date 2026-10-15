@@ -21,6 +21,7 @@ import {
 import type { Prisma, SectionType } from '@prisma/client';
 import { canMoveFolder, titleFromFileName } from '@/lib/doc-tree';
 import { mergeOrder } from '@/lib/reorder';
+import { CATALOG_BY_KEY, customUrl, isUsefulPlace, regionUrl } from '@/lib/useful-links';
 import { saveUpload, deleteMedia, UploadError } from '@/server/media';
 import { invalidateTenantCacheById } from '@/server/tenant/resolve';
 import { geocodeAddress } from '@/server/maps/yandex';
@@ -884,6 +885,7 @@ const SORTABLE_LISTS = {
   groups: '/admin/groups',
   clubs: '/admin/clubs',
   faq: '/admin/faq',
+  links: '/admin/links',
 } as const;
 
 export type SortableKind = keyof typeof SORTABLE_LISTS;
@@ -910,7 +912,8 @@ export async function reorderList(formData: FormData): Promise<ActionState> {
       kind === 'staff' ? await prisma.staffMember.findMany(byPosition)
         : kind === 'groups' ? await prisma.group.findMany(byPosition)
           : kind === 'clubs' ? await prisma.club.findMany(byPosition)
-            : await prisma.faqItem.findMany(byPosition)
+            : kind === 'faq' ? await prisma.faqItem.findMany(byPosition)
+              : await prisma.usefulLink.findMany(byPosition)
     ).map((row) => row.id);
 
     const ordered = mergeOrder(existing, requested);
@@ -921,7 +924,8 @@ export async function reorderList(formData: FormData): Promise<ActionState> {
         if (kind === 'staff') return prisma.staffMember.updateMany(args);
         if (kind === 'groups') return prisma.group.updateMany(args);
         if (kind === 'clubs') return prisma.club.updateMany(args);
-        return prisma.faqItem.updateMany(args);
+        if (kind === 'faq') return prisma.faqItem.updateMany(args);
+        return prisma.usefulLink.updateMany(args);
       }),
     );
 
@@ -1434,6 +1438,98 @@ export async function deleteFaq(formData: FormData) {
   // Уже удалена (повторное нажатие) — молча «готово».
   if (await ownedOrGone('faqItem', id, ctx.tenantId)) await prisma.faqItem.deleteMany({ where: { id } });
   revalidatePath('/admin/faq');
+}
+
+// ─────────────────────────── Полезные ссылки ───────────────────────────
+
+/**
+ * Выбор плиток каталога (src/lib/useful-links.ts) и место показа. Снятая
+ * галочка удаляет плитку, новая встаёт в конец списка; порядок меняется
+ * перетаскиванием (reorderList, kind «links»).
+ */
+export async function saveUsefulLinks(formData: FormData) {
+  const ctx = await gate(formData);
+  const checked = new Set(formData.getAll('catalog').map(String).filter((key) => CATALOG_BY_KEY.has(key)));
+
+  const regionHref = regionUrl(str(formData, 'regionUrl'));
+  if (checked.has('region') && !regionHref) {
+    throw new ActionError({
+      kk: 'Білім басқармасы сайтының мекенжайын көрсетіңіз: https://-тен басталатын, .kz доменіндегі',
+      ru: 'Укажите адрес сайта управления образования: начинается с https://, домен .kz',
+    });
+  }
+
+  const place = str(formData, 'place');
+  const existing = await prisma.usefulLink.findMany({
+    where: { tenantId: ctx.tenantId },
+    orderBy: { position: 'asc' },
+    select: { id: true, catalogKey: true, position: true },
+  });
+  const present = new Set(existing.map((row) => row.catalogKey).filter(Boolean));
+  let position = (existing.at(-1)?.position ?? -1) + 1;
+
+  await prisma.$transaction([
+    prisma.usefulLink.deleteMany({
+      where: { tenantId: ctx.tenantId, catalogKey: { not: null, notIn: [...checked] } },
+    }),
+    ...[...checked]
+      .filter((key) => !present.has(key))
+      .map((catalogKey) => prisma.usefulLink.create({ data: { tenantId: ctx.tenantId, catalogKey, position: position++ } })),
+    prisma.usefulLink.updateMany({
+      where: { tenantId: ctx.tenantId, catalogKey: 'region' },
+      data: {
+        url: regionHref,
+        titleRu: optionalStr(formData, 'regionTitleRu'),
+        titleKk: optionalStr(formData, 'regionTitleKk') ?? optionalStr(formData, 'regionTitleRu'),
+      },
+    }),
+    prisma.tenant.update({
+      where: { id: ctx.tenantId },
+      data: { usefulLinksPlace: isUsefulPlace(place) ? place : 'home' },
+    }),
+  ]);
+
+  // Место показа — поле сада, а сад на сайте берётся из кеша.
+  await invalidateTenantCacheById(ctx.tenantId);
+  revalidatePath('/admin/links');
+}
+
+/** Свой баннер: название, адрес и, по желанию, картинка. */
+export async function addUsefulLink(formData: FormData) {
+  const ctx = await gate(formData);
+  const titleRu = str(formData, 'titleRu');
+  if (titleRu.length < 2) throw new ActionError({ kk: 'Атауын жазыңыз', ru: 'Напишите название' });
+  const url = customUrl(str(formData, 'url'));
+  if (!url) {
+    throw new ActionError({ kk: 'Сілтемені тексеріңіз: https://-тен басталуы керек', ru: 'Проверьте ссылку: она должна начинаться с https://' });
+  }
+
+  let mediaId: string | null = null;
+  const image = formData.get('image');
+  if (image instanceof File && image.size > 0) mediaId = (await saveUpload(image, ctx.tenantId)).id;
+
+  const last = await prisma.usefulLink.findFirst({ where: { tenantId: ctx.tenantId }, orderBy: { position: 'desc' } });
+  await prisma.usefulLink.create({
+    data: {
+      tenantId: ctx.tenantId,
+      titleRu,
+      titleKk: str(formData, 'titleKk') || titleRu,
+      noteRu: optionalStr(formData, 'noteRu'),
+      noteKk: optionalStr(formData, 'noteKk') ?? optionalStr(formData, 'noteRu'),
+      url,
+      mediaId,
+      position: (last?.position ?? -1) + 1,
+    },
+  });
+  revalidatePath('/admin/links');
+}
+
+export async function deleteUsefulLink(formData: FormData) {
+  const ctx = await gate(formData);
+  const id = str(formData, 'id');
+  // Уже удалена (повторное нажатие) — молча «готово».
+  if (await ownedOrGone('usefulLink', id, ctx.tenantId)) await prisma.usefulLink.deleteMany({ where: { id } });
+  revalidatePath('/admin/links');
 }
 
 // ─────────────────────────── Отзывы, стоимость, распорядок на главной ───────────────────────────

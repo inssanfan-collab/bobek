@@ -98,6 +98,11 @@ export function scoped(tenantId: string) {
         prisma.pricePlan.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.PricePlanGetPayload<T>[]>,
     },
 
+    usefulLinks: {
+      findMany: <T extends Prisma.UsefulLinkFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.UsefulLinkFindManyArgs>) =>
+        prisma.usefulLink.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.UsefulLinkGetPayload<T>[]>,
+    },
+
     routine: {
       findMany: <T extends Prisma.RoutineItemFindManyArgs>(args?: Prisma.SelectSubset<T, Prisma.RoutineItemFindManyArgs>) =>
         prisma.routineItem.findMany(withTenant<T>(args as MaybeArgs, tenantId)) as Promise<Prisma.RoutineItemGetPayload<T>[]>,
@@ -149,7 +154,7 @@ export class NotFoundError extends Error {}
 type OwnedModel =
   | 'post' | 'section' | 'media' | 'album' | 'document' | 'documentFolder'
   | 'staffMember' | 'group' | 'menuDay' | 'feedbackMessage' | 'page'
-  | 'club' | 'faqItem' | 'review' | 'pricePlan' | 'routineItem';
+  | 'club' | 'faqItem' | 'review' | 'pricePlan' | 'routineItem' | 'usefulLink';
 
 /**
  * Записи уже нет — её удалили (часто тем же сотрудником секундой раньше:
@@ -176,6 +181,7 @@ async function ownerOf(model: OwnedModel, id: string): Promise<string | null> {
     menuDay: prisma.menuDay, feedbackMessage: prisma.feedbackMessage, page: prisma.page,
     club: prisma.club, faqItem: prisma.faqItem,
     review: prisma.review, pricePlan: prisma.pricePlan, routineItem: prisma.routineItem,
+    usefulLink: prisma.usefulLink,
   } as const;
 
   const row = await (delegates[model] as unknown as OwnerLookup).findUnique({

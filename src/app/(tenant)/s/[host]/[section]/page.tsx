@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
 import { ThemedFooter, ThemedHeader } from '@/components/site/ThemedChrome';
+import { UsefulLinks } from '@/components/site/UsefulLinks';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { PhotoZoom } from '@/components/site/PhotoZoom';
 import { recordVisit } from '@/server/stats';
@@ -142,6 +143,12 @@ export default async function SectionPage({
           </div>
         </PhotoZoom>
       </main>
+      <UsefulLinks
+        db={context.db}
+        place={context.tenant.usefulLinksPlace}
+        locale={locale}
+        where={section.type === 'ANTICORRUPTION' ? 'anticorruption' : 'page'}
+      />
       <ThemedFooter themeCode={context.tenant.themeCode} profile={profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
     </>
   );

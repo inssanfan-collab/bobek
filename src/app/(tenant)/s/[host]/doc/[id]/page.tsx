@@ -5,6 +5,7 @@ import { publicSiteContext, localeFrom, withLocale } from '@/server/tenant/conte
 import { siteMenu } from '@/server/tenant/menu';
 import { sectionSettings } from '@/lib/sections';
 import { ThemedFooter, ThemedHeader } from '@/components/site/ThemedChrome';
+import { UsefulLinks } from '@/components/site/UsefulLinks';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { isOfficeDoc } from '@/lib/media-kind';
 import { pick } from '@/lib/i18n';
@@ -113,6 +114,7 @@ export default async function DocumentViewPage({
 
         <p className="mt-3 text-sm text-muted">{T.hint[locale]}</p>
       </main>
+      <UsefulLinks db={context.db} place={context.tenant.usefulLinksPlace} locale={locale} where="page" />
       <ThemedFooter themeCode={context.tenant.themeCode} profile={profile} sections={sections} locale={locale} portalDomain={env.portalDomain} />
     </>
   );

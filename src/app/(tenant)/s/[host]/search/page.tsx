@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { publicSiteContext, localeFrom, siteDefaultLocale, withLocale } from '@/server/tenant/context';
 import { siteMenu } from '@/server/tenant/menu';
 import { ThemedFooter, ThemedHeader } from '@/components/site/ThemedChrome';
+import { UsefulLinks } from '@/components/site/UsefulLinks';
 import { UrgentNotice } from '@/components/site/UrgentNotice';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { pick } from '@/lib/i18n';
@@ -151,6 +152,7 @@ export default async function SearchPage({
         ) : null}
       </main>
 
+      <UsefulLinks db={db} place={tenant.usefulLinksPlace} locale={locale} where="page" />
       <ThemedFooter themeCode={tenant.themeCode} profile={profile} sections={menu} locale={locale} portalDomain={env.portalDomain} />
     </>
   );

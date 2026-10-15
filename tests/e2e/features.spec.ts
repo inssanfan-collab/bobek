@@ -127,6 +127,34 @@ test.describe('Ручной порядок', () => {
   });
 });
 
+test.describe('Полезные ссылки', () => {
+  test('плитка «111», включённая в админке, видна на главной сайта', async ({ page }) => {
+    await login(page, site('sad12'), SAD12_ADMIN);
+    await page.goto(`${site('sad12')}/admin/links`);
+    const tile = page.getByLabel('111 — единый контакт-центр');
+    const form = page.locator('form', { has: tile });
+    await tile.check();
+    await form.getByRole('button', { name: 'Сохранить' }).click();
+    await page.reload();
+    await expect(tile).toBeChecked();
+
+    await page.goto(`${site('sad12')}/?lang=ru`);
+    await expect(page.getByRole('heading', { name: 'Полезные ссылки' })).toBeVisible();
+    await expect(page.locator('a[href="tel:111"]')).toBeVisible();
+
+    // По умолчанию — только на главной: на других страницах блока нет.
+    await page.goto(`${site('sad12')}/contacts?lang=ru`);
+    await expect(page.getByRole('heading', { name: 'Полезные ссылки' })).toHaveCount(0);
+
+    // Вернуть как было.
+    await page.goto(`${site('sad12')}/admin/links`);
+    await tile.uncheck();
+    await form.getByRole('button', { name: 'Сохранить' }).click();
+    await page.reload();
+    await expect(tile).not.toBeChecked();
+  });
+});
+
 /** Число из карточки «Сегодня» на странице статистики сада. */
 async function todayViews(page: Page): Promise<number> {
   await page.goto(`${site('sad12')}/admin/stats`);
