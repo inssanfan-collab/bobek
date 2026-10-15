@@ -134,7 +134,7 @@ test.describe('Полезные ссылки', () => {
     const tile = page.getByLabel('111 — единый контакт-центр');
     const form = page.locator('form', { has: tile });
     await tile.check();
-    await form.getByRole('button', { name: 'Сохранить' }).click();
+    await saveForm(page, form);
     await page.reload();
     await expect(tile).toBeChecked();
 
@@ -149,11 +149,19 @@ test.describe('Полезные ссылки', () => {
     // Вернуть как было.
     await page.goto(`${site('sad12')}/admin/links`);
     await tile.uncheck();
-    await form.getByRole('button', { name: 'Сохранить' }).click();
+    await saveForm(page, form);
     await page.reload();
     await expect(tile).not.toBeChecked();
   });
 });
+
+/** «Сохранить» в форме — и дождаться ответа сервера, иначе перезагрузка обгонит сохранение. */
+async function saveForm(page: Page, form: ReturnType<Page['locator']>) {
+  const saved = page.waitForResponse((response) => response.request().method() === 'POST');
+  await form.getByRole('button', { name: 'Сохранить' }).click();
+  expect((await saved).ok()).toBe(true);
+  await page.waitForLoadState('networkidle');
+}
 
 /** Число из карточки «Сегодня» на странице статистики сада. */
 async function todayViews(page: Page): Promise<number> {
