@@ -360,3 +360,15 @@
     font-size: 0.95rem;
   }
 }
+
+/* Педагоги на главной — круглые фото в пастельной рамке, как плитки разделов. */
+[data-theme='akvarel'] .akvarel-staff .hb-staff-card {
+  border: 2px dashed rgb(var(--brand) / 0.35);
+  background: rgb(var(--akv-peach) / 0.45);
+  border-radius: 1.75rem;
+  padding: 1.2rem;
+}
+
+[data-theme='akvarel'] .akvarel-staff .hb-staff-photo {
+  box-shadow: 0 0 0 4px rgb(255 255 255), 0 0 0 6px rgb(var(--brand) / 0.35);
+}

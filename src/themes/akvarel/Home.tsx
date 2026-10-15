@@ -2,9 +2,16 @@ import {
   ContactCard, GalleryStrip, NewsCard, PlacesBadge, SectionTiles, SiteLink, T,
 } from '@/components/site/blocks';
 import { HeroButtons, HeroTitle } from '@/components/site/Hero';
+import { StaffCards } from '@/components/site/home-blocks';
+import { findSection } from '@/components/site/theme-kit';
 import { pick } from '@/lib/i18n';
 import type { HomeProps } from '@/templates/types';
 import { Boat, Cloud, Star, Sun, Wave } from './Doodles';
+
+const LT = {
+  staff: { kk: 'Педагогтар', ru: 'Педагоги' },
+  allStaff: { kk: 'Барлық педагогтар құрамы', ru: 'Весь педагогический состав' },
+};
 
 /**
  * Главная «Акварели»: первый экран на акварельных пятнах, обложка —
@@ -12,7 +19,8 @@ import { Boat, Cloud, Star, Sun, Wave } from './Doodles';
  * Секции разделены волной, плитки разделов — с пунктирной пастельной
  * рамкой разных цветов.
  */
-export function AkvarelHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
+export function AkvarelHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero, staff = [], menu }: HomeProps) {
+  const staffSection = findSection(menu, 'STAFF');
   return (
     <div className="akvarel-home">
       <section className="akvarel-hero">
@@ -73,10 +81,20 @@ export function AkvarelHome({ profile, sections, news, announcements, albums, lo
               <SiteLink href="/news" locale={locale} className="akvarel-more">{T.allNews[locale]} →</SiteLink>
             </div>
             <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {news.slice(0, 3).map((post) => (
+              {news.slice(0, 6).map((post) => (
                 <NewsCard key={post.id} post={post} locale={locale} />
               ))}
             </div>
+          </section>
+        ) : null}
+
+        {staff.length > 0 ? (
+          <section>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <h2 className="akvarel-heading font-display">{LT.staff[locale]}</h2>
+              {staffSection ? <SiteLink href={`/${staffSection.slug}`} locale={locale} className="akvarel-more">{LT.allStaff[locale]} →</SiteLink> : null}
+            </div>
+            <StaffCards staff={staff} locale={locale} limit={3} className="akvarel-staff mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" />
           </section>
         ) : null}
 
