@@ -899,6 +899,8 @@ body {
  */
 .useful-banner { background: var(--ub-bg); color: var(--ub-ink); }
 .useful-banner .useful-banner-note { color: var(--ub-sub); }
+/* Номер телефона — как на плакате: прямой жирный шрифт, а не рукописный шрифт заголовков сада. */
+.useful-banner .useful-banner-number { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; }
 .useful-banner[data-tone='blue'] { --ub-bg: #e6f1fb; --ub-ink: #0c447c; --ub-sub: #185fa5; }
 .useful-banner[data-tone='teal'] { --ub-bg: #e1f5ee; --ub-ink: #085041; --ub-sub: #0f6e56; }
 .useful-banner[data-tone='coral'] { --ub-bg: #faece7; --ub-ink: #712b13; --ub-sub: #993c1d; }

@@ -85,7 +85,7 @@ export async function UsefulLinks({
               className="useful-banner flex h-full min-h-[5.25rem] items-center gap-4 rounded-2xl px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               {link.number ? (
-                <span className="shrink-0 font-display text-3xl font-extrabold leading-none tracking-tight">{link.number}</span>
+                <span className="useful-banner-number shrink-0 text-3xl font-extrabold leading-none tracking-tight">{link.number}</span>
               ) : link.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={link.image} alt="" className="h-14 w-20 shrink-0 rounded-xl object-cover" loading="lazy" />
