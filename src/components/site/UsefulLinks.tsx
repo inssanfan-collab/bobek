@@ -76,31 +76,35 @@ export async function UsefulLinks({
       <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {links.map((link) => (
           <li key={link.id}>
+            {/* Баннер, как на сайтах госорганизаций: цвет — по группе (useful-banner в globals.css),
+                у телефона номер крупно, как на плакате. Картинка — только у своего баннера сада. */}
             <a
               href={link.href}
+              data-tone={link.tone}
               {...(link.isPhone ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
-              className="card flex h-full items-center gap-3 p-4 transition hover:-translate-y-0.5 hover:shadow-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand"
+              className="useful-banner flex h-full min-h-[5.25rem] items-center gap-4 rounded-2xl px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
             >
-              {link.image ? (
+              {link.number ? (
+                <span className="shrink-0 font-display text-3xl font-extrabold leading-none tracking-tight">{link.number}</span>
+              ) : link.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={link.image} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" loading="lazy" />
+                <img src={link.image} alt="" className="h-14 w-20 shrink-0 rounded-xl object-cover" loading="lazy" />
               ) : (
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-ink" aria-hidden>
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.8}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    dangerouslySetInnerHTML={{ __html: ICONS[link.icon] }}
-                  />
-                </span>
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-8 w-8 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                  dangerouslySetInnerHTML={{ __html: ICONS[link.icon] }}
+                />
               )}
               <span className="min-w-0">
-                <span className="block font-semibold leading-snug">{link.title}</span>
-                {link.note ? <span className="mt-0.5 block text-sm text-muted">{link.note}</span> : null}
+                <span className="block font-bold leading-snug">{link.title}</span>
+                {link.note ? <span className="useful-banner-note mt-0.5 block text-sm">{link.note}</span> : null}
               </span>
             </a>
           </li>

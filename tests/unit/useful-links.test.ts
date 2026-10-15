@@ -55,8 +55,19 @@ describe('resolveUsefulLinks', () => {
     expect(kk!.title).toBe('ҚР Оқу-ағарту министрлігі');
   });
 
-  it('телефон — tel: и без новой вкладки', () => {
-    expect(resolveUsefulLinks([row({ catalogKey: 'tel111' })], 'ru')[0]).toMatchObject({ href: 'tel:111', isPhone: true });
+  it('телефон — tel:, без новой вкладки, номер крупно и подпись без номера', () => {
+    expect(resolveUsefulLinks([row({ catalogKey: 'tel111' })], 'ru')[0]).toMatchObject({
+      href: 'tel:111', isPhone: true, number: '111', title: 'Единый контакт-центр', tone: 'teal',
+    });
+    expect(resolveUsefulLinks([row({ catalogKey: 'tel1424' })], 'kk')[0]).toMatchObject({ number: '1424', tone: 'coral' });
+  });
+
+  it('цвет баннера — по группе, свой баннер — нейтральный', () => {
+    const links = resolveUsefulLinks(
+      [row({ id: 'a', catalogKey: 'egov' }), row({ id: 'b', titleRu: 'Акимат', url: 'akimat.kz' })],
+      'ru',
+    );
+    expect(links.map((link) => link.tone)).toEqual(['blue', 'neutral']);
   });
 
   it('регион без адреса и устаревший ключ пропускаются, свой баннер — с картинкой', () => {

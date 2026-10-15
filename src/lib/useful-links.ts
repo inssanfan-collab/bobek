@@ -21,11 +21,24 @@ export type UsefulIcon = 'building' | 'egov' | 'mail' | 'scales' | 'phone' | 'sh
 
 export type UsefulGroup = 'gov' | 'children' | 'anticorruption' | 'region';
 
+/** Цвет баннера: по группе плиток (вариант «А» — широкие цветные баннеры, 15.10.2026). */
+export type UsefulTone = 'blue' | 'teal' | 'coral' | 'violet' | 'neutral';
+
+export const GROUP_TONE: Record<UsefulGroup, UsefulTone> = {
+  gov: 'blue',
+  children: 'teal',
+  anticorruption: 'coral',
+  region: 'violet',
+};
+
 export type CatalogLink = {
   key: string;
   group: UsefulGroup;
   icon: UsefulIcon;
   title: Phrase;
+  /** Телефон: номер крупно, как на плакате, а рядом — подпись без номера. */
+  number?: string;
+  label?: Phrase;
   note: Phrase;
   /** Адрес или tel:; у плитки региона адрес свой у каждого сада — тогда null. */
   href: Phrase | null;
@@ -78,6 +91,8 @@ export const USEFUL_CATALOG: CatalogLink[] = [
   },
   {
     key: 'tel111',
+    number: '111',
+    label: { kk: 'Бірыңғай байланыс орталығы', ru: 'Единый контакт-центр' },
     group: 'children',
     icon: 'phone',
     title: { kk: '111 — бірыңғай байланыс орталығы', ru: '111 — единый контакт-центр' },
@@ -89,6 +104,8 @@ export const USEFUL_CATALOG: CatalogLink[] = [
   },
   {
     key: 'tel150',
+    number: '150',
+    label: { kk: 'Сенім телефоны', ru: 'Телефон доверия' },
     group: 'children',
     icon: 'phone',
     title: { kk: '150 — сенім телефоны', ru: '150 — телефон доверия' },
@@ -100,6 +117,8 @@ export const USEFUL_CATALOG: CatalogLink[] = [
   },
   {
     key: 'tel112',
+    number: '112',
+    label: { kk: 'Шұғыл көмек', ru: 'Экстренная помощь' },
     group: 'children',
     icon: 'phone',
     title: { kk: '112 — шұғыл көмек', ru: '112 — экстренная помощь' },
@@ -122,6 +141,8 @@ export const USEFUL_CATALOG: CatalogLink[] = [
   },
   {
     key: 'tel1424',
+    number: '1424',
+    label: { kk: 'Сыбайлас жемқорлық туралы хабарлау', ru: 'Сообщить о коррупции' },
     group: 'anticorruption',
     icon: 'phone',
     title: { kk: '1424 — байланыс орталығы', ru: '1424 — колл-центр' },
@@ -197,6 +218,9 @@ export type UsefulLinkRow = {
 export type ResolvedLink = {
   id: string;
   icon: UsefulIcon;
+  tone: UsefulTone;
+  /** Номер телефона крупно (111, 1424); тогда title — подпись без номера. */
+  number: string | null;
   title: string;
   note: string | null;
   href: string;
@@ -221,10 +245,13 @@ export function resolveUsefulLinks(rows: UsefulLinkRow[], locale: Locale): Resol
       if (!item) continue;
       const href = item.href ? item.href[locale] : regionUrl(row.url);
       if (!href) continue;
+      const own = pickText(locale, row.titleKk, row.titleRu);
       out.push({
         id: row.id,
         icon: item.icon,
-        title: pickText(locale, row.titleKk, row.titleRu) ?? item.title[locale],
+        tone: GROUP_TONE[item.group],
+        number: item.number ?? null,
+        title: own ?? (item.label ?? item.title)[locale],
         note: item.note[locale],
         href,
         isPhone: href.startsWith('tel:'),
@@ -238,6 +265,8 @@ export function resolveUsefulLinks(rows: UsefulLinkRow[], locale: Locale): Resol
     out.push({
       id: row.id,
       icon: 'link',
+      tone: 'neutral',
+      number: null,
       title,
       note: pickText(locale, row.noteKk, row.noteRu),
       href,

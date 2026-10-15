@@ -890,3 +890,18 @@ body {
 .kit-photo-title { position: absolute; left: 0.75rem; bottom: 0.75rem; max-width: calc(100% - 1.5rem); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 999px; background: rgb(255 255 255 / 0.92); padding: 0.3rem 0.85rem; font-size: 0.82rem; font-weight: 800; color: rgb(var(--ink)); }
 .kit-photos-1 { max-width: 36rem; margin-inline: auto; }
 .pinned-mark { display: inline-flex; align-items: center; gap: 0.25rem; border-radius: 999px; background: rgb(var(--brand-soft)); padding: 0.1rem 0.55rem; font-size: 0.75rem; font-weight: 800; color: rgb(var(--brand-ink)); }
+
+/*
+ * «Полезные ссылки» — баннеры госресурсов (src/components/site/UsefulLinks.tsx).
+ * Цвета свои, а не палитры сада: баннер узнаётся по группе, как на сайтах
+ * госорганизаций. Подпись и основной текст — от 4,5:1 к фону. В версии для
+ * слабовидящих — чёрное на белом с рамкой, как всё остальное.
+ */
+.useful-banner { background: var(--ub-bg); color: var(--ub-ink); }
+.useful-banner .useful-banner-note { color: var(--ub-sub); }
+.useful-banner[data-tone='blue'] { --ub-bg: #e6f1fb; --ub-ink: #0c447c; --ub-sub: #185fa5; }
+.useful-banner[data-tone='teal'] { --ub-bg: #e1f5ee; --ub-ink: #085041; --ub-sub: #0f6e56; }
+.useful-banner[data-tone='coral'] { --ub-bg: #faece7; --ub-ink: #712b13; --ub-sub: #993c1d; }
+.useful-banner[data-tone='violet'] { --ub-bg: #eeedfe; --ub-ink: #3c3489; --ub-sub: #534ab7; }
+.useful-banner[data-tone='neutral'] { --ub-bg: #f1efe8; --ub-ink: #2c2c2a; --ub-sub: #5f5e5a; }
+[data-a11y='on'] .useful-banner { --ub-bg: #fff; --ub-ink: #000; --ub-sub: #000; border: 2px solid #000; }
