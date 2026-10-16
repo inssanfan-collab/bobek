@@ -2,6 +2,8 @@ import {
   ContactCard, GalleryStrip, NewsCard, PlacesBadge, SectionTiles, SiteLink, T,
 } from '@/components/site/blocks';
 import { HeroButtons, HeroTitle } from '@/components/site/Hero';
+import { StaffCards } from '@/components/site/home-blocks';
+import { findSection } from '@/components/site/theme-kit';
 import { pick } from '@/lib/i18n';
 import type { HomeProps } from '@/templates/types';
 
@@ -11,7 +13,13 @@ import type { HomeProps } from '@/templates/types';
  * со смещённой тенью; за ней — синяя арка и жёлтый круг. Разделы —
  * разноцветными блоками, новости и альбомы — в рамках с тенью.
  */
-export function KonstruktorHome({ profile, sections, news, announcements, albums, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
+const LT = {
+  staff: { kk: 'Педагогтар', ru: 'Педагоги' },
+  allStaff: { kk: 'Барлық педагогтар құрамы', ru: 'Весь педагогический состав' },
+} as const;
+
+export function KonstruktorHome({ profile, sections, news, announcements, albums, staff = [], menu, locale, coverUrl, coverPosition, showContacts, hero }: HomeProps) {
+  const staffSection = findSection(menu, 'STAFF');
   return (
     <div className="kon-home">
       {announcements.length > 0 ? (
@@ -71,6 +79,17 @@ export function KonstruktorHome({ profile, sections, news, announcements, albums
                 <NewsCard key={post.id} post={post} locale={locale} />
               ))}
             </div>
+          </section>
+        ) : null}
+
+        {/* Педагоги — первые трое из «Педагогического состава»; нет педагогов — нет блока. */}
+        {staff.length > 0 ? (
+          <section>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <h2 className="kon-heading font-display">{LT.staff[locale]}</h2>
+              {staffSection ? <SiteLink href={`/${staffSection.slug}`} locale={locale} className="kon-more">{LT.allStaff[locale]} →</SiteLink> : null}
+            </div>
+            <StaffCards staff={staff} locale={locale} limit={3} className="kon-staff mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" />
           </section>
         ) : null}
 
