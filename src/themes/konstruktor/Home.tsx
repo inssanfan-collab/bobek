@@ -67,7 +67,7 @@ export function KonstruktorHome({ profile, sections, news, announcements, albums
               <SiteLink href="/news" locale={locale} className="kon-more">{T.allNews[locale]} →</SiteLink>
             </div>
             <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {news.slice(0, 3).map((post) => (
+              {news.slice(0, 6).map((post) => (
                 <NewsCard key={post.id} post={post} locale={locale} />
               ))}
             </div>
