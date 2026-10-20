@@ -43,11 +43,11 @@
     "gsap": "3.13.0",
     "lenis": "1.3.4",
     "maxmind": "^4.3.29",
-    "next": "^15.5.27",
+    "next": "^15.5.28",
     "nodemailer": "^10.0.10",
     "pdfkit": "^0.20.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.2.9",
+    "react-dom": "^19.2.9",
     "sanitize-html": "^2.17.7",
     "server-only": "^0.0.1",
     "sharp": "^0.35.5",
@@ -68,7 +68,7 @@
     "autoprefixer": "^10.4.20",
     "dotenv": "^16.6.1",
     "eslint": "^9.19.0",
-    "eslint-config-next": "^15.5.27",
+    "eslint-config-next": "^15.5.28",
     "postcss": "^8.5.1",
     "prisma": "^6.3.1",
     "tailwindcss": "^3.4.17",
@@ -85,6 +85,12 @@
       "sharp",
       "esbuild",
       "@node-rs/argon2"
-    ]
+    ],
+    "overrides": {
+      "postcss@<8.5.23": "^8.5.23",
+      "brace-expansion@<1.1.21": "^1.1.21",
+      "brace-expansion@>=2.0.0 <2.1.7": "^2.1.7",
+      "source-map-js@<1.2.2": "^1.2.2"
+    }
   }
 }
