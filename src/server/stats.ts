@@ -50,11 +50,18 @@ export async function recordVisit(tenantId: string): Promise<void> {
   }
 }
 
-/** Просмотры конкретной публикации — сад видит, какая новость зашла. */
+/**
+ * Просмотры конкретной публикации — сад видит, какая новость зашла.
+ *
+ * Сырым SQL, а не prisma.post.update: тот сдвигает @updatedAt, и каждый
+ * просмотр выглядел бы правкой — новость всплывала в «последних изменениях»
+ * админки, а в карте сайта менялся lastmod. Чужого сада тут не прочитать:
+ * запрос только пишет и только по id найденной на странице новости.
+ */
 export async function recordPostView(postId: string): Promise<void> {
   try {
     if (await notAVisit()) return;
-    await prisma.post.update({ where: { id: postId }, data: { viewCount: { increment: 1 } } });
+    await prisma.$executeRaw`UPDATE "Post" SET "viewCount" = "viewCount" + 1 WHERE id = ${postId}`;
   } catch {
     /* не критично */
   }

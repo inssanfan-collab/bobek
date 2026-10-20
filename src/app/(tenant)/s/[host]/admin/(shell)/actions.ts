@@ -10,6 +10,7 @@ import { assertCanEdit } from '@/server/auth/guards';
 import { assertCsrf } from '@/server/auth/csrf';
 import { assertOwned, ownedOrGone } from '@/server/db/scope';
 import { audit } from '@/server/audit';
+import { changedKeys } from '@/lib/audit-details';
 import { sanitizeContent, toPlainText } from '@/lib/sanitize';
 import { isVideoUrl } from '@/lib/video';
 import type { EditorUpload } from '@/components/admin/RichText';
@@ -655,7 +656,7 @@ export async function createDocFolder(formData: FormData) {
   if (titleRu.length < 2) throw new ActionError({ kk: 'Бума атауын көрсетіңіз', ru: 'Укажите название папки' });
   const parentId = await folderIdFrom(formData, ctx.tenantId, 'parentId');
 
-  await prisma.documentFolder.create({
+  const folder = await prisma.documentFolder.create({
     data: {
       tenantId: ctx.tenantId,
       titleRu,
@@ -665,6 +666,7 @@ export async function createDocFolder(formData: FormData) {
     },
   });
 
+  await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'folder', entityId: folder.id, meta: { title: titleRu } });
   revalidatePath('/admin/documents');
 }
 
@@ -696,6 +698,7 @@ export async function renameDocFolder(formData: FormData) {
   }
 
   await prisma.documentFolder.update({ where: { id }, data });
+  await audit(ctx.user, 'content.update', { tenantId: ctx.tenantId, entity: 'folder', entityId: id, meta: { title: titleRu } });
   revalidatePath('/admin/documents');
 }
 
@@ -712,7 +715,7 @@ export async function deleteDocFolder(formData: FormData) {
     revalidatePath('/admin/documents');
     return;
   }
-  const folder = await prisma.documentFolder.findUniqueOrThrow({ where: { id }, select: { parentId: true } });
+  const folder = await prisma.documentFolder.findUniqueOrThrow({ where: { id }, select: { parentId: true, titleRu: true } });
 
   const [children, start] = await Promise.all([
     prisma.documentFolder.findMany({
@@ -731,6 +734,7 @@ export async function deleteDocFolder(formData: FormData) {
     prisma.documentFolder.delete({ where: { id } }),
   ]);
 
+  await audit(ctx.user, 'content.delete', { tenantId: ctx.tenantId, entity: 'folder', entityId: id, meta: { title: folder.titleRu } });
   revalidatePath('/admin/documents');
 }
 
@@ -780,6 +784,7 @@ export async function saveDocument(formData: FormData) {
       where: { id: existingId },
       data: { titleRu, titleKk: str(formData, 'titleKk') || titleRu, folderId, ...(mediaId ? { mediaId } : {}) },
     });
+    await audit(ctx.user, 'content.update', { tenantId: ctx.tenantId, entity: 'document', entityId: existingId, meta: { title: titleRu } });
     revalidatePath('/admin/documents');
     return;
   }
@@ -801,7 +806,7 @@ export async function saveDocument(formData: FormData) {
   for (const file of files) {
     const media = await saveUpload(file, ctx.tenantId);
     const fromName = titleFromFileName(file.name) || file.name;
-    await prisma.document.create({
+    const document = await prisma.document.create({
       data: {
         tenantId: ctx.tenantId,
         titleRu: formRu || fromName,
@@ -811,6 +816,7 @@ export async function saveDocument(formData: FormData) {
         position: position++,
       },
     });
+    await audit(ctx.user, 'content.create', { tenantId: ctx.tenantId, entity: 'document', entityId: document.id, meta: { title: document.titleRu } });
   }
 
   revalidatePath('/admin/documents');
@@ -820,7 +826,11 @@ export async function deleteDocument(formData: FormData) {
   const ctx = await gate(formData);
   const id = str(formData, 'id');
   // Уже удалена (повторное нажатие) — молча «готово».
-  if (await ownedOrGone('document', id, ctx.tenantId)) await prisma.document.deleteMany({ where: { id } });
+  if (await ownedOrGone('document', id, ctx.tenantId)) {
+    const document = await prisma.document.findUnique({ where: { id }, select: { titleRu: true } });
+    await prisma.document.deleteMany({ where: { id } });
+    await audit(ctx.user, 'content.delete', { tenantId: ctx.tenantId, entity: 'document', entityId: id, meta: { title: document?.titleRu } });
+  }
   revalidatePath('/admin/documents');
 }
 
@@ -1264,41 +1274,41 @@ export async function saveProfile(formData: FormData) {
     }
   }
 
-  await prisma.tenantProfile.update({
-    where: { tenantId: ctx.tenantId },
-    data: {
-      nameRu,
-      nameKk: str(formData, 'nameKk') || nameRu,
-      shortNameRu: optionalStr(formData, 'shortNameRu'),
-      shortNameKk: optionalStr(formData, 'shortNameKk'),
-      bin: optionalStr(formData, 'bin'),
-      licenseNo: optionalStr(formData, 'licenseNo'),
-      addressRu,
-      addressKk: optionalStr(formData, 'addressKk'),
-      district: optionalStr(formData, 'district'),
-      phone: optionalStr(formData, 'phone'),
-      phoneExtra: optionalStr(formData, 'phoneExtra'),
-      email: optionalStr(formData, 'email'),
-      workHours: optionalStr(formData, 'workHours'),
-      headNameRu: optionalStr(formData, 'headNameRu'),
-      headNameKk: optionalStr(formData, 'headNameKk'),
-      groupsCount: num(formData, 'groupsCount'),
-      langKk: formData.get('langKk') === 'on',
-      langRu: formData.get('langRu') === 'on',
-      aboutRu: optionalStr(formData, 'aboutRu'),
-      aboutKk: optionalStr(formData, 'aboutKk'),
-      whatsapp: optionalStr(formData, 'whatsapp'),
-      instagram: optionalStr(formData, 'instagram'),
-      youtube: optionalStr(formData, 'youtube'),
-      facebook: optionalStr(formData, 'facebook'),
-      telegram: optionalStr(formData, 'telegram'),
-      lat,
-      lng,
-    },
-  });
+  const data = {
+    nameRu,
+    nameKk: str(formData, 'nameKk') || nameRu,
+    shortNameRu: optionalStr(formData, 'shortNameRu'),
+    shortNameKk: optionalStr(formData, 'shortNameKk'),
+    bin: optionalStr(formData, 'bin'),
+    licenseNo: optionalStr(formData, 'licenseNo'),
+    addressRu,
+    addressKk: optionalStr(formData, 'addressKk'),
+    district: optionalStr(formData, 'district'),
+    phone: optionalStr(formData, 'phone'),
+    phoneExtra: optionalStr(formData, 'phoneExtra'),
+    email: optionalStr(formData, 'email'),
+    workHours: optionalStr(formData, 'workHours'),
+    headNameRu: optionalStr(formData, 'headNameRu'),
+    headNameKk: optionalStr(formData, 'headNameKk'),
+    groupsCount: num(formData, 'groupsCount'),
+    langKk: formData.get('langKk') === 'on',
+    langRu: formData.get('langRu') === 'on',
+    aboutRu: optionalStr(formData, 'aboutRu'),
+    aboutKk: optionalStr(formData, 'aboutKk'),
+    whatsapp: optionalStr(formData, 'whatsapp'),
+    instagram: optionalStr(formData, 'instagram'),
+    youtube: optionalStr(formData, 'youtube'),
+    facebook: optionalStr(formData, 'facebook'),
+    telegram: optionalStr(formData, 'telegram'),
+    lat,
+    lng,
+  };
+  const before = await prisma.tenantProfile.findUnique({ where: { tenantId: ctx.tenantId } });
+  await prisma.tenantProfile.update({ where: { tenantId: ctx.tenantId }, data });
 
   await invalidateTenantCacheById(ctx.tenantId);
-  await audit(ctx.user, 'tenant.update', { tenantId: ctx.tenantId, entity: 'profile' });
+  // В журнал — какие поля поменяли, без значений: в паспорте телефоны и имена.
+  await audit(ctx.user, 'tenant.update', { tenantId: ctx.tenantId, entity: 'profile', meta: { changed: changedKeys(before, data) } });
   revalidatePath('/admin/profile');
 }
 

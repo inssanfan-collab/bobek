@@ -19,6 +19,8 @@ const ENTITY: Record<string, Phrase> = {
   media: { kk: 'Файл', ru: 'Файл' },
   section: { kk: 'Бөлім', ru: 'Раздел' },
   page: { kk: 'Бет', ru: 'Страница' },
+  folder: { kk: 'Бума', ru: 'Папка' },
+  document: { kk: 'Құжат', ru: 'Документ' },
   homepage: { kk: 'Басты бет', ru: 'Главная страница' },
   profile: { kk: 'Балабақша паспорты', ru: 'Паспорт сада' },
   portalSettings: { kk: 'Портал деректемелері', ru: 'Реквизиты портала' },
@@ -43,6 +45,41 @@ const KEY: Record<string, Phrase> = {
   staff: { kk: 'педагогтар', ru: 'педагогов' },
 };
 
+/**
+ * Поля паспорта сада — для «что поменяли» (meta.changed). Пары Kk/Ru
+ * сливаются в одно: «название», а не «название, название».
+ */
+const PROFILE_FIELD: Record<string, Phrase> = {
+  name: { kk: 'атауы', ru: 'название' },
+  shortName: { kk: 'қысқа атауы', ru: 'краткое название' },
+  bin: { kk: 'БСН', ru: 'БИН' },
+  licenseNo: { kk: 'лицензия', ru: 'лицензия' },
+  address: { kk: 'мекенжай', ru: 'адрес' },
+  district: { kk: 'аудан', ru: 'район' },
+  phone: { kk: 'телефон', ru: 'телефон' },
+  phoneExtra: { kk: 'қосымша телефон', ru: 'доп. телефон' },
+  email: { kk: 'пошта', ru: 'почта' },
+  workHours: { kk: 'жұмыс уақыты', ru: 'часы работы' },
+  headName: { kk: 'меңгеруші', ru: 'заведующая' },
+  groupsCount: { kk: 'топтар саны', ru: 'число групп' },
+  langKk: { kk: 'қазақ тілі', ru: 'казахский язык' },
+  langRu: { kk: 'орыс тілі', ru: 'русский язык' },
+  about: { kk: 'сипаттама', ru: 'описание' },
+  whatsapp: { kk: 'WhatsApp', ru: 'WhatsApp' },
+  instagram: { kk: 'Instagram', ru: 'Instagram' },
+  youtube: { kk: 'YouTube', ru: 'YouTube' },
+  facebook: { kk: 'Facebook', ru: 'Facebook' },
+  telegram: { kk: 'Telegram', ru: 'Telegram' },
+  lat: { kk: 'картадағы нүкте', ru: 'точка на карте' },
+  lng: { kk: 'картадағы нүкте', ru: 'точка на карте' },
+};
+
+/** Ключи, у которых значение изменилось. Пусто и null — одно и то же. */
+export function changedKeys(before: object | null, after: Record<string, unknown>): string[] {
+  const old = (before ?? {}) as Record<string, unknown>;
+  return Object.keys(after).filter((key) => String(old[key] ?? '') !== String(after[key] ?? ''));
+}
+
 const T = {
   noTitle: { kk: 'атауы жазылмаған', ru: 'название не записано' },
   telegram: { kk: 'Telegram кодымен', ru: 'с кодом из Telegram' },
@@ -53,10 +90,12 @@ const T = {
   no: { kk: 'жоқ', ru: 'нет' },
   extended: { kk: 'мерзімі ұзартылды', ru: 'период продлён' },
   theme: { kk: 'тақырып', ru: 'тема' },
+  changed: { kk: 'өзгертілді', ru: 'изменено' },
+  nothing: { kk: 'ештеңе өзгермеді', ru: 'ничего не изменилось' },
 } as const;
 
 /** Пропускаем служебное: код поста Instagram, флаг ручного продления. */
-const SKIP = new Set(['title', 'code', 'manual', 'mfa', 'source', 'reason', 'from', 'to', 'extended']);
+const SKIP = new Set(['title', 'code', 'manual', 'mfa', 'source', 'reason', 'from', 'to', 'extended', 'changed']);
 
 function plain(value: unknown, locale: Locale): string {
   if (value === null || value === undefined || value === '') return T.none[locale];
@@ -87,6 +126,18 @@ export function auditDetails({ action, entity, meta, currentTitle }: AuditDetail
     else if (label && entity !== 'homepage' && entity !== 'profile' && entity !== 'portalSettings') {
       parts.push(`${label} (${T.noTitle[locale]})`);
     } else if (label) parts.push(label);
+  }
+
+  if (Array.isArray(m.changed)) {
+    const fields = [
+      ...new Set(
+        m.changed.map((key) => {
+          const base = String(key).replace(/(Ru|Kk)$/, '');
+          return (PROFILE_FIELD[base] ?? PROFILE_FIELD[String(key)])?.[locale] ?? String(key);
+        }),
+      ),
+    ];
+    parts.push(fields.length > 0 ? `${T.changed[locale]}: ${fields.join(', ')}` : T.nothing[locale]);
   }
 
   if (m.source === 'instagram') parts.push(T.instagram[locale]);
