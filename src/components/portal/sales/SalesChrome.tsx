@@ -2,6 +2,7 @@ import { withLocale, type Locale } from '@/lib/i18n';
 import { formatPhone, phoneHref } from '@/lib/labels';
 import { portalSettings } from '@/server/docs/contract';
 import { GoogleAdsTag } from './GoogleAdsTag';
+import { OpenAiPixel } from './OpenAiPixel';
 import { VisitTracker } from './VisitTracker';
 import './sales.css';
 
@@ -69,8 +70,10 @@ export function SalesHeader({ locale, pathname, onHome = false }: { locale: Loca
   const kk = pathname === '/' ? '/?lang=kk' : `${pathname}?lang=kk`;
   return (
     <>
-      {/* Тег Google Рекламы и сводка посещений владельцу — только здесь, на продающих страницах. */}
+      {/* Тег Google Рекламы и сводка посещений владельцу — только здесь, на продающих страницах;
+          пиксель рекламы в ChatGPT — только на главной: туда ведёт реклама и там форма заявки. */}
       <GoogleAdsTag />
+      {onHome ? <OpenAiPixel /> : null}
       <VisitTracker />
       <header className="top">
         <div className="wrap top-in">

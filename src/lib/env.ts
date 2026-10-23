@@ -47,6 +47,8 @@ export const env = {
   telegramBotToken: (process.env.TELEGRAM_BOT_TOKEN ?? '').trim(),
   googleAdsId: (process.env.GOOGLE_ADS_ID ?? '').trim(),
   googleAdsLeadLabel: (process.env.GOOGLE_ADS_LEAD_LABEL ?? '').trim(),
+  /** Pixel ID рекламы в ChatGPT (OpenAI Ads). Пусто — пикселя нет (OpenAiPixel). */
+  openaiAdsPixelId: (process.env.OPENAI_ADS_PIXEL_ID ?? '').trim(),
   /**
    * Цены тарифов за год. Базовый раньше был единственным и назывался
    * SUBSCRIPTION_PRICE_KZT — эта переменная по-прежнему стоит в .env на сервере,
